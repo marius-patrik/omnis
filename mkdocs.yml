@@ -44,6 +44,7 @@ nav:
   - Notes:
       - Architecture decisions: notes/architecture_decisions.md
       - Vision capture: notes/vision_capture.md
+      - Bootstrap runbook: notes/bootstrap.md
 
 markdown_extensions:
   - admonition

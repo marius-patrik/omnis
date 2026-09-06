@@ -59,6 +59,13 @@ python .github/scripts/repo_settings.py --plan     # show what would change
 python .github/scripts/repo_settings.py --apply    # apply it
 ```
 
+## Operating this repository
+
+Setup state, the two secrets the pipeline still needs, and the reproduction sequence are in
+[notes/bootstrap.md](notes/bootstrap.md). The short version: the board, labels, protection, and
+seeded backlog are live; `GH_PROJECT_TOKEN` and the agent provider secrets are not set yet, and
+until `GH_PROJECT_TOKEN` exists the approve-and-auto-merge path cannot complete a full cycle.
+
 ## Local development
 
 ```bash

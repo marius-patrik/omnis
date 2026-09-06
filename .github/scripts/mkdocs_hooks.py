@@ -25,6 +25,7 @@ PUBLISHED_PAGES: List[Tuple[str, str]] = [
     ("VISION.md", "vision.md"),
     ("notes/architecture_decisions.md", "notes/architecture_decisions.md"),
     ("notes/vision_capture.md", "notes/vision_capture.md"),
+    ("notes/bootstrap.md", "notes/bootstrap.md"),
 ]
 
 #: Repository-relative markdown targets rewritten to their published counterparts.
