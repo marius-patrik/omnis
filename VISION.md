@@ -621,10 +621,15 @@ characters without touching colour). Treat them as shape, not as code to copy.
 Points where the source material is internally inconsistent, or where following it literally would
 be a mistake. Each is a decision to make deliberately, not a defect to fix silently.
 
-1. **Renderer duplication has no stated abstraction.** `dom-flexbox` and `terminal-cell-grid` are
-   presented as a switch, but nothing in the transcript describes the shared representation both
-   consume. Without one, every surface gets implemented twice. `ARCHITECTURE.md` §4 introduces the
-   scene tree to close this; it is an addition, not something the source specifies.
+1. **The two-renderer model is superseded.** The transcript presents `dom-flexbox` and
+   `terminal-cell-grid` as a switch, and never describes a shared representation both consume —
+   which would mean implementing every surface twice. `ARCHITECTURE.md` §4 replaces it with **one
+   GPU compositor**: terminal, widget UI, browser content, and 3D become *sources* that emit
+   primitives into a single frame graph, over the scene tree of §4.2. A terminal cell is a glyph run
+   with fixed advance and a browser is a content source, so neither justifies its own renderer. This
+   also extends the engine beyond anything in the transcript — shaders, 3D scenes, and particle
+   systems are a first-class material-layer primitive available to every presentation mode, rather
+   than effects that would exist in one renderer and not the other.
 2. **`aiPersona` couples appearance to model choice.** Selecting a look also selects a provider,
    model, and reasoning effort. Nobody asked for that, and it will surprise people who want Claude's
    layout with a different model. Keep the axes separate; let a preset *suggest* a persona.

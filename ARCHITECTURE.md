@@ -107,11 +107,16 @@ Five orthogonal axes. A preset is a point in this space.
 
 | Axis | Setting | Values |
 |---|---|---|
-| Renderer engine | `workbench.rendererEngine` | `dom-flexbox` · `terminal-cell-grid` |
+| Presentation mode | `workbench.presentation` | `cell-grid` · `widget` · `hybrid` |
 | Layout topology | `workbench.layout.paradigm` | `chat-centric` · `ide-split` · `terminal-grid` · `vcs-dag` |
 | Input routing | `workbench.inputBar.mode` | `global-hud` · `per-pane` · `hybrid` |
 | Keymap | `workbench.keybindings` | `default` · `vscode` · `zed` · `cursor-claude` · `vim` · `emacs` |
 | Chrome & tokens | `workbench.window.*`, `workbench.theme.*` | see §5 |
+
+The first axis is **presentation, not renderer**. There is one renderer (§4); `cell-grid` and
+`widget` are layout modes that emit into it. `hybrid` mixes them per pane — a cell-grid editor beside
+a widget-laid-out settings panel is a legal configuration, not a special case. The transcript's
+`workbench.rendererEngine: 'dom-flexbox' | 'terminal-cell-grid'` is superseded.
 
 **Invariant:** no product code may branch on a *preset name*. Features branch on axis values or on
 capability queries — never `if (theme === 'brand-claude')`. This is testable and must be covered by a
@@ -125,35 +130,108 @@ effort. Omnis does not. A preset may *suggest* a persona; it never sets one behi
 
 ---
 
-## 4. Renderer separation
+## 4. The renderer — one GPU compositor
 
-Two renderers, one view model.
+**There is one renderer.** Terminal, graphical UI, web content, and 3D are not renderers; they are
+**sources** that emit primitives into a single GPU frame graph.
 
 ```
-                 ┌───────────────────────────────┐
-                 │        View Model (Rust)      │   panes, focus, buffers,
-                 │  renderer-agnostic scene tree │   selections, decorations
-                 └───────────┬───────────────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-   ┌────────────────────┐        ┌──────────────────────┐
-   │  dom-flexbox       │        │  terminal-cell-grid  │
-   │  React + Dockview  │        │  GPU cell matrix     │
-   └────────────────────┘        └──────────────────────┘
+   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌────────────┐
+   │ Cell-grid    │ │ Widget       │ │ Browser      │ │ Browser      │ │ 3D scene   │
+   │ layout       │ │ layout       │ │ (semantic)   │ │ (raster)     │ │ layer      │
+   └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └─────┬──────┘
+          │                │                │                │               │
+          └────────────────┴────────┬───────┴────────────────┴───────────────┘
+                                    ▼
+                    ┌───────────────────────────────────┐
+                    │   Scene tree  (renderer-agnostic) │
+                    └────────────────┬──────────────────┘
+                                     ▼
+                    ┌───────────────────────────────────┐
+                    │  omnis-render — GPU compositor    │
+                    │  batched primitives · frame graph │
+                    │  damage tracking · material passes│
+                    └────────────────┬──────────────────┘
+                                     ▼
+                              wgpu → Vulkan / Metal / DX12
 ```
 
-**The rule that makes two renderers affordable:** feature code targets the view model, never a
-renderer. A feature that cannot be expressed in the scene tree does not ship until the scene tree
-grows to express it. Any feature implemented twice is a design defect.
+### 4.1 Why one renderer
 
-The source material describes the switch but never the shared representation. The scene tree is this
-document's addition, and it is the single highest-leverage decision in the project.
+- **Text is text.** A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with
+  shaped advance. Same atlas, same pipeline, same shader. Two renderers would build that twice.
+- **A browser is a content source, not a rendering engine.** Whether a page arrives as a semantic
+  tree we lay out ourselves or as a screencast texture, it ends up as primitives in the same frame.
+- **Effects that live in only one renderer become per-theme bolt-ons** — precisely what §3's
+  invariant exists to reject. Shaders and particles must be available to every presentation mode or
+  they are decoration for one theme.
+- **One frame, one budget.** Compositing a terminal pane, a chart, a video, and a particle field in
+  one pass is a scheduling problem with one answer. Two renderers make it two answers that disagree.
 
-- The scene tree must exist **before** `terminal-cell-grid` starts. Building it first as a fork of
-  the DOM UI is the failure this repository exists to avoid.
-- Renderer switching is **restart-tolerant** in v1. Live hot-swap is a goal gated behind a measured
-  spike (D8).
+### 4.2 Primitives
+
+The compositor's vocabulary is deliberately small; every source reduces to it.
+
+| Primitive | Used by |
+|---|---|
+| Quad — solid, gradient, rounded, bordered, shadowed | backgrounds, panels, cell backgrounds, chrome |
+| Glyph run — from a shared atlas, fixed or shaped advance | terminal cells, labels, code, semantic web text |
+| Texture — sampled image or video frame | screencast rasters, icons, webview surfaces, render targets |
+| Path — SDF or tessellated | vector icons, `lucide-animated`, graphs, DAG edges |
+| Material layer — custom shader with declared inputs | 3D scenes, particle fields, backdrops, transitions |
+
+Primitives are instanced and batched by class. Adding a source must not add a primitive class; if it
+would, that is a design conversation, not a patch.
+
+### 4.3 Sources
+
+| Source | Emits | Note |
+|---|---|---|
+| Cell-grid layout | glyph runs on a fixed advance grid, background quads | "Terminal UI" is a **layout mode**, not an engine |
+| Widget layout | rounded quads, glyph runs, textures, paths | The graphical UI |
+| Browser — semantic | AXTree → widget layout → primitives | Keyboard-navigable, cheap, diffable |
+| Browser — raster | CDP screencast → texture | For content we cannot or should not re-lay-out |
+| 3D scene | depth-tested draws, instanced particles, custom materials | Own camera and depth buffer, composited as a layer |
+
+**The DOM is not a renderer here.** A real DOM is still required for third-party webviews — VS Code
+extension UIs expect one. Those are hosted out-of-process and composited as textures: a *source*,
+never the renderer. No Omnis product UI is implemented in DOM.
+
+### 4.4 3D, shaders, and particles
+
+The material layer is a first-class primitive, not an effects add-on. It carries a shader, declared
+uniform inputs, and a compositing mode, and it is available to every presentation mode — including
+the cell grid, where a material layer renders behind or between glyph runs.
+
+Two distinct uses, deliberately not conflated:
+
+- **Chrome** — backdrops, transitions, agent-activity particle fields, the icon state machine's
+  animation. Authored by Omnis and by presets.
+- **Content** — shader playgrounds, 3D model preview, GPU-accelerated data visualization, anything a
+  user or extension supplies.
+
+The compositor supports both identically. Whether the *product* exposes authoring to users and
+extensions — and on what sandboxing terms, since a hostile shader can hang a GPU — is D14, and it
+sizes the epic very differently. The engine is built for both; the exposure is gated.
+
+### 4.5 What this costs, stated plainly
+
+Owning the renderer means owning text shaping, layout, hit-testing, IME, and **accessibility**. A
+fully custom-rendered UI has no native accessibility tree; one has to be published deliberately
+(UIA, AX, AT-SPI) or the application is unusable with a screen reader. That is a real obligation, not
+a footnote — it is why `accessibility` is a first-class label and why it must appear in E3's
+acceptance criteria rather than being discovered late.
+
+### 4.6 Consequences for the rest of this document
+
+- **The scene tree becomes more load-bearing, not less.** It is now the single input to the single
+  renderer. E10 still lands before E3.
+- **D8 largely dissolves.** With one renderer there is no renderer to hot-swap; switching between
+  cell-grid and widget presentation is a layout change. Live switching becomes cheap rather than
+  needing a spike. D8 is narrowed to whether *graphics device loss and adapter switching* are handled
+  transparently.
+- **A new baseline decision appears.** One GPU compositor means a minimum GPU capability, a graphics
+  API choice, and a software-fallback answer for machines that cannot meet it (D11).
 
 ---
 
@@ -191,9 +269,11 @@ crates/
   omnis-agent/         agent engine and MCP server binary
   omnis-lsp/           LSP multiplexer hub
   omnis-dap/           Debug Adapter Protocol implementation
+  omnis-render/        THE renderer: GPU compositor, frame graph, primitive batching,
+                       glyph atlas and shaping, material/shader passes, damage tracking
+  omnis-layout/        cell-grid and widget layout modes; both emit scene-tree primitives
   omnis-browser/       Chromium supervisor, CDP bridge, adblock
-  omnis-term-ui/       GPU cell-matrix renderer
-  omnis-term-browser/  AXTree→cells and screencast→sixel/braille bridges
+  omnis-web-source/    AXTree→layout and screencast→texture bridges (browser as a source)
   omnis-cas/           FastCDC chunking, convergent encryption, VFS
 packages/
   core/                Cordis microkernel, context definitions, dsh-compat
@@ -221,9 +301,13 @@ Each must be resolved by an ADR before its dependent epic leaves `Backlog`.
 | D5 | **Extension host compatibility target** — VS Code API emulation via `exthost-node`, or a native-first API with shims. | E8 |
 | D6 | **Agent provider adapter contract.** | E5 |
 | D7 | **Performance budgets** — frame time, redraw latency, cold start, memory ceiling. | E3, E7 |
-| D8 | **Renderer hot-swap** — restart-tolerant only, or live. | E3 |
+| D8 | **Graphics device loss and adapter switching** — handled transparently, or surfaced. Narrowed from "renderer hot-swap", which §4.6 dissolves: with one renderer, switching presentation mode is a layout change. | E3 |
 | D9 | **Subsystem admission criteria** — what a subsystem must satisfy to enter `omnisd` (bus-only communication, independent omission, resource budget, failure isolation). The daemon's subsystem list is long enough that this needs to be a gate, not a habit. | E1, and every subsystem epic |
 | D10 | **Vault threat model** — what `mlock`, Argon2id parameters, and process injection actually defend against, and what they do not. Injecting secrets into child environments is a real exposure that needs stating before it is built. | E11 |
+| D11 | **Graphics baseline** — API (wgpu over Vulkan/Metal/DX12, or native per platform), the minimum GPU capability required, and what happens on machines below it: software fallback, degraded mode, or refusal. One renderer makes this a hard floor for the whole application, not a per-feature concern. | E3, E20 |
+| D12 | **Text stack** — shaping engine, glyph atlas strategy, subpixel and hinting policy, bidi and complex-script support, IME integration. Owning the renderer means owning all of it (§4.5). | E3 |
+| D13 | **Webview compositing** — how out-of-process third-party webviews reach the frame: shared-texture zero-copy, readback, or native subsurface. Determines whether VS Code extension UIs are usable or merely present. | E8, E3 |
+| D14 | **Shader and 3D exposure** — is the material layer authored only by Omnis and its presets (chrome), or also by users and extensions (content)? Exposure demands sandboxing, resource limits, and a hang-recovery story, since a hostile or careless shader can wedge a GPU. Sizes E20 by an order of magnitude. | E20 |
 
 ---
 

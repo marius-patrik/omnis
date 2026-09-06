@@ -56,24 +56,30 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
     ),
     (
         "E3",
-        "Terminal cell-grid renderer",
+        "Unified GPU compositor (`omnis-render`)",
         "area:term",
-        "Blocked by D4 (platforms), D7 (performance budgets), D8 (hot-swap), and E10 (view model). "
-        "Starting this before the view model exists produces a fork of the UI, not a renderer.",
-        "GPU cell matrix buffer, WebGPU/WebGL blit pipeline, monospace metrics, 24-bit TrueColor "
-        "with SGR attributes, 256-colour ANSI palettes, cursor shapes, pane-grid keyboard "
-        "navigation, command-palette-first interaction, and the inline terminal inspector.",
+        "Blocked by D4 (platforms), D7 (performance budgets), D11 (graphics baseline), "
+        "D12 (text stack), and E10 (scene tree). Building any source before the compositor "
+        "produces a private renderer with a different name.",
+        "**The** renderer. Frame graph; batched instanced primitives (quad, glyph run, texture, "
+        "path, material layer); shared glyph atlas and shaping; damage tracking; device-loss "
+        "handling; and the material-layer pass that 3D and particles ride on. Terminal, widget, "
+        "browser, and 3D are sources that emit into this crate - they are not renderers.",
         [
-            "Every screen reachable in the DOM renderer is reachable here, from the same view model",
-            "No feature code is written twice; the diff touches renderers, not features",
-            "Frame time meets the budget set by D7, measured in CI",
+            "Terminal cells and UI labels share one glyph atlas and one pipeline",
+            "Adding a source adds no new primitive class",
+            "A terminal pane, a video, and a particle field composite in one frame within the "
+            "D7 budget, measured in CI",
+            "The accessibility tree is published to the platform (UIA / AX / AT-SPI) - a custom "
+            "renderer that ships without one is unusable with a screen reader",
+            "GPU device loss recovers without losing application state",
         ],
     ),
     (
         "E4",
         "Brand presets as pure data",
         "area:ui",
-        "Blocked by D3 (trade-dress policy) and E9 (capability matrix).",
+        "Blocked by D3 (trade-dress policy), E9 (capability matrix), and E20 (layout modes).",
         "Preset file format, token sets, asset packs, the `lucide-animated` default icon set, and "
         "the proof that adding a brand requires zero code changes.",
         [
@@ -111,16 +117,19 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
     ),
     (
         "E7",
-        "Terminal-grid browser bridge",
+        "Browser as a source",
         "area:browser",
-        "Blocked by E3 (cell-grid renderer) and D7 (performance budgets).",
-        "The `omnis-browser` Chromium/CDP worker; semantic mode (AXTree to styled cells with "
-        "interactive cell coordinates and CDP navigation events); pixel mode (screencast to Sixel "
-        "or Unicode Braille); and `auto`/`hybrid` mode selection with an FPS budget.",
+        "Blocked by E3 (compositor), E20 (layout modes), D7 (performance budgets), and "
+        "D13 (webview compositing).",
+        "The `omnis-browser` Chromium/CDP worker and `omnis-web-source`: semantic mode "
+        "(AXTree to layout to primitives, keyboard-navigable) and raster mode (screencast to "
+        "texture), `auto`/`hybrid` selection, an FPS budget, and webview compositing per D13. "
+        "A browser is a content source, not a rendering engine.",
         [
             "A documentation page is readable and navigable in semantic mode by keyboard alone",
-            "Pixel mode holds the configured FPS without starving the daemon",
+            "Raster mode holds the configured FPS without starving the daemon",
             "Crashing the browser worker does not affect the daemon or other surfaces",
+            "Third-party webviews reach the frame without a full readback per frame",
         ],
     ),
     (
@@ -151,13 +160,13 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
     ),
     (
         "E10",
-        "Renderer-agnostic view model",
+        "Scene tree - the renderer-agnostic view model",
         "area:core",
         "Blocked by E9 (capability matrix). Must land before E3.",
-        "The scene tree: panes, focus, buffers, selections, decorations. This is the abstraction "
-        "boundary that makes a second renderer affordable instead of a second product.",
+        "Panes, focus, buffers, selections, decorations, and the primitive vocabulary of "
+        "ARCHITECTURE.md section 4.2. The single input to the single renderer.",
         [
-            "The DOM renderer is rewritten to consume only the scene tree",
+            "Every source emits scene-tree primitives and nothing else",
             "No feature code references a renderer directly",
             "A feature that cannot be expressed in the scene tree is rejected, not special-cased",
         ],
@@ -271,6 +280,37 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
         ],
     ),
     (
+        "E20",
+        "Layout modes - cell-grid and widget",
+        "area:term",
+        "Blocked by E3 (compositor) and E10 (scene tree).",
+        "`omnis-layout`: the cell-grid mode (fixed advance, 24-bit TrueColor with SGR attributes, "
+        "256-colour ANSI palettes, cursor shapes, pane-grid keyboard navigation, "
+        "command-palette-first interaction, inline inspector strips) and the widget mode, both "
+        "emitting scene-tree primitives. `hybrid` mixes them per pane.",
+        [
+            "A cell-grid editor and a widget settings panel coexist in one window",
+            "Switching presentation mode is a layout change, requiring no renderer restart",
+            "Neither mode owns a primitive the other cannot use",
+        ],
+    ),
+    (
+        "E21",
+        "3D, shaders, and particles",
+        "area:ui",
+        "Blocked by E3 (compositor), D11 (graphics baseline), and D14 (shader exposure). "
+        "D14 sizes this epic by an order of magnitude.",
+        "The material-layer pass in anger: a scene layer with its own camera and depth buffer, "
+        "GPU-instanced particle systems, and custom shader materials with declared inputs. If D14 "
+        "opens authoring to users and extensions: sandboxing, resource limits, and GPU-hang "
+        "recovery.",
+        [
+            "A material layer composites correctly behind and between glyph runs in cell-grid mode",
+            "A particle field runs without pushing the frame past the D7 budget",
+            "If exposed per D14, a hostile or careless shader cannot wedge the GPU or the daemon",
+        ],
+    ),
+    (
         "E19",
         "Sync mesh and CRDT change log",
         "area:data",
@@ -335,7 +375,9 @@ DECISIONS: List[Tuple[str, str, str]] = [
     ),
     (
         "D8",
-        "Is renderer switching restart-tolerant only, or live hot-swap?",
+        "Are graphics device loss and adapter switching handled transparently, or surfaced to the "
+        "user? Narrowed from 'renderer hot-swap': with one renderer there is no renderer to swap, "
+        "and switching presentation mode is a layout change.",
         "E3",
     ),
     (
@@ -351,6 +393,34 @@ DECISIONS: List[Tuple[str, str, str]] = [
         "`mlock`, the Argon2id parameters, and injecting secrets into child process environments "
         "each carry real exposure that needs stating before it is built.",
         "E11, E19",
+    ),
+    (
+        "D11",
+        "Which graphics API, what minimum GPU capability, and what happens below it - software "
+        "fallback, degraded mode, or refusal? One renderer makes this a hard floor for the whole "
+        "application rather than a per-feature concern.",
+        "E3, E21",
+    ),
+    (
+        "D12",
+        "What is the text stack: shaping engine, glyph atlas strategy, subpixel and hinting "
+        "policy, bidi and complex-script support, IME integration? Owning the renderer means "
+        "owning all of it.",
+        "E3",
+    ),
+    (
+        "D13",
+        "How do out-of-process third-party webviews reach the frame - shared-texture zero-copy, "
+        "readback, or a native subsurface? This decides whether VS Code extension UIs are usable "
+        "or merely present.",
+        "E3, E7, E8",
+    ),
+    (
+        "D14",
+        "Is the material layer authored only by Omnis and its presets, or also by users and "
+        "extensions? Exposure demands sandboxing, resource limits, and GPU-hang recovery, since a "
+        "careless shader can wedge a GPU.",
+        "E21",
     ),
 ]
 
