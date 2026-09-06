@@ -1,6 +1,6 @@
 # ADR-0017 — The TUI is dropped as a surface
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Supersedes**: the two-backend model in [ADR-0001](0001-one-scene-tree-two-renderer-backends.md)
 - **Closes**: D15
 
