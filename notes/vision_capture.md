@@ -1,6 +1,6 @@
 # Vision capture — provenance
 
-`VISION.md` is a transcript of the scoping conversation that produced Omnis. This note records where
+`notes/transcript.md` is a transcript of the scoping conversation that produced Omnis. This note records where
 it came from and how it was captured.
 
 ## Source
@@ -63,9 +63,9 @@ by a truncated preview line, model turns by `Odpověď Gemini`. The decoder stri
 
 ## Ground rules
 
-`VISION.md` is non-normative regardless of how complete it is. Anything in it that should bind the
+`notes/transcript.md` is non-normative regardless of how complete it is. Anything in it that should bind the
 implementation must be promoted deliberately into `ARCHITECTURE.md` through an ADR — never by
 treating the vision document as a specification.
 
-`VISION.md` §11 lists the points where the source is internally inconsistent or where following it
+`notes/transcript.md` §11 lists the points where the source is internally inconsistent or where following it
 literally would be a mistake. Those are decisions, not defects; several are already tracked as D1–D10.

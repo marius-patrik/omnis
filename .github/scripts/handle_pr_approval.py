@@ -38,24 +38,87 @@ MERGE_POLL_INTERVAL_SECONDS = 5
 MERGE_POLL_ATTEMPTS = 12
 
 
-def _gh(args: List[str], repo: str, check: bool = False) -> subprocess.CompletedProcess:
+def _gh(
+    args: List[str], repo: str, check: bool = False, as_bot: bool = False
+) -> subprocess.CompletedProcess:
     """Runs a ``gh`` command scoped to a repository.
 
     Args:
         args: Arguments following the ``gh`` executable.
         repo: Repository slug (``owner/name``).
         check: Raise on non-zero exit when ``True``.
+        as_bot: Run with ``BOT_TOKEN`` instead of ``GH_TOKEN``. Required for submitting the proxy
+            review: ``GH_TOKEN`` is the maintainer's token, and GitHub refuses to let an author
+            approve their own pull request, so an approval sent with it fails silently.
 
     Returns:
         The completed process.
     """
-    return subprocess.run(
-        ["gh"] + args,
-        capture_output=True,
-        text=True,
-        check=check,
-        env=dict(os.environ, GH_REPO=repo),
+    env = dict(os.environ, GH_REPO=repo)
+    if as_bot:
+        bot_token = os.environ.get("BOT_TOKEN", "")
+        if bot_token:
+            env["GH_TOKEN"] = bot_token
+    return subprocess.run(["gh"] + args, capture_output=True, text=True, check=check, env=env)
+
+
+def submit_proxy_review(pr_number: int, repo: str, actor: str) -> bool:
+    """Submits the bot's approving review and verifies that it landed.
+
+    Branch protection requires one approving review. Pull requests are opened with a token belonging
+    to the maintainer, so the maintainer cannot approve them — GitHub rejects self-approval. The
+    approval therefore has to come from ``github-actions[bot]``, which requires the repository's
+    ``can_approve_pull_request_reviews`` permission and a ``BOT_TOKEN`` distinct from ``GH_TOKEN``.
+
+    The result is verified rather than assumed: a failed approval used to leave the pull request
+    stuck at ``REVIEW_REQUIRED`` with auto-merge armed and nothing in the log to explain it.
+
+    Args:
+        pr_number: Pull request number.
+        repo: Repository slug (``owner/name``).
+        actor: Login of the maintainer whose approval is being proxied.
+
+    Returns:
+        ``True`` when an approving review exists after the attempt.
+    """
+    if not os.environ.get("BOT_TOKEN"):
+        print(
+            "BOT_TOKEN is not set. The proxy approval would be sent as the pull request's own "
+            "author and rejected as self-approval; skipping. Set BOT_TOKEN to "
+            "secrets.GITHUB_TOKEN in the workflow.",
+            file=sys.stderr,
+        )
+        return False
+
+    print(f"Submitting approving review as the bot on PR #{pr_number}...")
+    result = _gh(
+        [
+            "pr",
+            "review",
+            str(pr_number),
+            "--approve",
+            "-b",
+            f"Approved via automation on behalf of @{actor}.",
+        ],
+        repo,
+        as_bot=True,
     )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        print(
+            f"Proxy approval FAILED: {detail[0] if detail else 'unknown error'}",
+            file=sys.stderr,
+        )
+
+    check = _gh(["api", f"repos/{repo}/pulls/{pr_number}/reviews", "--jq", ".[].state"], repo)
+    approved = "APPROVED" in (check.stdout or "")
+    if not approved:
+        print(
+            f"PR #{pr_number} still has no approving review. Auto-merge will stay armed but the "
+            f"pull request cannot merge until one is submitted.",
+            file=sys.stderr,
+        )
+    return approved
 
 
 def collect_bound_issues(pr_data: Dict[str, Any]) -> List[int]:
@@ -178,18 +241,7 @@ def handle_pr_approval() -> None:
         _gh(["pr", "ready", str(pr_number)], repo, True)
 
     if data.get("reviewDecision") == "REVIEW_REQUIRED":
-        print(f"Submitting approving review as bot on PR #{pr_number}...")
-        _gh(
-            [
-                "pr",
-                "review",
-                str(pr_number),
-                "--approve",
-                "-b",
-                f"Approved via automation on behalf of @{actor}.",
-            ],
-            repo,
-        )
+        submit_proxy_review(int(pr_number), repo, actor)
 
     print(f"Enabling auto-merge for PR #{pr_number} with --delete-branch...")
     result = _gh(["pr", "merge", str(pr_number), "--auto", "--merge", "--delete-branch"], repo)

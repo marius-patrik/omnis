@@ -1,13 +1,18 @@
-# Omnis — Vision (Reference Only)
+# Source transcript — scoping conversation
 
-> **Status: NON-NORMATIVE.** This is a transcript-derived record of the scoping conversation that
-> produced Omnis. It is source material. It is **not** a specification and does **not** override
-> `ARCHITECTURE.md`. Where the two disagree, `ARCHITECTURE.md` wins.
+> **Status: SOURCE MATERIAL. Superseded as a specification.**
+>
+> This is the captured record of the scoping conversation that produced Omnis. It is kept for
+> provenance and for the detail it carries, not as a specification: `ARCHITECTURE.md` is now the
+> single normative document, and everything here that survived review has been absorbed into it or
+> explicitly rejected in a decision record.
+>
+> Read it to understand *where an idea came from*. Do not implement from it — several of its
+> proposals were rejected outright (see §11, and ADR-0001, ADR-0002, ADR-0012, ADR-0013).
 >
 > **Provenance:** Google Gemini conversation "App Scoping Technical Specifications Discussion"
-> (`gemini.google.com/app/545cf54445afcd33`). First captured 2026-09-06 (partial); **completed
-> 2026-09-06** — all 20 turns, 79,181 characters. No gaps remain. See
-> [notes/vision_capture.md](notes/vision_capture.md) for provenance detail.
+> (`gemini.google.com/app/545cf54445afcd33`), captured 2026-09-06 — all 20 turns, 79,181 characters,
+> no gaps. Capture method in [vision_capture.md](vision_capture.md).
 
 ---
 
@@ -630,6 +635,13 @@ be a mistake. Each is a decision to make deliberately, not a defect to fix silen
    also extends the engine beyond anything in the transcript — shaders, 3D scenes, and particle
    systems are a first-class material-layer primitive available to every presentation mode, rather
    than effects that would exist in one renderer and not the other.
+
+   The transcript also conflates two different things under `brand-zed`: a terminal *look*, and
+   actually *running in a terminal*. Omnis separates them. `cell-grid` is a presentation mode the
+   GPU compositor draws in a desktop window; `omnis-tui` is a genuine second renderer backend that
+   emits ANSI to a real terminal, works over SSH, and needs no GPU. Both consume the same scene
+   tree, which is what makes feature parity between them a contract rather than a hope
+   (`ARCHITECTURE.md` §4.7).
 2. **`aiPersona` couples appearance to model choice.** Selecting a look also selects a provider,
    model, and reasoning effort. Nobody asked for that, and it will surprise people who want Claude's
    layout with a different model. Keep the axes separate; let a preset *suggest* a persona.

@@ -31,14 +31,14 @@ body:
       description: "Primary area affected. See `AGENTS.md` rule 15 for the full taxonomy."
       options:
         - "core - microkernel, IPC/substrate bus, daemon, configuration (area:core)"
-        - "ui - DOM renderer, layout, theming, brand presets, settings (area:ui)"
+        - "ui - renderer, layout, themes and profiles, settings (area:ui)"
         - "term - terminal cell-grid renderer, ANSI pipeline, PTY (area:term)"
         - "agents - harness orchestration, providers, personas (area:agents)"
         - "browser - embedded browser, CDP bridge, render modes (area:browser)"
         - "data - schema, persistence, migrations, sync (area:data)"
         - "ext - extension host, plugin API, shims (area:ext)"
         - "ci - workflows, containers, repo automation (area:ci)"
-        - "docs - documentation, MkDocs, architecture notes (area:docs)"
+        - "docs - documentation, ProperDocs, architecture notes (area:docs)"
     validations:
       required: true
 
@@ -75,7 +75,7 @@ body:
       placeholder: |
         - [ ] Behaviour is reachable by toggling a documented setting, not by brand-specific code
         - [ ] Unit tests cover the new behaviour
-        - [ ] `mkdocs build --strict` passes with zero warnings
+        - [ ] `properdocs build --strict` passes with zero warnings
     validations:
       required: false
 

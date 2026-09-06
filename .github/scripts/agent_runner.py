@@ -1,7 +1,11 @@
-"""Runner script for containerized Antigravity CI agent.
+"""Runner for the containerized, harness-agnostic CI agent.
 
-Handles Google OAuth token refresh, stage dispatching (interpret, plan, implement, review, respond),
-auto-labeling, and conventional commit generation.
+Drives whichever coding-agent CLI is available - Antigravity, Claude Code, Codex, Kimi, Grok,
+Cursor, or opencode - through the declarative registry in :mod:`harnesses`. Nothing below knows
+which CLI is running.
+
+Handles credential refresh, stage dispatching (interpret, plan, implement, self-review,
+plan-alignment, respond), auto-labeling, and Conventional Commit generation.
 """
 
 import argparse
@@ -34,6 +38,9 @@ _CANDIDATE_DIRS = [
 for _d in _CANDIDATE_DIRS:
     if os.path.isdir(_d) and _d not in sys.path:
         sys.path.insert(0, _d)
+
+import harnesses
+from harnesses import Harness, resolve_attempts
 
 try:
     from project_automation import PROJECT_NUMBER, PROJECT_OWNER
@@ -300,7 +307,8 @@ def classify_type_and_area(text: str) -> Tuple[str, str]:
     if re.search(r"\b(fix|bug|error|crash|broken|fail)\b", lower):
         t_label = "bug"
     elif re.search(
-        r"\b(docs?|document|documents|documenting|documentation|docstrings?|mkdocs|readme)\b", lower
+        r"\b(docs?|document|documents|documenting|documentation|docstrings?|mkdocs|properdocs|readme)\b",
+        lower,
     ):
         t_label = "docs"
     elif re.search(r"\b(refactor|clean|cleanup|simplify)\b", lower):
@@ -337,7 +345,7 @@ def classify_type_and_area(text: str) -> Tuple[str, str]:
         lower,
     ):
         a_label = "area:ui"
-    elif re.search(r"\b(doc|docs|documentation|mkdocs|material)\b", lower):
+    elif re.search(r"\b(doc|docs|documentation|mkdocs|properdocs)\b", lower):
         a_label = "area:docs"
     elif re.search(r"\b(ci|action|workflow|pipeline|docker|runner|automation)\b", lower):
         a_label = "area:ci"
@@ -814,12 +822,13 @@ def checkpoint_and_notify_exhaustion(
 
     # 3. Post structured notice comment
     steps_formatted = "\n".join([f"- [x] {s}" for s in steps])
-    models_formatted = "\n".join([f"- `{m}`" for m in DEFAULT_MODEL_FALLBACK_CHAIN])
+    models_formatted = harnesses.describe_chain()
 
     comment_body = (
         "<!-- omnis-agent -->\n"
         "### ⚠️ Omnis Agent Quota Exhaustion Notice\n\n"
-        "Execution has paused because API quota was exhausted across all fallback model tiers:\n"
+        "Execution has paused because API quota was exhausted across every configured "
+        "harness and model:\n"
         f"{models_formatted}\n\n"
         "#### Completed Steps\n"
         f"{steps_formatted}\n\n"
@@ -829,9 +838,9 @@ def checkpoint_and_notify_exhaustion(
         "- **Project Status**: Updated to `Blocked`\n\n"
         "#### Instructions to Resume\n"
         "When quota limits reset or additional quota is provisioned:\n"
-        "1. Verify that Gemini / LLM quota is available.\n"
+        "1. Verify that quota is available on at least one configured harness.\n"
         "2. Comment `approve` or `/resume` on this issue/PR to resume execution.\n"
-        "3. The Antigravity agent will pick up from the checkpoint and complete remaining work.\n"
+        "3. The agent resumes from the checkpoint on whichever harness is available.\n"
     )
     if error_detail:
         comment_body += f"\n<details><summary>Error Details</summary>\n\n```\n{error_detail.strip()}\n```\n</details>\n"
@@ -850,9 +859,9 @@ def checkpoint_and_notify_exhaustion(
     return checkpoint_data
 
 
-def run_agy_prompt(
+def run_agent_prompt(
     prompt: str,
-    model: str = "gemini-3.8-flash-high",
+    model: Optional[str] = None,
     timeout: str = "5m0s",
     max_retries: int = 2,
     base_delay: float = 1.0,
@@ -860,83 +869,102 @@ def run_agy_prompt(
     fallback_models: Optional[List[str]] = None,
     checkpoint_context: Optional[Dict[str, Any]] = None,
 ) -> str:
-    """Executes a prompt non-interactively using Antigravity CLI with backoff and model fallback.
+    """Executes a prompt non-interactively against the first harness that succeeds.
+
+    Walks the resolved harness chain (see :mod:`harnesses`), trying each harness and each of its
+    models in order. Transient quota errors are retried with exponential backoff; a persistent quota
+    error falls through to the next attempt; any other failure returns immediately, because falling
+    through on a genuine bug would burn every harness on the same broken prompt.
 
     Args:
         prompt: Instruction prompt to execute.
-        model: Primary model tier or ID to use.
-        timeout: Print mode timeout (default 5m0s, use longer for implementation).
-        max_retries: Maximum transient retry attempts per model before escalating.
-        base_delay: Initial retry delay in seconds for exponential backoff.
-        backoff_factor: Multiplier for exponential backoff.
-        fallback_models: Optional explicit list of fallback models.
-        checkpoint_context: Optional dictionary for automatic checkpointing if all tiers exhaust.
+        model: Optional model pinned onto the first available harness.
+        timeout: Print-mode timeout as a Go duration string.
+        max_retries: Transient retry attempts per attempt before escalating.
+        base_delay: Initial retry delay in seconds.
+        backoff_factor: Exponential backoff multiplier.
+        fallback_models: Optional explicit model chain, overriding the first harness's own.
+        checkpoint_context: Optional context for checkpointing when every attempt is exhausted.
 
     Returns:
-        Agent text output or explicit error description.
+        Agent text output, or an explicit error description prefixed
+        ``[Omnis Agent Execution Error]``.
     """
-    model_chain = get_model_fallback_chain(model, fallback_models)
+    chain = fallback_models or ([model] if model else None)
+    attempts = resolve_attempts(model_chain=chain)
+
+    if not attempts:
+        err = (
+            "[Omnis Agent Execution Error]: No usable harness. "
+            "No CLI from AGENT_HARNESS_CHAIN is on PATH with credentials."
+        )
+        print(err, file=sys.stderr)
+        return err
+
     env = os.environ.copy()
     env.setdefault("TERM", "xterm-256color")
     last_error_detail = ""
+    tried: List[str] = []
 
-    for current_model in model_chain:
+    for harness, current_model in attempts:
+        label = f"{harness.name}" + (f"/{current_model}" if current_model else "")
+        tried.append(label)
+        argv = harness.build_argv(prompt, current_model, timeout)
+
         for attempt in range(max_retries + 1):
-            cmd = [
-                "agy",
-                "--print",
-                prompt,
-                "--model",
-                current_model,
-                "--dangerously-skip-permissions",
-                "--print-timeout",
-                timeout,
-            ]
             try:
-                res = subprocess.run(cmd, capture_output=True, text=True, check=True, env=env)
+                res = subprocess.run(argv, capture_output=True, text=True, check=True, env=env)
+                if len(tried) > 1:
+                    print(f"Succeeded on {label} after {len(tried) - 1} exhausted attempt(s).")
                 return res.stdout.strip()
             except FileNotFoundError:
-                err = "[Omnis Agent Execution Error]: `agy` CLI binary not found in PATH."
-                print(err, file=sys.stderr)
-                return err
+                print(
+                    f"Harness binary {harness.binary!r} vanished between resolution and "
+                    f"invocation; moving to the next attempt.",
+                    file=sys.stderr,
+                )
+                break
             except subprocess.CalledProcessError as e:
                 stderr_part = (e.stderr or "").strip()
                 stdout_part = (e.stdout or "").strip()
                 detail = f"{stderr_part}\n{stdout_part}".strip() or str(e)
                 last_error_detail = detail
-                if is_quota_exhausted(detail):
-                    if attempt < max_retries:
-                        delay = calculate_backoff(
-                            attempt, base_delay=base_delay, backoff_factor=backoff_factor
-                        )
-                        print(
-                            f"Transient rate limit/quota error on model '{current_model}' "
-                            f"(attempt {attempt + 1}/{max_retries + 1}): {detail}. "
-                            f"Retrying in {delay:.2f}s...",
-                            file=sys.stderr,
-                        )
-                        time.sleep(delay)
-                        continue
-                    else:
-                        print(
-                            f"Quota exhausted for model '{current_model}' after {max_retries + 1} attempts. "
-                            f"Escalating to next fallback model in chain...",
-                            file=sys.stderr,
-                        )
-                        break
-                else:
-                    err = f"[Omnis Agent Execution Error]: `agy` invocation failed (exit code {e.returncode}): {detail}"
+
+                if not is_quota_exhausted(detail):
+                    err = (
+                        f"[Omnis Agent Execution Error]: `{harness.binary}` invocation failed "
+                        f"(exit code {e.returncode}): {detail}"
+                    )
                     print(err, file=sys.stderr)
                     return err
-            except Exception as e:
-                err = f"[Omnis Agent Execution Error]: Unexpected failure executing `agy`: {e}"
+
+                if attempt < max_retries:
+                    delay = calculate_backoff(
+                        attempt, base_delay=base_delay, backoff_factor=backoff_factor
+                    )
+                    print(
+                        f"Transient rate limit on {label} "
+                        f"(attempt {attempt + 1}/{max_retries + 1}): {detail}. "
+                        f"Retrying in {delay:.2f}s...",
+                        file=sys.stderr,
+                    )
+                    time.sleep(delay)
+                    continue
+
+                print(
+                    f"Quota exhausted on {label} after {max_retries + 1} attempts. "
+                    f"Escalating to the next harness/model in the chain...",
+                    file=sys.stderr,
+                )
+                break
+            except Exception as e:  # noqa: BLE001 - surface anything unexpected verbatim
+                err = f"[Omnis Agent Execution Error]: Unexpected failure executing {label}: {e}"
                 print(err, file=sys.stderr)
                 return err
 
-    # All model tiers in fallback chain exhausted
     err = (
-        f"[Omnis Agent Execution Error]: Quota exhausted across all fallback models "
-        f"({', '.join(model_chain)}): {last_error_detail}"
+        f"[Omnis Agent Execution Error]: Quota exhausted across every harness and model "
+        f"({', '.join(tried)}): {last_error_detail}"
     )
     print(err, file=sys.stderr)
 
@@ -984,7 +1012,7 @@ def handle_interpret(issue_number: int, repo: str):
         ],
         "is_pr": False,
     }
-    interpretation = run_agy_prompt(prompt, checkpoint_context=checkpoint_ctx)
+    interpretation = run_agent_prompt(prompt, checkpoint_context=checkpoint_ctx)
 
     if is_quota_exhausted(interpretation):
         return
@@ -1084,7 +1112,7 @@ def handle_plan(request_number: int, plan_number: int, repo: str):
         ],
         "is_pr": False,
     }
-    plan_body = run_agy_prompt(prompt, checkpoint_context=checkpoint_ctx)
+    plan_body = run_agent_prompt(prompt, checkpoint_context=checkpoint_ctx)
 
     if is_quota_exhausted(plan_body):
         return
@@ -1123,7 +1151,7 @@ def handle_respond(issue_or_pr_num: int, comment_text: str, repo: str, is_pr: bo
         f'"{comment_text}"\n\n'
         "Provide a direct, helpful, and concise response addressing the feedback and detailing next actions."
     )
-    response = run_agy_prompt(prompt, checkpoint_context=checkpoint_ctx)
+    response = run_agent_prompt(prompt, checkpoint_context=checkpoint_ctx)
     if is_quota_exhausted(response):
         return
 
@@ -1491,7 +1519,7 @@ def handle_implement(plan_number: int, request_number: int, repo: str):
             "completed_steps": list(completed_steps),
             "cwd": cwd,
         }
-        impl_result = run_agy_prompt(
+        impl_result = run_agent_prompt(
             implement_prompt, timeout="15m0s", checkpoint_context=checkpoint_ctx
         )
         if is_quota_exhausted(impl_result):
@@ -1528,7 +1556,9 @@ def handle_implement(plan_number: int, request_number: int, repo: str):
         checkpoint_ctx["completed_steps"] = list(completed_steps) + [
             "Executed test suite (failures detected; attempting automated fix)"
         ]
-        fix_result = run_agy_prompt(fix_prompt, timeout="10m0s", checkpoint_context=checkpoint_ctx)
+        fix_result = run_agent_prompt(
+            fix_prompt, timeout="10m0s", checkpoint_context=checkpoint_ctx
+        )
         if is_quota_exhausted(fix_result):
             return
         if not fix_result.startswith("[Omnis Agent Execution Error]"):
@@ -1733,7 +1763,7 @@ def handle_self_review(pr_number: int, plan_number: int, repo: str):
             ],
             "cwd": cwd,
         }
-        review_result = run_agy_prompt(review_prompt, checkpoint_context=checkpoint_ctx)
+        review_result = run_agent_prompt(review_prompt, checkpoint_context=checkpoint_ctx)
 
         if is_quota_exhausted(review_result):
             return
@@ -1789,7 +1819,9 @@ def handle_self_review(pr_number: int, plan_number: int, repo: str):
                     f"to change and WHY it is necessary (justification), based on:\n\n"
                     f"{review_result}"
                 )
-                deviation_text = run_agy_prompt(deviation_prompt, checkpoint_context=checkpoint_ctx)
+                deviation_text = run_agent_prompt(
+                    deviation_prompt, checkpoint_context=checkpoint_ctx
+                )
                 if is_quota_exhausted(deviation_text):
                     return
                 if not deviation_text.startswith("[Omnis Agent Execution Error]"):
@@ -1819,7 +1851,9 @@ def handle_self_review(pr_number: int, plan_number: int, repo: str):
             f"Fix the following code review findings in the workspace:\n\n"
             f"{review_result}\n\nMake the necessary changes to resolve all findings."
         )
-        fix_result = run_agy_prompt(fix_prompt, timeout="10m0s", checkpoint_context=checkpoint_ctx)
+        fix_result = run_agent_prompt(
+            fix_prompt, timeout="10m0s", checkpoint_context=checkpoint_ctx
+        )
 
         if is_quota_exhausted(fix_result):
             return
@@ -1934,7 +1968,7 @@ def handle_plan_alignment(pr_number: int, plan_number: int, request_number: int,
             "Evaluating plan alignment",
         ],
     }
-    alignment_result = run_agy_prompt(alignment_prompt, checkpoint_context=checkpoint_ctx)
+    alignment_result = run_agent_prompt(alignment_prompt, checkpoint_context=checkpoint_ctx)
 
     if is_quota_exhausted(alignment_result):
         return

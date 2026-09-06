@@ -73,13 +73,30 @@ def test_agents_defines_every_area_label_used_by_the_agent():
         assert label in content, f"AGENTS.md must document the {label!r} scope"
 
 
-def test_architecture_is_declared_normative_and_vision_is_not():
-    """The precedence between the two documents is stated in both of them."""
+def test_architecture_is_the_only_normative_document():
+    """Vision and architecture are one file; the transcript specifies nothing."""
     architecture = _read("ARCHITECTURE.md")
-    vision = _read("VISION.md")
+    transcript = _read("notes", "transcript.md")
+
     assert "Status: NORMATIVE" in architecture
-    assert "NON-NORMATIVE" in vision
-    assert "ARCHITECTURE.md" in vision, "VISION.md must point at the normative document"
+    assert "only normative document" in architecture
+
+    assert "SOURCE MATERIAL" in transcript, "the transcript must declare that it is not a spec"
+    assert "ARCHITECTURE.md" in transcript, "the transcript must point at the normative document"
+    assert not os.path.exists(
+        os.path.join(REPO_ROOT, "VISION.md")
+    ), "VISION.md was merged into ARCHITECTURE.md; a second one would reintroduce the split"
+
+
+def test_architecture_states_its_principles_with_enforcement():
+    """A principle nobody enforces erodes; the table must say what enforces each one."""
+    architecture = _read("ARCHITECTURE.md")
+    principles = set(re.findall(r"^\| (P\d+) \|", architecture, re.MULTILINE))
+    assert len(principles) >= 8, f"expected the principle table, found {sorted(principles)}"
+    section = architecture[architecture.index("## 2. Principles") : architecture.index("## 3.")]
+    for line in section.splitlines():
+        if re.match(r"^\| P\d+ \|", line):
+            assert line.count("|") >= 4, f"principle has no enforcement column: {line[:60]}"
 
 
 def test_architecture_lists_open_decisions_with_identifiers():
@@ -96,81 +113,53 @@ def test_roadmap_epics_are_addressable():
     assert len(epics) >= 8, f"expected at least 8 epics, found {sorted(epics)}"
 
 
-def test_vision_declares_its_provenance():
-    """A transcript-derived document must say where it came from and how complete it is."""
-    vision = _read("VISION.md")
-    assert "gemini.google.com" in vision, "VISION.md must cite its source conversation"
-    assert "notes/vision_capture.md" in vision, "VISION.md must link the provenance note"
+def test_transcript_declares_its_provenance():
+    """Source material must say where it came from and how completely it was captured."""
+    transcript = _read("notes", "transcript.md")
+    assert "gemini.google.com" in transcript, "the transcript must cite its source conversation"
+    assert "vision_capture.md" in transcript, "the transcript must link the provenance note"
 
 
-def test_vision_gap_markers_agree_with_the_capture_note():
+def test_transcript_gap_markers_agree_with_the_capture_note():
     """Completeness is claimed in one place; the two documents must not contradict each other."""
-    vision = _read("VISION.md")
+    transcript = _read("notes", "transcript.md")
     capture = _read("notes", "vision_capture.md")
-    claims_complete = "Status: complete" in capture
 
-    if claims_complete:
-        assert "[GAP]" not in vision, (
-            "notes/vision_capture.md claims the capture is complete, "
-            "but VISION.md still carries [GAP] markers"
+    if "Status: complete" in capture:
+        assert "[GAP]" not in transcript, (
+            "vision_capture.md claims the capture is complete, "
+            "but the transcript still carries [GAP] markers"
         )
     else:
-        assert "[GAP]" in vision, (
-            "notes/vision_capture.md does not claim completeness, "
-            "so VISION.md must mark where it is partial"
+        assert "[GAP]" in transcript, (
+            "vision_capture.md does not claim completeness, "
+            "so the transcript must mark where it is partial"
         )
 
 
-def test_seeder_epics_match_the_roadmap():
-    """Every epic the seeder files has a ROADMAP row, and every row has a seeder entry."""
-    import seed_backlog
-
-    roadmap = _read("ROADMAP.md")
-    seeded = {entry[0] for entry in seed_backlog.EPICS}
-    documented = set(re.findall(r"^\| (E\d+) \|", roadmap, re.MULTILINE)) - {"E0"}
-
-    assert documented == seeded, (
-        f"ROADMAP rows and seeder entries disagree: "
-        f"only in ROADMAP {sorted(documented - seeded)}, "
-        f"only in seeder {sorted(seeded - documented)}"
-    )
-
-
-def test_seeder_decisions_match_the_architecture():
-    """Every decision the seeder files is listed in ARCHITECTURE.md §7, and the reverse."""
-    import seed_backlog
-
-    architecture = _read("ARCHITECTURE.md")
-    seeded = {entry[0] for entry in seed_backlog.DECISIONS}
-    documented = set(re.findall(r"^\| (D\d+) \|", architecture, re.MULTILINE))
-
-    assert documented == seeded, (
-        f"ARCHITECTURE rows and seeder entries disagree: "
-        f"only in ARCHITECTURE {sorted(documented - seeded)}, "
-        f"only in seeder {sorted(seeded - documented)}"
-    )
-
-
-def test_seeder_uses_only_real_area_labels():
-    """An epic filed with an unknown area label lands unclassifiable on the board."""
-    import repo_settings
-    import seed_backlog
-
-    known = {name for name, _color, _description in repo_settings.LABELS}
-    for roadmap_id, _name, area, *_rest in seed_backlog.EPICS:
-        assert area in known, f"{roadmap_id} uses undefined label {area!r}"
-
-
-def test_vision_carries_review_notes():
+def test_transcript_carries_review_notes():
     """Recording a source faithfully is not the same as endorsing it."""
-    vision = _read("VISION.md")
-    assert "Review notes" in vision or "[REVIEW]" in vision
-    assert "ARCHITECTURE.md" in vision, "VISION.md must defer to the normative document"
+    transcript = _read("notes", "transcript.md")
+    assert "Review notes" in transcript or "[REVIEW]" in transcript
+    assert "ARCHITECTURE.md" in transcript, "the transcript must defer to the normative document"
+
+
+def test_reference_declaration_exists_and_is_documented():
+    """The declaration is the product's central artifact; a stale example is worse than none."""
+    declaration = _read("examples", "omnis.nix")
+    architecture = _read("ARCHITECTURE.md")
+
+    assert "examples/omnis.nix" in architecture, "the architecture must point at the declaration"
+    for section in ("hosts", "placement", "subsystems", "environments", "presentation", "secrets"):
+        assert (
+            f"{section} = " in declaration or f"{section} =" in declaration
+        ), f"the reference declaration must show `{section}`"
+    assert "keychain:" in declaration, "secrets must appear as references, never values"
 
 
 @pytest.mark.parametrize(
     "document",
-    ["README.md", "AGENTS.md", "ARCHITECTURE.md", "ROADMAP.md", "VISION.md"],
+    ["README.md", "AGENTS.md", "ARCHITECTURE.md", "ROADMAP.md"],
 )
 def test_core_documents_are_present_and_substantial(document: str):
     """Placeholder documents are worse than missing ones; require real content.

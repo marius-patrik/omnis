@@ -1,24 +1,84 @@
 # Omnis
 
-**Universal developer workspace and local-first personal data OS.**
+**An AI operating system. Talk to your machine, and it does the thing.**
 
-One engine, many presets. Omnis is a desktop workspace whose entire presentation layer — renderer,
-layout topology, input routing, keymap, window chrome, and iconography — is a *configuration state
-of a single engine* rather than a set of alternative implementations. A "theme" here is not a
-stylesheet; it is a named point in an orthogonal capability matrix.
+"Install Rust, give me a Windows VM with Photoshop, put the daemon on my workstation and the
+interface here, and make it look like Zed" is a sentence, not an afternoon. Omnis takes it, writes
+the change into one declaration, shows you exactly what it will do, and applies it. If you don't like
+the result, you roll it back — one command, every time, whatever changed.
 
-> **Status: scaffold.** The repository, its governance rules, and its autonomous delivery pipeline
-> are in place. The product tree is not: it is decomposed into epics in
-> [ROADMAP.md](ROADMAP.md) and built one approved plan at a time.
+It is very smart because it can see the whole machine: your repositories, terminals, packages,
+containers, guest operating systems, browser, and secrets are one system with one API, and the agent
+is a first-class operator of it rather than a chat box bolted onto an editor.
+
+Underneath, Omnis is a **kernel**. It owns nothing you could get elsewhere — `git`, `sl`, Nix,
+podman, libvirt, Chromium, Tailscale, and the coding-agent CLIs are all **bound, not built** — and
+everything that makes them compose: one bus, one scene tree, one declaration, one modification
+surface, one audit trail.
+
+> **Status: specification.** The governance rules and the autonomous delivery pipeline are in place
+> and running. The product tree is not: it is specified in [ARCHITECTURE.md](ARCHITECTURE.md),
+> decided in [decision records](notes/adr/), and sequenced in [ROADMAP.md](ROADMAP.md).
+
+## The whole machine, in one file
+
+Subsystems, guest operating systems, where each process runs, and how it looks are one declaration.
+Applying it produces a **generation** — a parent, a diff, an author — so rollback is one operation
+and an agent reconfiguring your machine leaves a reviewable change rather than a mutation.
+
+```nix
+{
+  omnis = {
+    hosts.core.backend = "docker";        # native · docker · wsl · podman · nspawn · remote
+    placement = { daemon = "core"; gui = "workstation"; };
+
+    subsystems.vcs = {
+      enable   = true;
+      backends = [ "git" "sapling" ];     # drop one and it leaves entirely — binary,
+      default  = "git";                   # completions, credential helper, menu entries, all
+    };
+
+    environments.windows = {
+      kind = "vm";                        # container · vm · compat (Wine/Proton)
+      apps.integration = "remoteapp";     # Windows apps as ordinary windows
+    };
+
+    presentation = { profile = "zed"; theme = "catppuccin-mocha"; };
+    remote = { enable = true; via = "tailscale"; };
+  };
+}
+```
+
+The full reference is [`examples/omnis.nix`](examples/omnis.nix).
+
+Removing something removes it **completely** — the processes, the packages, the files, and
+everything it contributed to the rest of the system. "Disabled" and "not installed" are not
+different states.
+
+## What makes it AI-first
+
+Not a chat panel. An agent is a **first-class operator**: it calls the same API as you, reads the
+same option schema the settings UI is generated from, addresses the same objects by the same URIs,
+and is bound by the same approval gate and audit trail.
+
+That is only safe because every change is a generation — gated before it takes effect, reversible
+after. The accountability machinery is not a constraint on the goal; it is what makes the goal
+achievable.
+
+The documentation is generated from that same option schema and lives **inside** the product, so you
+read about the system in the window you are declaring it in — and so does the agent proposing the
+change.
 
 ## Start here
 
 | Document | What it is |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **Normative.** Process topology, the capability matrix, renderer separation, and the eight open decisions that gate the roadmap. |
-| [ROADMAP.md](ROADMAP.md) | Epics, entry gates, and sequencing rationale. |
-| [AGENTS.md](AGENTS.md) | The binding rules for every contributor, human or agent. Also `CONTRIBUTING.md`. |
-| [VISION.md](VISION.md) | **Reference only.** Captured scoping conversation. Never overrides the architecture. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | **The only normative document.** What Omnis is, why, and how it is built. |
+| [Decision records](notes/adr/) | Every decision that binds the implementation, with the alternatives it rejected. |
+| [ROADMAP.md](ROADMAP.md) | Epics, entry gates, sequencing. |
+| [AGENTS.md](AGENTS.md) | Binding rules for every contributor, human or agent. Also `CONTRIBUTING.md`. |
+| [notes/pipeline.md](notes/pipeline.md) | How the delivery pipeline works, and how it fails. |
+| [notes/transcript.md](notes/transcript.md) | Source material only. Specifies nothing. |
 
 ## How work happens here
 
@@ -36,43 +96,26 @@ user request  ──▶  Request issue      ──▶  interpretation  ──▶
                    you Approve  ──▶  auto-merge  ──▶  issues closed, board set to Done
 ```
 
-Two human gates, both explicit: you approve the *interpretation* before anything is planned, and the
-*plan* before anything is written. Nothing merges without a review approval from you.
+Two human gates before anything is written, one before anything merges. Specification runs
+**architecture → decision records → roadmap → issues**, and an issue is only filed for work that is
+already settled.
 
-Full rules in [AGENTS.md](AGENTS.md).
-
-## Repository automation
-
-| Path | Purpose |
-|---|---|
-| `.github/workflows/ci.yml` | Pipeline, Rust, web, and docs jobs. Language jobs are guarded, so they stay green while the product tree is still a scaffold. |
-| `.github/workflows/agent.yml` | Containerized autonomous agent, dispatched on issues and comments. |
-| `.github/workflows/project-automation.yml` | Board status transitions from lifecycle events. |
-| `.github/workflows/pr-approval-automerge.yml` | Approval detection, auto-merge, post-merge reconciliation. |
-| `.github/workflows/open-pr.yml` | Opens bot-authored draft PRs so the maintainer can review them. |
-| `.github/scripts/repo_settings.py` | Every GitHub setting that otherwise only exists in the web UI, as re-runnable code. |
-
-Reproduce the GitHub-side configuration at any time:
-
-```bash
-python .github/scripts/repo_settings.py --plan     # show what would change
-python .github/scripts/repo_settings.py --apply    # apply it
-```
-
-## Operating this repository
-
-Setup state, the two secrets the pipeline still needs, and the reproduction sequence are in
-[notes/bootstrap.md](notes/bootstrap.md). The short version: the board, labels, protection, and
-seeded backlog are live; `GH_PROJECT_TOKEN` and the agent provider secrets are not set yet, and
-until `GH_PROJECT_TOKEN` exists the approve-and-auto-merge path cannot complete a full cycle.
+Full rules in [AGENTS.md](AGENTS.md); mechanics in [notes/pipeline.md](notes/pipeline.md).
 
 ## Local development
 
 ```bash
 pip install -r requirements-dev.txt
-pytest -v                 # repository automation tests
-black --check .           # formatting
-mkdocs serve              # documentation site
+pytest -v                    # repository automation tests
+black --check .              # formatting
+properdocs serve             # documentation site
+```
+
+Reproduce the GitHub-side configuration — labels, board, protection, permissions — at any time:
+
+```bash
+python .github/scripts/repo_settings.py --plan     # show drift
+python .github/scripts/repo_settings.py --apply    # reconcile
 ```
 
 ## License
