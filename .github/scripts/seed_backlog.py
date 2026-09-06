@@ -27,8 +27,7 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
         "E1",
         "Substrate Bus and process topology",
         "area:core",
-        "Blocked by D1 (day-one user workflow). Until we know what a user does, "
-        "the message set is guesswork.",
+        "Blocked by D1 (first vertical slice) and D9 (subsystem admission criteria).",
         "The `omnis-proto` wire schema, dual-socket transport (control: ordered typed "
         "request/response; stream: high-volume unidirectional frames), the additive versioning "
         "rule, an `omnisd` skeleton, surface attach/detach, and crash isolation between surfaces "
@@ -57,24 +56,30 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
     ),
     (
         "E3",
-        "Terminal cell-grid renderer",
+        "Unified GPU compositor (`omnis-render`)",
         "area:term",
-        "Blocked by D4 (platforms), D7 (performance budgets), D8 (hot-swap), and E10 (view model). "
-        "Starting this before the view model exists produces a fork of the UI, not a renderer.",
-        "GPU cell matrix buffer, WebGPU/WebGL blit pipeline, monospace metrics, 24-bit TrueColor "
-        "with SGR attributes, 256-colour ANSI palettes, cursor shapes, pane-grid keyboard "
-        "navigation, command-palette-first interaction, and the inline terminal inspector.",
+        "Blocked by D4 (platforms), D7 (performance budgets), D11 (graphics baseline), "
+        "D12 (text stack), and E10 (scene tree). Building any source before the compositor "
+        "produces a private renderer with a different name.",
+        "**The** renderer. Frame graph; batched instanced primitives (quad, glyph run, texture, "
+        "path, material layer); shared glyph atlas and shaping; damage tracking; device-loss "
+        "handling; and the material-layer pass that 3D and particles ride on. Terminal, widget, "
+        "browser, and 3D are sources that emit into this crate - they are not renderers.",
         [
-            "Every screen reachable in the DOM renderer is reachable here, from the same view model",
-            "No feature code is written twice; the diff touches renderers, not features",
-            "Frame time meets the budget set by D7, measured in CI",
+            "Terminal cells and UI labels share one glyph atlas and one pipeline",
+            "Adding a source adds no new primitive class",
+            "A terminal pane, a video, and a particle field composite in one frame within the "
+            "D7 budget, measured in CI",
+            "The accessibility tree is published to the platform (UIA / AX / AT-SPI) - a custom "
+            "renderer that ships without one is unusable with a screen reader",
+            "GPU device loss recovers without losing application state",
         ],
     ),
     (
         "E4",
         "Brand presets as pure data",
         "area:ui",
-        "Blocked by D3 (trade-dress policy) and E9 (capability matrix).",
+        "Blocked by D3 (trade-dress policy), E9 (capability matrix), and E20 (layout modes).",
         "Preset file format, token sets, asset packs, the `lucide-animated` default icon set, and "
         "the proof that adding a brand requires zero code changes.",
         [
@@ -101,9 +106,9 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
         "E6",
         "Local-first persistence",
         "area:data",
-        "Blocked by D2 (storage engine and shape).",
-        "Storage engine choice, schema, migrations, the sync boundary, and the line between "
-        "configuration (versioned files) and user data (the store).",
+        "Blocked by D2 (the configuration/data boundary).",
+        "The PGlite store, schema, migrations, the configuration/data boundary, and the sync "
+        "boundary.",
         [
             "Configuration never lives in the database",
             "Migrations run forward on a populated store without data loss",
@@ -112,16 +117,19 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
     ),
     (
         "E7",
-        "Terminal-grid browser bridge",
+        "Browser as a source",
         "area:browser",
-        "Blocked by E3 (cell-grid renderer) and D7 (performance budgets).",
-        "The `omnis-browser` Chromium/CDP worker; semantic mode (AXTree to styled cells with "
-        "interactive cell coordinates and CDP navigation events); pixel mode (screencast to Sixel "
-        "or Unicode Braille); and `auto`/`hybrid` mode selection with an FPS budget.",
+        "Blocked by E3 (compositor), E20 (layout modes), D7 (performance budgets), and "
+        "D13 (webview compositing).",
+        "The `omnis-browser` Chromium/CDP worker and `omnis-web-source`: semantic mode "
+        "(AXTree to layout to primitives, keyboard-navigable) and raster mode (screencast to "
+        "texture), `auto`/`hybrid` selection, an FPS budget, and webview compositing per D13. "
+        "A browser is a content source, not a rendering engine.",
         [
             "A documentation page is readable and navigable in semantic mode by keyboard alone",
-            "Pixel mode holds the configured FPS without starving the daemon",
+            "Raster mode holds the configured FPS without starving the daemon",
             "Crashing the browser worker does not affect the daemon or other surfaces",
+            "Third-party webviews reach the frame without a full readback per frame",
         ],
     ),
     (
@@ -152,15 +160,168 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
     ),
     (
         "E10",
-        "Renderer-agnostic view model",
+        "Scene tree - the renderer-agnostic view model",
         "area:core",
         "Blocked by E9 (capability matrix). Must land before E3.",
-        "The scene tree: panes, focus, buffers, selections, decorations. This is the abstraction "
-        "boundary that makes a second renderer affordable instead of a second product.",
+        "Panes, focus, buffers, selections, decorations, and the primitive vocabulary of "
+        "ARCHITECTURE.md section 4.2. The single input to the single renderer.",
         [
-            "The DOM renderer is rewritten to consume only the scene tree",
+            "Every source emits scene-tree primitives and nothing else",
             "No feature code references a renderer directly",
             "A feature that cannot be expressed in the scene tree is rejected, not special-cased",
+        ],
+    ),
+    (
+        "E11",
+        "Vault, SSH/GPG agent, and secure process spawn",
+        "area:core",
+        "Blocked by D4 (platforms), D10 (threat model), and E1 (bus).",
+        "Argon2id-derived KEK held in a `Zeroizing` buffer with `mlock`; OS keychain bridging "
+        "(Apple Keychain, DPAPI, Secret Service); `omnis-ssh-agent` on `~/.omnis/ssh.sock`; "
+        "`.env` injection into child process memory maps, never to disk and never into agent "
+        "context windows.",
+        [
+            "No plaintext secret is ever written to disk or into an agent's context",
+            "A spawned process receives its secrets; a sibling process cannot read them",
+            "Locking the vault revokes in-flight access, not just future access",
+        ],
+    ),
+    (
+        "E12",
+        "Terminals, PTY, and containers",
+        "area:core",
+        "Blocked by E1 (bus).",
+        "Native PTY manager, tmux control server, Bollard Docker pipes, resource supervisor, and "
+        "the `PTY_STREAM` / `PTY_RESIZE` / `DOCKER_LOG` data-socket opcodes end to end.",
+        [
+            "A terminal survives the GUI reloading or crashing",
+            "Resize is in-band and never loses buffered output",
+            "The resource supervisor bounds a runaway process without killing the daemon",
+        ],
+    ),
+    (
+        "E13",
+        "Content-addressed storage and VFS",
+        "area:data",
+        "Blocked by E6 (persistence).",
+        "`omnis-cas`: FastCDC chunking, BLAKE3 keys, convergent encryption, reflink deduplication, "
+        "multi-provider VFS mounts, and the central inotify watcher.",
+        [
+            "Identical content stored twice occupies one copy",
+            "Convergent keys never leak plaintext across encryption boundaries",
+            "The watcher scales to a large workspace without exhausting handles",
+        ],
+    ),
+    (
+        "E14",
+        "Universal VCS and stacked PRs (`ovcs`)",
+        "area:core",
+        "Blocked by E1 (bus).",
+        "Dual Git/Sapling engine, atomic operation log (`vcs_op_log`), automated `absorb`, 3-way "
+        "AST merge editor, stacked PR management across GitHub/GitLab/Forgejo, git alternates "
+        "manager.",
+        [
+            "Every mutating operation is undoable from the operation log",
+            "The same workflow works against Git and Sapling repositories",
+            "A stack rebases without the user reconstructing it by hand",
+        ],
+    ),
+    (
+        "E15",
+        "Task and build DAG engine",
+        "area:core",
+        "Blocked by E13 (CAS). The caching claim rests on CAS timestamps.",
+        "Manifest parsing (`package.json`, `Cargo.toml`, `Makefile`, `Taskfile.yaml`), a "
+        "cross-repository dependency graph, CAS-timestamp skipping of unchanged targets, and "
+        "parallel execution.",
+        [
+            "An unchanged target is skipped, and the skip is explainable",
+            "A dependency cycle is reported with the cycle, not just detected",
+            "Parallel execution respects the resource supervisor's bounds",
+        ],
+    ),
+    (
+        "E16",
+        "Packages and extensions - the binary substrate",
+        "area:ext",
+        "Blocked by D5 (compatibility target) and E1 (bus).",
+        "The two universes kept deliberately separate: `omnis pkg` (project and system "
+        "dependencies) versus `omnis ext` (client, editor, and agent capabilities). Install, "
+        "resolve, cache, and grant.",
+        [
+            "A project dependency can never be installed as a client extension, or vice versa",
+            "Extension capability grants are explicit and auditable",
+            "The FastCDC cache is shared across workspaces without cross-contamination",
+        ],
+    ),
+    (
+        "E17",
+        "LSP hub and DAP",
+        "area:core",
+        "Blocked by E1 (bus) and E12 (PTY and process supervision).",
+        "`omnis-lsp` multiplexer hub and the `omnis-dap` Debug Adapter Protocol implementation.",
+        [
+            "One language server instance serves every surface and every pane",
+            "A crashing language server is restarted without losing editor state",
+            "Debug sessions survive a GUI reload",
+        ],
+    ),
+    (
+        "E18",
+        "Universal context fabric",
+        "area:core",
+        "Blocked by E13 (CAS) and E1 (bus).",
+        "`ContextFragment` harvesting from code selections, terminal buffers, browser pages, and "
+        "container logs; a persistent sidebar shelf; and `omnis://context/<id>` URIs.",
+        [
+            "A fragment resolves to the same content after a restart",
+            "Fragments from every listed origin share one normal form",
+            "An agent can consume a fragment by URI without a bespoke adapter",
+        ],
+    ),
+    (
+        "E20",
+        "Layout modes - cell-grid and widget",
+        "area:term",
+        "Blocked by E3 (compositor) and E10 (scene tree).",
+        "`omnis-layout`: the cell-grid mode (fixed advance, 24-bit TrueColor with SGR attributes, "
+        "256-colour ANSI palettes, cursor shapes, pane-grid keyboard navigation, "
+        "command-palette-first interaction, inline inspector strips) and the widget mode, both "
+        "emitting scene-tree primitives. `hybrid` mixes them per pane.",
+        [
+            "A cell-grid editor and a widget settings panel coexist in one window",
+            "Switching presentation mode is a layout change, requiring no renderer restart",
+            "Neither mode owns a primitive the other cannot use",
+        ],
+    ),
+    (
+        "E21",
+        "3D, shaders, and particles",
+        "area:ui",
+        "Blocked by E3 (compositor), D11 (graphics baseline), and D14 (shader exposure). "
+        "D14 sizes this epic by an order of magnitude.",
+        "The material-layer pass in anger: a scene layer with its own camera and depth buffer, "
+        "GPU-instanced particle systems, and custom shader materials with declared inputs. If D14 "
+        "opens authoring to users and extensions: sandboxing, resource limits, and GPU-hang "
+        "recovery.",
+        [
+            "A material layer composites correctly behind and between glyph runs in cell-grid mode",
+            "A particle field runs without pushing the frame past the D7 budget",
+            "If exposed per D14, a hostile or careless shader cannot wedge the GPU or the daemon",
+        ],
+    ),
+    (
+        "E19",
+        "Sync mesh and CRDT change log",
+        "area:data",
+        "Blocked by E6 (persistence), E13 (CAS), and D10 (threat model).",
+        "Tailscale mesh sync, a CRDT change log with hybrid logical clocks, P2P WebRTC mesh, "
+        "cloud storage VFS, and the serialized PGlite mailbox. Syncs one user's devices - not "
+        "multi-user collaboration.",
+        [
+            "Two devices edited offline converge without losing either side's work",
+            "Clock skew between devices does not reorder causally related changes",
+            "Sync is opt-in per workspace and the application works fully without it",
         ],
     ),
 ]
@@ -169,13 +330,18 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
 DECISIONS: List[Tuple[str, str, str]] = [
     (
         "D1",
-        "What does a user actually do with Omnis on day one, before any theming exists?",
-        "Everything. The whole of Phase 1, and the sequencing of E1.",
+        "Which single path through the substrate is built first, end to end, to prove the bus, "
+        "the daemon lifecycle, and one surface? "
+        "This is a sequencing choice, not a product thesis - the architecture is the "
+        "specification, and the subsystems compose rather than enumerate.",
+        "E1, and the ordering of everything after it",
     ),
     (
         "D2",
-        "Which storage engine and shape for local-first user data? "
-        "Postgres is rejected for configuration; the store for user data is undecided.",
+        "Which entities are configuration in versioned files, and which are data in the PGlite "
+        "store, and where does the sync boundary fall? "
+        "The engine itself is settled: the daemon's 'Serialized PGlite Mailbox' is embedded "
+        "Postgres, so Drizzle is consistent with local-first.",
         "E6",
     ),
     (
@@ -186,8 +352,9 @@ DECISIONS: List[Tuple[str, str, str]] = [
     ),
     (
         "D4",
-        "What is the target platform matrix, and which platform is primary for v1?",
-        "E2, E3",
+        "What is the target platform matrix, and which platform is primary for v1? "
+        "Vibrancy, Mica/Acrylic, traffic-light insets, and `mlock` all diverge by platform.",
+        "E2, E3, E11",
     ),
     (
         "D5",
@@ -208,8 +375,52 @@ DECISIONS: List[Tuple[str, str, str]] = [
     ),
     (
         "D8",
-        "Is renderer switching restart-tolerant only, or live hot-swap?",
+        "Are graphics device loss and adapter switching handled transparently, or surfaced to the "
+        "user? Narrowed from 'renderer hot-swap': with one renderer there is no renderer to swap, "
+        "and switching presentation mode is a layout change.",
         "E3",
+    ),
+    (
+        "D9",
+        "What must a subsystem satisfy to be admitted into `omnisd` - bus-only communication, "
+        "independent omission, a resource budget, failure isolation? "
+        "The subsystem list is long enough that this has to be a written gate, not a habit.",
+        "E1, and every subsystem epic in Phase 2",
+    ),
+    (
+        "D10",
+        "What does the vault threat model actually defend against, and what does it not? "
+        "`mlock`, the Argon2id parameters, and injecting secrets into child process environments "
+        "each carry real exposure that needs stating before it is built.",
+        "E11, E19",
+    ),
+    (
+        "D11",
+        "Which graphics API, what minimum GPU capability, and what happens below it - software "
+        "fallback, degraded mode, or refusal? One renderer makes this a hard floor for the whole "
+        "application rather than a per-feature concern.",
+        "E3, E21",
+    ),
+    (
+        "D12",
+        "What is the text stack: shaping engine, glyph atlas strategy, subpixel and hinting "
+        "policy, bidi and complex-script support, IME integration? Owning the renderer means "
+        "owning all of it.",
+        "E3",
+    ),
+    (
+        "D13",
+        "How do out-of-process third-party webviews reach the frame - shared-texture zero-copy, "
+        "readback, or a native subsurface? This decides whether VS Code extension UIs are usable "
+        "or merely present.",
+        "E3, E7, E8",
+    ),
+    (
+        "D14",
+        "Is the material layer authored only by Omnis and its presets, or also by users and "
+        "extensions? Exposure demands sandboxing, resource limits, and GPU-hang recovery, since a "
+        "careless shader can wedge a GPU.",
+        "E21",
     ),
 ]
 
