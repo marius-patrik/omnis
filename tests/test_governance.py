@@ -96,12 +96,36 @@ def test_roadmap_epics_are_addressable():
     assert len(epics) >= 8, f"expected at least 8 epics, found {sorted(epics)}"
 
 
-def test_vision_marks_its_own_gaps():
-    """A partial capture must advertise where it is partial."""
+def test_vision_declares_its_provenance():
+    """A transcript-derived document must say where it came from and how complete it is."""
     vision = _read("VISION.md")
-    assert "[GAP]" in vision
-    assert vision.count("[GAP]") >= 4
-    assert "notes/vision_capture.md" in vision
+    assert "gemini.google.com" in vision, "VISION.md must cite its source conversation"
+    assert "notes/vision_capture.md" in vision, "VISION.md must link the provenance note"
+
+
+def test_vision_gap_markers_agree_with_the_capture_note():
+    """Completeness is claimed in one place; the two documents must not contradict each other."""
+    vision = _read("VISION.md")
+    capture = _read("notes", "vision_capture.md")
+    claims_complete = "Status: complete" in capture
+
+    if claims_complete:
+        assert "[GAP]" not in vision, (
+            "notes/vision_capture.md claims the capture is complete, "
+            "but VISION.md still carries [GAP] markers"
+        )
+    else:
+        assert "[GAP]" in vision, (
+            "notes/vision_capture.md does not claim completeness, "
+            "so VISION.md must mark where it is partial"
+        )
+
+
+def test_vision_carries_review_notes():
+    """Recording a source faithfully is not the same as endorsing it."""
+    vision = _read("VISION.md")
+    assert "Review notes" in vision or "[REVIEW]" in vision
+    assert "ARCHITECTURE.md" in vision, "VISION.md must defer to the normative document"
 
 
 @pytest.mark.parametrize(
