@@ -27,8 +27,7 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
         "E1",
         "Substrate Bus and process topology",
         "area:core",
-        "Blocked by D1 (day-one user workflow). Until we know what a user does, "
-        "the message set is guesswork.",
+        "Blocked by D1 (first vertical slice) and D9 (subsystem admission criteria).",
         "The `omnis-proto` wire schema, dual-socket transport (control: ordered typed "
         "request/response; stream: high-volume unidirectional frames), the additive versioning "
         "rule, an `omnisd` skeleton, surface attach/detach, and crash isolation between surfaces "
@@ -101,9 +100,9 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
         "E6",
         "Local-first persistence",
         "area:data",
-        "Blocked by D2 (storage engine and shape).",
-        "Storage engine choice, schema, migrations, the sync boundary, and the line between "
-        "configuration (versioned files) and user data (the store).",
+        "Blocked by D2 (the configuration/data boundary).",
+        "The PGlite store, schema, migrations, the configuration/data boundary, and the sync "
+        "boundary.",
         [
             "Configuration never lives in the database",
             "Migrations run forward on a populated store without data loss",
@@ -163,19 +162,146 @@ EPICS: List[Tuple[str, str, str, str, str, List[str]]] = [
             "A feature that cannot be expressed in the scene tree is rejected, not special-cased",
         ],
     ),
+    (
+        "E11",
+        "Vault, SSH/GPG agent, and secure process spawn",
+        "area:core",
+        "Blocked by D4 (platforms), D10 (threat model), and E1 (bus).",
+        "Argon2id-derived KEK held in a `Zeroizing` buffer with `mlock`; OS keychain bridging "
+        "(Apple Keychain, DPAPI, Secret Service); `omnis-ssh-agent` on `~/.omnis/ssh.sock`; "
+        "`.env` injection into child process memory maps, never to disk and never into agent "
+        "context windows.",
+        [
+            "No plaintext secret is ever written to disk or into an agent's context",
+            "A spawned process receives its secrets; a sibling process cannot read them",
+            "Locking the vault revokes in-flight access, not just future access",
+        ],
+    ),
+    (
+        "E12",
+        "Terminals, PTY, and containers",
+        "area:core",
+        "Blocked by E1 (bus).",
+        "Native PTY manager, tmux control server, Bollard Docker pipes, resource supervisor, and "
+        "the `PTY_STREAM` / `PTY_RESIZE` / `DOCKER_LOG` data-socket opcodes end to end.",
+        [
+            "A terminal survives the GUI reloading or crashing",
+            "Resize is in-band and never loses buffered output",
+            "The resource supervisor bounds a runaway process without killing the daemon",
+        ],
+    ),
+    (
+        "E13",
+        "Content-addressed storage and VFS",
+        "area:data",
+        "Blocked by E6 (persistence).",
+        "`omnis-cas`: FastCDC chunking, BLAKE3 keys, convergent encryption, reflink deduplication, "
+        "multi-provider VFS mounts, and the central inotify watcher.",
+        [
+            "Identical content stored twice occupies one copy",
+            "Convergent keys never leak plaintext across encryption boundaries",
+            "The watcher scales to a large workspace without exhausting handles",
+        ],
+    ),
+    (
+        "E14",
+        "Universal VCS and stacked PRs (`ovcs`)",
+        "area:core",
+        "Blocked by E1 (bus).",
+        "Dual Git/Sapling engine, atomic operation log (`vcs_op_log`), automated `absorb`, 3-way "
+        "AST merge editor, stacked PR management across GitHub/GitLab/Forgejo, git alternates "
+        "manager.",
+        [
+            "Every mutating operation is undoable from the operation log",
+            "The same workflow works against Git and Sapling repositories",
+            "A stack rebases without the user reconstructing it by hand",
+        ],
+    ),
+    (
+        "E15",
+        "Task and build DAG engine",
+        "area:core",
+        "Blocked by E13 (CAS). The caching claim rests on CAS timestamps.",
+        "Manifest parsing (`package.json`, `Cargo.toml`, `Makefile`, `Taskfile.yaml`), a "
+        "cross-repository dependency graph, CAS-timestamp skipping of unchanged targets, and "
+        "parallel execution.",
+        [
+            "An unchanged target is skipped, and the skip is explainable",
+            "A dependency cycle is reported with the cycle, not just detected",
+            "Parallel execution respects the resource supervisor's bounds",
+        ],
+    ),
+    (
+        "E16",
+        "Packages and extensions - the binary substrate",
+        "area:ext",
+        "Blocked by D5 (compatibility target) and E1 (bus).",
+        "The two universes kept deliberately separate: `omnis pkg` (project and system "
+        "dependencies) versus `omnis ext` (client, editor, and agent capabilities). Install, "
+        "resolve, cache, and grant.",
+        [
+            "A project dependency can never be installed as a client extension, or vice versa",
+            "Extension capability grants are explicit and auditable",
+            "The FastCDC cache is shared across workspaces without cross-contamination",
+        ],
+    ),
+    (
+        "E17",
+        "LSP hub and DAP",
+        "area:core",
+        "Blocked by E1 (bus) and E12 (PTY and process supervision).",
+        "`omnis-lsp` multiplexer hub and the `omnis-dap` Debug Adapter Protocol implementation.",
+        [
+            "One language server instance serves every surface and every pane",
+            "A crashing language server is restarted without losing editor state",
+            "Debug sessions survive a GUI reload",
+        ],
+    ),
+    (
+        "E18",
+        "Universal context fabric",
+        "area:core",
+        "Blocked by E13 (CAS) and E1 (bus).",
+        "`ContextFragment` harvesting from code selections, terminal buffers, browser pages, and "
+        "container logs; a persistent sidebar shelf; and `omnis://context/<id>` URIs.",
+        [
+            "A fragment resolves to the same content after a restart",
+            "Fragments from every listed origin share one normal form",
+            "An agent can consume a fragment by URI without a bespoke adapter",
+        ],
+    ),
+    (
+        "E19",
+        "Sync mesh and CRDT change log",
+        "area:data",
+        "Blocked by E6 (persistence), E13 (CAS), and D10 (threat model).",
+        "Tailscale mesh sync, a CRDT change log with hybrid logical clocks, P2P WebRTC mesh, "
+        "cloud storage VFS, and the serialized PGlite mailbox. Syncs one user's devices - not "
+        "multi-user collaboration.",
+        [
+            "Two devices edited offline converge without losing either side's work",
+            "Clock skew between devices does not reorder causally related changes",
+            "Sync is opt-in per workspace and the application works fully without it",
+        ],
+    ),
 ]
 
 #: (decision id, question, what it blocks).
 DECISIONS: List[Tuple[str, str, str]] = [
     (
         "D1",
-        "What does a user actually do with Omnis on day one, before any theming exists?",
-        "Everything. The whole of Phase 1, and the sequencing of E1.",
+        "Which single path through the substrate is built first, end to end, to prove the bus, "
+        "the daemon lifecycle, and one surface? "
+        "This is a sequencing choice, not a product thesis - the architecture is the "
+        "specification, and the subsystems compose rather than enumerate.",
+        "E1, and the ordering of everything after it",
     ),
     (
         "D2",
-        "Which storage engine and shape for local-first user data? "
-        "Postgres is rejected for configuration; the store for user data is undecided.",
+        "Which entities are configuration in versioned files, and which are data in the PGlite "
+        "store, and where does the sync boundary fall? "
+        "The engine itself is settled: the daemon's 'Serialized PGlite Mailbox' is embedded "
+        "Postgres, so Drizzle is consistent with local-first.",
         "E6",
     ),
     (
@@ -186,8 +312,9 @@ DECISIONS: List[Tuple[str, str, str]] = [
     ),
     (
         "D4",
-        "What is the target platform matrix, and which platform is primary for v1?",
-        "E2, E3",
+        "What is the target platform matrix, and which platform is primary for v1? "
+        "Vibrancy, Mica/Acrylic, traffic-light insets, and `mlock` all diverge by platform.",
+        "E2, E3, E11",
     ),
     (
         "D5",
@@ -210,6 +337,20 @@ DECISIONS: List[Tuple[str, str, str]] = [
         "D8",
         "Is renderer switching restart-tolerant only, or live hot-swap?",
         "E3",
+    ),
+    (
+        "D9",
+        "What must a subsystem satisfy to be admitted into `omnisd` - bus-only communication, "
+        "independent omission, a resource budget, failure isolation? "
+        "The subsystem list is long enough that this has to be a written gate, not a habit.",
+        "E1, and every subsystem epic in Phase 2",
+    ),
+    (
+        "D10",
+        "What does the vault threat model actually defend against, and what does it not? "
+        "`mlock`, the Argon2id parameters, and injecting secrets into child process environments "
+        "each carry real exposure that needs stating before it is built.",
+        "E11, E19",
     ),
 ]
 
