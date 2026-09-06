@@ -307,7 +307,8 @@ def classify_type_and_area(text: str) -> Tuple[str, str]:
     if re.search(r"\b(fix|bug|error|crash|broken|fail)\b", lower):
         t_label = "bug"
     elif re.search(
-        r"\b(docs?|document|documents|documenting|documentation|docstrings?|mkdocs|readme)\b", lower
+        r"\b(docs?|document|documents|documenting|documentation|docstrings?|mkdocs|properdocs|readme)\b",
+        lower,
     ):
         t_label = "docs"
     elif re.search(r"\b(refactor|clean|cleanup|simplify)\b", lower):
@@ -344,7 +345,7 @@ def classify_type_and_area(text: str) -> Tuple[str, str]:
         lower,
     ):
         a_label = "area:ui"
-    elif re.search(r"\b(doc|docs|documentation|mkdocs|material)\b", lower):
+    elif re.search(r"\b(doc|docs|documentation|mkdocs|properdocs)\b", lower):
         a_label = "area:docs"
     elif re.search(r"\b(ci|action|workflow|pipeline|docker|runner|automation)\b", lower):
         a_label = "area:ci"

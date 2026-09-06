@@ -61,7 +61,7 @@ scope creep is legible in a plan and invisible in a diff.
 | `pr-approval-automerge.yml` | review submitted, comment created | Detects your approval, readies the draft, submits the bot's proxy review, arms auto-merge, reconciles afterwards. |
 | `open-pr.yml` | `workflow_dispatch` | Opens the draft PR, so PRs are not authored by your local credentials. |
 | `auto-format.yml` | push to any branch | Formats and commits. Formatting is never a review topic. |
-| `deploy-docs.yml` | push to main | Builds with `mkdocs build --strict` and deploys to Pages. |
+| `deploy-docs.yml` | push to main | Builds with `properdocs build --strict` and deploys to Pages. |
 
 ### Scripts
 
@@ -73,7 +73,7 @@ scope creep is legible in a plan and invisible in a diff.
 | `handle_pr_approval.py` | Approval detection, proxy review, auto-merge, post-merge reconciliation. |
 | `open_pr.py` | Dispatches `open-pr.yml` and waits for the PR to appear. |
 | `repo_settings.py` | Every GitHub setting that otherwise exists only in the web UI, as re-runnable code. |
-| `mkdocs_hooks.py` | Publishes the canonical root documents and the ADR directory as site pages, and generates the decision index and navigation. |
+| `docs_hooks.py` | Publishes the canonical root documents and the ADR directory as site pages, and generates the decision index and navigation. |
 
 ---
 
@@ -157,7 +157,7 @@ It also requires the repository's `can_approve_pull_request_reviews` permission,
 ```bash
 python .github/scripts/repo_settings.py --plan      # show GitHub-side drift
 python .github/scripts/repo_settings.py --apply     # reconcile it
-pytest -v && black --check . && mkdocs build --strict
+pytest -v && black --check . && properdocs build --strict
 ```
 
 Setup state and the reproduction sequence are in [bootstrap.md](bootstrap.md).

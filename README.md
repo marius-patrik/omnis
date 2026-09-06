@@ -73,7 +73,7 @@ until `GH_PROJECT_TOKEN` exists the approve-and-auto-merge path cannot complete 
 pip install -r requirements-dev.txt
 pytest -v                 # repository automation tests
 black --check .           # formatting
-mkdocs serve              # documentation site
+properdocs serve              # documentation site
 ```
 
 ## License

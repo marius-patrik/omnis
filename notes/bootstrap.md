@@ -100,7 +100,7 @@ python .github/scripts/repo_settings.py --apply
 | Repair board items with no status | trigger **Project Board Automation** via `workflow_dispatch` |
 | Open a bot-authored draft PR | `python .github/scripts/open_pr.py --branch <b> --title <t> --body <b>` |
 | Add a decision record | create `notes/adr/NNNN-title.md`; index and navigation generate themselves |
-| Run the local suite | `pytest -v && black --check . && mkdocs build --strict` |
+| Run the local suite | `pytest -v && black --check . && properdocs build --strict` |
 
 ## Adding a required status check
 

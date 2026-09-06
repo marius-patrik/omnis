@@ -34,9 +34,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Build documentation with MkDocs
+      - name: Build documentation with ProperDocs
         run: |
-          mkdocs build --strict
+          properdocs build --strict
 
       - name: Upload Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

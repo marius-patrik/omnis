@@ -26,7 +26,7 @@ the reason. Editing history erases the argument, which is the part worth keeping
 ## Writing one
 
 Create `notes/adr/NNNN-kebab-case-title.md` with the next free number. The docs site picks it up with
-no further wiring: `.github/scripts/mkdocs_hooks.py` discovers the directory, generates the index
+no further wiring: `.github/scripts/docs_hooks.py` discovers the directory, generates the index
 table from each file's title and status line, and injects the navigation entries.
 
 ```markdown

@@ -132,4 +132,4 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Build documentation
-        run: mkdocs build --strict
+        run: properdocs build --strict

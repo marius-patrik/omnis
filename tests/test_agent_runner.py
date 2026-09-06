@@ -31,7 +31,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         ("Add a migration for the settings schema", "area:data"),
         ("Version the substrate bus IPC frames", "area:core"),
         ("Titlebar vibrancy is wrong on Windows", "area:ui"),
-        ("Fix the mkdocs build", "area:docs"),
+        ("Fix the properdocs build", "area:docs"),
         ("Harden the docker runner workflow", "area:ci"),
     ],
 )

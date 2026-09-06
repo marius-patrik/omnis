@@ -1,4 +1,4 @@
-"""MkDocs hooks that publish the repository's canonical markdown without duplicating it.
+"""ProperDocs hooks that publish the repository's canonical markdown without duplicating it.
 
 `AGENTS.md` rule 2 forbids storing a static documentation mirror and forbids a manually maintained
 index. The canonical documents live at the repository root (`README.md`, `ARCHITECTURE.md`,
@@ -12,14 +12,14 @@ These hooks therefore:
 - discover `notes/adr/*.md`, generate the decision index table from each record's title and status,
   and inject the navigation entries - so adding an ADR needs no configuration change;
 - rewrite links written for GitHub (``ARCHITECTURE.md``) to their site paths, so
-  ``mkdocs build --strict`` reports no broken links.
+  ``properdocs build --strict`` reports no broken links.
 """
 
 import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from mkdocs.structure.files import File, Files
+from properdocs.structure.files import File, Files
 
 #: (source path relative to the repository root, destination path inside the site).
 PUBLISHED_PAGES: List[Tuple[str, str]] = [
@@ -65,10 +65,10 @@ _RESOLVES_PATTERN = re.compile(r"\*\*(?:Resolves|Narrows)\*\*:\s*(?P<resolves>[^
 
 
 def _repo_root(config: Any) -> str:
-    """Resolves the repository root from the MkDocs configuration.
+    """Resolves the repository root from the ProperDocs configuration.
 
     Args:
-        config: MkDocs configuration object or mapping.
+        config: ProperDocs configuration object or mapping.
 
     Returns:
         Absolute path to the repository root.
@@ -206,11 +206,11 @@ def _rewrite_links(markdown: str, dest_path: str) -> str:
 def on_config(config: Any) -> Any:
     """Injects the Architecture section, including one entry per ADR, into ``nav``.
 
-    Navigation is built here rather than declared in ``mkdocs.yml`` so that adding a record to
+    Navigation is built here rather than declared in ``properdocs.yml`` so that adding a record to
     ``notes/adr/`` is the only step required to publish it.
 
     Args:
-        config: MkDocs configuration.
+        config: ProperDocs configuration.
 
     Returns:
         The configuration with ``nav`` rewritten.
@@ -249,8 +249,8 @@ def on_files(files: Files, config: Any) -> Files:
     """Injects the canonical repository documents and every ADR as virtual pages.
 
     Args:
-        files: The file collection MkDocs discovered under ``docs_dir``.
-        config: MkDocs configuration.
+        files: The file collection ProperDocs discovered under ``docs_dir``.
+        config: ProperDocs configuration.
 
     Returns:
         The augmented file collection.
