@@ -14,7 +14,7 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
 | E0 | Repository, governance, autonomous pipeline | `area:ci` | — | Done. Everything else is produced by this pipeline. |
-| D∗ | Architecture decisions D1–D15 | `area:docs` | — | Fifteen open decisions in `ARCHITECTURE.md` §7. Each is resolved by an ADR before its dependent epic leaves `Backlog` — and by rule 13, none of them becomes an issue until it is settled. |
+| D∗ | Architecture decisions D1–D15 | `area:docs` | — | Fifteen open decisions in `ARCHITECTURE.md` §8. Each is resolved by an ADR before its dependent epic leaves `Backlog` — and by rule 13, none of them becomes an issue until it is settled. |
 
 ## Phase 1 — The spine
 

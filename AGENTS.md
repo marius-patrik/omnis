@@ -142,7 +142,7 @@ VISION.md  →  ARCHITECTURE.md  →  ADRs (notes/architecture_decisions.md)  �
   dependencies").
 - **Speculative epic and decision issues are prohibited.** Filing an issue for an unanswered
   question moves the argument into the tracker, where it fragments across comment threads instead of
-  converging in the document that owns it. Open questions live in `ARCHITECTURE.md` §7 until an ADR
+  converging in the document that owns it. Open questions live in `ARCHITECTURE.md` §8 until an ADR
   closes them; planned work lives in `ROADMAP.md` until its gate opens.
 - **Large settled bodies of work** are tracked as `epic`-labelled issues: a container carrying the
   scope statement, the acceptance criteria for the area, and a checklist of child `Request` issues.

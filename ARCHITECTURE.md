@@ -104,11 +104,20 @@ Contract rules:
 
 ## 3. The capability matrix and the modification surface
 
-### 3.1 Five orthogonal axes
+### 3.1 Themes, profiles, and five orthogonal axes
 
-A **profile** is a point in this space. Omnis has no "themes": a theme implies decoration, and what
-is being selected here is behaviour — renderer output, layout, input routing, keymap, and chrome.
-The transcript's `SystemPersonalityPackage` is exactly this, so the term is *profile* throughout.
+Two distinct concepts, and colours keep the name (ADR-0002).
+
+**A theme is colours**, in the **VS Code colour-theme format**: `colors`, `tokenColors`,
+`semanticTokenColors`, `type`. Existing VS Code colour themes load unmodified, and the format already
+carries `terminal.ansi*` — so the sixteen ANSI colours the cell-grid layout and `omnis-tui` both need
+come for free. The VS Code colour key namespace is canonical, extended only where Omnis needs tokens
+VS Code lacks (material-layer inputs, cell-grid specifics). File and product icon themes use the
+VS Code icon-theme format for the same reason.
+
+**A profile bundles** a theme, an icon theme, the axis values below, window chrome, the app icon and
+its state animations, typography and density, an audio pack, material-layer backdrops, and settings
+overrides. A profile is the transcript's `SystemPersonalityPackage`.
 
 | Axis | Setting | Values |
 |---|---|---|
@@ -128,15 +137,16 @@ surface: the desktop app uses the GPU compositor, the terminal UI uses the ANSI 
 user picking `cell-grid` in the desktop app gets the terminal *look*, GPU-drawn; running
 `omnis-tui` gets the real thing.
 
-**Invariant:** no product code may branch on a *profile name*. Features branch on axis values or on
-capability queries — never `if (profile === 'claude')`. This is testable and must be covered by a
-lint.
+**Invariant:** no product code may branch on a *profile name* or a *theme name*. Features branch on
+axis values or on capability queries — never `if (profile === 'claude')`. This is testable and must
+be covered by a lint.
 
-A **profile** is therefore a data file — axis values, token values, assets — and nothing else.
-Adding a profile must require zero code changes.
+Themes and profiles are therefore **data files** and nothing else. Adding either must require zero
+code changes.
 
-**Agent persona is not an axis.** `VISION.md` §5 binds a profile to a provider, model, and reasoning
-effort. Omnis does not. A profile may *suggest* a persona; it never sets one behind the user's back.
+**Agent persona is not part of a profile.** `VISION.md` §5 binds one to a provider, model, and
+reasoning effort. Omnis does not. A profile may *suggest* a persona; it never sets one behind the
+user's back.
 
 ### 3.2 The modification surface
 
@@ -344,7 +354,33 @@ holds workspaces, tabs, chat, audit, CAS metadata, VCS state, and context fragme
 
 ---
 
-## 6. Crate and package layout
+## 6. Packages and extensions are separate universes
+
+A line most tools blur, and blurring it is why their permission models cannot be reasoned about.
+
+| **Packages** — `omnis pkg` / `ctx.packages` | **Extensions** — `omnis ext` / `ctx.extensions` |
+|---|---|
+| *What the user's project runs on* | *What the workspace and its agents run on* |
+| Scoped to a repository or the host OS | Scoped to the Omnis client, editor, or an agent |
+| Bun, pnpm, npm, Cargo, uv, Poetry, Go modules, Deno; Homebrew, Pacman, APT | VS Code extensions (Open VSX/VSIX), web extensions, LSPs |
+| Project task runners: `package.json` scripts, Cargo targets, task DAGs | Runtime modules, MCP servers, agent skills, themes, icon themes, profiles |
+| No access to the Omnis client | No ability to mutate a project's dependency graph |
+
+**The rule:** a package cannot reach the client, and an extension cannot reach a project's dependency
+graph. Crossing the line requires an explicit, audited capability grant. Anything that genuinely
+needs both — a toolchain that also contributes editor features — ships as two artifacts with a grant
+between them.
+
+Separate commands, separate resolvers, separate capability grants. The content-addressed store
+underneath is shared, so the duplication is in policy, not in bytes.
+
+A user installing "a thing" must be told which universe it lands in. The CLI and the UI make that
+explicit rather than guessing, because a wrong guess is precisely the confusion this split exists to
+prevent.
+
+---
+
+## 7. Crate and package layout
 
 Following the source layout (`VISION.md` §9.2), with `omnis-term-ui` split out of `omnis-browser`
 because a renderer and a browser supervisor have no reason to share a crate.
@@ -381,14 +417,14 @@ carries guarded Rust and web jobs.
 
 ---
 
-## 7. Open decisions
+## 8. Open decisions
 
-Each must be resolved by an ADR before its dependent epic leaves `Backlog`.
+Each must be resolved by an ADR before its dependent epic leaves `Backlog`. Resolved decisions are struck through and link to their record; see [the decision log](notes/adr/).
 
 | # | Decision | Blocks |
 |---|---|---|
 | D1 | **First vertical slice** — which single path through the substrate is built first, end to end, to prove the bus, the daemon lifecycle, and one surface. Not a product thesis: the capability surface is the spec. This is a sequencing choice. | E1, and the ordering of everything after |
-| D2 | **Config/data boundary** — PGlite is the store (§5), so the engine is settled. What remains: which entities are configuration in files versus data in the store, and where the sync boundary falls. | E6 |
+| ~~D2~~ | **Config/data boundary** — resolved by [ADR-0005](notes/adr/0005-configuration-lives-in-files-data-lives-in-pglite.md): configuration in versioned files, user data in PGlite. | ~~E6~~ |
 | D3 | **Trade-dress policy** — which third-party names, marks, and icons may ship, and under what attribution. | E4 |
 | D4 | **Platform matrix** — which platforms, and which is primary for v1. Vibrancy, Mica/Acrylic, traffic lights, and `mlock` all diverge. | E2, E3, E11 |
 | D5 | **Extension host compatibility target** — VS Code API emulation via `exthost-node`, or a native-first API with shims. | E8 |
@@ -405,7 +441,7 @@ Each must be resolved by an ADR before its dependent epic leaves `Backlog`.
 
 ---
 
-## 8. Repository automation
+## 9. Repository automation
 
 The development pipeline is part of the architecture: `AGENTS.md` (rules), `.github/workflows/`
 (enforcement), `.github/scripts/` (implementation). The pipeline is Python; that is deliberate and
