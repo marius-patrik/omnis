@@ -470,14 +470,19 @@ def apply_branch_protection(run: Runner) -> None:
 
 
 def apply_pages(run: Runner) -> None:
-    """Enables GitHub Pages with the Actions build type.
+    """Enables GitHub Pages from the ``gh-pages`` branch.
+
+    Branch source rather than the Actions build type: Pages has exactly one source, and
+    per-pull-request previews live under ``pr-<N>/`` on the same site. Both the main deploy and the
+    preview workflow publish to that branch, so the two mechanisms cannot fight over it.
 
     Args:
         run: Command runner.
     """
     print("\n== GitHub Pages ==")
-    run.api("POST", f"repos/{SLUG}/pages", {"build_type": "workflow"}, allow_fail=True)
-    run.api("PUT", f"repos/{SLUG}/pages", {"build_type": "workflow"}, allow_fail=True)
+    source = {"build_type": "legacy", "source": {"branch": "gh-pages", "path": "/"}}
+    run.api("POST", f"repos/{SLUG}/pages", source, allow_fail=True)
+    run.api("PUT", f"repos/{SLUG}/pages", source, allow_fail=True)
 
 
 def report_required_secrets(run: Runner) -> None:

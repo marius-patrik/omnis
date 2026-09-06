@@ -1,11 +1,20 @@
 # Omnis
 
-**An AI-first operating system for a power user's machine.**
+**An AI operating system. Talk to your machine, and it does the thing.**
 
-Omnis is a kernel. It owns nothing you could get elsewhere — `git`, `sl`, Nix, podman, libvirt,
-Chromium, Tailscale, and the coding-agent CLIs are all **bound, not built** — and everything that
-makes them compose: one bus, one scene tree, one declaration, one modification surface, one audit
-trail.
+"Install Rust, give me a Windows VM with Photoshop, put the daemon on my workstation and the
+interface here, and make it look like Zed" is a sentence, not an afternoon. Omnis takes it, writes
+the change into one declaration, shows you exactly what it will do, and applies it. If you don't like
+the result, you roll it back — one command, every time, whatever changed.
+
+It is very smart because it can see the whole machine: your repositories, terminals, packages,
+containers, guest operating systems, browser, and secrets are one system with one API, and the agent
+is a first-class operator of it rather than a chat box bolted onto an editor.
+
+Underneath, Omnis is a **kernel**. It owns nothing you could get elsewhere — `git`, `sl`, Nix,
+podman, libvirt, Chromium, Tailscale, and the coding-agent CLIs are all **bound, not built** — and
+everything that makes them compose: one bus, one scene tree, one declaration, one modification
+surface, one audit trail.
 
 > **Status: specification.** The governance rules and the autonomous delivery pipeline are in place
 > and running. The product tree is not: it is specified in [ARCHITECTURE.md](ARCHITECTURE.md),

@@ -181,3 +181,38 @@ def test_gitignore_excludes_agent_checkpoint():
 
     content = _read(os.path.join(REPO_ROOT, ".gitignore"))
     assert agent_runner.CHECKPOINT_FILENAME in content
+
+
+def test_preview_workflow_exists_and_is_scoped():
+    """Pull request previews must not run for forks, whose token cannot write here."""
+    content = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
+    assert "pull_request" in content
+    assert "head.repo.full_name == github.repository" in content, "forks must be skipped"
+    assert "deployments: write" in content, "the preview must register a GitHub deployment"
+    assert "transient_environment" in content, "preview environments are transient"
+
+
+def test_preview_and_main_deploy_share_one_pages_source():
+    """GitHub Pages has one source; two mechanisms would silently fight."""
+    preview = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
+    deploy = _read(os.path.join(WORKFLOW_DIR, "deploy-docs.yml"))
+    for content in (preview, deploy):
+        assert "branch: gh-pages" in content
+    assert "upload-pages-artifact" not in deploy, "the Actions build type conflicts with a branch"
+    assert "clean-exclude" in deploy, "publishing the site must not delete live previews"
+    assert "target-folder: pr-" in preview
+
+
+def test_preview_is_torn_down_when_the_pull_request_closes():
+    """A preview left behind after merge accumulates forever."""
+    content = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
+    assert "closed" in content
+    assert "git rm" in content, "the preview directory must be removed"
+    assert "inactive" in content, "the deployment must be deactivated"
+
+
+def test_pages_is_configured_for_the_branch_source():
+    """repo_settings must match the workflows, or the first deploy silently 404s."""
+    content = _read(os.path.join(SCRIPT_DIR, "repo_settings.py"))
+    assert '"branch": "gh-pages"' in content
+    assert '"build_type": "legacy"' in content
