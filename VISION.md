@@ -630,6 +630,13 @@ be a mistake. Each is a decision to make deliberately, not a defect to fix silen
    also extends the engine beyond anything in the transcript — shaders, 3D scenes, and particle
    systems are a first-class material-layer primitive available to every presentation mode, rather
    than effects that would exist in one renderer and not the other.
+
+   The transcript also conflates two different things under `brand-zed`: a terminal *look*, and
+   actually *running in a terminal*. Omnis separates them. `cell-grid` is a presentation mode the
+   GPU compositor draws in a desktop window; `omnis-tui` is a genuine second renderer backend that
+   emits ANSI to a real terminal, works over SSH, and needs no GPU. Both consume the same scene
+   tree, which is what makes feature parity between them a contract rather than a hope
+   (`ARCHITECTURE.md` §4.7).
 2. **`aiPersona` couples appearance to model choice.** Selecting a look also selects a provider,
    model, and reasoning effort. Nobody asked for that, and it will surprise people who want Claude's
    layout with a different model. Keep the axes separate; let a preset *suggest* a persona.

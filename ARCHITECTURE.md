@@ -13,8 +13,8 @@ attached over IPC.
 
 The daemon owns version control, packages, tasks, terminals, containers, language servers,
 debuggers, an embedded browser, an agent runtime, a secrets vault, content-addressed storage, and a
-sync mesh. The surfaces — a Tauri desktop app, a CLI, and any external harness — own nothing but
-presentation and input. Closing a window, reloading the UI, or crashing a surface costs nothing.
+sync mesh. The surfaces — a Tauri desktop app, a terminal UI, a CLI, and any external harness — own
+nothing but presentation and input. Closing a window, reloading the UI, or crashing a surface costs nothing.
 
 Because the daemon owns behaviour, the presentation layer collapses into **configuration**. Renderer,
 layout topology, input routing, keymap, chrome, and iconography are orthogonal axes, and a
@@ -35,8 +35,8 @@ profiles.
 
 ```
                        ┌──────────────────────────────────────┐
-   SURFACES            │  omnis-gui (Tauri)  │  omnis (CLI)   │  external harnesses
-                       └─────────┬───────────┴────────┬───────┴──────────┬─────────┘
+   SURFACES            │ omnis-gui · omnis-tui · omnis (CLI) │  external harnesses
+                       └─────────┬───────────┴────────┬──────┴───────────┬─────────┘
                                  │                    │                  │ MCP/stdio
                                  └────────── Substrate Bus ──────────────┘
                                                 │
@@ -58,6 +58,7 @@ profiles.
 | `omnisd` | Session state, scheduling, persistence, all blocking I/O, subsystem supervision | Render anything; depend on a GUI being attached |
 | `omnis-gui` | Window, renderer, input capture, presentation state | Own durable state; block on I/O |
 | `omnis` (CLI) | Scriptable surface over the same bus; `--json` on every command | Reimplement daemon logic |
+| `omnis-tui` | Full interactive surface in a real terminal, local or over SSH | Assume a GPU, a window, or a display server |
 | Browser worker | Chromium/CDP lifecycle, page capture | Touch the GUI process directly |
 | Extension host | Untrusted third-party code, sandboxed | Share an address space with `omnisd` |
 
@@ -117,10 +118,15 @@ The transcript's `SystemPersonalityPackage` is exactly this, so the term is *pro
 | Keymap | `workbench.keybindings` | `default` · `vscode` · `zed` · `cursor-claude` · `vim` · `emacs` |
 | Chrome & tokens | `workbench.window.*`, `workbench.theme.*` | see §5 |
 
-The first axis is **presentation, not renderer**. There is one renderer (§4); `cell-grid` and
-`widget` are layout modes that emit into it. `hybrid` mixes them per pane — a cell-grid editor beside
-a widget-laid-out settings panel is a legal configuration, not a special case. The transcript's
+The first axis is **presentation, not renderer**. `cell-grid` and `widget` are layout modes that emit
+into the scene tree; `hybrid` mixes them per pane, so a cell-grid editor beside a widget-laid-out
+settings panel is a legal configuration, not a special case. The transcript's
 `workbench.rendererEngine: 'dom-flexbox' | 'terminal-cell-grid'` is superseded.
+
+**Which renderer backend runs is not this axis, and not a user preference.** It follows from the
+surface: the desktop app uses the GPU compositor, the terminal UI uses the ANSI backend (§4). A
+user picking `cell-grid` in the desktop app gets the terminal *look*, GPU-drawn; running
+`omnis-tui` gets the real thing.
 
 **Invariant:** no product code may branch on a *profile name*. Features branch on axis values or on
 capability queries — never `if (profile === 'claude')`. This is testable and must be covered by a
@@ -160,10 +166,27 @@ are the same operation with a different caller.
 
 ---
 
-## 4. The renderer — one GPU compositor
+## 4. Renderers — one scene tree, two backends
 
-**There is one renderer.** Terminal, graphical UI, web content, and 3D are not renderers; they are
-**sources** that emit primitives into a single GPU frame graph.
+**Sources are not renderers.** Cell-grid layout, widget layout, web content, and 3D all emit
+primitives into one scene tree. That scene tree is then consumed by one of **two renderer backends**:
+
+| Backend | Crate | Target | Output |
+|---|---|---|---|
+| GPU compositor | `omnis-render` | Desktop window (Tauri) | Batched GPU primitives |
+| ANSI/TUI | `omnis-tui` | A real terminal, local or over SSH | Escape sequences on stdout |
+
+The split is **not** aesthetic. `cell-grid` presentation mode is a terminal *look* drawn by the GPU
+compositor in a desktop window; the TUI backend is Omnis genuinely *running in a terminal* — no
+window, no GPU, works over SSH, survives in `tmux`. Those are different problems and they need
+different code. What they must not need is different *features*.
+
+The scene tree is the parity contract. §4.7 states what that contract guarantees and where it
+honestly cannot.
+
+### 4.0 The GPU compositor
+
+Terminal, graphical UI, web content, and 3D emit primitives into a single GPU frame graph.
 
 ```
    ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌────────────┐
@@ -252,10 +275,48 @@ fully custom-rendered UI has no native accessibility tree; one has to be publish
 a footnote — it is why `accessibility` is a first-class label and why it must appear in E3's
 acceptance criteria rather than being discovered late.
 
-### 4.6 Consequences for the rest of this document
+### 4.7 The TUI backend and the parity contract
 
-- **The scene tree becomes more load-bearing, not less.** It is now the single input to the single
-  renderer. E10 still lands before E3.
+`omnis-tui` consumes the same scene tree and degrades it to a character cell grid plus ANSI escape
+sequences. Everything the GPU compositor can show must be *reachable* in a terminal, even where it
+cannot be *reproduced*.
+
+**How each primitive degrades:**
+
+| Primitive | In a terminal | Fidelity |
+|---|---|---|
+| Glyph run | Text cells, already fixed-advance in `cell-grid` mode | Full |
+| Quad — fill, border | Background colour and box-drawing characters | Full for cell-aligned; borders snap to the grid |
+| Quad — rounded, shadow, gradient | Nearest box-drawing corner; shadows dropped | Approximate |
+| Path | Braille or box-drawing rasterization; falls back to its label | Approximate |
+| Texture | Terminal graphics protocol (kitty, iTerm2, Sixel) where present, else half-block or Braille downsample, else the declared alt text | Terminal-dependent |
+| Material layer (shaders, 3D, particles) | **Cannot execute.** Renders its declared static fallback | None — see below |
+
+**The contract, stated as rules:**
+
+1. **Every primitive declares a terminal fallback.** A primitive with no fallback cannot enter the
+   scene tree. This is enforced at the type level, not by convention.
+2. **Nothing is silently dropped.** Where a primitive degrades, the degradation is visible — an
+   alt-text label, a placeholder glyph — never a blank region that leaves the user unaware content
+   exists.
+3. **Feature parity, not pixel parity.** Every command, pane, view, and workflow reachable in the
+   desktop app is reachable in the TUI. Visual fidelity is explicitly not promised; *capability* is.
+4. **No feature is TUI-only or GPU-only.** A feature that cannot degrade is a scene-tree design
+   problem, resolved by extending the scene tree — not by branching on the backend.
+
+**Where parity honestly ends:** the material layer. A shader is GPU code; a terminal has no GPU. The
+options are a CPU-rendered approximation blitted through a terminal graphics protocol, or the static
+fallback. Omnis takes the static fallback by default and treats CPU approximation as an opt-in
+per-material decision, because a 3-FPS particle field over SSH is worse than a still image.
+
+**Terminal capability is detected, not assumed.** Truecolor versus 256-colour, the kitty keyboard
+protocol versus legacy escape sequences, SGR mouse reporting, and graphics-protocol support all vary.
+`omnis-tui` probes and adapts; the minimum floor it requires is D15.
+
+### 4.8 Consequences for the rest of this document
+
+- **The scene tree becomes more load-bearing, not less.** It is the single input to both backends
+  and the parity contract between them (§4.7). E10 still lands before E3.
 - **D8 largely dissolves.** With one renderer there is no renderer to hot-swap; switching between
   cell-grid and widget presentation is a layout change. Live switching becomes cheap rather than
   needing a spike. D8 is narrowed to whether *graphics device loss and adapter switching* are handled
@@ -296,6 +357,8 @@ crates/
     src/subsystems/    one module per subsystem, each independently omittable
   omnis-cli/           `omnis` executable, `--json` on every command
   omnis-gui/           Tauri desktop host and window manager
+  omnis-tui/           ANSI renderer backend: scene tree to cells, escape sequences,
+                       terminal capability detection, kitty/SGR input decoding
   omnis-agent/         agent engine and MCP server binary
   omnis-lsp/           LSP multiplexer hub
   omnis-dap/           Debug Adapter Protocol implementation
@@ -337,6 +400,7 @@ Each must be resolved by an ADR before its dependent epic leaves `Backlog`.
 | D11 | **Graphics baseline** — API (wgpu over Vulkan/Metal/DX12, or native per platform), the minimum GPU capability required, and what happens on machines below it: software fallback, degraded mode, or refusal. One renderer makes this a hard floor for the whole application, not a per-feature concern. | E3, E20 |
 | D12 | **Text stack** — shaping engine, glyph atlas strategy, subpixel and hinting policy, bidi and complex-script support, IME integration. Owning the renderer means owning all of it (§4.5). | E3 |
 | D13 | **Webview compositing** — how out-of-process third-party webviews reach the frame: shared-texture zero-copy, readback, or native subsurface. Determines whether VS Code extension UIs are usable or merely present. | E8, E3 |
+| D15 | **Terminal capability floor** — the minimum a terminal must provide for `omnis-tui`: truecolor or 256-colour, kitty keyboard protocol or legacy escapes, SGR mouse reporting, and whether any graphics protocol is required. Sets how far §4.7's degradation ladder has to reach. | E22 |
 | D14 | **Shader and 3D exposure** — is the material layer authored only by Omnis and its presets (chrome), or also by users and extensions (content)? Exposure demands sandboxing, resource limits, and a hang-recovery story, since a hostile or careless shader can wedge a GPU. Sizes E20 by an order of magnitude. | E20 |
 
 ---
