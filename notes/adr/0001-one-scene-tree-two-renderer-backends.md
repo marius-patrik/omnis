@@ -1,6 +1,11 @@
 # ADR-0001 — One scene tree, two renderer backends
 
 - **Status**: Accepted · **Date**: 2026-09-06 · **Narrows**: D8
+- **Partly superseded by**: [ADR-0017](0017-the-tui-is-dropped-as-a-surface.md) — the TUI
+  backend is dropped. The scene tree, the source/renderer separation, and the primitive
+  vocabulary below all stand; only the second backend is gone.
+- **Extended by**: [ADR-0019](0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own.md)
+  — a sixth primitive, for content we are not permitted to draw.
 - **Supersedes**: `notes/transcript.md` §6's two-renderer switch
 
 ## Context

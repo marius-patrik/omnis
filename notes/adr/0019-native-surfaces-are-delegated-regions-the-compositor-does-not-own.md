@@ -1,6 +1,6 @@
 # ADR-0019 — Native surfaces are delegated regions the compositor does not own
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Extends**: [ADR-0001](0001-one-scene-tree-two-renderer-backends.md) §9.2 · **Answers**: D13
 - **Enables**: [ADR-0014](0014-guest-environments-are-host-level-siblings-of-the-core.md), [ADR-0018](0018-services-are-backends-of-domain-subsystems.md)
 

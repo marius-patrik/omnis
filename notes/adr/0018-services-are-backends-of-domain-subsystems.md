@@ -1,6 +1,6 @@
 # ADR-0018 — Services are backends of domain subsystems
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Depends on**: ADR-0001, ADR-0011, ADR-0013 · **Applies**: P2, P10
 
 ## Context

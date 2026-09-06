@@ -14,7 +14,7 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
 | E0 | Repository, governance, autonomous pipeline | `area:ci` | — | Done. Everything else is produced by this pipeline. |
-| D∗ | Architecture decisions D1–D15 | `area:docs` | — | Fifteen open decisions in `ARCHITECTURE.md` §8. Each is resolved by an ADR before its dependent epic leaves `Backlog` — and by rule 13, none of them becomes an issue until it is settled. |
+| D∗ | Architecture decisions D1–D15 (D2, D8, D13, D15 resolved) | `area:docs` | — | Fifteen open decisions in `ARCHITECTURE.md` §8. Each is resolved by an ADR before its dependent epic leaves `Backlog` — and by rule 13, none of them becomes an issue until it is settled. |
 
 ## Phase 1 — The spine
 
@@ -22,8 +22,8 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 |---|---|---|---|---|
 | E1 | Substrate Bus, daemon, process topology | `area:core` | D1, D9 | `omnis-proto` wire schema; control socket (JSON-RPC 2.0) and data socket (9-byte framed binary, opcodes `0x01`–`0x05`); additive versioning; `omnisd` conditional subsystem bootloader; the `Subsystem` trait; surface attach/detach; crash isolation. |
 | E9 | Capability matrix and settings switchboard | `area:core` | E1 | Five orthogonal axes; layered resolution (`defaults → profile → user → workspace → runtime`); JSON schema; the `features` block that decides which subsystems initialize; live IPC updates; layer introspection; the lint enforcing no branching on profile names. |
-| E10 | Scene tree — the renderer-agnostic view model | `area:core` | E9 | Panes, focus, buffers, selections, decorations, and the primitive vocabulary of `ARCHITECTURE.md` §4.2. The single input to **both** renderer backends and the parity contract between them. **Must land before E3.** |
-| E3 | GPU compositor (`omnis-render`) | `area:term` | D4, D7, D11, D12, E10 | The desktop renderer backend. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer), shared glyph atlas and shaping, damage tracking, device-loss handling, and the material-layer pass that 3D and particles ride on. Every primitive it accepts must carry a declared terminal fallback (§4.7), or E22 cannot hold parity. |
+| E10 | Scene tree — the renderer-agnostic view model | `area:core` | E9 | Panes, focus, buffers, selections, decorations, and the primitive vocabulary of `ARCHITECTURE.md` §9.2. The single input to the compositor, and what keeps sources out of rendering — a source emits primitives and knows nothing about how they are drawn. **Must land before E3.** |
+| E3 | GPU compositor (`omnis-render`) | `area:term` | D4, D7, D11, D12, E10 | **The** renderer. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer, native surface), shared glyph atlas and shaping, damage tracking, device-loss handling, the material-layer pass that 3D and particles ride on, and the delegated-region path DRM playback and guest windows depend on (§9.4). Accessibility (UIA/AX/AT-SPI) is acceptance criteria, not a follow-up. |
 | E2 | Tauri shell and window chrome engine | `area:ui` | D4 | The five pillars: frame styles, drag regions, traffic-light insets, vibrancy (`NSVisualEffectView`, Mica, Acrylic), corner radius and border metrics, menu-bar paradigms; dynamic dock/tray icon state machine. |
 | E6 | Local-first persistence | `area:data` | D2 | PGlite store, schema, migrations, the config/data boundary, the sync boundary. |
 
@@ -44,7 +44,7 @@ The subsystems that make Omnis a workspace rather than a shell. Each is independ
 
 ## Phase 3 — Sources, presentation, and the second backend
 
-Sources emit into the scene tree; backends consume it. Only E3 and E22 are renderers.
+Sources emit into the scene tree; the compositor consumes it. Only E3 is a renderer.
 
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
@@ -52,7 +52,6 @@ Sources emit into the scene tree; backends consume it. Only E3 and E22 are rende
 | E4 | Profiles as pure data | `area:ui` | D3, E9, E20 | Profile file format, token sets, asset packs, `lucide-animated` default icon set, typography and density profiles, keymap profiles, audio packs, material-layer backdrops; and the proof that adding a profile requires zero code changes. |
 | E7 | Browser as a source | `area:browser` | E3, E20, D7, D13 | `omnis-browser` Chromium/CDP worker and `omnis-web-source`: semantic mode (AXTree → layout → primitives, keyboard-navigable) and raster mode (screencast → texture), `auto`/`hybrid` selection, FPS budget, and webview compositing per D13. |
 | E21 | 3D, shaders, and particles | `area:ui` | E3, D11, D14 | The material-layer pass in anger: scene layer with camera and depth buffer, GPU-instanced particle systems, custom shader materials with declared inputs, and — if D14 opens it to users and extensions — sandboxing, resource limits, and GPU-hang recovery. |
-| E22 | TUI surface (`omnis-tui`) | `area:term` | E10, E20, D15 | The **second renderer backend**: the same scene tree rendered as ANSI escape sequences in a real terminal, local or over SSH, with no GPU and no window. Terminal capability detection, the degradation ladder of `ARCHITECTURE.md` §4.7, kitty/SGR input decoding, and graphics-protocol passthrough where available. |
 
 ## Phase 4 — Agents, extensibility, mesh
 
@@ -76,8 +75,8 @@ Sources emit into the scene tree; backends consume it. Only E3 and E22 are rende
 ## Sequencing rationale
 
 1. **E10 before E3, and E3 before everything visible.** Terminal, widget, browser, and 3D are
-   sources that emit into the scene tree; only E3 and E22 are renderers (`ARCHITECTURE.md` §4). That
-   makes the scene tree the one thing every source and both backends agree on, and the compositor
+   sources that emit into the scene tree; only E3 is a renderer (`ARCHITECTURE.md` §9). That
+   makes the scene tree the one thing every source agrees on, and the compositor
    foundational rather than a Phase 3 flourish. Building a source before the compositor produces a
    private renderer with a different name.
 2. **E1 and E9 before every subsystem.** Subsystems are conditionally initialized from settings and
@@ -92,15 +91,14 @@ Sources emit into the scene tree; backends consume it. Only E3 and E22 are rende
 5. **E13 before E15.** The task engine's whole caching claim rests on CAS timestamps.
 6. **E9 before E4.** Presets are coordinates in the matrix; without the matrix they become the
    per-profile bolt-ons the design exists to reject.
-7. **Accessibility is E3's problem, not a later epic.** A fully custom-rendered UI publishes no
-   native accessibility tree unless it is built to (`ARCHITECTURE.md` §4.5). Retrofitting UIA/AX/
-   AT-SPI onto a shipped compositor is far more expensive than designing for it, so it belongs in
-   E3's acceptance criteria.
-8. **E22 is early for a reason.** The TUI is a *second renderer backend*, not a later port, and the
-   parity contract (`ARCHITECTURE.md` §4.7) only holds if it is exercised while the scene tree is
-   still soft. Every primitive must declare a terminal fallback; discovering that a primitive cannot
-   degrade is cheap in E10 and expensive after E3 and E20 have shipped features on top of it. The
-   practical rule: a primitive without a working TUI fallback is not finished.
+7. **Accessibility is E3's problem, and now non-negotiable.** A custom-rendered UI publishes no
+   native accessibility tree unless built to (`ARCHITECTURE.md` §9.5). With the TUI dropped
+   (ADR-0017) the published tree is the *only* path to text-addressable output, and retrofitting
+   UIA/AX/AT-SPI onto a shipped compositor costs far more than designing for it.
+8. **A native surface is a last resort, not a shortcut.** Every delegated region (§9.4) is a piece
+   of the interface we no longer control — unstyleable, uncapturable, and awkward to layer. It is
+   correct for DRM playback and heavy platform-composited content, and wrong for anything that
+   could have been a texture.
 7. **D1 is a slice, not a thesis.** The architecture already says what Omnis does. What it does not
    say is which path gets built first — and that choice determines which bus messages, which
    subsystem, and which surface come into existence first.

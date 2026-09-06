@@ -72,7 +72,7 @@ a paragraph erodes on the first deadline.
 | P4 | **Removal is complete**, including system integration. | Integration is brokered, never self-registered (§5.3) |
 | P5 | **No privileged caller.** The GUI has no capability the CLI or an external agent lacks. | One API, one validation path, one escrow (§7) |
 | P6 | **No branching on a profile or theme name.** Features branch on axis values or capability queries. | Lint |
-| P7 | **Every primitive degrades to a terminal.** A feature that cannot is a scene-tree problem. | Type-level: no fallback, no primitive (§9.4) |
+| P7 | **Delegate as little as possible.** A native surface is a region we no longer control; if content can be a texture, it should be. | Review — every delegated region is argued (§9.4) |
 | P8 | **Subsystems cannot couple.** The bus is the only ABI. | Separate processes (§5.1) |
 | P9 | **One schema, three consumers.** Option definitions drive the settings UI, the documentation, and the agent's vocabulary. | Generated, never hand-written (§6) |
 | P10 | **Adding a thing is declaring a thing.** Panes, sources, subsystems, environments, profiles, and themes are instances of shared abstractions, never bespoke implementations. | A new instance touches data and declaration, not core code |
@@ -84,7 +84,7 @@ a paragraph erodes on the first deadline.
 Four layers. Nothing runs inside the core.
 
 ```
-SURFACES      gui · tui · cli · web (over Tailscale) · external harnesses
+SURFACES      gui · cli · web (over Tailscale) · external harnesses
                                     ▲
 NEXT TO       vcs · terminals · lsp · dap · browser · cas · tasks · agent · docs · automation · exthost
               environments: containers · VMs · compat
@@ -107,7 +107,6 @@ registry, brokering, convergence.
 | `omnisd` | Bus routing, subsystem registry, capability brokering, convergence, generations | Render; contain a subsystem; depend on a surface being attached |
 | Subsystems | One domain each, behind an adapter | Talk to each other except over the bus; self-register integration |
 | `omnis-gui` | Window, renderer, input capture | Own durable state; block on I/O |
-| `omnis-tui` | A full interactive surface in a real terminal, local or over SSH | Assume a GPU, a window, or a display server |
 | `omnis` (CLI) | Scriptable surface, `--json` on every command | Reimplement daemon logic |
 | Environments | A guest userland or machine | Nest inside the core |
 
@@ -250,7 +249,7 @@ without a description is an incomplete option, and CI can say so.
 
 ### 6.2 Live while you declare
 
-In the GUI and the TUI, editing the declaration shows the documentation for the option under the
+In the GUI, editing the declaration shows the documentation for the option under the
 cursor: what it does, its type, its default, what it interacts with, and whether changing it applies
 live or needs a restart. **Declaring the system and reading about it are one activity**, not a
 context switch to a browser.
@@ -267,11 +266,6 @@ plausible-looking configuration that does not evaluate — the failure mode this
 Combined with §7, the sequence is: the agent proposes a declaration change, the documentation for
 every option it touched is shown beside the diff, and you approve or reject with the reasoning in
 front of you.
-
-### 6.4 It degrades
-
-A documentation pane is text, so it satisfies the parity contract completely (§9.4). The TUI gets the
-same documentation, searchable, with no loss.
 
 ---
 
@@ -364,7 +358,7 @@ A **host** is a named execution target backed by a runtime: `native`, `docker`, 
 `nspawn`, or `remote` (another personal machine over the tailnet). The container runtime is itself an
 abstraction — pinning one would exclude users to save a thin dispatch.
 
-Each core process — **daemon, CLI, GUI, TUI, web** — is **placed on a host** in the declaration.
+Each core process — **daemon, CLI, GUI, web** — is **placed on a host** in the declaration.
 Placement is a property of the system, not an installation detail: daemon on the workstation,
 interface on the laptop, is a configuration rather than a special build.
 
@@ -374,7 +368,6 @@ Processes carry constraints, checked at evaluation time:
 |---|---|
 | `daemon` | The workspace filesystem; durable storage |
 | `gui` | A display, a GPU, the platform window system — effectively `native` |
-| `tui` | A TTY |
 | `cli` | Nothing; attaches to a daemon wherever it is |
 | `web` | Reachability on the tailnet |
 
@@ -408,21 +401,28 @@ on my placement" becomes the standard bug report.
 **Sources are not renderers.** Cell-grid layout, widget layout, web content, guest windows, and 3D
 all emit primitives into one scene tree. Two **backends** consume it.
 
-| Backend | Crate | Target | Output |
-|---|---|---|---|
-| GPU compositor | `omnis-render` | Desktop window, and a browser canvas via WebGPU | Batched GPU primitives |
-| ANSI/TUI | `omnis-tui` | A real terminal, local or over SSH | Escape sequences on stdout |
+There is **one backend**: the GPU compositor (`omnis-render`), targeting a desktop window natively
+and a browser canvas over WebGPU (§8.1).
 
-The split is not aesthetic. `cell-grid` presentation is a terminal *look* the GPU compositor draws in
-a window; the TUI backend is Omnis genuinely *running in a terminal* — no window, no GPU, works over
-SSH, survives in `tmux`. Different problems, different code, identical features.
+`cell-grid` presentation remains — the terminal *look*, fixed advance, ANSI palettes, pane-grid
+keyboard navigation, command-palette-first interaction — drawn by the compositor in a window. Looking
+like a terminal and running in one were always separate things; ADR-0017 dropped the second, and the
+aesthetic is untouched.
+
+**One backend does not make the scene tree optional.** It is what keeps sources out of rendering: a
+source emits primitives and knows nothing about how they are drawn, which is what lets a browser
+page, a guest window, and a shader field coexist in one frame.
 
 ### 9.1 Why one scene tree
 
 A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with shaped advance —
-same atlas, same pipeline. A browser is a content source, not a rendering engine. Effects that live
-in only one backend become the per-profile bolt-on the whole design rejects. And compositing a
-terminal pane, a video, and a particle field in one frame is a scheduling problem with one answer.
+same atlas, same pipeline. A browser is a content source, not a rendering engine. And compositing a
+terminal pane, a video, a guest application window, and a particle field in one frame is a scheduling
+problem with one answer.
+
+The scene tree is also what makes a service presentable at all (§12): a source translates whatever it
+is fronting into primitives, and everything downstream — theming, layout, accessibility, the agent's
+view of the screen — works without knowing what produced them.
 
 ### 9.2 Primitives
 
@@ -433,9 +433,11 @@ terminal pane, a video, and a particle field in one frame is a scheduling proble
 | Texture | screencast rasters, guest windows, icons, render targets |
 | Path — SDF or tessellated | vector icons, graphs, DAG edges |
 | Material layer — custom shader with declared inputs | 3D scenes, particle fields, backdrops, transitions |
+| **Native surface** — a delegated region we do not draw | DRM playback, guest windows, hardware-decoded video, third-party webviews |
 
 **Adding a source must not add a primitive class.** If it would, that is a design conversation, not a
-patch.
+patch. The native surface is the one case that has earned it (ADR-0019), because no combination of
+the other five can express *content we are not permitted to look at*.
 
 ### 9.3 3D, shaders, particles
 
@@ -446,35 +448,43 @@ and **content** (shader playgrounds, model preview, GPU-accelerated visualisatio
 or extension. The engine supports both; exposing authoring demands sandboxing, resource limits, and
 GPU-hang recovery, and is gated on D14.
 
-### 9.4 The parity contract
+### 9.4 Native surfaces, and the rule for them
 
-| Primitive | In a terminal | Fidelity |
-|---|---|---|
-| Glyph run | Text cells | Full |
-| Quad — fill, border | Background colour and box-drawing characters | Full when cell-aligned |
-| Quad — rounded, shadow, gradient | Nearest box-drawing corner; shadows dropped | Approximate |
-| Path | Braille or box-drawing rasterisation, else its label | Approximate |
-| Texture | Terminal graphics protocol where present, else half-block or Braille, else declared alt text | Terminal-dependent |
-| Material layer | **Cannot execute**; renders its static fallback | None |
+Some content cannot be drawn by us. DRM-protected playback requires a protected output path, so
+capturing it — in a browser canvas or from a guest window — yields black frames by design. Capture is
+the wrong verb.
 
-1. **Every primitive declares a terminal fallback.** No fallback, no primitive — enforced at the type
-   level, not by convention (P7).
-2. **Nothing is silently dropped.** Degradation is visible — alt text, a placeholder — never a blank
-   region that hides the fact content exists.
-3. **Feature parity, not pixel parity.** Every command, pane, view, and workflow is reachable in the
-   TUI. Visual fidelity is explicitly not promised.
-4. **No feature is TUI-only or GPU-only.** A feature that cannot degrade is a scene-tree design
-   problem, fixed by extending the scene tree — never by branching on the backend.
+A **native surface** is delegated instead: Omnis declares the geometry, the clip, and the z-order, and
+the platform composites the content there through its own path. **We never receive the pixels**, which
+is exactly why it is permitted (Wayland subsurfaces, `CALayer`/`AVSampleBufferDisplayLayer`,
+DirectComposition visuals).
 
-Terminal capability is **detected, not assumed**: truecolor versus 256-colour, kitty keyboard
-protocol versus legacy escapes, SGR mouse reporting, graphics-protocol support.
+**The rule: delegate as little as possible.** Every delegated region is a piece of the interface we no
+longer control (P7). If content can be a texture, it should be.
+
+What a delegated region costs:
+
+| | |
+|---|---|
+| **No styling** | A profile does not reach inside it. It is someone else's rectangle. |
+| **No capture** | We cannot screenshot or record it — so our own capture features must say so rather than emit black. |
+| **Constrained z-order** | On several platforms an overlay sits above or below the scene, not freely interleaved. Modals over one may be impossible, not merely awkward. |
+| **Does not cross the network** | It cannot be delegated through the web surface's canvas, so remote access to DRM playback does not work and must say so. |
+| **Four implementations** | One per platform, in a project that otherwise confines platform differences to how the core is hosted. |
+
+Its contents are opaque to us, so its accessibility is the platform's and the content's. The region
+must still be **described** in our tree, or a screen reader meets an unexplained gap.
 
 ### 9.5 What owning the renderer costs
 
 Text shaping, hit-testing, IME, and **accessibility**. A custom-rendered UI publishes no native
 accessibility tree unless built to, so UIA/AX/AT-SPI belongs in the compositor's acceptance criteria
-rather than a later epic. The web surface makes this sharper, not softer: a browser is where users
-most expect assistive technology to work.
+rather than a later epic.
+
+Dropping the TUI (ADR-0017) makes this **non-negotiable rather than merely important**: a text
+backend was one path to text-addressable output, and with it gone the published accessibility tree is
+the only one. The web surface sharpens it further — a browser is where users most expect assistive
+technology to work.
 
 ---
 
@@ -484,7 +494,7 @@ most expect assistive technology to work.
 
 **A theme is colours**, in the **VS Code colour-theme format** — `colors`, `tokenColors`,
 `semanticTokenColors`, `type`. Existing themes load unmodified, and the format already carries
-`terminal.ansi*`, so the sixteen ANSI colours both the cell grid and `omnis-tui` need come free. Icon
+`terminal.ansi*`, so the sixteen ANSI colours the cell-grid presentation needs come free. Icon
 themes use the VS Code icon-theme format for the same reason.
 
 **A profile bundles** a theme, an icon theme, the axis values below, window chrome, the app icon and
@@ -565,7 +575,48 @@ the second.
 
 ---
 
-## 12. Security
+## 12. Services
+
+A **service** — ChatGPT, DeepSeek, Google, YouTube, Netflix — is a **backend of a domain subsystem**.
+YouTube is to `streaming` what `git` is to `vcs`: the same swappability (P2), the same declaration,
+the same complete removal (§5.3).
+
+Three concerns, only one of them new:
+
+| Concern | Mechanism |
+|---|---|
+| **Presentation** | A source emitting scene-tree primitives (§9) |
+| **Action** | A capability over the bus, brokered and escrow-gated (§7) |
+| **Aggregation** | A **domain schema** every backend maps onto — the new part |
+
+**The universal translator already exists.** `omnis-web-source`'s semantic mode — AXTree to layout to
+primitives — renders any service with a web interface *today*, as real primitives rather than a
+rectangle of pixels: keyboard-navigable, themeable, and legible to an agent.
+
+Four tiers, progressive, with no cliff:
+
+| Tier | What | Cost |
+|---|---|---|
+| 0 | Raster — screencast into a texture | Nothing; always works |
+| 1 | Semantic translation — AXTree to primitives | Nothing; the default |
+| 2 | Declared adapter — a mapping to the domain schema | Data, not code (P10) |
+| 3 | API adapter — the service's own API | An adapter subsystem, and credentials |
+
+Everything is usable at tier 1 and upgraded in place. A service that changes its markup is fixed by
+editing data, not by shipping a release.
+
+**A domain schema names which capabilities a backend may decline.** Not every provider supports every
+action, and a schema that assumes otherwise produces an interface full of controls that silently
+fail. DRM playback is the sharpest case: a backend supplies search, metadata, and queue, and declines
+playback, which is then delegated to a native surface (§9.4).
+
+**Terms of service is a decision, not a technical question.** Re-presenting some services through our
+own interface is contractually restricted regardless of feasibility, and which adapters ship needs
+the same treatment as trade dress (D3).
+
+---
+
+## 13. Security
 
 - **The vault.** Master key via Argon2id; the key-encryption key in a zeroising buffer with `mlock`,
   never serialised. Device secrets bridge to the OS keychain.
@@ -581,7 +632,7 @@ The structure is fixed; the **threat model is D10** and may constrain it.
 
 ---
 
-## 13. Crate and package layout
+## 14. Crate and package layout
 
 ```
 crates/
@@ -589,11 +640,10 @@ crates/
   omnisd/              the core: routing, registry, brokering, convergence, generations
   omnis-cli/           `omnis`, `--json` on every command
   omnis-gui/           desktop host and window manager
-  omnis-tui/           ANSI backend: scene tree to cells, capability detection, input decoding
   omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
   omnis-layout/        cell-grid and widget layout modes
   omnis-browser/       Chromium supervisor and CDP bridge
-  omnis-web-source/    AXTree→layout and screencast→texture bridges
+  omnis-web-source/    AXTree→layout and screencast→texture bridges; the default service backend
   omnis-cas/           chunking, convergent encryption, VFS
   omnis-agent/         harness registry, session supervision, MCP bridge
   omnis-docs/          option schema → documentation, search index, in-product docs surface
@@ -611,7 +661,7 @@ and web jobs.
 
 ---
 
-## 14. Open decisions
+## 15. Open decisions
 
 Resolved decisions link to their record; see [the decision log](notes/adr/).
 
@@ -629,13 +679,13 @@ Resolved decisions link to their record; see [the decision log](notes/adr/).
 | D10 | **Vault threat model** — what `mlock`, the Argon2id parameters, and spawn-time injection actually defend against | E11, E19 |
 | D11 | **Graphics baseline** — API, minimum GPU capability, and what happens below it | E3, E21 |
 | D12 | **Text stack** — shaping, atlas strategy, subpixel policy, bidi, IME | E3 |
-| D13 | **Webview compositing** — shared-texture, readback, or native subsurface | E3, E7, E8 |
+| ~~D13~~ | Webview compositing — answered by [ADR-0019](notes/adr/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own.md): a native subsurface, not readback | ~~E3, E7, E8~~ |
 | D14 | **Shader and 3D exposure** — Omnis and profiles only, or users and extensions | E21 |
-| D15 | **Terminal capability floor** for `omnis-tui` | E22 |
+| ~~D15~~ | Terminal capability floor — moot, the TUI is dropped by [ADR-0017](notes/adr/0017-the-tui-is-dropped-as-a-surface.md) | ~~E22~~ |
 
 ---
 
-## 15. Repository automation
+## 16. Repository automation
 
 The development pipeline is part of the architecture: [`AGENTS.md`](AGENTS.md) states the rules,
 [`notes/pipeline.md`](notes/pipeline.md) explains how it works and how releases are cut,
