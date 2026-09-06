@@ -2,10 +2,11 @@
 
 **Universal developer workspace and local-first personal data OS.**
 
-One engine, many presets. Omnis is a desktop workspace whose entire presentation layer — renderer,
+One engine, many profiles. Omnis is a desktop workspace whose entire presentation layer — renderer,
 layout topology, input routing, keymap, window chrome, and iconography — is a *configuration state
-of a single engine* rather than a set of alternative implementations. A "theme" here is not a
-stylesheet; it is a named point in an orthogonal capability matrix.
+of a single engine* rather than a set of alternative implementations. A **profile** is a named
+point in an orthogonal capability matrix — not a stylesheet — and everything it configures is
+modifiable at runtime by the user, the integrated agent, or an external agent through one API.
 
 > **Status: scaffold.** The repository, its governance rules, and its autonomous delivery pipeline
 > are in place. The product tree is not: it is decomposed into epics in

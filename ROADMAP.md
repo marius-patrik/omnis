@@ -49,7 +49,7 @@ Everything here emits into E3's compositor. None of these is a renderer.
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
 | E20 | Layout modes — cell-grid and widget | `area:term` | E3, E10 | `omnis-layout`: the cell-grid mode (fixed advance, 24-bit TrueColor with SGR attributes, 256-colour ANSI palettes, cursor shapes, pane-grid keyboard navigation, command-palette-first interaction, inline inspector strips) and the widget mode, both emitting scene-tree primitives. `hybrid` mixes them per pane. |
-| E4 | Brand presets as pure data | `area:ui` | D3, E9, E20 | Preset file format, token sets, asset packs, `lucide-animated` default icon set, typography and density profiles, keymap profiles, audio packs, material-layer backdrops; and the proof that adding a brand requires zero code changes. |
+| E4 | Profiles as pure data | `area:ui` | D3, E9, E20 | Preset file format, token sets, asset packs, `lucide-animated` default icon set, typography and density profiles, keymap profiles, audio packs, material-layer backdrops; and the proof that adding a brand requires zero code changes. |
 | E7 | Browser as a source | `area:browser` | E3, E20, D7, D13 | `omnis-browser` Chromium/CDP worker and `omnis-web-source`: semantic mode (AXTree → layout → primitives, keyboard-navigable) and raster mode (screencast → texture), `auto`/`hybrid` selection, FPS budget, and webview compositing per D13. |
 | E21 | 3D, shaders, and particles | `area:ui` | E3, D11, D14 | The material-layer pass in anger: scene layer with camera and depth buffer, GPU-instanced particle systems, custom shader materials with declared inputs, and — if D14 opens it to users and extensions — sandboxing, resource limits, and GPU-hang recovery. |
 

@@ -129,16 +129,43 @@ issues labeled `Request` before any planning, branching, or code changes begin.
   linked via GitHub sub-issues (`--parent <request_id>`) containing the detailed implementation
   plan. All subsequent branches and pull requests bind to the plan issue.
 
-### 13. Epics & Decomposition
-Large bodies of work are tracked as `epic`-labelled issues. An epic is a container: it carries the
-scope statement, the acceptance criteria for the whole area, and a checklist of child `Request`
-issues. Epics are never implemented directly — only their children are. `ROADMAP.md` is the
-authoritative list of epics and their sequencing, and must be updated whenever an epic is added,
-split, completed, or dropped.
+### 13. Specification Sequence & When Issues May Exist
+Specification proceeds in one direction, and each stage is locked before the next begins:
 
-### 14. Containerized Agent & Conversational CI Lifecycle
-An autonomous AI agent runs containerized in GitHub Actions (`docker/Dockerfile.agent`) driving a
-provider CLI, with a model fallback chain and checkpoint/resume on quota exhaustion:
+```
+VISION.md  →  ARCHITECTURE.md  →  ADRs (notes/architecture_decisions.md)  →  ROADMAP.md  →  issues
+```
+
+- **An issue may only be filed for work that is settled.** Settled means one of two things: an
+  approved ADR resolving the decision the work depends on, or a concrete mechanical task whose
+  outcome is not in question (for example, "create the Bun workspace and add these named
+  dependencies").
+- **Speculative epic and decision issues are prohibited.** Filing an issue for an unanswered
+  question moves the argument into the tracker, where it fragments across comment threads instead of
+  converging in the document that owns it. Open questions live in `ARCHITECTURE.md` §7 until an ADR
+  closes them; planned work lives in `ROADMAP.md` until its gate opens.
+- **Large settled bodies of work** are tracked as `epic`-labelled issues: a container carrying the
+  scope statement, the acceptance criteria for the area, and a checklist of child `Request` issues.
+  Epics are never implemented directly — only their children are.
+- `ROADMAP.md` is the authoritative list of epics and their sequencing, and is updated whenever an
+  epic is added, split, completed, or dropped.
+
+### 14. Harness-Agnostic Containerized Agent & Conversational CI Lifecycle
+An autonomous AI agent runs containerized in GitHub Actions (`docker/Dockerfile.agent`). It is
+**harness-agnostic**: no pipeline code knows which coding-agent CLI is executing.
+- **Harness registry**: `.github/scripts/harnesses.py` declares each CLI — Antigravity (`agy`),
+  Claude Code (`claude`), OpenAI Codex (`codex`), Kimi (`kimi`), Grok (`grok`), Cursor
+  (`cursor-agent`), and opencode (`opencode`) — as a binary, an argv template, and a model chain.
+  Adding a harness is a data change; changing one is a configuration change.
+- **No hardcoded invocation**: every field is overridable at runtime through the
+  `AGENT_HARNESS_CONFIG` repository variable, and the order through `AGENT_HARNESS_CHAIN`, so an
+  upstream flag rename never requires a code change or a container rebuild.
+- **Graceful degradation**: harnesses whose binary is absent from `PATH`, or whose credentials are
+  unset, are skipped rather than failed. An image carrying four of seven CLIs is a working image
+  with a shorter fallback chain.
+- **Fallback across harnesses, not just models**: quota exhaustion on one harness escalates to the
+  next harness in the chain. Only when every harness and model is exhausted does the agent
+  checkpoint and block.
 - **Authentication**: Provider credentials are supplied through repository secrets only. The runner
   performs a pre-flight token exchange on every run; no credentials are ever committed.
 - **Auto-Detection & Interpretation**: Incoming unlabelled issues are automatically tagged
@@ -158,7 +185,7 @@ provider CLI, with a model fallback chain and checkpoint/resume on quota exhaust
 - **Allowed Types**: `feat`, `fix` (mapped from `bug`), `chore`, `docs`, `refactor`, `test`, `ci`.
 - **Allowed Area Scopes & Labels**:
   - `area:core`: Microkernel, process topology, IPC/substrate bus, daemon lifecycle, config.
-  - `area:ui`: DOM renderer, layout topology, theming, brand profiles, settings surfaces.
+  - `area:ui`: DOM renderer, layout topology, theming, profiles, settings surfaces.
   - `area:term`: Terminal cell-grid renderer, ANSI/TrueColor pipeline, PTY integration.
   - `area:agents`: Harness orchestration, provider adapters, personas, approvals.
   - `area:browser`: Embedded browser engine, CDP bridge, semantic and pixel render modes.

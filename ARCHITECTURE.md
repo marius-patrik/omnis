@@ -17,8 +17,8 @@ sync mesh. The surfaces — a Tauri desktop app, a CLI, and any external harness
 presentation and input. Closing a window, reloading the UI, or crashing a surface costs nothing.
 
 Because the daemon owns behaviour, the presentation layer collapses into **configuration**. Renderer,
-layout topology, input routing, keymap, chrome, and iconography are orthogonal axes; a "theme" is a
-named point in that space, never a fork.
+layout topology, input routing, keymap, chrome, and iconography are orthogonal axes, and a
+**profile** is a named point in that space, never a fork.
 
 **We do not enumerate workflows.** The subsystems compose: a task DAG that reads a Cargo manifest, a
 terminal whose secrets came from the vault, a browser page harvested into a context fragment, an
@@ -27,7 +27,7 @@ capability surface is the specification; the workflows are what users assemble f
 them one by one would be both endless and wrong.
 
 **Non-goal:** reimplementing VS Code, Zed, or any chat client. Their *interaction shapes* are
-configuration presets.
+profiles.
 
 ---
 
@@ -101,9 +101,13 @@ Contract rules:
 
 ---
 
-## 3. The capability matrix
+## 3. The capability matrix and the modification surface
 
-Five orthogonal axes. A preset is a point in this space.
+### 3.1 Five orthogonal axes
+
+A **profile** is a point in this space. Omnis has no "themes": a theme implies decoration, and what
+is being selected here is behaviour — renderer output, layout, input routing, keymap, and chrome.
+The transcript's `SystemPersonalityPackage` is exactly this, so the term is *profile* throughout.
 
 | Axis | Setting | Values |
 |---|---|---|
@@ -118,15 +122,41 @@ The first axis is **presentation, not renderer**. There is one renderer (§4); `
 a widget-laid-out settings panel is a legal configuration, not a special case. The transcript's
 `workbench.rendererEngine: 'dom-flexbox' | 'terminal-cell-grid'` is superseded.
 
-**Invariant:** no product code may branch on a *preset name*. Features branch on axis values or on
-capability queries — never `if (theme === 'brand-claude')`. This is testable and must be covered by a
+**Invariant:** no product code may branch on a *profile name*. Features branch on axis values or on
+capability queries — never `if (profile === 'claude')`. This is testable and must be covered by a
 lint.
 
-A **brand preset** is therefore a data file — axis values, token values, assets — and nothing else.
-Adding a brand must require zero code changes.
+A **profile** is therefore a data file — axis values, token values, assets — and nothing else.
+Adding a profile must require zero code changes.
 
-**Agent persona is not an axis.** `VISION.md` §5 binds a theme to a provider, model, and reasoning
-effort. Omnis does not. A preset may *suggest* a persona; it never sets one behind the user's back.
+**Agent persona is not an axis.** `VISION.md` §5 binds a profile to a provider, model, and reasoning
+effort. Omnis does not. A profile may *suggest* a persona; it never sets one behind the user's back.
+
+### 3.2 The modification surface
+
+**Everything configurable is modifiable at runtime — by the user, by the integrated agent, and by
+external agents — through one API.** This is a first-class architectural requirement, not a
+convenience.
+
+- **No privileged surface.** The GUI has no capability the CLI or an external harness lacks. The GUI
+  is a client of the control socket like any other; if a setting can be changed by clicking, it can
+  be changed by a `omnis` invocation and by an agent over MCP, using the same operation.
+- **Introspectable, not guessable.** Clients enumerate what exists — the schema of every setting, the
+  axes and their legal values, the installed profiles, keymaps, layouts, extensions, and material
+  layers — rather than hardcoding knowledge of them. A surface that must be updated in lockstep with
+  the daemon to expose a new setting is a design defect.
+- **One validation path, one approval path.** A mutation is validated identically whichever client
+  sent it, and side-effectful mutations pass the same approval escrow. An external agent changing a
+  profile is gated exactly as the integrated one is. There is no "trusted caller" shortcut.
+- **Attributed and audited.** Every mutation records who made it — the user, the integrated agent, or
+  a named external harness — in the audit stream. Attribution is what makes agent modifiability safe
+  to grant: an unattributable change is indistinguishable from a compromise.
+- **Reversible.** Because configuration is layered files (§5) and mutations are recorded, any change
+  an agent makes can be inspected, diffed, and rolled back without reconstructing intent.
+
+The practical consequence: profiles, keymaps, layouts, material layers, and extensions are all
+authored through the same surface at runtime. "Customizing Omnis" and "an agent customizing Omnis"
+are the same operation with a different caller.
 
 ---
 
@@ -240,7 +270,7 @@ acceptance criteria rather than being discovered late.
 `settings.json` is the user-facing switchboard: JSON-with-comments, schema-validated, layered.
 
 ```
-defaults  →  brand preset  →  user settings  →  workspace settings  →  runtime overrides
+defaults  →  profile  →  user settings  →  workspace settings  →  runtime overrides
 ```
 
 Later layers win. Every layer is inspectable; the settings UI must answer "which layer set this?"
@@ -280,7 +310,7 @@ packages/
   agent-sdk/           npm package `@omnis/agent`
   exthost-node/        isolated Node.js runtime for VS Code extensions
   frontend/            webview shell (Dockview, shadcn/ui)
-  presets/             brand presets — data only, no code
+  profiles/            profiles — data only, no code
 ```
 
 None of this exists yet. It is the target shape epics build toward, and the reason `ci.yml` already
