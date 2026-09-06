@@ -471,7 +471,11 @@ def process_event(
 
 
 def reconcile_unassigned_statuses(client: GitHubProjectClient) -> None:
-    """Assigns ``ToDo`` to every open board item that has no status.
+    """Gives every open board item without a status the one its labels imply.
+
+    An item can reach the board without passing through a lifecycle event — added by hand, or added
+    while the automation lacked a token that can write to Projects v2. Defaulting all of those to
+    ``ToDo`` would silently promote backlog items into the ready queue, so the labels decide.
 
     Args:
         client: Project client.
@@ -492,9 +496,11 @@ def reconcile_unassigned_statuses(client: GitHubProjectClient) -> None:
         )
         for item in json.loads(raw_items).get("items", []):
             content = item.get("content", {})
-            if not item.get("status") and item.get("id") and not content.get("closed", False):
-                client.edit_status(item["id"], "ToDo")
-                print(f"Self-healed item {item['id']} ({content.get('title')}) to ToDo")
+            if item.get("status") or not item.get("id") or content.get("closed", False):
+                continue
+            status = determine_status_from_labels(item.get("labels", []) or [])
+            client.edit_status(item["id"], status)
+            print(f"Self-healed item {item['id']} ({content.get('title')}) to {status}")
     except Exception as exc:  # noqa: BLE001 - reconciliation is best-effort
         print(f"Status reconciliation notice: {exc}", file=sys.stderr)
 

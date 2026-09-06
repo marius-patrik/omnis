@@ -225,6 +225,42 @@ def test_push_to_other_branches_is_ignored():
     assert client.closed_issues == []
 
 
+def test_reconciliation_uses_labels_not_a_blanket_todo(monkeypatch: pytest.MonkeyPatch):
+    """Self-healing must not promote backlog items into the ready queue."""
+    from project_automation import reconcile_unassigned_statuses
+
+    items = {
+        "items": [
+            {"id": "i1", "labels": ["epic", "Backlog"], "content": {"title": "epic"}},
+            {"id": "i2", "labels": ["bug"], "content": {"title": "untriaged"}},
+            {"id": "i3", "labels": [], "status": "Done", "content": {"title": "already set"}},
+            {"id": "i4", "labels": [], "content": {"title": "closed", "closed": True}},
+        ]
+    }
+
+    class Recorder(GitHubProjectClient):
+        """Captures status writes without touching the API."""
+
+        def __init__(self) -> None:
+            super().__init__(owner="o", project_number=1)
+            self.writes: List[Tuple[str, str]] = []
+
+        def run_gh(self, args: List[str]) -> str:
+            """Returns a canned item listing."""
+            import json as _json
+
+            return _json.dumps(items)
+
+        def edit_status(self, item_id: str, status_name: str) -> bool:
+            """Records the write."""
+            self.writes.append((item_id, status_name))
+            return True
+
+    client = Recorder()
+    reconcile_unassigned_statuses(client)
+    assert client.writes == [("i1", "Backlog"), ("i2", "ToDo")]
+
+
 def test_status_field_ids_are_not_hardcoded():
     """Board ids are resolved at runtime; a hardcoded id breaks on every board rebuild."""
     path = os.path.join(REPO_ROOT, ".github", "scripts", "project_automation.py")
