@@ -216,3 +216,17 @@ def test_pages_is_configured_for_the_branch_source():
     content = _read(os.path.join(SCRIPT_DIR, "repo_settings.py"))
     assert '"branch": "gh-pages"' in content
     assert '"build_type": "legacy"' in content
+
+
+def test_teardown_does_not_use_git_without_a_checkout():
+    """The teardown job has no checkout, so `git ls-remote origin` silently no-ops.
+
+    That is not hypothetical: it shipped once and left the preview for #22 behind while reporting
+    success.
+    """
+    content = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
+    teardown = content[content.index("  teardown:") :]
+    assert (
+        "actions/checkout" in teardown or "git ls-remote" not in teardown
+    ), "teardown must either check out the repository or avoid git commands that need a remote"
+    assert "branches/gh-pages" in teardown, "branch existence must be checked through the API"

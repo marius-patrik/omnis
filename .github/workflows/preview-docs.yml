@@ -93,7 +93,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+          # No checkout in this job, so there is no `origin` to query with git. Ask the API.
+          if ! gh api "repos/${{ github.repository }}/branches/gh-pages" >/dev/null 2>&1; then
             echo "No gh-pages branch; nothing to clean up."
             exit 0
           fi
