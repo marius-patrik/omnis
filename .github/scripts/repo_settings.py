@@ -358,23 +358,86 @@ def apply_project_board(run: Runner) -> Optional[int]:
     status = next(
         (f for f in json.loads(fields).get("fields", []) if f.get("name") == "Status"), None
     )
-    have = [o["name"] for o in status.get("options", [])] if status else []
-    missing = [name for name in STATUS_OPTIONS if name not in have]
+    if status is None:
+        print("  no Status field on this project; create one in the UI first")
+        return number
 
-    if missing:
-        # The REST/`gh` surface cannot append single-select options; this is a GraphQL mutation and
-        # a genuinely UI-only action for anyone without it. Report precisely rather than pretend.
-        print(f"  Status options present: {have}")
-        print(f"  Status options MISSING: {missing}")
-        print(
-            "  Add them at "
-            f"https://github.com/users/{OWNER}/projects/{number}/settings/fields "
-            "-> Status -> add option (order matters, it is the column order)."
-        )
-    else:
-        print(f"  Status options complete: {STATUS_OPTIONS}")
+    have = [o["name"] for o in status.get("options", [])]
+    if have == STATUS_OPTIONS:
+        print(f"  Status options already correct: {have}")
+        return number
 
+    print(f"  Status options present: {have}")
+    print(f"  Status options wanted:  {STATUS_OPTIONS}")
+    apply_status_options(run, status["id"], have)
     return number
+
+
+def apply_status_options(run: Runner, field_id: str, existing: List[str]) -> None:
+    """Rewrites the Status single-select options to the canonical taxonomy.
+
+    `gh project` cannot edit single-select options, so this is a GraphQL mutation. The mutation
+    replaces the option set wholesale and matches surviving options by name, so items already sitting
+    in a retained column keep their status. Options whose names are dropped lose their assignments,
+    which is why the guard below refuses to run once the board carries columns outside the taxonomy.
+
+    Args:
+        run: Command runner.
+        field_id: Node id of the Status field.
+        existing: Option names currently on the field.
+    """
+    extra = [name for name in existing if name not in STATUS_OPTIONS and name != "Todo"]
+    if extra:
+        print(f"  REFUSING to rewrite: board has custom options that would be deleted: {extra}")
+        print("  Reconcile them by hand, or add them to STATUS_OPTIONS, then re-run.")
+        run.failures.append(f"status options rewrite blocked by custom columns {extra}")
+        return
+
+    options = [
+        {"name": name, "color": color, "description": description}
+        for name, color, description in (
+            ("Backlog", "PURPLE", "Staged for future consideration"),
+            ("ToDo", "GREEN", "Approved and ready to be worked on"),
+            ("In Progress", "YELLOW", "Work is actively in progress"),
+            ("Blocked", "ORANGE", "Blocked by dependencies, externals, or agent quota"),
+            ("Done", "BLUE", "Completed and verified"),
+            ("Superseded", "GRAY", "Outranked by a newer request or plan"),
+            ("Dropped", "RED", "Closed without implementation or abandoned"),
+        )
+    ]
+    assert [option["name"] for option in options] == STATUS_OPTIONS
+
+    mutation = (
+        "mutation($fieldId:ID!,$options:[ProjectV2SingleSelectFieldOptionInput!]!)"
+        "{updateProjectV2Field(input:{fieldId:$fieldId,singleSelectOptions:$options})"
+        "{projectV2Field{... on ProjectV2SingleSelectField{options{name}}}}}"
+    )
+    payload = {"query": mutation, "variables": {"fieldId": field_id, "options": options}}
+
+    if not run.apply:
+        print(f"  would set Status options to {STATUS_OPTIONS}")
+        return
+
+    result = subprocess.run(
+        ["gh", "api", "graphql", "--input", "-"],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        print(
+            f"  FAILED to set Status options: {detail[0] if detail else 'unknown'}", file=sys.stderr
+        )
+        run.failures.append("updateProjectV2Field singleSelectOptions")
+        return
+    applied = [
+        option["name"]
+        for option in json.loads(result.stdout)["data"]["updateProjectV2Field"]["projectV2Field"][
+            "options"
+        ]
+    ]
+    print(f"  Status options set to {applied}")
 
 
 def apply_branch_protection(run: Runner) -> None:

@@ -18,8 +18,24 @@ permissions:
 
 jobs:
   run-agent:
+    # The agent stays off until its provider secrets exist. Set the repository variable
+    # AGENT_ENABLED to "true" once ANTIGRAVITY_REFRESH_TOKEN, ANTIGRAVITY_CLIENT_ID, and
+    # ANTIGRAVITY_CLIENT_SECRET are configured; until then every issue would otherwise start a
+    # container build that cannot authenticate. `secrets` is not available in a job-level `if`,
+    # which is why this gate is a variable and the step below re-checks the secret itself.
+    if: vars.AGENT_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Verify provider credentials are present
+        env:
+          REFRESH_TOKEN: ${{ secrets.ANTIGRAVITY_REFRESH_TOKEN }}
+        run: |
+          if [ -z "$REFRESH_TOKEN" ]; then
+            echo "::error::AGENT_ENABLED is true but ANTIGRAVITY_REFRESH_TOKEN is not set." >&2
+            exit 1
+          fi
+          echo "Provider credentials present."
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
