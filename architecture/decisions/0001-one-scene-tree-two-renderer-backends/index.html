@@ -160,6 +160,26 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../process/">Process</a>
     </li>
 </ul>
@@ -212,6 +232,11 @@
           <h1 id="adr-0001-one-scene-tree-two-renderer-backends">ADR-0001 — One scene tree, two renderer backends<a class="headerlink" href="#adr-0001-one-scene-tree-two-renderer-backends" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06 · <strong>Narrows</strong>: D8</li>
+<li><strong>Partly superseded by</strong>: <a href="../0017-the-tui-is-dropped-as-a-surface/">ADR-0017</a> — the TUI
+  backend is dropped. The scene tree, the source/renderer separation, and the primitive
+  vocabulary below all stand; only the second backend is gone.</li>
+<li><strong>Extended by</strong>: <a href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019</a>
+  — a sixth primitive, for content we are not permitted to draw.</li>
 <li><strong>Supersedes</strong>: <code>notes/transcript.md</code> §6's two-renderer switch</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>

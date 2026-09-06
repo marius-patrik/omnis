@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0012 — The system is one declarative configuration, applied as generations · Omnis</title>
+    <title>ADR-0020 — Documentation is generated from the option schema and lives in the product · Omnis</title>
     <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,8 +135,8 @@
          href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+      <a class="nav__link"
+         href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -167,8 +167,8 @@
          href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -229,80 +229,65 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0012-the-system-is-one-declarative-configuration-applied-as-generations">ADR-0012 — The system is one declarative configuration, applied as generations<a class="headerlink" href="#adr-0012-the-system-is-one-declarative-configuration-applied-as-generations" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product">ADR-0020 — Documentation is generated from the option schema and lives in the product<a class="headerlink" href="#adr-0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06</li>
-<li><strong>Refines</strong>: ADR-0005 · <strong>Completes</strong>: ADR-0003, ADR-0006</li>
+<li><strong>Depends on</strong>: ADR-0012 · <strong>Establishes</strong>: P9</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p><code>notes/transcript.md</code> §7 treats <code>settings.json</code> as a switchboard: a bag of keys the UI writes and the daemon
-reads. ADR-0005 put configuration in versioned files, which is right but says nothing about <em>shape</em>.</p>
-<p>Two problems remain unsolved by a settings bag. First, once subsystems, packages, profiles, and
-guest environments are all configuration, an unstructured key-value file cannot express the
-dependencies between them. Second — and more seriously — ADR-0003 promises every modification is
-<strong>reversible</strong> and ADR-0006 promises every agent action is <strong>attributable</strong>, and neither record says
-by what mechanism. Both are currently aspirations.</p>
+<p>The system is defined by a declaration (ADR-0012), which is only usable if you can discover what you
+may declare. Three consumers need that knowledge and normally get it three separate ways: the
+settings UI has hand-built forms, the documentation is hand-written prose, and an agent gets nothing
+and guesses.</p>
+<p>Three sources for one truth is three ways to be wrong, and the failure is asymmetric — the settings
+UI is exercised constantly and stays right, while the documentation quietly rots and the agent
+produces plausible configuration that does not evaluate.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><strong>The configuration is a single declarative specification the system converges toward</strong>, in the
-NixOS sense: you describe the desired state, evaluation produces a system, and applying it creates a
-<strong>generation</strong>.</p>
-<ul>
-<li><strong>One declaration, in Nix.</strong> Not a format of our own that compiles to Nix — that means owning a
-  language and a compiler, which ADR-0011 forbids. Using the Nix module system directly gives typed
-  options, merge semantics, <code>mkDefault</code>/<code>mkForce</code>, imports, and nixpkgs for nothing.</li>
-<li><strong>It declares the whole system</strong>: enabled subsystems, packages and toolchains, profiles and themes,
-  guest environments, remote access, and secret <em>references</em> — never secret values (ADR-0010).</li>
-<li><strong>Applying it produces a generation</strong> with a parent, a diff, and an author. Generations are
-  listable, diffable, and roll back.</li>
-<li><strong>Runtime mutations write the declaration.</strong> A change made through the modification surface
-  (ADR-0003) is staged into the specification and applied by convergence. It is not an overlay and
-  not a side-channel.</li>
-</ul>
-<h2 id="why-this-completes-two-earlier-records">Why this completes two earlier records<a class="headerlink" href="#why-this-completes-two-earlier-records" title="Permanent link">&para;</a></h2>
-<p><strong>ADR-0003's reversibility becomes a mechanism.</strong> "Any change an agent makes can be inspected,
-diffed, and rolled back" stops being a design intention and becomes <code>omnis rollback</code> — the same
-operation for a typo, a bad profile, and a misbehaving agent.</p>
-<p><strong>ADR-0006's attribution gets a natural unit.</strong> A generation has an author. An agent reconfiguring
-your system produces a reviewable change with a parent commit, not an untraceable mutation. Audit
-answers <em>what happened</em>; generations answer <em>what the system now is, and who made it so</em>.</p>
-<p>This is the reason to prefer declarative here. It is not tidiness — it is that the safety properties
-already promised have no other credible implementation.</p>
+<p><strong>One option schema, three consumers.</strong> Every option carries a type, a default, a description, an
+example, and whether changing it applies live or needs a restart. From that single definition:</p>
+<ol>
+<li><strong>The settings UI</strong> is generated from the types. Forms are not hand-built per option.</li>
+<li><strong>The documentation</strong> is generated — both the published site and the in-product surface.</li>
+<li><strong>The agent's vocabulary</strong> is the same schema: what it may set, to what values, and what each
+   means.</li>
+</ol>
+<p><strong>Documentation is a surface inside the product</strong>, not a website beside it. In the GUI, editing the
+declaration shows the documentation for the option under the cursor, alongside the architecture and
+the decision records. Declaring the system and reading about it are one activity.</p>
+<p><strong>The agent reads what you read.</strong> When it proposes a declaration change, the documentation for every
+option it touched is shown beside the diff, so approval happens with the reasoning present rather
+than from a bare patch.</p>
+<p>An option without a description is an incomplete option, and CI can say so.</p>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>A settings bag (<code>settings.json</code>), as the transcript proposes.</strong> Cannot express dependencies
-  between subsystems, packages, and environments; cannot roll back; gives attribution nowhere to
-  live. It is adequate for appearance and inadequate for a system definition.</li>
-<li><strong>Our own declarative format compiled to Nix.</strong> Friendlier syntax, and it costs a language, a
-  parser, a type system, an error-reporting story, and a compiler — to reach a place the Nix module
-  system already occupies. The friendliness belongs in the GUI editing structured options, not in a
-  second language.</li>
-<li><strong>Imperative configuration with a snapshot/undo layer.</strong> Snapshots capture state without capturing
-  intent, so a rollback cannot explain what it undid, and two concurrent changes cannot be merged.</li>
-<li><strong>Declarative base with runtime overlays that are never written back.</strong> The tempting middle. It
-  guarantees drift: the running system stops matching the declaration, and the declaration stops
-  being the source of truth exactly when you need it to be.</li>
+<li><strong>Hand-written documentation beside generated settings.</strong> The status quo everywhere, and it drifts
+  in one direction only: the code changes, the prose does not, and nobody notices until a user is
+  misled.</li>
+<li><strong>Generated documentation, hand-built settings forms.</strong> Halves the problem and keeps the expensive
+  half — every new option still needs UI work, which is what makes people avoid adding options.</li>
+<li><strong>Documentation as a website only.</strong> Forces a context switch out of the product at exactly the
+  moment attention is scarcest, and gives the agent nothing at all.</li>
+<li><strong>Letting the agent read the published site.</strong> Scraping our own documentation to recover structure
+  we had and discarded.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Nix is a hard dependency and a real learning curve.</strong> Users who never open the file are served by
-  the GUI writing structured options for them; users who do open it meet Nix. That cost is accepted
-  in exchange for the module system and nixpkgs.</li>
-<li>Convergence is not instant. Some changes apply live; others need a subsystem restart. The
-  configuration schema has to say which, or the UI will lie about when a change took effect.</li>
-<li>Every setting needs a typed option definition — which ADR-0003's introspection requirement demands
-  anyway, so the two land together.</li>
-<li>Secrets stay outside the declaration, referenced by name only. A declaration is diffable,
-  shareable, and frequently pasted into an issue.</li>
+<li>Every option needs a real description before it ships; a schema is only as good as its prose.</li>
+<li>The generated settings UI constrains what an option <em>can</em> be — an option whose type the generator
+  cannot render either needs a new type or a different design. That constraint is deliberate.</li>
+<li>The published site and the in-product surface must render the same schema without diverging, which
+  argues for the site being a thin consumer rather than a separate implementation.</li>
+<li>Documentation becomes part of the definition of done for a subsystem, not a follow-up task.</li>
 </ul>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">
+          <a class="pager__link pager__link--prev" href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</span>
+            <span class="pager__title">ADR-0019 — Native surfaces are delegated regions the compositor does not own</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0013-subsystems-run-beside-the-core-never-inside-it/">
+          <a class="pager__link pager__link--next" href="../0021-one-input-bar-one-navigation-model-everything-addressable/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0013 — Subsystems run beside the core, never inside it</span>
+            <span class="pager__title">ADR-0021 — One input bar, one navigation model, everything addressable</span>
           </a>
         </nav>
 
@@ -317,8 +302,6 @@ already promised have no other credible implementation.</p>
           <li><a href="#context">Context</a>
           </li>
           <li><a href="#decision">Decision</a>
-          </li>
-          <li><a href="#why-this-completes-two-earlier-records">Why this completes two earlier records</a>
           </li>
           <li><a href="#alternatives-rejected">Alternatives rejected</a>
           </li>

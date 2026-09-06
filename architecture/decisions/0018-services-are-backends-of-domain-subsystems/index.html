@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0012 — The system is one declarative configuration, applied as generations · Omnis</title>
+    <title>ADR-0018 — Services are backends of domain subsystems · Omnis</title>
     <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,8 +135,8 @@
          href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+      <a class="nav__link"
+         href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -159,8 +159,8 @@
          href="../0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0018 — Services are backends of domain subsystems</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -229,80 +229,130 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0012-the-system-is-one-declarative-configuration-applied-as-generations">ADR-0012 — The system is one declarative configuration, applied as generations<a class="headerlink" href="#adr-0012-the-system-is-one-declarative-configuration-applied-as-generations" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0018-services-are-backends-of-domain-subsystems">ADR-0018 — Services are backends of domain subsystems<a class="headerlink" href="#adr-0018-services-are-backends-of-domain-subsystems" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06</li>
-<li><strong>Refines</strong>: ADR-0005 · <strong>Completes</strong>: ADR-0003, ADR-0006</li>
+<li><strong>Depends on</strong>: ADR-0001, ADR-0011, ADR-0013 · <strong>Applies</strong>: P2, P10</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p><code>notes/transcript.md</code> §7 treats <code>settings.json</code> as a switchboard: a bag of keys the UI writes and the daemon
-reads. ADR-0005 put configuration in versioned files, which is right but says nothing about <em>shape</em>.</p>
-<p>Two problems remain unsolved by a settings bag. First, once subsystems, packages, profiles, and
-guest environments are all configuration, an unstructured key-value file cannot express the
-dependencies between them. Second — and more seriously — ADR-0003 promises every modification is
-<strong>reversible</strong> and ADR-0006 promises every agent action is <strong>attributable</strong>, and neither record says
-by what mechanism. Both are currently aspirations.</p>
+<p>A power user's day runs through services they do not own: ChatGPT, DeepSeek, Google, YouTube,
+Netflix, and a hundred others. Each has its own interface, its own conventions, and no relationship
+to any of the others. Omnis should be able to present them through interfaces we control, and to
+present <em>several</em> of them through <strong>one</strong> interface — a single streaming view over YouTube, Netflix,
+and whatever else, the way a single VCS view already spans Git and Sapling.</p>
+<p>The temptation is to treat this as a new subsystem class with new machinery. It is not. Almost all of
+it is two abstractions that already exist, which is why it is worth writing down before anyone builds
+a third.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><strong>The configuration is a single declarative specification the system converges toward</strong>, in the
-NixOS sense: you describe the desired state, evaluation produces a system, and applying it creates a
-<strong>generation</strong>.</p>
-<ul>
-<li><strong>One declaration, in Nix.</strong> Not a format of our own that compiles to Nix — that means owning a
-  language and a compiler, which ADR-0011 forbids. Using the Nix module system directly gives typed
-  options, merge semantics, <code>mkDefault</code>/<code>mkForce</code>, imports, and nixpkgs for nothing.</li>
-<li><strong>It declares the whole system</strong>: enabled subsystems, packages and toolchains, profiles and themes,
-  guest environments, remote access, and secret <em>references</em> — never secret values (ADR-0010).</li>
-<li><strong>Applying it produces a generation</strong> with a parent, a diff, and an author. Generations are
-  listable, diffable, and roll back.</li>
-<li><strong>Runtime mutations write the declaration.</strong> A change made through the modification surface
-  (ADR-0003) is staged into the specification and applied by convergence. It is not an overlay and
-  not a side-channel.</li>
-</ul>
-<h2 id="why-this-completes-two-earlier-records">Why this completes two earlier records<a class="headerlink" href="#why-this-completes-two-earlier-records" title="Permanent link">&para;</a></h2>
-<p><strong>ADR-0003's reversibility becomes a mechanism.</strong> "Any change an agent makes can be inspected,
-diffed, and rolled back" stops being a design intention and becomes <code>omnis rollback</code> — the same
-operation for a typo, a bad profile, and a misbehaving agent.</p>
-<p><strong>ADR-0006's attribution gets a natural unit.</strong> A generation has an author. An agent reconfiguring
-your system produces a reviewable change with a parent commit, not an untraceable mutation. Audit
-answers <em>what happened</em>; generations answer <em>what the system now is, and who made it so</em>.</p>
-<p>This is the reason to prefer declarative here. It is not tidiness — it is that the safety properties
-already promised have no other credible implementation.</p>
+<p><strong>A service is a backend of a domain subsystem.</strong> YouTube is to <code>streaming</code> what <code>git</code> is to <code>vcs</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>domain: streaming            one interface, one schema
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  backends:
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    youtube    → api adapter          official API where one exists
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    plex       → declared adapter     a mapping, no code
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    &lt;anything&gt; → browser source       works immediately, no integration
+</code></pre></div>
+<p>Three parts, each landing on an existing mechanism:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Presentation</strong> — how the service appears</td>
+<td>A <strong>source</strong> emitting scene-tree primitives (ADR-0001)</td>
+</tr>
+<tr>
+<td><strong>Action</strong> — doing something to it</td>
+<td>A <strong>capability</strong> over the bus, brokered and escrow-gated (§7)</td>
+</tr>
+<tr>
+<td><strong>Aggregation</strong> — several services, one interface</td>
+<td>A <strong>domain schema</strong> every backend maps onto</td>
+</tr>
+</tbody>
+</table>
+<p>Only the third is new. Presentation and action are the scene tree and the bus, unchanged.</p>
+<h3 id="the-universal-translator-already-exists">The universal translator already exists<a class="headerlink" href="#the-universal-translator-already-exists" title="Permanent link">&para;</a></h3>
+<p><code>omnis-web-source</code>'s semantic mode — AXTree to layout to primitives — <em>is</em> the "show anything"
+translator. Any service with a web interface is renderable today, as real primitives rather than a
+rectangle of pixels: keyboard-navigable, themeable, and legible to an agent. No new machinery.</p>
+<h3 id="progressive-with-no-cliff">Progressive, with no cliff<a class="headerlink" href="#progressive-with-no-cliff" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>What it is</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Raster — screencast into a texture</td>
+<td>Nothing; always works</td>
+</tr>
+<tr>
+<td>1</td>
+<td><strong>Semantic translation</strong> — AXTree to primitives</td>
+<td>Nothing; the default</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Declared adapter</strong> — a mapping from the service to the domain schema</td>
+<td>Data, not code (P10)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>API adapter</strong> — the service's own API</td>
+<td>An adapter subsystem, and credentials</td>
+</tr>
+</tbody>
+</table>
+<p>Everything starts usable at tier 1 and is upgraded in place. Nothing waits on an adapter, and writing
+one is a declaration change — which also means a service that breaks its DOM is fixed by editing
+data, not by shipping a release.</p>
+<h3 id="domain-schemas-are-small-and-explicit">Domain schemas are small and explicit<a class="headerlink" href="#domain-schemas-are-small-and-explicit" title="Permanent link">&para;</a></h3>
+<p>A domain names its entities, its actions, and — importantly — which capabilities a backend may
+<strong>decline</strong>. Not every provider supports every action, and a schema that assumes they all do produces
+an interface full of controls that silently fail.</p>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>A settings bag (<code>settings.json</code>), as the transcript proposes.</strong> Cannot express dependencies
-  between subsystems, packages, and environments; cannot roll back; gives attribution nowhere to
-  live. It is adequate for appearance and inadequate for a system definition.</li>
-<li><strong>Our own declarative format compiled to Nix.</strong> Friendlier syntax, and it costs a language, a
-  parser, a type system, an error-reporting story, and a compiler — to reach a place the Nix module
-  system already occupies. The friendliness belongs in the GUI editing structured options, not in a
-  second language.</li>
-<li><strong>Imperative configuration with a snapshot/undo layer.</strong> Snapshots capture state without capturing
-  intent, so a rollback cannot explain what it undid, and two concurrent changes cannot be merged.</li>
-<li><strong>Declarative base with runtime overlays that are never written back.</strong> The tempting middle. It
-  guarantees drift: the running system stops matching the declaration, and the declaration stops
-  being the source of truth exactly when you need it to be.</li>
+<li><strong>A bespoke integration per service.</strong> Where every comparable product ends up: N integrations, no
+  composition, and each one rotting independently. It also cannot deliver the thing actually asked
+  for — <em>one</em> interface over several providers.</li>
+<li><strong>Iframes and webviews, unstyled.</strong> Cheap and it is not an interface; it is a browser with extra
+  steps, and nothing aggregates.</li>
+<li><strong>A new "service" subsystem class with its own machinery.</strong> Duplicates the backend pattern that
+  already governs VCS, task runners, and agent harnesses, and would drift from it.</li>
+<li><strong>Scraping everything at tier 2 with no tier 1.</strong> Makes every service a project before it is usable
+  at all, and guarantees a long tail that never gets done.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Nix is a hard dependency and a real learning curve.</strong> Users who never open the file are served by
-  the GUI writing structured options for them; users who do open it meet Nix. That cost is accepted
-  in exchange for the module system and nixpkgs.</li>
-<li>Convergence is not instant. Some changes apply live; others need a subsystem restart. The
-  configuration schema has to say which, or the UI will lie about when a change took effect.</li>
-<li>Every setting needs a typed option definition — which ADR-0003's introspection requirement demands
-  anyway, so the two land together.</li>
-<li>Secrets stay outside the declaration, referenced by name only. A declaration is diffable,
-  shareable, and frequently pasted into an issue.</li>
+<li>Adding a service is a declaration; removing one removes it completely, integration included
+  (ADR-0013).</li>
+<li>Tier-2 adapters break when services change their markup. That is inherent, and the mitigation is
+  that a fix is data — not that breakage is avoidable.</li>
+<li>Credentials go through the vault (ADR-0010): referenced by name, injected, never in agent context.</li>
+<li><strong>Terms of service is a decision, not a technical question.</strong> Re-presenting some services through
+  our own interface is contractually restricted regardless of feasibility, and which services we ship
+  adapters for needs the same treatment as trade dress (D3).</li>
+<li><strong>DRM playback cannot be a source.</strong> Protected content cannot be composited into a scene tree we
+  own. It is delegated instead — see ADR-0019 — and the schema must therefore let a backend decline
+  the playback capability while still supplying search, metadata, and queue.</li>
 </ul>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">
+          <a class="pager__link pager__link--prev" href="../0017-the-tui-is-dropped-as-a-surface/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</span>
+            <span class="pager__title">ADR-0017 — The TUI is dropped as a surface</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0013-subsystems-run-beside-the-core-never-inside-it/">
+          <a class="pager__link pager__link--next" href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0013 — Subsystems run beside the core, never inside it</span>
+            <span class="pager__title">ADR-0019 — Native surfaces are delegated regions the compositor does not own</span>
           </a>
         </nav>
 
@@ -317,8 +367,11 @@ already promised have no other credible implementation.</p>
           <li><a href="#context">Context</a>
           </li>
           <li><a href="#decision">Decision</a>
-          </li>
-          <li><a href="#why-this-completes-two-earlier-records">Why this completes two earlier records</a>
+            <ul>
+              <li><a href="#the-universal-translator-already-exists">The universal translator already exists</a></li>
+              <li><a href="#progressive-with-no-cliff">Progressive, with no cliff</a></li>
+              <li><a href="#domain-schemas-are-small-and-explicit">Domain schemas are small and explicit</a></li>
+            </ul>
           </li>
           <li><a href="#alternatives-rejected">Alternatives rejected</a>
           </li>

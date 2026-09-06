@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0012 — The system is one declarative configuration, applied as generations · Omnis</title>
+    <title>ADR-0019 — Native surfaces are delegated regions the compositor does not own · Omnis</title>
     <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,8 +135,8 @@
          href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+      <a class="nav__link"
+         href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -163,8 +163,8 @@
          href="../0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -229,80 +229,107 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0012-the-system-is-one-declarative-configuration-applied-as-generations">ADR-0012 — The system is one declarative configuration, applied as generations<a class="headerlink" href="#adr-0012-the-system-is-one-declarative-configuration-applied-as-generations" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own">ADR-0019 — Native surfaces are delegated regions the compositor does not own<a class="headerlink" href="#adr-0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06</li>
-<li><strong>Refines</strong>: ADR-0005 · <strong>Completes</strong>: ADR-0003, ADR-0006</li>
+<li><strong>Extends</strong>: <a href="../0001-one-scene-tree-two-renderer-backends/">ADR-0001</a> §9.2 · <strong>Answers</strong>: D13</li>
+<li><strong>Enables</strong>: <a href="../0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014</a>, <a href="../0018-services-are-backends-of-domain-subsystems/">ADR-0018</a></li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p><code>notes/transcript.md</code> §7 treats <code>settings.json</code> as a switchboard: a bag of keys the UI writes and the daemon
-reads. ADR-0005 put configuration in versioned files, which is right but says nothing about <em>shape</em>.</p>
-<p>Two problems remain unsolved by a settings bag. First, once subsystems, packages, profiles, and
-guest environments are all configuration, an unstructured key-value file cannot express the
-dependencies between them. Second — and more seriously — ADR-0003 promises every modification is
-<strong>reversible</strong> and ADR-0006 promises every agent action is <strong>attributable</strong>, and neither record says
-by what mechanism. Both are currently aspirations.</p>
+<p>ADR-0014 states that a guest application window is "a pixel source composited into the scene tree",
+riding the existing <code>texture</code> primitive. ADR-0018 then hits a wall with it: <strong>DRM-protected playback
+cannot be captured</strong>. Widevine and its equivalents require a protected output path, and capturing
+protected output yields black frames by design. Netflix in a guest environment fails exactly as
+Netflix in a browser canvas fails, because both are capture.</p>
+<p>The same wall, less obviously, applies to anything the platform composites better than we can:
+hardware-decoded video, and third-party webviews (D13), where a per-frame readback is both a
+performance cost and a fidelity loss.</p>
+<p>Capture is the wrong verb.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><strong>The configuration is a single declarative specification the system converges toward</strong>, in the
-NixOS sense: you describe the desired state, evaluation produces a system, and applying it creates a
-<strong>generation</strong>.</p>
+<p>Add a sixth primitive: a <strong>native surface</strong> — a region the scene tree <strong>delegates</strong> rather than
+draws.</p>
+<p>Omnis declares the geometry, the clip, and the z-order. The <strong>platform</strong> composites someone else's
+content there, through its own path. <strong>We never receive the pixels</strong>, which is precisely why it is
+permitted where capture is not.</p>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux/Wayland</td>
+<td>Subsurface, or an overlay plane</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td><code>CALayer</code> / <code>AVSampleBufferDisplayLayer</code></td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>DirectComposition visual, swapchain overlay</td>
+</tr>
+</tbody>
+</table>
+<p>Used by: DRM playback, guest environment windows, hardware-decoded video, and third-party webviews.</p>
+<p><strong>This is the sixth primitive class.</strong> §9.2 says adding one is a design conversation rather than a
+patch; this is that conversation, and the justification is that no combination of the existing five
+can express "content we are not allowed to look at".</p>
+<h3 id="what-it-costs-and-these-are-not-small">What it costs, and these are not small<a class="headerlink" href="#what-it-costs-and-these-are-not-small" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>One declaration, in Nix.</strong> Not a format of our own that compiles to Nix — that means owning a
-  language and a compiler, which ADR-0011 forbids. Using the Nix module system directly gives typed
-  options, merge semantics, <code>mkDefault</code>/<code>mkForce</code>, imports, and nixpkgs for nothing.</li>
-<li><strong>It declares the whole system</strong>: enabled subsystems, packages and toolchains, profiles and themes,
-  guest environments, remote access, and secret <em>references</em> — never secret values (ADR-0010).</li>
-<li><strong>Applying it produces a generation</strong> with a parent, a diff, and an author. Generations are
-  listable, diffable, and roll back.</li>
-<li><strong>Runtime mutations write the declaration.</strong> A change made through the modification surface
-  (ADR-0003) is staged into the specification and applied by convergence. It is not an overlay and
-  not a side-channel.</li>
+<li><strong>We cannot style, theme, colour-correct, or post-process it.</strong> A profile does not reach inside a
+  native surface. It is someone else's rectangle.</li>
+<li><strong>We cannot screenshot or record it.</strong> Which is the point, and also means our own capture features
+  have a hole in them that must be reported honestly rather than producing a black rectangle.</li>
+<li><strong>Z-ordering is constrained.</strong> On several platforms an overlay is above or below the scene, not
+  freely interleaved. Effects, popovers, and modals over a native surface may be impossible rather
+  than merely awkward, and layout has to be designed knowing that.</li>
+<li><strong>It does not cross the network.</strong> The web surface (ADR-0015) hosts the compositor in a browser
+  canvas; a native surface cannot be delegated through it. <strong>Remote access to DRM playback does not
+  work</strong>, and the remote surface must say so rather than showing a blank region.</li>
+<li><strong>It is a per-platform implementation</strong> — four mechanisms, not one — in a project that otherwise
+  keeps platform differences to how the core is hosted.</li>
 </ul>
-<h2 id="why-this-completes-two-earlier-records">Why this completes two earlier records<a class="headerlink" href="#why-this-completes-two-earlier-records" title="Permanent link">&para;</a></h2>
-<p><strong>ADR-0003's reversibility becomes a mechanism.</strong> "Any change an agent makes can be inspected,
-diffed, and rolled back" stops being a design intention and becomes <code>omnis rollback</code> — the same
-operation for a typo, a bad profile, and a misbehaving agent.</p>
-<p><strong>ADR-0006's attribution gets a natural unit.</strong> A generation has an author. An agent reconfiguring
-your system produces a reviewable change with a parent commit, not an untraceable mutation. Audit
-answers <em>what happened</em>; generations answer <em>what the system now is, and who made it so</em>.</p>
-<p>This is the reason to prefer declarative here. It is not tidiness — it is that the safety properties
-already promised have no other credible implementation.</p>
+<h3 id="the-rule">The rule<a class="headerlink" href="#the-rule" title="Permanent link">&para;</a></h3>
+<p><strong>Delegate as little as possible, and only where capture is impossible or wasteful.</strong> A native
+surface is an escape hatch from our own rendering, and every use of one is a region of the interface
+we no longer control. If content can be a texture, it should be.</p>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>A settings bag (<code>settings.json</code>), as the transcript proposes.</strong> Cannot express dependencies
-  between subsystems, packages, and environments; cannot roll back; gives attribution nowhere to
-  live. It is adequate for appearance and inadequate for a system definition.</li>
-<li><strong>Our own declarative format compiled to Nix.</strong> Friendlier syntax, and it costs a language, a
-  parser, a type system, an error-reporting story, and a compiler — to reach a place the Nix module
-  system already occupies. The friendliness belongs in the GUI editing structured options, not in a
-  second language.</li>
-<li><strong>Imperative configuration with a snapshot/undo layer.</strong> Snapshots capture state without capturing
-  intent, so a rollback cannot explain what it undid, and two concurrent changes cannot be merged.</li>
-<li><strong>Declarative base with runtime overlays that are never written back.</strong> The tempting middle. It
-  guarantees drift: the running system stops matching the declaration, and the declaration stops
-  being the source of truth exactly when you need it to be.</li>
+<li><strong>Capture the guest window into a texture</strong> (ADR-0014 as written). Works for ordinary applications
+  and fails precisely where it was needed: protected content captures black. It also pays a readback
+  per frame for content the platform would composite for free.</li>
+<li><strong>Accept that DRM services cannot be presented at all.</strong> Honest, and it removes a large part of the
+  point of ADR-0018's streaming domain. Search, metadata, and queue can be unified even when playback
+  cannot — but only if playback has somewhere to go.</li>
+<li><strong>Ship a separate player window outside Omnis.</strong> Solves DRM by leaving the product. The whole
+  premise is composition.</li>
+<li><strong>Attempt to defeat the protected path.</strong> Not a design option.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Nix is a hard dependency and a real learning curve.</strong> Users who never open the file are served by
-  the GUI writing structured options for them; users who do open it meet Nix. That cost is accepted
-  in exchange for the module system and nixpkgs.</li>
-<li>Convergence is not instant. Some changes apply live; others need a subsystem restart. The
-  configuration schema has to say which, or the UI will lie about when a change took effect.</li>
-<li>Every setting needs a typed option definition — which ADR-0003's introspection requirement demands
-  anyway, so the two land together.</li>
-<li>Secrets stay outside the declaration, referenced by name only. A declaration is diffable,
-  shareable, and frequently pasted into an issue.</li>
+<li>ADR-0014's "guest windows ride the <code>texture</code> primitive" is refined: they ride <code>texture</code> where
+  capture works, and a native surface where it does not or where the platform composites better.</li>
+<li><strong>D13 is answered</strong>: webviews use a native subsurface, not readback — the same mechanism, reached
+  from a different direction, which is evidence it is the right one.</li>
+<li>The parity contract is not violated, because ADR-0017 removed the TUI. A native surface could not
+  have degraded to a terminal under any definition, so this primitive and the TUI were mutually
+  exclusive. Dropping the TUI is what makes it available.</li>
+<li>The accessibility obligation (§9.5) does not extend inside a native surface: its contents are
+  opaque to us, so whatever accessibility it has is the platform's and the content's. The region must
+  still be <em>described</em> in our tree, or a screen reader encounters an unexplained gap.</li>
 </ul>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">
+          <a class="pager__link pager__link--prev" href="../0018-services-are-backends-of-domain-subsystems/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</span>
+            <span class="pager__title">ADR-0018 — Services are backends of domain subsystems</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0013-subsystems-run-beside-the-core-never-inside-it/">
+          <a class="pager__link pager__link--next" href="../0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0013 — Subsystems run beside the core, never inside it</span>
+            <span class="pager__title">ADR-0020 — Documentation is generated from the option schema and lives in the product</span>
           </a>
         </nav>
 
@@ -317,8 +344,10 @@ already promised have no other credible implementation.</p>
           <li><a href="#context">Context</a>
           </li>
           <li><a href="#decision">Decision</a>
-          </li>
-          <li><a href="#why-this-completes-two-earlier-records">Why this completes two earlier records</a>
+            <ul>
+              <li><a href="#what-it-costs-and-these-are-not-small">What it costs, and these are not small</a></li>
+              <li><a href="#the-rule">The rule</a></li>
+            </ul>
           </li>
           <li><a href="#alternatives-rejected">Alternatives rejected</a>
           </li>

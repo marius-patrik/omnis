@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0012 — The system is one declarative configuration, applied as generations · Omnis</title>
+    <title>ADR-0022 — Self-optimisation is the system proposing generations against itself · Omnis</title>
     <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,8 +135,8 @@
          href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+      <a class="nav__link"
+         href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -175,8 +175,8 @@
          href="../0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -229,80 +229,64 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0012-the-system-is-one-declarative-configuration-applied-as-generations">ADR-0012 — The system is one declarative configuration, applied as generations<a class="headerlink" href="#adr-0012-the-system-is-one-declarative-configuration-applied-as-generations" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0022-self-optimisation-is-the-system-proposing-generations-against-itself">ADR-0022 — Self-optimisation is the system proposing generations against itself<a class="headerlink" href="#adr-0022-self-optimisation-is-the-system-proposing-generations-against-itself" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06</li>
-<li><strong>Refines</strong>: ADR-0005 · <strong>Completes</strong>: ADR-0003, ADR-0006</li>
+<li><strong>Depends on</strong>: ADR-0003, ADR-0006, ADR-0012</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p><code>notes/transcript.md</code> §7 treats <code>settings.json</code> as a switchboard: a bag of keys the UI writes and the daemon
-reads. ADR-0005 put configuration in versioned files, which is right but says nothing about <em>shape</em>.</p>
-<p>Two problems remain unsolved by a settings bag. First, once subsystems, packages, profiles, and
-guest environments are all configuration, an unstructured key-value file cannot express the
-dependencies between them. Second — and more seriously — ADR-0003 promises every modification is
-<strong>reversible</strong> and ADR-0006 promises every agent action is <strong>attributable</strong>, and neither record says
-by what mechanism. Both are currently aspirations.</p>
+<p>A system that observes its own behaviour can improve it: disable a subsystem nothing has called in a
+month, resize a cache that always misses, move a process off a saturated host, prefetch what is
+always fetched.</p>
+<p>The obvious way to build that is a tuner with privileged access that adjusts things directly. That
+version is also the one that produces "why is my machine different today" with no answer, which is
+exactly the unattributable change ADR-0003 exists to prevent.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><strong>The configuration is a single declarative specification the system converges toward</strong>, in the
-NixOS sense: you describe the desired state, evaluation produces a system, and applying it creates a
-<strong>generation</strong>.</p>
-<ul>
-<li><strong>One declaration, in Nix.</strong> Not a format of our own that compiles to Nix — that means owning a
-  language and a compiler, which ADR-0011 forbids. Using the Nix module system directly gives typed
-  options, merge semantics, <code>mkDefault</code>/<code>mkForce</code>, imports, and nixpkgs for nothing.</li>
-<li><strong>It declares the whole system</strong>: enabled subsystems, packages and toolchains, profiles and themes,
-  guest environments, remote access, and secret <em>references</em> — never secret values (ADR-0010).</li>
-<li><strong>Applying it produces a generation</strong> with a parent, a diff, and an author. Generations are
-  listable, diffable, and roll back.</li>
-<li><strong>Runtime mutations write the declaration.</strong> A change made through the modification surface
-  (ADR-0003) is staged into the specification and applied by convergence. It is not an overlay and
-  not a side-channel.</li>
-</ul>
-<h2 id="why-this-completes-two-earlier-records">Why this completes two earlier records<a class="headerlink" href="#why-this-completes-two-earlier-records" title="Permanent link">&para;</a></h2>
-<p><strong>ADR-0003's reversibility becomes a mechanism.</strong> "Any change an agent makes can be inspected,
-diffed, and rolled back" stops being a design intention and becomes <code>omnis rollback</code> — the same
-operation for a typo, a bad profile, and a misbehaving agent.</p>
-<p><strong>ADR-0006's attribution gets a natural unit.</strong> A generation has an author. An agent reconfiguring
-your system produces a reviewable change with a parent commit, not an untraceable mutation. Audit
-answers <em>what happened</em>; generations answer <em>what the system now is, and who made it so</em>.</p>
-<p>This is the reason to prefer declarative here. It is not tidiness — it is that the safety properties
-already promised have no other credible implementation.</p>
+<p><strong>Self-optimisation is not a new mechanism.</strong> The system acts as an agent against itself and goes
+through the ordinary path: it <strong>proposes a generation</strong>, carrying a diff, an author, and the
+measurements that motivated it, and that proposal passes the same escrow as any other change
+(ADR-0006).</p>
+<p>Approving it is the same action as approving anything else. Rolling it back is the same operation
+(ADR-0012).</p>
+<p><strong>It is never silent.</strong> Whether a class of optimisation may be auto-approved is a policy in the
+declaration — <strong>off by default</strong>, and never for anything that removes or relocates. A cache resize
+is a candidate for standing approval; removing a subsystem is not.</p>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>A settings bag (<code>settings.json</code>), as the transcript proposes.</strong> Cannot express dependencies
-  between subsystems, packages, and environments; cannot roll back; gives attribution nowhere to
-  live. It is adequate for appearance and inadequate for a system definition.</li>
-<li><strong>Our own declarative format compiled to Nix.</strong> Friendlier syntax, and it costs a language, a
-  parser, a type system, an error-reporting story, and a compiler — to reach a place the Nix module
-  system already occupies. The friendliness belongs in the GUI editing structured options, not in a
-  second language.</li>
-<li><strong>Imperative configuration with a snapshot/undo layer.</strong> Snapshots capture state without capturing
-  intent, so a rollback cannot explain what it undid, and two concurrent changes cannot be merged.</li>
-<li><strong>Declarative base with runtime overlays that are never written back.</strong> The tempting middle. It
-  guarantees drift: the running system stops matching the declaration, and the declaration stops
-  being the source of truth exactly when you need it to be.</li>
+<li><strong>A privileged tuner that adjusts the system directly.</strong> Simplest to build and it creates changes
+  with no author, no diff, and no rollback — the precise failure ADR-0003 was written against. That
+  it is the system rather than an external agent making the change does not improve the position; it
+  makes it harder to notice.</li>
+<li><strong>Optimisation as configuration hints the daemon interprets at runtime.</strong> Keeps the declaration
+  honest and moves the behaviour somewhere unobservable: the running system stops matching the
+  declaration, which is the drift ADR-0012 rejects.</li>
+<li><strong>Everything auto-approved, with an undo.</strong> Sounds equivalent to gating and is not: undo requires
+  noticing, and the changes most worth gating are the ones least likely to be noticed.</li>
+<li><strong>No self-optimisation at all.</strong> Defensible, and it leaves real waste in place on a system whose
+  whole premise is knowing what it is running.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Nix is a hard dependency and a real learning curve.</strong> Users who never open the file are served by
-  the GUI writing structured options for them; users who do open it meet Nix. That cost is accepted
-  in exchange for the module system and nixpkgs.</li>
-<li>Convergence is not instant. Some changes apply live; others need a subsystem restart. The
-  configuration schema has to say which, or the UI will lie about when a change took effect.</li>
-<li>Every setting needs a typed option definition — which ADR-0003's introspection requirement demands
-  anyway, so the two land together.</li>
-<li>Secrets stay outside the declaration, referenced by name only. A declaration is diffable,
-  shareable, and frequently pasted into an issue.</li>
+<li><strong>It is only as good as the telemetry.</strong> Data that answers "is this subsystem worth keeping"
+  is a design problem in its own right, not a side effect of logging, and building the proposer
+  before the measurements produces confident nonsense.</li>
+<li>Proposal quality matters more than proposal frequency. A system that suggests ten changes a day
+  trains the user to approve without reading, which defeats the gate — so the bar for proposing is
+  high, and silence is a valid output.</li>
+<li>Auto-approval policy is a security surface: an over-broad standing grant is a privileged tuner
+  reintroduced through configuration.</li>
+<li>Because proposals are generations, the history of what the system changed about itself is
+  inspectable after the fact — which is what makes the whole idea defensible.</li>
 </ul>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">
+          <a class="pager__link pager__link--prev" href="../0021-one-input-bar-one-navigation-model-everything-addressable/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</span>
+            <span class="pager__title">ADR-0021 — One input bar, one navigation model, everything addressable</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0013-subsystems-run-beside-the-core-never-inside-it/">
+          <a class="pager__link pager__link--next" href="../process/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0013 — Subsystems run beside the core, never inside it</span>
+            <span class="pager__title">Process</span>
           </a>
         </nav>
 
@@ -317,8 +301,6 @@ already promised have no other credible implementation.</p>
           <li><a href="#context">Context</a>
           </li>
           <li><a href="#decision">Decision</a>
-          </li>
-          <li><a href="#why-this-completes-two-earlier-records">Why this completes two earlier records</a>
           </li>
           <li><a href="#alternatives-rejected">Alternatives rejected</a>
           </li>

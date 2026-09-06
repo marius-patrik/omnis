@@ -160,6 +160,26 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="decisions/process/">Process</a>
     </li>
 </ul>
@@ -297,8 +317,8 @@ a paragraph erodes on the first deadline.</p>
 </tr>
 <tr>
 <td>P7</td>
-<td><strong>Every primitive degrades to a terminal.</strong> A feature that cannot is a scene-tree problem.</td>
-<td>Type-level: no fallback, no primitive (§9.4)</td>
+<td><strong>Delegate as little as possible.</strong> A native surface is a region we no longer control; if content can be a texture, it should be.</td>
+<td>Review — every delegated region is argued (§9.4)</td>
 </tr>
 <tr>
 <td>P8</td>
@@ -320,7 +340,7 @@ a paragraph erodes on the first deadline.</p>
 <hr />
 <h2 id="3-topology">3. Topology<a class="headerlink" href="#3-topology" title="Permanent link">&para;</a></h2>
 <p>Four layers. Nothing runs inside the core.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SURFACES      gui · tui · cli · web (over Tailscale) · external harnesses
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SURFACES      gui · cli · web (over Tailscale) · external harnesses
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                    ▲
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>NEXT TO       vcs · terminals · lsp · dap · browser · cas · tasks · agent · docs · automation · exthost
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>              environments: containers · VMs · compat
@@ -358,11 +378,6 @@ registry, brokering, convergence.</p>
 <td><code>omnis-gui</code></td>
 <td>Window, renderer, input capture</td>
 <td>Own durable state; block on I/O</td>
-</tr>
-<tr>
-<td><code>omnis-tui</code></td>
-<td>A full interactive surface in a real terminal, local or over SSH</td>
-<td>Assume a GPU, a window, or a display server</td>
 </tr>
 <tr>
 <td><code>omnis</code> (CLI)</td>
@@ -475,7 +490,7 @@ website beside the product — it is a <strong>surface inside it</strong>.</p>
 <p>There is no second place to update, and therefore no way for the three to disagree (P9). An option
 without a description is an incomplete option, and CI can say so.</p>
 <h3 id="62-live-while-you-declare">6.2 Live while you declare<a class="headerlink" href="#62-live-while-you-declare" title="Permanent link">&para;</a></h3>
-<p>In the GUI and the TUI, editing the declaration shows the documentation for the option under the
+<p>In the GUI, editing the declaration shows the documentation for the option under the
 cursor: what it does, its type, its default, what it interacts with, and whether changing it applies
 live or needs a restart. <strong>Declaring the system and reading about it are one activity</strong>, not a
 context switch to a browser.</p>
@@ -488,9 +503,6 @@ plausible-looking configuration that does not evaluate — the failure mode this
 <p>Combined with §7, the sequence is: the agent proposes a declaration change, the documentation for
 every option it touched is shown beside the diff, and you approve or reject with the reasoning in
 front of you.</p>
-<h3 id="64-it-degrades">6.4 It degrades<a class="headerlink" href="#64-it-degrades" title="Permanent link">&para;</a></h3>
-<p>A documentation pane is text, so it satisfies the parity contract completely (§9.4). The TUI gets the
-same documentation, searchable, with no loss.</p>
 <hr />
 <h2 id="7-the-modification-surface">7. The modification surface<a class="headerlink" href="#7-the-modification-surface" title="Permanent link">&para;</a></h2>
 <p><strong>Everything configurable is modifiable at runtime — by the user, the built-in agent, and external
@@ -584,7 +596,7 @@ declaration, and the escrow it depends on are real.</p>
 <p>A <strong>host</strong> is a named execution target backed by a runtime: <code>native</code>, <code>docker</code>, <code>wsl</code>, <code>podman</code>,
 <code>nspawn</code>, or <code>remote</code> (another personal machine over the tailnet). The container runtime is itself an
 abstraction — pinning one would exclude users to save a thin dispatch.</p>
-<p>Each core process — <strong>daemon, CLI, GUI, TUI, web</strong> — is <strong>placed on a host</strong> in the declaration.
+<p>Each core process — <strong>daemon, CLI, GUI, web</strong> — is <strong>placed on a host</strong> in the declaration.
 Placement is a property of the system, not an installation detail: daemon on the workstation,
 interface on the laptop, is a configuration rather than a special build.</p>
 <p>Processes carry constraints, checked at evaluation time:</p>
@@ -603,10 +615,6 @@ interface on the laptop, is a configuration rather than a special build.</p>
 <tr>
 <td><code>gui</code></td>
 <td>A display, a GPU, the platform window system — effectively <code>native</code></td>
-</tr>
-<tr>
-<td><code>tui</code></td>
-<td>A TTY</td>
 </tr>
 <tr>
 <td><code>cli</code></td>
@@ -638,38 +646,23 @@ on my placement" becomes the standard bug report.</p>
 <h2 id="9-rendering">9. Rendering<a class="headerlink" href="#9-rendering" title="Permanent link">&para;</a></h2>
 <p><strong>Sources are not renderers.</strong> Cell-grid layout, widget layout, web content, guest windows, and 3D
 all emit primitives into one scene tree. Two <strong>backends</strong> consume it.</p>
-<table>
-<thead>
-<tr>
-<th>Backend</th>
-<th>Crate</th>
-<th>Target</th>
-<th>Output</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>GPU compositor</td>
-<td><code>omnis-render</code></td>
-<td>Desktop window, and a browser canvas via WebGPU</td>
-<td>Batched GPU primitives</td>
-</tr>
-<tr>
-<td>ANSI/TUI</td>
-<td><code>omnis-tui</code></td>
-<td>A real terminal, local or over SSH</td>
-<td>Escape sequences on stdout</td>
-</tr>
-</tbody>
-</table>
-<p>The split is not aesthetic. <code>cell-grid</code> presentation is a terminal <em>look</em> the GPU compositor draws in
-a window; the TUI backend is Omnis genuinely <em>running in a terminal</em> — no window, no GPU, works over
-SSH, survives in <code>tmux</code>. Different problems, different code, identical features.</p>
+<p>There is <strong>one backend</strong>: the GPU compositor (<code>omnis-render</code>), targeting a desktop window natively
+and a browser canvas over WebGPU (§8.1).</p>
+<p><code>cell-grid</code> presentation remains — the terminal <em>look</em>, fixed advance, ANSI palettes, pane-grid
+keyboard navigation, command-palette-first interaction — drawn by the compositor in a window. Looking
+like a terminal and running in one were always separate things; ADR-0017 dropped the second, and the
+aesthetic is untouched.</p>
+<p><strong>One backend does not make the scene tree optional.</strong> It is what keeps sources out of rendering: a
+source emits primitives and knows nothing about how they are drawn, which is what lets a browser
+page, a guest window, and a shader field coexist in one frame.</p>
 <h3 id="91-why-one-scene-tree">9.1 Why one scene tree<a class="headerlink" href="#91-why-one-scene-tree" title="Permanent link">&para;</a></h3>
 <p>A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with shaped advance —
-same atlas, same pipeline. A browser is a content source, not a rendering engine. Effects that live
-in only one backend become the per-profile bolt-on the whole design rejects. And compositing a
-terminal pane, a video, and a particle field in one frame is a scheduling problem with one answer.</p>
+same atlas, same pipeline. A browser is a content source, not a rendering engine. And compositing a
+terminal pane, a video, a guest application window, and a particle field in one frame is a scheduling
+problem with one answer.</p>
+<p>The scene tree is also what makes a service presentable at all (§12): a source translates whatever it
+is fronting into primitives, and everything downstream — theming, layout, accessibility, the agent's
+view of the screen — works without knowing what produced them.</p>
 <h3 id="92-primitives">9.2 Primitives<a class="headerlink" href="#92-primitives" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -699,10 +692,15 @@ terminal pane, a video, and a particle field in one frame is a scheduling proble
 <td>Material layer — custom shader with declared inputs</td>
 <td>3D scenes, particle fields, backdrops, transitions</td>
 </tr>
+<tr>
+<td><strong>Native surface</strong> — a delegated region we do not draw</td>
+<td>DRM playback, guest windows, hardware-decoded video, third-party webviews</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Adding a source must not add a primitive class.</strong> If it would, that is a design conversation, not a
-patch.</p>
+patch. The native surface is the one case that has earned it (ADR-0019), because no combination of
+the other five can express <em>content we are not permitted to look at</em>.</p>
 <h3 id="93-3d-shaders-particles">9.3 3D, shaders, particles<a class="headerlink" href="#93-3d-shaders-particles" title="Permanent link">&para;</a></h3>
 <p>The material layer is a first-class primitive, not an effects add-on, available in every presentation
 mode — including behind and between glyph runs in the cell grid. Two uses, deliberately not
@@ -710,71 +708,63 @@ conflated: <strong>chrome</strong> (backdrops, transitions, agent-activity field
 and <strong>content</strong> (shader playgrounds, model preview, GPU-accelerated visualisation) supplied by a user
 or extension. The engine supports both; exposing authoring demands sandboxing, resource limits, and
 GPU-hang recovery, and is gated on D14.</p>
-<h3 id="94-the-parity-contract">9.4 The parity contract<a class="headerlink" href="#94-the-parity-contract" title="Permanent link">&para;</a></h3>
+<h3 id="94-native-surfaces-and-the-rule-for-them">9.4 Native surfaces, and the rule for them<a class="headerlink" href="#94-native-surfaces-and-the-rule-for-them" title="Permanent link">&para;</a></h3>
+<p>Some content cannot be drawn by us. DRM-protected playback requires a protected output path, so
+capturing it — in a browser canvas or from a guest window — yields black frames by design. Capture is
+the wrong verb.</p>
+<p>A <strong>native surface</strong> is delegated instead: Omnis declares the geometry, the clip, and the z-order, and
+the platform composites the content there through its own path. <strong>We never receive the pixels</strong>, which
+is exactly why it is permitted (Wayland subsurfaces, <code>CALayer</code>/<code>AVSampleBufferDisplayLayer</code>,
+DirectComposition visuals).</p>
+<p><strong>The rule: delegate as little as possible.</strong> Every delegated region is a piece of the interface we no
+longer control (P7). If content can be a texture, it should be.</p>
+<p>What a delegated region costs:</p>
 <table>
 <thead>
 <tr>
-<th>Primitive</th>
-<th>In a terminal</th>
-<th>Fidelity</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Glyph run</td>
-<td>Text cells</td>
-<td>Full</td>
+<td><strong>No styling</strong></td>
+<td>A profile does not reach inside it. It is someone else's rectangle.</td>
 </tr>
 <tr>
-<td>Quad — fill, border</td>
-<td>Background colour and box-drawing characters</td>
-<td>Full when cell-aligned</td>
+<td><strong>No capture</strong></td>
+<td>We cannot screenshot or record it — so our own capture features must say so rather than emit black.</td>
 </tr>
 <tr>
-<td>Quad — rounded, shadow, gradient</td>
-<td>Nearest box-drawing corner; shadows dropped</td>
-<td>Approximate</td>
+<td><strong>Constrained z-order</strong></td>
+<td>On several platforms an overlay sits above or below the scene, not freely interleaved. Modals over one may be impossible, not merely awkward.</td>
 </tr>
 <tr>
-<td>Path</td>
-<td>Braille or box-drawing rasterisation, else its label</td>
-<td>Approximate</td>
+<td><strong>Does not cross the network</strong></td>
+<td>It cannot be delegated through the web surface's canvas, so remote access to DRM playback does not work and must say so.</td>
 </tr>
 <tr>
-<td>Texture</td>
-<td>Terminal graphics protocol where present, else half-block or Braille, else declared alt text</td>
-<td>Terminal-dependent</td>
-</tr>
-<tr>
-<td>Material layer</td>
-<td><strong>Cannot execute</strong>; renders its static fallback</td>
-<td>None</td>
+<td><strong>Four implementations</strong></td>
+<td>One per platform, in a project that otherwise confines platform differences to how the core is hosted.</td>
 </tr>
 </tbody>
 </table>
-<ol>
-<li><strong>Every primitive declares a terminal fallback.</strong> No fallback, no primitive — enforced at the type
-   level, not by convention (P7).</li>
-<li><strong>Nothing is silently dropped.</strong> Degradation is visible — alt text, a placeholder — never a blank
-   region that hides the fact content exists.</li>
-<li><strong>Feature parity, not pixel parity.</strong> Every command, pane, view, and workflow is reachable in the
-   TUI. Visual fidelity is explicitly not promised.</li>
-<li><strong>No feature is TUI-only or GPU-only.</strong> A feature that cannot degrade is a scene-tree design
-   problem, fixed by extending the scene tree — never by branching on the backend.</li>
-</ol>
-<p>Terminal capability is <strong>detected, not assumed</strong>: truecolor versus 256-colour, kitty keyboard
-protocol versus legacy escapes, SGR mouse reporting, graphics-protocol support.</p>
+<p>Its contents are opaque to us, so its accessibility is the platform's and the content's. The region
+must still be <strong>described</strong> in our tree, or a screen reader meets an unexplained gap.</p>
 <h3 id="95-what-owning-the-renderer-costs">9.5 What owning the renderer costs<a class="headerlink" href="#95-what-owning-the-renderer-costs" title="Permanent link">&para;</a></h3>
 <p>Text shaping, hit-testing, IME, and <strong>accessibility</strong>. A custom-rendered UI publishes no native
 accessibility tree unless built to, so UIA/AX/AT-SPI belongs in the compositor's acceptance criteria
-rather than a later epic. The web surface makes this sharper, not softer: a browser is where users
-most expect assistive technology to work.</p>
+rather than a later epic.</p>
+<p>Dropping the TUI (ADR-0017) makes this <strong>non-negotiable rather than merely important</strong>: a text
+backend was one path to text-addressable output, and with it gone the published accessibility tree is
+the only one. The web surface sharpens it further — a browser is where users most expect assistive
+technology to work.</p>
 <hr />
 <h2 id="10-presentation">10. Presentation<a class="headerlink" href="#10-presentation" title="Permanent link">&para;</a></h2>
 <h3 id="101-themes-and-profiles">10.1 Themes and profiles<a class="headerlink" href="#101-themes-and-profiles" title="Permanent link">&para;</a></h3>
 <p><strong>A theme is colours</strong>, in the <strong>VS Code colour-theme format</strong> — <code>colors</code>, <code>tokenColors</code>,
 <code>semanticTokenColors</code>, <code>type</code>. Existing themes load unmodified, and the format already carries
-<code>terminal.ansi*</code>, so the sixteen ANSI colours both the cell grid and <code>omnis-tui</code> need come free. Icon
+<code>terminal.ansi*</code>, so the sixteen ANSI colours the cell-grid presentation needs come free. Icon
 themes use the VS Code icon-theme format for the same reason.</p>
 <p><strong>A profile bundles</strong> a theme, an icon theme, the axis values below, window chrome, the app icon and
 its state animations, typography and density, an audio pack, material-layer backdrops, and settings
@@ -867,7 +857,79 @@ the second.</p>
   wrong cache hits, so detecting them is part of the work, not an extra.</li>
 </ul>
 <hr />
-<h2 id="12-security">12. Security<a class="headerlink" href="#12-security" title="Permanent link">&para;</a></h2>
+<h2 id="12-services">12. Services<a class="headerlink" href="#12-services" title="Permanent link">&para;</a></h2>
+<p>A <strong>service</strong> — ChatGPT, DeepSeek, Google, YouTube, Netflix — is a <strong>backend of a domain subsystem</strong>.
+YouTube is to <code>streaming</code> what <code>git</code> is to <code>vcs</code>: the same swappability (P2), the same declaration,
+the same complete removal (§5.3).</p>
+<p>Three concerns, only one of them new:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Presentation</strong></td>
+<td>A source emitting scene-tree primitives (§9)</td>
+</tr>
+<tr>
+<td><strong>Action</strong></td>
+<td>A capability over the bus, brokered and escrow-gated (§7)</td>
+</tr>
+<tr>
+<td><strong>Aggregation</strong></td>
+<td>A <strong>domain schema</strong> every backend maps onto — the new part</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The universal translator already exists.</strong> <code>omnis-web-source</code>'s semantic mode — AXTree to layout to
+primitives — renders any service with a web interface <em>today</em>, as real primitives rather than a
+rectangle of pixels: keyboard-navigable, themeable, and legible to an agent.</p>
+<p>Four tiers, progressive, with no cliff:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>What</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Raster — screencast into a texture</td>
+<td>Nothing; always works</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Semantic translation — AXTree to primitives</td>
+<td>Nothing; the default</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Declared adapter — a mapping to the domain schema</td>
+<td>Data, not code (P10)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>API adapter — the service's own API</td>
+<td>An adapter subsystem, and credentials</td>
+</tr>
+</tbody>
+</table>
+<p>Everything is usable at tier 1 and upgraded in place. A service that changes its markup is fixed by
+editing data, not by shipping a release.</p>
+<p><strong>A domain schema names which capabilities a backend may decline.</strong> Not every provider supports every
+action, and a schema that assumes otherwise produces an interface full of controls that silently
+fail. DRM playback is the sharpest case: a backend supplies search, metadata, and queue, and declines
+playback, which is then delegated to a native surface (§9.4).</p>
+<p><strong>Terms of service is a decision, not a technical question.</strong> Re-presenting some services through our
+own interface is contractually restricted regardless of feasibility, and which adapters ship needs
+the same treatment as trade dress (D3).</p>
+<hr />
+<h2 id="13-security">13. Security<a class="headerlink" href="#13-security" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>The vault.</strong> Master key via Argon2id; the key-encryption key in a zeroising buffer with <code>mlock</code>,
   never serialised. Device secrets bridge to the OS keychain.</li>
@@ -881,32 +943,31 @@ the second.</p>
 </ul>
 <p>The structure is fixed; the <strong>threat model is D10</strong> and may constrain it.</p>
 <hr />
-<h2 id="13-crate-and-package-layout">13. Crate and package layout<a class="headerlink" href="#13-crate-and-package-layout" title="Permanent link">&para;</a></h2>
+<h2 id="14-crate-and-package-layout">14. Crate and package layout<a class="headerlink" href="#14-crate-and-package-layout" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>crates/
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  omnis-core/          bus contracts, option schema, scene tree types, capability matrix
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  omnisd/              the core: routing, registry, brokering, convergence, generations
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  omnis-cli/           `omnis`, `--json` on every command
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  omnis-gui/           desktop host and window manager
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  omnis-tui/           ANSI backend: scene tree to cells, capability detection, input decoding
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  omnis-layout/        cell-grid and widget layout modes
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  omnis-browser/       Chromium supervisor and CDP bridge
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  omnis-web-source/    AXTree→layout and screencast→texture bridges
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  omnis-cas/           chunking, convergent encryption, VFS
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  omnis-agent/         harness registry, session supervision, MCP bridge
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  omnis-docs/          option schema → documentation, search index, in-product docs surface
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>subsystems/            one adapter binary per bound tool — vcs, terminals, lsp, dap, tasks, …
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>packages/
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>  frontend/            web surface shell
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>  profiles/            profiles and themes — data only, no code
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>nix/                   modules defining the declaration's option schema
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>examples/
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>  omnis.nix            the reference declaration
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  omnis-layout/        cell-grid and widget layout modes
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  omnis-browser/       Chromium supervisor and CDP bridge
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  omnis-web-source/    AXTree→layout and screencast→texture bridges; the default service backend
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  omnis-cas/           chunking, convergent encryption, VFS
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  omnis-agent/         harness registry, session supervision, MCP bridge
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  omnis-docs/          option schema → documentation, search index, in-product docs surface
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>subsystems/            one adapter binary per bound tool — vcs, terminals, lsp, dap, tasks, …
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>packages/
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  frontend/            web surface shell
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>  profiles/            profiles and themes — data only, no code
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>nix/                   modules defining the declaration's option schema
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>examples/
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>  omnis.nix            the reference declaration
 </code></pre></div>
 <p>Nothing here exists yet. It is the target shape, and the reason <code>ci.yml</code> already carries guarded Rust
 and web jobs.</p>
 <hr />
-<h2 id="14-open-decisions">14. Open decisions<a class="headerlink" href="#14-open-decisions" title="Permanent link">&para;</a></h2>
+<h2 id="15-open-decisions">15. Open decisions<a class="headerlink" href="#15-open-decisions" title="Permanent link">&para;</a></h2>
 <p>Resolved decisions link to their record; see <a href="decisions/">the decision log</a>.</p>
 <table>
 <thead>
@@ -978,9 +1039,9 @@ and web jobs.</p>
 <td>E3</td>
 </tr>
 <tr>
-<td>D13</td>
-<td><strong>Webview compositing</strong> — shared-texture, readback, or native subsurface</td>
-<td>E3, E7, E8</td>
+<td>~~D13~~</td>
+<td>Webview compositing — answered by <a href="decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019</a>: a native subsurface, not readback</td>
+<td>~~E3, E7, E8~~</td>
 </tr>
 <tr>
 <td>D14</td>
@@ -988,14 +1049,14 @@ and web jobs.</p>
 <td>E21</td>
 </tr>
 <tr>
-<td>D15</td>
-<td><strong>Terminal capability floor</strong> for <code>omnis-tui</code></td>
-<td>E22</td>
+<td>~~D15~~</td>
+<td>Terminal capability floor — moot, the TUI is dropped by <a href="decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017</a></td>
+<td>~~E22~~</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="15-repository-automation">15. Repository automation<a class="headerlink" href="#15-repository-automation" title="Permanent link">&para;</a></h2>
+<h2 id="16-repository-automation">16. Repository automation<a class="headerlink" href="#16-repository-automation" title="Permanent link">&para;</a></h2>
 <p>The development pipeline is part of the architecture: <a href="../agents/"><code>AGENTS.md</code></a> states the rules,
 <a href="../pipeline/"><code>notes/pipeline.md</code></a> explains how it works and how releases are cut,
 <code>.github/workflows/</code> enforces it, and <code>.github/scripts/</code> implements it. The pipeline is Python; that
@@ -1050,7 +1111,6 @@ is deliberate and independent of the product stack.</p>
               <li><a href="#61-one-schema-three-consumers">6.1 One schema, three consumers</a></li>
               <li><a href="#62-live-while-you-declare">6.2 Live while you declare</a></li>
               <li><a href="#63-the-agent-reads-what-you-read">6.3 The agent reads what you read</a></li>
-              <li><a href="#64-it-degrades">6.4 It degrades</a></li>
             </ul>
           </li>
           <li><a href="#7-the-modification-surface">7. The modification surface</a>
@@ -1071,7 +1131,7 @@ is deliberate and independent of the product stack.</p>
               <li><a href="#91-why-one-scene-tree">9.1 Why one scene tree</a></li>
               <li><a href="#92-primitives">9.2 Primitives</a></li>
               <li><a href="#93-3d-shaders-particles">9.3 3D, shaders, particles</a></li>
-              <li><a href="#94-the-parity-contract">9.4 The parity contract</a></li>
+              <li><a href="#94-native-surfaces-and-the-rule-for-them">9.4 Native surfaces, and the rule for them</a></li>
               <li><a href="#95-what-owning-the-renderer-costs">9.5 What owning the renderer costs</a></li>
             </ul>
           </li>
@@ -1084,13 +1144,15 @@ is deliberate and independent of the product stack.</p>
           </li>
           <li><a href="#11-data">11. Data</a>
           </li>
-          <li><a href="#12-security">12. Security</a>
+          <li><a href="#12-services">12. Services</a>
           </li>
-          <li><a href="#13-crate-and-package-layout">13. Crate and package layout</a>
+          <li><a href="#13-security">13. Security</a>
           </li>
-          <li><a href="#14-open-decisions">14. Open decisions</a>
+          <li><a href="#14-crate-and-package-layout">14. Crate and package layout</a>
           </li>
-          <li><a href="#15-repository-automation">15. Repository automation</a>
+          <li><a href="#15-open-decisions">15. Open decisions</a>
+          </li>
+          <li><a href="#16-repository-automation">16. Repository automation</a>
           </li>
         </ul>
       </aside>

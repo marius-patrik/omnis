@@ -160,6 +160,26 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -237,7 +257,7 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 </tr>
 <tr>
 <td>D∗</td>
-<td>Architecture decisions D1–D15</td>
+<td>Architecture decisions D1–D15 (D2, D8, D13, D15 resolved)</td>
 <td><code>area:docs</code></td>
 <td>—</td>
 <td>Fifteen open decisions in <code>ARCHITECTURE.md</code> §8. Each is resolved by an ADR before its dependent epic leaves <code>Backlog</code> — and by rule 13, none of them becomes an issue until it is settled.</td>
@@ -275,14 +295,14 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 <td>Scene tree — the renderer-agnostic view model</td>
 <td><code>area:core</code></td>
 <td>E9</td>
-<td>Panes, focus, buffers, selections, decorations, and the primitive vocabulary of <code>ARCHITECTURE.md</code> §4.2. The single input to <strong>both</strong> renderer backends and the parity contract between them. <strong>Must land before E3.</strong></td>
+<td>Panes, focus, buffers, selections, decorations, and the primitive vocabulary of <code>ARCHITECTURE.md</code> §9.2. The single input to the compositor, and what keeps sources out of rendering — a source emits primitives and knows nothing about how they are drawn. <strong>Must land before E3.</strong></td>
 </tr>
 <tr>
 <td>E3</td>
 <td>GPU compositor (<code>omnis-render</code>)</td>
 <td><code>area:term</code></td>
 <td>D4, D7, D11, D12, E10</td>
-<td>The desktop renderer backend. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer), shared glyph atlas and shaping, damage tracking, device-loss handling, and the material-layer pass that 3D and particles ride on. Every primitive it accepts must carry a declared terminal fallback (§4.7), or E22 cannot hold parity.</td>
+<td><strong>The</strong> renderer. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer, native surface), shared glyph atlas and shaping, damage tracking, device-loss handling, the material-layer pass that 3D and particles ride on, and the delegated-region path DRM playback and guest windows depend on (§9.4). Accessibility (UIA/AX/AT-SPI) is acceptance criteria, not a follow-up.</td>
 </tr>
 <tr>
 <td>E2</td>
@@ -366,7 +386,7 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 </tbody>
 </table>
 <h2 id="phase-3-sources-presentation-and-the-second-backend">Phase 3 — Sources, presentation, and the second backend<a class="headerlink" href="#phase-3-sources-presentation-and-the-second-backend" title="Permanent link">&para;</a></h2>
-<p>Sources emit into the scene tree; backends consume it. Only E3 and E22 are renderers.</p>
+<p>Sources emit into the scene tree; the compositor consumes it. Only E3 is a renderer.</p>
 <table>
 <thead>
 <tr>
@@ -405,13 +425,6 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 <td><code>area:ui</code></td>
 <td>E3, D11, D14</td>
 <td>The material-layer pass in anger: scene layer with camera and depth buffer, GPU-instanced particle systems, custom shader materials with declared inputs, and — if D14 opens it to users and extensions — sandboxing, resource limits, and GPU-hang recovery.</td>
-</tr>
-<tr>
-<td>E22</td>
-<td>TUI surface (<code>omnis-tui</code>)</td>
-<td><code>area:term</code></td>
-<td>E10, E20, D15</td>
-<td>The <strong>second renderer backend</strong>: the same scene tree rendered as ANSI escape sequences in a real terminal, local or over SSH, with no GPU and no window. Terminal capability detection, the degradation ladder of <code>ARCHITECTURE.md</code> §4.7, kitty/SGR input decoding, and graphics-protocol passthrough where available.</td>
 </tr>
 </tbody>
 </table>
@@ -469,8 +482,8 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 <h2 id="sequencing-rationale">Sequencing rationale<a class="headerlink" href="#sequencing-rationale" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>E10 before E3, and E3 before everything visible.</strong> Terminal, widget, browser, and 3D are
-   sources that emit into the scene tree; only E3 and E22 are renderers (<code>ARCHITECTURE.md</code> §4). That
-   makes the scene tree the one thing every source and both backends agree on, and the compositor
+   sources that emit into the scene tree; only E3 is a renderer (<code>ARCHITECTURE.md</code> §9). That
+   makes the scene tree the one thing every source agrees on, and the compositor
    foundational rather than a Phase 3 flourish. Building a source before the compositor produces a
    private renderer with a different name.</li>
 <li><strong>E1 and E9 before every subsystem.</strong> Subsystems are conditionally initialized from settings and
@@ -485,15 +498,14 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 <li><strong>E13 before E15.</strong> The task engine's whole caching claim rests on CAS timestamps.</li>
 <li><strong>E9 before E4.</strong> Presets are coordinates in the matrix; without the matrix they become the
    per-profile bolt-ons the design exists to reject.</li>
-<li><strong>Accessibility is E3's problem, not a later epic.</strong> A fully custom-rendered UI publishes no
-   native accessibility tree unless it is built to (<code>ARCHITECTURE.md</code> §4.5). Retrofitting UIA/AX/
-   AT-SPI onto a shipped compositor is far more expensive than designing for it, so it belongs in
-   E3's acceptance criteria.</li>
-<li><strong>E22 is early for a reason.</strong> The TUI is a <em>second renderer backend</em>, not a later port, and the
-   parity contract (<code>ARCHITECTURE.md</code> §4.7) only holds if it is exercised while the scene tree is
-   still soft. Every primitive must declare a terminal fallback; discovering that a primitive cannot
-   degrade is cheap in E10 and expensive after E3 and E20 have shipped features on top of it. The
-   practical rule: a primitive without a working TUI fallback is not finished.</li>
+<li><strong>Accessibility is E3's problem, and now non-negotiable.</strong> A custom-rendered UI publishes no
+   native accessibility tree unless built to (<code>ARCHITECTURE.md</code> §9.5). With the TUI dropped
+   (ADR-0017) the published tree is the <em>only</em> path to text-addressable output, and retrofitting
+   UIA/AX/AT-SPI onto a shipped compositor costs far more than designing for it.</li>
+<li><strong>A native surface is a last resort, not a shortcut.</strong> Every delegated region (§9.4) is a piece
+   of the interface we no longer control — unstyleable, uncapturable, and awkward to layer. It is
+   correct for DRM playback and heavy platform-composited content, and wrong for anything that
+   could have been a texture.</li>
 <li><strong>D1 is a slice, not a thesis.</strong> The architecture already says what Omnis does. What it does not
    say is which path gets built first — and that choice determines which bus messages, which
    subsystem, and which surface come into existence first.</li>
