@@ -1,11 +1,11 @@
 # ADR-0012 — The system is one declarative configuration, applied as generations
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Refines**: ADR-0005 · **Completes**: ADR-0003, ADR-0006
 
 ## Context
 
-`VISION.md` §7 treats `settings.json` as a switchboard: a bag of keys the UI writes and the daemon
+`notes/transcript.md` §7 treats `settings.json` as a switchboard: a bag of keys the UI writes and the daemon
 reads. ADR-0005 put configuration in versioned files, which is right but says nothing about *shape*.
 
 Two problems remain unsolved by a settings bag. First, once subsystems, packages, profiles, and

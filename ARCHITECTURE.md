@@ -1,83 +1,120 @@
 # Omnis — Architecture
 
-**Status: NORMATIVE.** This is the single source of truth for process topology, crate boundaries,
-IPC contracts, and renderer separation. `VISION.md` is reference material and never overrides this
-document. Changes require an ADR in `notes/architecture_decisions.md`.
+**Status: NORMATIVE, and the only normative document.** Vision and architecture are one file: what
+Omnis is, why, and how it is built. The scoping transcript that started it is kept as source material
+in [`notes/transcript.md`](notes/transcript.md) and specifies nothing.
+
+Changes require a decision record in [`notes/adr/`](notes/adr/).
 
 ---
 
-## 1. Product thesis
+## 1. What Omnis is
 
-Omnis is a **headless daemon that owns everything durable**, with thin interchangeable surfaces
-attached over IPC.
+**An AI-first operating system for a power user's machine.**
 
-The daemon owns version control, packages, tasks, terminals, containers, language servers,
-debuggers, an embedded browser, an agent runtime, a secrets vault, content-addressed storage, and a
-sync mesh. The surfaces — a Tauri desktop app, a terminal UI, a CLI, and any external harness — own
-nothing but presentation and input. Closing a window, reloading the UI, or crashing a surface costs nothing.
+*AI-first* here is a structural claim, not a description of a feature. An agent is a **first-class
+operator** of this system: it calls the same API as the user (P5), reads the same option schema the
+settings UI is generated from (P9), addresses the same objects by the same URIs (§10.3), and is bound
+by the same approval gate and audit trail (§7.1). It is not a panel bolted into an editor.
 
-Because the daemon owns behaviour, the presentation layer collapses into **configuration**. Renderer,
-layout topology, input routing, keymap, chrome, and iconography are orthogonal axes, and a
-**profile** is a named point in that space, never a fork.
+That is only safe because of what §4.1 and §7.1 provide: every change an agent makes is a generation
+with an author and a diff, gated before it takes effect and reversible after. Giving an agent real
+power over a machine is defensible exactly to the degree that its actions are reviewable and
+undoable — so the accountability machinery is not a constraint on the AI-first goal, it is the thing
+that makes it achievable.
 
-**We do not enumerate workflows.** The subsystems compose: a task DAG that reads a Cargo manifest, a
-terminal whose secrets came from the vault, a browser page harvested into a context fragment, an
+Omnis is a headless daemon that owns nothing you could get elsewhere, and everything that makes those
+things compose. Version control, packages, tasks, terminals, containers, language servers,
+debuggers, a browser, agents, secrets, and storage are all **bound, not built** — `git`, `sl`, Nix,
+podman, libvirt, Chromium, Tailscale, the coding-agent CLIs. What Omnis owns is the seams: one bus,
+one scene tree, one declaration, one modification surface, one audit trail.
+
+Four properties follow, and they are the whole design:
+
+**The system is declared, not configured.** One file describes the machine — subsystems, packages,
+guest operating systems, where each process runs, how it looks. Applying it produces a *generation*
+with a parent, a diff, and an author. Rollback is one operation. Removing something removes it
+entirely: the processes, the packages, the files, and everything it contributed to the rest of the
+system.
+
+**Everything is modifiable, by anyone authorised.** The user, the built-in agent, and an external
+agent all change the system through the same API, pass the same approval gate, and land in the same
+audit trail. There is no privileged surface and no trusted caller.
+
+**The documentation is part of the product.** The option schema that defines the declaration also
+generates the documentation, so you read about the system in the same window you are declaring it in
+— and so does the agent proposing the change.
+
+**The interface is a configuration state, not an implementation.** Renderer output, layout, input
+routing, keymap, and chrome are orthogonal axes. A *profile* is a named point in that space; a
+*theme* is colours in the VS Code format, so the existing ecosystem loads unmodified.
+
+**We do not enumerate workflows.** The subsystems compose: a task graph that reads a Cargo manifest,
+a terminal whose secrets came from the vault, a browser page harvested into a context fragment, an
 agent whose every action lands in the audit stream and whose risky ones wait in escrow. The
-capability surface is the specification; the workflows are what users assemble from it. Specifying
-them one by one would be both endless and wrong.
+capability surface is the specification; workflows are what a user assembles from it.
 
-**Non-goal:** reimplementing VS Code, Zed, or any chat client. Their *interaction shapes* are
-profiles.
+**Non-goals.** Reimplementing anything on the bound list. Reproducing another product's feature set.
+Cloud accounts, multi-user collaboration, or anything that requires a network service to start.
 
 ---
 
-## 2. Process topology
+## 2. Principles
+
+Each is enforced somewhere — a lint, a test, a type, or a process boundary. A principle that is only
+a paragraph erodes on the first deadline.
+
+| | Principle | Enforced by |
+|---|---|---|
+| P1 | **Bind, don't reimplement.** If it exists, bind it. If binding exposes it raw, write the adapter — not the tool. | Review against ADR-0011's list of owned abstractions |
+| P2 | **An abstraction exists to make its backend swappable and removable**, never to replace it. | Two backends before an abstraction is called done |
+| P3 | **Declared, not imperative.** State goes in the declaration; changes converge. | Runtime mutations write the declaration (§4.2) |
+| P4 | **Removal is complete**, including system integration. | Integration is brokered, never self-registered (§5.3) |
+| P5 | **No privileged caller.** The GUI has no capability the CLI or an external agent lacks. | One API, one validation path, one escrow (§7) |
+| P6 | **No branching on a profile or theme name.** Features branch on axis values or capability queries. | Lint |
+| P7 | **Every primitive degrades to a terminal.** A feature that cannot is a scene-tree problem. | Type-level: no fallback, no primitive (§9.4) |
+| P8 | **Subsystems cannot couple.** The bus is the only ABI. | Separate processes (§5.1) |
+| P9 | **One schema, three consumers.** Option definitions drive the settings UI, the documentation, and the agent's vocabulary. | Generated, never hand-written (§6) |
+| P10 | **Adding a thing is declaring a thing.** Panes, sources, subsystems, environments, profiles, and themes are instances of shared abstractions, never bespoke implementations. | A new instance touches data and declaration, not core code |
+
+---
+
+## 3. Topology
+
+Four layers. Nothing runs inside the core.
 
 ```
-                       ┌──────────────────────────────────────┐
-   SURFACES            │ omnis-gui · omnis-tui · omnis (CLI) │  external harnesses
-                       └─────────┬───────────┴────────┬──────┴───────────┬─────────┘
-                                 │                    │                  │ MCP/stdio
-                                 └────────── Substrate Bus ──────────────┘
-                                                │
-                       ┌────────────────────────┴────────────────────────┐
-   DAEMON              │                     omnisd                      │
-                       │      OSB router · conditional subsystems        │
-                       └───┬──────────────┬──────────────┬───────────────┘
-                           │              │              │
-   WORKERS          ┌──────┴─────┐ ┌──────┴──────┐ ┌─────┴────────┐
-                    │ pty / lsp  │ │ omnis-      │ │ extension    │
-                    │ / dap      │ │ browser     │ │ host (node)  │
-                    └────────────┘ └─────────────┘ └──────────────┘
+SURFACES      gui · tui · cli · web (over Tailscale) · external harnesses
+                                    ▲
+NEXT TO       vcs · terminals · lsp · dap · browser · cas · tasks · agent · docs · automation · exthost
+              environments: containers · VMs · compat
+              supervised peers — separate processes, the bus is the only ABI
+                                    ▲
+CORE          omnisd — bus router · registry · capability broker · convergence & generations
+                                    ▲
+BELOW         host OS · container runtime · Nix store · systemd · Tailscale · OS keychain
+              bound, never owned
 ```
 
-### 2.1 Responsibilities
+**Below** is infrastructure that pre-exists. The core binds it and never assumes exclusive ownership.
+**Next to** are peers the core supervises but does not contain. **The core is small** — routing,
+registry, brokering, convergence.
+
+### 3.1 Responsibilities
 
 | Process | Owns | Never does |
 |---|---|---|
-| `omnisd` | Session state, scheduling, persistence, all blocking I/O, subsystem supervision | Render anything; depend on a GUI being attached |
-| `omnis-gui` | Window, renderer, input capture, presentation state | Own durable state; block on I/O |
-| `omnis` (CLI) | Scriptable surface over the same bus; `--json` on every command | Reimplement daemon logic |
-| `omnis-tui` | Full interactive surface in a real terminal, local or over SSH | Assume a GPU, a window, or a display server |
-| Browser worker | Chromium/CDP lifecycle, page capture | Touch the GUI process directly |
-| Extension host | Untrusted third-party code, sandboxed | Share an address space with `omnisd` |
+| `omnisd` | Bus routing, subsystem registry, capability brokering, convergence, generations | Render; contain a subsystem; depend on a surface being attached |
+| Subsystems | One domain each, behind an adapter | Talk to each other except over the bus; self-register integration |
+| `omnis-gui` | Window, renderer, input capture | Own durable state; block on I/O |
+| `omnis-tui` | A full interactive surface in a real terminal, local or over SSH | Assume a GPU, a window, or a display server |
+| `omnis` (CLI) | Scriptable surface, `--json` on every command | Reimplement daemon logic |
+| Environments | A guest userland or machine | Nest inside the core |
 
-### 2.2 Subsystems are conditional
-
-`omnisd` initializes subsystems from the `features` block in `settings.json`. A user who has not
-enabled Docker runs a daemon with no Docker subsystem — not a disabled one. This is what keeps a
-platform of this size honest: **every subsystem must be independently omittable**, which forces it to
-sit behind the bus rather than reach into its neighbours.
-
-A subsystem implements one trait — initialize, shut down, and communicate only over the bus. A
-subsystem that cannot be disabled without breaking another subsystem is a design defect.
-
-### 2.3 Substrate Bus
-
-Two sockets with different guarantees.
+### 3.2 The Substrate Bus
 
 **Control** (`omnis-control.sock`, `\\.\pipe\omnis-control`) — JSON-RPC 2.0. Capability checks,
-layout persistence, escrow transitions, extension registration, queries, context shelf edits.
+declaration reads and writes, generation transitions, escrow tickets, registry and schema queries.
 
 **Data** (`omnis-data.sock`, `\\.\pipe\omnis-data`) — binary multiplexer, uniform 9-byte header:
 
@@ -87,362 +124,520 @@ layout persistence, escrow transitions, extension registration, queries, context
 0x01 PTY_STREAM   raw terminal stdout/stdin
 0x02 PTY_RESIZE   [Cols: u16][Rows: u16]
 0x03 DOCKER_LOG   demultiplexed container logs
-0x04 CAS_CHUNK    decrypted FastCDC blob payloads
-0x05 CDP_BINARY   CDP screencast frames, Sixel rasters
+0x04 CAS_CHUNK    decrypted content-addressed payloads
+0x05 CDP_BINARY   browser screencast frames, guest window frames
 ```
 
 Contract rules:
 
 - The wire schema is **versioned and additive**. A surface built against version *N* runs against
-  daemon version *N+k*.
-- Every control message is expressible as JSON, for the CLI and for debugging, whatever the encoding.
+  daemon version *N+k*. New opcodes are appended, never renumbered.
+- Every control message is expressible as JSON, whatever the encoding on the wire.
 - Surfaces are **stateless with respect to the daemon**. Any surface may attach, detach, or crash at
-  any point without data loss.
-- New opcodes are appended, never renumbered.
+  any point without data loss — which is why a surface on another machine is legal (§8).
+- **Tracing is part of the bus from the first message.** With every subsystem out of process, one
+  stack trace becomes several processes and a correlation id. Retrofitting that is far more expensive
+  than carrying it from the start.
 
 ---
 
-## 3. The capability matrix and the modification surface
+## 4. The declaration
 
-### 3.1 Themes, profiles, and five orthogonal axes
+**One file defines the system.** Not settings the daemon reads — the definition it converges toward.
+See [`examples/omnis.nix`](examples/omnis.nix) for the reference declaration.
 
-Two distinct concepts, and colours keep the name (ADR-0002).
+It is a **Nix module**. Not a format of our own that compiles to Nix: that means owning a language, a
+parser, a type system, an error-reporting story, and a compiler, to arrive where the Nix module
+system already is. We get typed options, merge semantics, `mkDefault`/`mkForce`, imports, and
+nixpkgs for nothing (P1).
 
-**A theme is colours**, in the **VS Code colour-theme format**: `colors`, `tokenColors`,
-`semanticTokenColors`, `type`. Existing VS Code colour themes load unmodified, and the format already
-carries `terminal.ansi*` — so the sixteen ANSI colours the cell-grid layout and `omnis-tui` both need
-come for free. The VS Code colour key namespace is canonical, extended only where Omnis needs tokens
-VS Code lacks (material-layer inputs, cell-grid specifics). File and product icon themes use the
-VS Code icon-theme format for the same reason.
+It declares hosts and placement, subsystems and their backends, guest environments, presentation,
+remote access, and secret *references* — never secret values.
 
-**A profile bundles** a theme, an icon theme, the axis values below, window chrome, the app icon and
-its state animations, typography and density, an audio pack, material-layer backdrops, and settings
-overrides. A profile is the transcript's `SystemPersonalityPackage`.
+### 4.1 Generations
 
-| Axis | Setting | Values |
-|---|---|---|
-| Presentation mode | `workbench.presentation` | `cell-grid` · `widget` · `hybrid` |
-| Layout topology | `workbench.layout.paradigm` | `chat-centric` · `ide-split` · `terminal-grid` · `vcs-dag` |
-| Input routing | `workbench.inputBar.mode` | `global-hud` · `per-pane` · `hybrid` |
-| Keymap | `workbench.keybindings` | `default` · `vscode` · `zed` · `cursor-claude` · `vim` · `emacs` |
-| Chrome & tokens | `workbench.window.*`, `workbench.theme.*` | see §5 |
+Applying a declaration produces a **generation**: a parent, a diff, an author, and a resulting system.
+Generations are listable, diffable, and roll back.
 
-The first axis is **presentation, not renderer**. `cell-grid` and `widget` are layout modes that emit
-into the scene tree; `hybrid` mixes them per pane, so a cell-grid editor beside a widget-laid-out
-settings panel is a legal configuration, not a special case. The transcript's
-`workbench.rendererEngine: 'dom-flexbox' | 'terminal-cell-grid'` is superseded.
+This is the mechanism behind two guarantees that would otherwise be aspirations:
 
-**Which renderer backend runs is not this axis, and not a user preference.** It follows from the
-surface: the desktop app uses the GPU compositor, the terminal UI uses the ANSI backend (§4). A
-user picking `cell-grid` in the desktop app gets the terminal *look*, GPU-drawn; running
-`omnis-tui` gets the real thing.
+- **Reversibility.** "Any change an agent makes can be rolled back" becomes one operation, identical
+  for a typo, a bad profile, and a misbehaving agent.
+- **Attribution.** A generation has an author. An agent reconfiguring your machine produces a
+  reviewable change with a parent, not an untraceable mutation.
 
-**Invariant:** no product code may branch on a *profile name* or a *theme name*. Features branch on
-axis values or on capability queries — never `if (profile === 'claude')`. This is testable and must
-be covered by a lint.
+Audit answers *what happened*; generations answer *what the system now is, and who made it so*.
 
-Themes and profiles are therefore **data files** and nothing else. Adding either must require zero
-code changes.
+### 4.2 Runtime changes write the declaration
 
-**Agent persona is not part of a profile.** `VISION.md` §5 binds one to a provider, model, and
-reasoning effort. Omnis does not. A profile may *suggest* a persona; it never sets one behind the
-user's back.
+A change made through the modification surface is **staged into the declaration** and applied by
+convergence. It is not an overlay and not a side channel. Overlays guarantee drift: the running
+system stops matching the declaration exactly when you need the declaration to be true.
 
-### 3.2 The modification surface
+Resolution layers, later winning:
 
-**Everything configurable is modifiable at runtime — by the user, by the integrated agent, and by
-external agents — through one API.** This is a first-class architectural requirement, not a
-convenience.
+```
+defaults → profile → user → workspace → runtime
+```
 
-- **No privileged surface.** The GUI has no capability the CLI or an external harness lacks. The GUI
-  is a client of the control socket like any other; if a setting can be changed by clicking, it can
-  be changed by a `omnis` invocation and by an agent over MCP, using the same operation.
-- **Introspectable, not guessable.** Clients enumerate what exists — the schema of every setting, the
-  axes and their legal values, the installed profiles, keymaps, layouts, extensions, and material
-  layers — rather than hardcoding knowledge of them. A surface that must be updated in lockstep with
-  the daemon to expose a new setting is a design defect.
-- **One validation path, one approval path.** A mutation is validated identically whichever client
-  sent it, and side-effectful mutations pass the same approval escrow. An external agent changing a
-  profile is gated exactly as the integrated one is. There is no "trusted caller" shortcut.
-- **Attributed and audited.** Every mutation records who made it — the user, the integrated agent, or
-  a named external harness — in the audit stream. Attribution is what makes agent modifiability safe
-  to grant: an unattributable change is indistinguishable from a compromise.
-- **Reversible.** Because configuration is layered files (§5) and mutations are recorded, any change
-  an agent makes can be inspected, diffed, and rolled back without reconstructing intent.
+Every layer is inspectable: the settings surface can name which layer set any value.
 
-The practical consequence: profiles, keymaps, layouts, material layers, and extensions are all
-authored through the same surface at runtime. "Customizing Omnis" and "an agent customizing Omnis"
-are the same operation with a different caller.
+### 4.3 What this costs
+
+Nix is a hard dependency with a real learning curve. Users who never open the file are served by the
+GUI writing typed options for them; users who do open it meet Nix. Convergence is also not instant —
+some changes apply live, others need a subsystem restart, and the option schema must say which, or
+the interface will lie about when a change took effect.
 
 ---
 
-## 4. Renderers — one scene tree, two backends
+## 5. Subsystems
 
-**Sources are not renderers.** Cell-grid layout, widget layout, web content, and 3D all emit
-primitives into one scene tree. That scene tree is then consumed by one of **two renderer backends**:
+A subsystem is **a separate process that speaks the bus**. That is the whole contract.
+
+### 5.1 Why out of process
+
+"Every subsystem must be independently omittable" as a *rule* erodes: with seventeen subsystems in
+one address space, the first deadline produces a direct call between two of them and nothing fails to
+signal it. With separate processes and only a versioned wire schema between them, two subsystems
+**cannot** couple. The property becomes structural (P8).
+
+It also makes P1 mechanical: binding `git` is a thin adapter process, not a module inside the daemon,
+and a subsystem may be written in any language.
+
+### 5.2 Supervision is not ours
+
+Restart policy, resource limits, ordering, health checks, and **socket activation** are systemd's.
+Socket activation matters specifically: a subsystem starts on its first bus message, which answers
+both the memory cost of many processes and the cold-start cost of starting them.
+
+### 5.3 Removal is complete
+
+Disabling a subsystem removes the processes, the packages, the installed files, **and everything it
+contributed to the rest of the system** — commands, keybindings, menu entries, file associations,
+protocol handlers, shell completions, credential helpers, settings surfaces. Remove the Git backend
+and nothing of Git remains anywhere. "Disabled" and "not installed" are not different states.
+
+**This forces a constraint.** Integration points are **declared and brokered by the core registry**,
+never registered imperatively by a subsystem. A subsystem that could install a shim, a menu entry, or
+a `PATH` entry on its own would be one whose removal could never be complete. Declaring integration
+is the only way the guarantee holds (P4).
+
+### 5.4 Backends are swappable
+
+Where a subsystem fronts more than one implementation — `git` and `sl`, several task runners, several
+agent CLIs — the abstraction exists so they are **interchangeable and removable** (P2), not so either
+is reimplemented. Omnis owns the operation log, the cross-repository graph, and the harness registry.
+The tools stay the tools.
+
+---
+
+## 6. Documentation is part of the system
+
+A declaration is only usable if you can discover what you may declare. So documentation is not a
+website beside the product — it is a **surface inside it**.
+
+### 6.1 One schema, three consumers
+
+Every option carries a type, a default, a description, and an example. That single schema drives:
+
+1. **The settings UI** — forms generated from types, not hand-built per option.
+2. **The documentation** — in-product and published, generated from the same definitions.
+3. **The agent's vocabulary** — what an agent may set, with what values, and what each means.
+
+There is no second place to update, and therefore no way for the three to disagree (P9). An option
+without a description is an incomplete option, and CI can say so.
+
+### 6.2 Live while you declare
+
+In the GUI and the TUI, editing the declaration shows the documentation for the option under the
+cursor: what it does, its type, its default, what it interacts with, and whether changing it applies
+live or needs a restart. **Declaring the system and reading about it are one activity**, not a
+context switch to a browser.
+
+The same pane carries the architecture and decision records, so "why is it like this" is answerable
+without leaving the workspace.
+
+### 6.3 The agent reads what you read
+
+When an agent proposes a change to the declaration it is working from the option schema, and its
+proposal cites the options it sets. An agent that must guess at option names produces
+plausible-looking configuration that does not evaluate — the failure mode this design removes.
+
+Combined with §7, the sequence is: the agent proposes a declaration change, the documentation for
+every option it touched is shown beside the diff, and you approve or reject with the reasoning in
+front of you.
+
+### 6.4 It degrades
+
+A documentation pane is text, so it satisfies the parity contract completely (§9.4). The TUI gets the
+same documentation, searchable, with no loss.
+
+---
+
+## 7. The modification surface
+
+**Everything configurable is modifiable at runtime — by the user, the built-in agent, and external
+agents — through one API.**
+
+- **No privileged surface.** The GUI is a control-socket client like any other. If a setting can be
+  changed by clicking, it can be changed by `omnis` and by an agent over MCP, using the same
+  operation (P5).
+- **Introspectable, not guessable.** Clients enumerate the option schema, the axes and their legal
+  values, installed profiles, themes, keymaps, environments, and subsystems (§6.1).
+- **One validation path, one approval path.** Side-effectful mutations pass the same escrow whoever
+  sent them. There is no trusted-caller shortcut: identity is not a security boundary when both the
+  built-in and external agents run arbitrary model output. The gate is on the *action*.
+- **Attributed.** Every mutation records who made it. An unattributable change is indistinguishable
+  from a compromise.
+- **Reversible**, via generations (§4.1).
+
+### 7.1 Agent accountability
+
+Every side-effectful agent action is **recorded before it takes effect** in an append-only audit
+stream — actor, action category, parameters, outcome — and **gated by an escrow ticket** that
+expires. An expired ticket is a denial, never a silent grant. A killswitch revokes in-flight
+execution, not merely future execution. Actions that cannot be recorded cannot be executed.
+
+Audit without escrow is a perfect record of damage already done. Escrow without audit is approvals
+with no history. They are one invariant.
+
+### 7.2 Self-optimisation
+
+The system observes itself — which subsystems are used, latency and memory per process, cache hit
+rates, which placements are slow — and **proposes changes to its own declaration**: disable a
+subsystem nothing has called in a month, resize a cache, move a process to a host that is not
+saturated, prefetch what is always fetched.
+
+**Self-optimisation is not a new mechanism.** It is the system acting as an agent against itself, and
+it goes through exactly the path in §7 and §7.1: a proposed generation, with a diff, an author, and
+the measurements that motivated it, passing the same escrow. Approving it is the same action as
+approving anything else, and rolling it back is the same operation.
+
+**It is never silent.** A system that reconfigures itself without a reviewable generation is
+precisely the unattributable change §7 rejects, and "the computer decided" is not an acceptable
+answer to "why is my machine different today". Whether a class of optimisation may be auto-approved
+is a policy in the declaration — off by default, and never for anything that removes or relocates.
+
+The honest limit: this is only as good as the telemetry, and telemetry that answers "is this
+subsystem worth keeping" is a design problem in its own right, not a side effect of logging.
+
+### 7.3 Automation
+
+Goal loops, workflow graphs, one-shot tasks, and scheduled jobs are **one abstraction**, not four
+features (P10).
+
+An **automation** is a declared graph of steps with:
+
+| Part | What it is |
+|---|---|
+| **Trigger** | Manual, a schedule, a bus event, or a goal becoming unsatisfied |
+| **Steps** | A graph — sequential, parallel, or conditional — of actions, each addressable (§10.3) |
+| **Gates** | Escrow points where a human approves before the graph continues (§7.1) |
+| **Checkpoints** | Durable progress, so an interrupted run resumes rather than restarts |
+| **Termination** | An explicit stop condition. A goal loop without one is not a loop, it is a leak |
+
+Every automation is declared (P3), every step is attributed and audited (§7.1), and a failed or
+blocked run checkpoints and reports rather than dying silently.
+
+**A goal loop is a graph with a satisfaction condition** rather than a distinct mechanism: it runs,
+checks whether the goal holds, and either stops or re-enters. Self-optimisation (§7.2) is a goal loop
+whose action is proposing a generation. Scheduled jobs are graphs with a time trigger. The task graph
+(§11) is the execution engine underneath, not a parallel system.
+
+**The proof this abstraction is right is that it already exists.** The pipeline that builds Omnis —
+request, interpretation gate, plan, approval gate, implement, self-review loop, merge gate, with
+checkpoint-and-resume on quota exhaustion — *is* a goal loop with human gates and durable
+checkpoints. It is currently GitHub Actions and Python because the product does not exist yet. When
+it does, that pipeline should be an Omnis automation, and the fact that it was built by hand first
+means the abstraction is validated against a real workload rather than an imagined one.
+
+**Not built yet.** This section specifies the shape; no automation engine exists. Its position in the
+roadmap is deliberate — an automation abstraction is only worth building once the bus, the
+declaration, and the escrow it depends on are real.
+
+---
+
+## 8. Hosts and placement
+
+A **host** is a named execution target backed by a runtime: `native`, `docker`, `wsl`, `podman`,
+`nspawn`, or `remote` (another personal machine over the tailnet). The container runtime is itself an
+abstraction — pinning one would exclude users to save a thin dispatch.
+
+Each core process — **daemon, CLI, GUI, TUI, web** — is **placed on a host** in the declaration.
+Placement is a property of the system, not an installation detail: daemon on the workstation,
+interface on the laptop, is a configuration rather than a special build.
+
+Processes carry constraints, checked at evaluation time:
+
+| Process | Requires |
+|---|---|
+| `daemon` | The workspace filesystem; durable storage |
+| `gui` | A display, a GPU, the platform window system — effectively `native` |
+| `tui` | A TTY |
+| `cli` | Nothing; attaches to a daemon wherever it is |
+| `web` | Reachability on the tailnet |
+
+**Resolution failure is a configuration error with a reason**, reported when the generation is
+evaluated — not a runtime crash. The GUI constraint is load-bearing: a GPU compositor in a container
+without passthrough is crippled, and passthrough on macOS and Windows ranges from fragile to
+unavailable. **The GUI runs natively; the daemon is what gets containerised.**
+
+### 8.1 Remote access
+
+Remote access is a **web surface served over Tailscale** at the device's HTTPS name
+(`https://<device>.<tailnet>.ts.net`). Transport, naming, and certificates are Tailscale's; caller
+identity comes from the tailnet, which is what makes attribution satisfiable for a remote caller.
+
+It is **optional**. The daemon starts, runs, and is fully usable with no network at all.
+
+The web surface is a surface, not a renderer backend: the compositor is wgpu-based and wgpu targets
+WebGPU, so a browser hosts the *same* backend in a canvas.
+
+### 8.2 What splitting costs
+
+A remote daemon means remote filesystem access, so the VFS and content-addressed store stop being
+optimisations and become load-bearing for correctness and latency. Input-to-frame latency crosses a
+network in split configurations. And the tested combinations must be named explicitly, or "it works
+on my placement" becomes the standard bug report.
+
+---
+
+## 9. Rendering
+
+**Sources are not renderers.** Cell-grid layout, widget layout, web content, guest windows, and 3D
+all emit primitives into one scene tree. Two **backends** consume it.
 
 | Backend | Crate | Target | Output |
 |---|---|---|---|
-| GPU compositor | `omnis-render` | Desktop window (Tauri) | Batched GPU primitives |
+| GPU compositor | `omnis-render` | Desktop window, and a browser canvas via WebGPU | Batched GPU primitives |
 | ANSI/TUI | `omnis-tui` | A real terminal, local or over SSH | Escape sequences on stdout |
 
-The split is **not** aesthetic. `cell-grid` presentation mode is a terminal *look* drawn by the GPU
-compositor in a desktop window; the TUI backend is Omnis genuinely *running in a terminal* — no
-window, no GPU, works over SSH, survives in `tmux`. Those are different problems and they need
-different code. What they must not need is different *features*.
+The split is not aesthetic. `cell-grid` presentation is a terminal *look* the GPU compositor draws in
+a window; the TUI backend is Omnis genuinely *running in a terminal* — no window, no GPU, works over
+SSH, survives in `tmux`. Different problems, different code, identical features.
 
-The scene tree is the parity contract. §4.7 states what that contract guarantees and where it
-honestly cannot.
+### 9.1 Why one scene tree
 
-### 4.0 The GPU compositor
+A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with shaped advance —
+same atlas, same pipeline. A browser is a content source, not a rendering engine. Effects that live
+in only one backend become the per-profile bolt-on the whole design rejects. And compositing a
+terminal pane, a video, and a particle field in one frame is a scheduling problem with one answer.
 
-Terminal, graphical UI, web content, and 3D emit primitives into a single GPU frame graph.
-
-```
-   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌────────────┐
-   │ Cell-grid    │ │ Widget       │ │ Browser      │ │ Browser      │ │ 3D scene   │
-   │ layout       │ │ layout       │ │ (semantic)   │ │ (raster)     │ │ layer      │
-   └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └─────┬──────┘
-          │                │                │                │               │
-          └────────────────┴────────┬───────┴────────────────┴───────────────┘
-                                    ▼
-                    ┌───────────────────────────────────┐
-                    │   Scene tree  (renderer-agnostic) │
-                    └────────────────┬──────────────────┘
-                                     ▼
-                    ┌───────────────────────────────────┐
-                    │  omnis-render — GPU compositor    │
-                    │  batched primitives · frame graph │
-                    │  damage tracking · material passes│
-                    └────────────────┬──────────────────┘
-                                     ▼
-                              wgpu → Vulkan / Metal / DX12
-```
-
-### 4.1 Why one renderer
-
-- **Text is text.** A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with
-  shaped advance. Same atlas, same pipeline, same shader. Two renderers would build that twice.
-- **A browser is a content source, not a rendering engine.** Whether a page arrives as a semantic
-  tree we lay out ourselves or as a screencast texture, it ends up as primitives in the same frame.
-- **Effects that live in only one renderer become per-theme bolt-ons** — precisely what §3's
-  invariant exists to reject. Shaders and particles must be available to every presentation mode or
-  they are decoration for one theme.
-- **One frame, one budget.** Compositing a terminal pane, a chart, a video, and a particle field in
-  one pass is a scheduling problem with one answer. Two renderers make it two answers that disagree.
-
-### 4.2 Primitives
-
-The compositor's vocabulary is deliberately small; every source reduces to it.
+### 9.2 Primitives
 
 | Primitive | Used by |
 |---|---|
 | Quad — solid, gradient, rounded, bordered, shadowed | backgrounds, panels, cell backgrounds, chrome |
-| Glyph run — from a shared atlas, fixed or shaped advance | terminal cells, labels, code, semantic web text |
-| Texture — sampled image or video frame | screencast rasters, icons, webview surfaces, render targets |
-| Path — SDF or tessellated | vector icons, `lucide-animated`, graphs, DAG edges |
+| Glyph run — shared atlas, fixed or shaped advance | terminal cells, labels, code, semantic web text |
+| Texture | screencast rasters, guest windows, icons, render targets |
+| Path — SDF or tessellated | vector icons, graphs, DAG edges |
 | Material layer — custom shader with declared inputs | 3D scenes, particle fields, backdrops, transitions |
 
-Primitives are instanced and batched by class. Adding a source must not add a primitive class; if it
-would, that is a design conversation, not a patch.
+**Adding a source must not add a primitive class.** If it would, that is a design conversation, not a
+patch.
 
-### 4.3 Sources
+### 9.3 3D, shaders, particles
 
-| Source | Emits | Note |
-|---|---|---|
-| Cell-grid layout | glyph runs on a fixed advance grid, background quads | "Terminal UI" is a **layout mode**, not an engine |
-| Widget layout | rounded quads, glyph runs, textures, paths | The graphical UI |
-| Browser — semantic | AXTree → widget layout → primitives | Keyboard-navigable, cheap, diffable |
-| Browser — raster | CDP screencast → texture | For content we cannot or should not re-lay-out |
-| 3D scene | depth-tested draws, instanced particles, custom materials | Own camera and depth buffer, composited as a layer |
+The material layer is a first-class primitive, not an effects add-on, available in every presentation
+mode — including behind and between glyph runs in the cell grid. Two uses, deliberately not
+conflated: **chrome** (backdrops, transitions, agent-activity fields) authored by Omnis and profiles,
+and **content** (shader playgrounds, model preview, GPU-accelerated visualisation) supplied by a user
+or extension. The engine supports both; exposing authoring demands sandboxing, resource limits, and
+GPU-hang recovery, and is gated on D14.
 
-**The DOM is not a renderer here.** A real DOM is still required for third-party webviews — VS Code
-extension UIs expect one. Those are hosted out-of-process and composited as textures: a *source*,
-never the renderer. No Omnis product UI is implemented in DOM.
-
-### 4.4 3D, shaders, and particles
-
-The material layer is a first-class primitive, not an effects add-on. It carries a shader, declared
-uniform inputs, and a compositing mode, and it is available to every presentation mode — including
-the cell grid, where a material layer renders behind or between glyph runs.
-
-Two distinct uses, deliberately not conflated:
-
-- **Chrome** — backdrops, transitions, agent-activity particle fields, the icon state machine's
-  animation. Authored by Omnis and by presets.
-- **Content** — shader playgrounds, 3D model preview, GPU-accelerated data visualization, anything a
-  user or extension supplies.
-
-The compositor supports both identically. Whether the *product* exposes authoring to users and
-extensions — and on what sandboxing terms, since a hostile shader can hang a GPU — is D14, and it
-sizes the epic very differently. The engine is built for both; the exposure is gated.
-
-### 4.5 What this costs, stated plainly
-
-Owning the renderer means owning text shaping, layout, hit-testing, IME, and **accessibility**. A
-fully custom-rendered UI has no native accessibility tree; one has to be published deliberately
-(UIA, AX, AT-SPI) or the application is unusable with a screen reader. That is a real obligation, not
-a footnote — it is why `accessibility` is a first-class label and why it must appear in E3's
-acceptance criteria rather than being discovered late.
-
-### 4.7 The TUI backend and the parity contract
-
-`omnis-tui` consumes the same scene tree and degrades it to a character cell grid plus ANSI escape
-sequences. Everything the GPU compositor can show must be *reachable* in a terminal, even where it
-cannot be *reproduced*.
-
-**How each primitive degrades:**
+### 9.4 The parity contract
 
 | Primitive | In a terminal | Fidelity |
 |---|---|---|
-| Glyph run | Text cells, already fixed-advance in `cell-grid` mode | Full |
-| Quad — fill, border | Background colour and box-drawing characters | Full for cell-aligned; borders snap to the grid |
+| Glyph run | Text cells | Full |
+| Quad — fill, border | Background colour and box-drawing characters | Full when cell-aligned |
 | Quad — rounded, shadow, gradient | Nearest box-drawing corner; shadows dropped | Approximate |
-| Path | Braille or box-drawing rasterization; falls back to its label | Approximate |
-| Texture | Terminal graphics protocol (kitty, iTerm2, Sixel) where present, else half-block or Braille downsample, else the declared alt text | Terminal-dependent |
-| Material layer (shaders, 3D, particles) | **Cannot execute.** Renders its declared static fallback | None — see below |
+| Path | Braille or box-drawing rasterisation, else its label | Approximate |
+| Texture | Terminal graphics protocol where present, else half-block or Braille, else declared alt text | Terminal-dependent |
+| Material layer | **Cannot execute**; renders its static fallback | None |
 
-**The contract, stated as rules:**
-
-1. **Every primitive declares a terminal fallback.** A primitive with no fallback cannot enter the
-   scene tree. This is enforced at the type level, not by convention.
-2. **Nothing is silently dropped.** Where a primitive degrades, the degradation is visible — an
-   alt-text label, a placeholder glyph — never a blank region that leaves the user unaware content
-   exists.
-3. **Feature parity, not pixel parity.** Every command, pane, view, and workflow reachable in the
-   desktop app is reachable in the TUI. Visual fidelity is explicitly not promised; *capability* is.
+1. **Every primitive declares a terminal fallback.** No fallback, no primitive — enforced at the type
+   level, not by convention (P7).
+2. **Nothing is silently dropped.** Degradation is visible — alt text, a placeholder — never a blank
+   region that hides the fact content exists.
+3. **Feature parity, not pixel parity.** Every command, pane, view, and workflow is reachable in the
+   TUI. Visual fidelity is explicitly not promised.
 4. **No feature is TUI-only or GPU-only.** A feature that cannot degrade is a scene-tree design
-   problem, resolved by extending the scene tree — not by branching on the backend.
+   problem, fixed by extending the scene tree — never by branching on the backend.
 
-**Where parity honestly ends:** the material layer. A shader is GPU code; a terminal has no GPU. The
-options are a CPU-rendered approximation blitted through a terminal graphics protocol, or the static
-fallback. Omnis takes the static fallback by default and treats CPU approximation as an opt-in
-per-material decision, because a 3-FPS particle field over SSH is worse than a still image.
+Terminal capability is **detected, not assumed**: truecolor versus 256-colour, kitty keyboard
+protocol versus legacy escapes, SGR mouse reporting, graphics-protocol support.
 
-**Terminal capability is detected, not assumed.** Truecolor versus 256-colour, the kitty keyboard
-protocol versus legacy escape sequences, SGR mouse reporting, and graphics-protocol support all vary.
-`omnis-tui` probes and adapts; the minimum floor it requires is D15.
+### 9.5 What owning the renderer costs
 
-### 4.8 Consequences for the rest of this document
-
-- **The scene tree becomes more load-bearing, not less.** It is the single input to both backends
-  and the parity contract between them (§4.7). E10 still lands before E3.
-- **D8 largely dissolves.** With one renderer there is no renderer to hot-swap; switching between
-  cell-grid and widget presentation is a layout change. Live switching becomes cheap rather than
-  needing a spike. D8 is narrowed to whether *graphics device loss and adapter switching* are handled
-  transparently.
-- **A new baseline decision appears.** One GPU compositor means a minimum GPU capability, a graphics
-  API choice, and a software-fallback answer for machines that cannot meet it (D11).
+Text shaping, hit-testing, IME, and **accessibility**. A custom-rendered UI publishes no native
+accessibility tree unless built to, so UIA/AX/AT-SPI belongs in the compositor's acceptance criteria
+rather than a later epic. The web surface makes this sharper, not softer: a browser is where users
+most expect assistive technology to work.
 
 ---
 
-## 5. Configuration
+## 10. Presentation
 
-`settings.json` is the user-facing switchboard: JSON-with-comments, schema-validated, layered.
+### 10.1 Themes and profiles
 
-```
-defaults  →  profile  →  user settings  →  workspace settings  →  runtime overrides
-```
+**A theme is colours**, in the **VS Code colour-theme format** — `colors`, `tokenColors`,
+`semanticTokenColors`, `type`. Existing themes load unmodified, and the format already carries
+`terminal.ansi*`, so the sixteen ANSI colours both the cell grid and `omnis-tui` need come free. Icon
+themes use the VS Code icon-theme format for the same reason.
 
-Later layers win. Every layer is inspectable; the settings UI must answer "which layer set this?"
-for any key.
+**A profile bundles** a theme, an icon theme, the axis values below, window chrome, the app icon and
+its state animations, typography and density, an audio pack, material-layer backdrops, and settings
+overrides.
 
-**Configuration lives in files; user data lives in the store.** Presets, keymaps, and feature flags
-are versioned, diffable, shareable artifacts. The store — PGlite, embedded, per `VISION.md` §9.6 —
-holds workspaces, tabs, chat, audit, CAS metadata, VCS state, and context fragments. The transcript's
-`brandAppearanceProfiles` table crosses that line and is not adopted.
+**Agent persona is not part of a profile.** A profile may *suggest* one; it never sets a provider,
+model, or reasoning effort behind the user's back.
+
+### 10.2 The capability matrix
+
+| Axis | Option | Values |
+|---|---|---|
+| Presentation mode | `presentation` | `cell-grid` · `widget` · `hybrid` |
+| Layout topology | `layout` | `chat-centric` · `ide-split` · `terminal-grid` · `vcs-dag` |
+| Input routing | `inputBar` | `global-hud` · `per-pane` · `hybrid` |
+| Keymap | `keybindings` | `default` · `vscode` · `zed` · `cursor-claude` · `vim` · `emacs` |
+| Chrome & tokens | `window.*`, `theme` | §10.1 |
+
+Which *backend* runs is not an axis and not a preference: it follows from the surface. `hybrid` mixes
+presentation modes per pane, so a cell-grid editor beside a widget settings panel is legal rather
+than a special case.
+
+Themes and profiles are **data files** and nothing else. Adding either requires zero code changes (P6).
+
+### 10.3 One input bar, one navigation model
+
+**There is one input bar.** Not a chat box, a search field, a terminal prompt, a command palette, and
+a browser address bar — one input, bound to whatever has focus. A chat, a quick search, a terminal, a
+web page, a settings filter, and a documentation query all reach the user through the same control.
+
+Panes do not ship their own input widgets. A pane declares an **input contract** — what it accepts,
+where completions come from, what history it draws on, and what submitting means — and the input bar
+renders and routes accordingly. That is P10 applied to the most duplicated widget in every
+comparable product.
+
+This clarifies the `inputBar` axis (§10.2): `global-hud` and `per-pane` are not two implementations,
+they are two *placements* of the same bar — floating and centred, or anchored into the focused pane.
+`hybrid` mixes them.
+
+**Everything is addressable.** Panes, files, settings pages, documentation, chats, repositories,
+tasks, context fragments, and guest environments all have an `omnis://` address. Addressability is
+what makes the rest of this work: it is what the input bar navigates to, what the CLI takes as an
+argument, what an agent cites in a proposal, and what a link in the documentation points at.
+
+**Navigation is global.** Because everything is addressed, **back, forward, and reload** are system
+controls rather than browser controls, over one history stack across every surface. Reload means
+*re-materialise this view from its source* — re-read the file, re-query the schema, re-fetch the page
+— and never *re-execute*: reloading a task view must not run the task. Confusing those two is how a
+navigation control becomes destructive.
 
 ---
 
-## 6. Packages and extensions are separate universes
+## 11. Data
 
-A line most tools blur, and blurring it is why their permission models cannot be reasoned about.
+**Configuration lives in files; user data lives in PGlite** — embedded Postgres, not a server.
 
-| **Packages** — `omnis pkg` / `ctx.packages` | **Extensions** — `omnis ext` / `ctx.extensions` |
-|---|---|
-| *What the user's project runs on* | *What the workspace and its agents run on* |
-| Scoped to a repository or the host OS | Scoped to the Omnis client, editor, or an agent |
-| Bun, pnpm, npm, Cargo, uv, Poetry, Go modules, Deno; Homebrew, Pacman, APT | VS Code extensions (Open VSX/VSIX), web extensions, LSPs |
-| Project task runners: `package.json` scripts, Cargo targets, task DAGs | Runtime modules, MCP servers, agent skills, themes, icon themes, profiles |
-| No access to the Omnis client | No ability to mutate a project's dependency graph |
+The test: *would a user want this in version control, or be alarmed to find it there?* Themes,
+profiles, keymaps, layouts, feature flags, placement, and environments are the first. Workspaces,
+tabs, chat threads, audit entries, CAS metadata, VCS state, context fragments, and escrow tickets are
+the second.
 
-**The rule:** a package cannot reach the client, and an extension cannot reach a project's dependency
-graph. Crossing the line requires an explicit, audited capability grant. Anything that genuinely
-needs both — a toolchain that also contributes editor features — ships as two artifacts with a grant
-between them.
-
-Separate commands, separate resolvers, separate capability grants. The content-addressed store
-underneath is shared, so the duplication is in policy, not in bytes.
-
-A user installing "a thing" must be told which universe it lands in. The CLI and the UI make that
-explicit rather than guessing, because a wrong guess is precisely the confusion this split exists to
-prevent.
+- **Content-addressed storage** — content-defined chunking, BLAKE3 keys, convergent encryption keyed
+  by a per-user master secret, reflink deduplication. Convergent encryption leaks equality *within*
+  one user's store: an attacker with store access who can guess a plaintext can confirm its presence.
+  A bounded, accepted property, not an oversight.
+- **Context fragments** — everything captured normalises to one envelope regardless of origin (code
+  selection, terminal buffer, browser page, container log), addressable as `omnis://context/<id>`,
+  payload in the CAS. Per-origin formats would mean an adapter per origin per consumer.
+- **The VCS operation log** — every mutating operation appends an entry carrying enough state to
+  invert it. Undo is a first-class operation over that log, not reconstruction from git internals,
+  and it holds identically for Git and Sapling because the log is Omnis's. Operations that are not
+  losslessly invertible must capture the discarded state into the CAS first, or refuse.
+- **Task identity is the hash of its inputs** — source content, dependency output hashes, the command
+  line, the declared environment. Not a timestamp: `mtime` changes on checkout and fails to change on
+  same-second writes, and is meaningless across machines or a sync mesh. Undeclared inputs produce
+  wrong cache hits, so detecting them is part of the work, not an extra.
 
 ---
 
-## 7. Crate and package layout
+## 12. Security
 
-Following the source layout (`VISION.md` §9.2), with `omnis-term-ui` split out of `omnis-browser`
-because a renderer and a browser supervisor have no reason to share a crate.
+- **The vault.** Master key via Argon2id; the key-encryption key in a zeroising buffer with `mlock`,
+  never serialised. Device secrets bridge to the OS keychain.
+- **Secrets reach child processes by injection at spawn time** — never written to disk, never to a
+  file the child reads.
+- **Secrets never enter agent context.** An agent may reference a secret by name and cause it to be
+  injected; it may not read the value. Otherwise every secret reaches a model provider's logs and any
+  transcript the user later shares.
+- **Git, forge, and SSH authentication** go through a local agent socket, so private keys are
+  decrypted on demand and never handed out.
+
+The structure is fixed; the **threat model is D10** and may constrain it.
+
+---
+
+## 13. Crate and package layout
 
 ```
 crates/
-  omnis-core/          shared RPC models, schema types, OSB contracts, capability matrix,
-                       settings resolution, scene tree types
-  omnisd/              headless daemon; conditional subsystem bootloader
-    src/subsystems/    one module per subsystem, each independently omittable
-  omnis-cli/           `omnis` executable, `--json` on every command
-  omnis-gui/           Tauri desktop host and window manager
-  omnis-tui/           ANSI renderer backend: scene tree to cells, escape sequences,
-                       terminal capability detection, kitty/SGR input decoding
-  omnis-agent/         agent engine and MCP server binary
-  omnis-lsp/           LSP multiplexer hub
-  omnis-dap/           Debug Adapter Protocol implementation
-  omnis-render/        THE renderer: GPU compositor, frame graph, primitive batching,
-                       glyph atlas and shaping, material/shader passes, damage tracking
-  omnis-layout/        cell-grid and widget layout modes; both emit scene-tree primitives
-  omnis-browser/       Chromium supervisor, CDP bridge, adblock
-  omnis-web-source/    AXTree→layout and screencast→texture bridges (browser as a source)
-  omnis-cas/           FastCDC chunking, convergent encryption, VFS
+  omnis-core/          bus contracts, option schema, scene tree types, capability matrix
+  omnisd/              the core: routing, registry, brokering, convergence, generations
+  omnis-cli/           `omnis`, `--json` on every command
+  omnis-gui/           desktop host and window manager
+  omnis-tui/           ANSI backend: scene tree to cells, capability detection, input decoding
+  omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
+  omnis-layout/        cell-grid and widget layout modes
+  omnis-browser/       Chromium supervisor and CDP bridge
+  omnis-web-source/    AXTree→layout and screencast→texture bridges
+  omnis-cas/           chunking, convergent encryption, VFS
+  omnis-agent/         harness registry, session supervision, MCP bridge
+  omnis-docs/          option schema → documentation, search index, in-product docs surface
+subsystems/            one adapter binary per bound tool — vcs, terminals, lsp, dap, tasks, …
 packages/
-  core/                Cordis microkernel, context definitions, dsh-compat
-  agent-sdk/           npm package `@omnis/agent`
-  exthost-node/        isolated Node.js runtime for VS Code extensions
-  frontend/            webview shell (Dockview, shadcn/ui)
-  profiles/            profiles — data only, no code
+  frontend/            web surface shell
+  profiles/            profiles and themes — data only, no code
+nix/                   modules defining the declaration's option schema
+examples/
+  omnis.nix            the reference declaration
 ```
 
-None of this exists yet. It is the target shape epics build toward, and the reason `ci.yml` already
-carries guarded Rust and web jobs.
+Nothing here exists yet. It is the target shape, and the reason `ci.yml` already carries guarded Rust
+and web jobs.
 
 ---
 
-## 8. Open decisions
+## 14. Open decisions
 
-Each must be resolved by an ADR before its dependent epic leaves `Backlog`. Resolved decisions are struck through and link to their record; see [the decision log](notes/adr/).
+Resolved decisions link to their record; see [the decision log](notes/adr/).
 
 | # | Decision | Blocks |
 |---|---|---|
-| D1 | **First vertical slice** — which single path through the substrate is built first, end to end, to prove the bus, the daemon lifecycle, and one surface. Not a product thesis: the capability surface is the spec. This is a sequencing choice. | E1, and the ordering of everything after |
-| ~~D2~~ | **Config/data boundary** — resolved by [ADR-0005](notes/adr/0005-configuration-lives-in-files-data-lives-in-pglite.md): configuration in versioned files, user data in PGlite. | ~~E6~~ |
-| D3 | **Trade-dress policy** — which third-party names, marks, and icons may ship, and under what attribution. | E4 |
-| D4 | **Platform matrix** — which platforms, and which is primary for v1. Vibrancy, Mica/Acrylic, traffic lights, and `mlock` all diverge. | E2, E3, E11 |
-| D5 | **Extension host compatibility target** — VS Code API emulation via `exthost-node`, or a native-first API with shims. | E8 |
-| D6 | **Agent provider adapter contract.** | E5 |
-| D7 | **Performance budgets** — frame time, redraw latency, cold start, memory ceiling. | E3, E7 |
-| D8 | **Graphics device loss and adapter switching** — handled transparently, or surfaced. Narrowed from "renderer hot-swap", which §4.6 dissolves: with one renderer, switching presentation mode is a layout change. | E3 |
-| D9 | **Subsystem admission criteria** — what a subsystem must satisfy to enter `omnisd` (bus-only communication, independent omission, resource budget, failure isolation). The daemon's subsystem list is long enough that this needs to be a gate, not a habit. | E1, and every subsystem epic |
-| D10 | **Vault threat model** — what `mlock`, Argon2id parameters, and process injection actually defend against, and what they do not. Injecting secrets into child environments is a real exposure that needs stating before it is built. | E11 |
-| D11 | **Graphics baseline** — API (wgpu over Vulkan/Metal/DX12, or native per platform), the minimum GPU capability required, and what happens on machines below it: software fallback, degraded mode, or refusal. One renderer makes this a hard floor for the whole application, not a per-feature concern. | E3, E20 |
-| D12 | **Text stack** — shaping engine, glyph atlas strategy, subpixel and hinting policy, bidi and complex-script support, IME integration. Owning the renderer means owning all of it (§4.5). | E3 |
-| D13 | **Webview compositing** — how out-of-process third-party webviews reach the frame: shared-texture zero-copy, readback, or native subsurface. Determines whether VS Code extension UIs are usable or merely present. | E8, E3 |
-| D15 | **Terminal capability floor** — the minimum a terminal must provide for `omnis-tui`: truecolor or 256-colour, kitty keyboard protocol or legacy escapes, SGR mouse reporting, and whether any graphics protocol is required. Sets how far §4.7's degradation ladder has to reach. | E22 |
-| D14 | **Shader and 3D exposure** — is the material layer authored only by Omnis and its presets (chrome), or also by users and extensions (content)? Exposure demands sandboxing, resource limits, and a hang-recovery story, since a hostile or careless shader can wedge a GPU. Sizes E20 by an order of magnitude. | E20 |
+| D1 | **First vertical slice** — which single path through the substrate is built first, end to end. A sequencing choice, not a product thesis. | E1, and the ordering of everything after |
+| ~~D2~~ | Config/data boundary — resolved by [ADR-0005](notes/adr/0005-configuration-lives-in-files-data-lives-in-pglite.md) and [ADR-0012](notes/adr/0012-the-system-is-one-declarative-configuration-applied-as-generations.md) | ~~E6~~ |
+| D3 | **Trade-dress policy** — which third-party names, marks, and icons may ship, and under what attribution | E4 |
+| D4 | **Host backends and tested placements per platform** — reshaped by [ADR-0016](notes/adr/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them.md) from "which platforms" to "which backends, and which placements do we test" | E2, E3, E11 |
+| D5 | **Extension host compatibility target** — VS Code API emulation, or native-first with shims | E8 |
+| D6 | **Agent provider adapter contract** | E5 |
+| D7 | **Performance budgets** — frame time, redraw latency, cold start, memory ceiling, and input-to-frame across a network | E3, E7 |
+| ~~D8~~ | Renderer hot-swap — dissolved by [ADR-0001](notes/adr/0001-one-scene-tree-two-renderer-backends.md); what remains is graphics device loss and adapter switching | E3 |
+| D9 | **Subsystem admission criteria** — what a subsystem must satisfy to enter the "next to" layer | Every subsystem |
+| D10 | **Vault threat model** — what `mlock`, the Argon2id parameters, and spawn-time injection actually defend against | E11, E19 |
+| D11 | **Graphics baseline** — API, minimum GPU capability, and what happens below it | E3, E21 |
+| D12 | **Text stack** — shaping, atlas strategy, subpixel policy, bidi, IME | E3 |
+| D13 | **Webview compositing** — shared-texture, readback, or native subsurface | E3, E7, E8 |
+| D14 | **Shader and 3D exposure** — Omnis and profiles only, or users and extensions | E21 |
+| D15 | **Terminal capability floor** for `omnis-tui` | E22 |
 
 ---
 
-## 9. Repository automation
+## 15. Repository automation
 
-The development pipeline is part of the architecture: `AGENTS.md` (rules), `.github/workflows/`
-(enforcement), `.github/scripts/` (implementation). The pipeline is Python; that is deliberate and
-independent of the product stack.
+The development pipeline is part of the architecture: [`AGENTS.md`](AGENTS.md) states the rules,
+[`notes/pipeline.md`](notes/pipeline.md) explains how it works and how releases are cut,
+`.github/workflows/` enforces it, and `.github/scripts/` implements it. The pipeline is Python; that
+is deliberate and independent of the product stack.

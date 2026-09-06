@@ -1,13 +1,18 @@
-# Omnis — Vision (Reference Only)
+# Source transcript — scoping conversation
 
-> **Status: NON-NORMATIVE.** This is a transcript-derived record of the scoping conversation that
-> produced Omnis. It is source material. It is **not** a specification and does **not** override
-> `ARCHITECTURE.md`. Where the two disagree, `ARCHITECTURE.md` wins.
+> **Status: SOURCE MATERIAL. Superseded as a specification.**
+>
+> This is the captured record of the scoping conversation that produced Omnis. It is kept for
+> provenance and for the detail it carries, not as a specification: `ARCHITECTURE.md` is now the
+> single normative document, and everything here that survived review has been absorbed into it or
+> explicitly rejected in a decision record.
+>
+> Read it to understand *where an idea came from*. Do not implement from it — several of its
+> proposals were rejected outright (see §11, and ADR-0001, ADR-0002, ADR-0012, ADR-0013).
 >
 > **Provenance:** Google Gemini conversation "App Scoping Technical Specifications Discussion"
-> (`gemini.google.com/app/545cf54445afcd33`). First captured 2026-09-06 (partial); **completed
-> 2026-09-06** — all 20 turns, 79,181 characters. No gaps remain. See
-> [notes/vision_capture.md](notes/vision_capture.md) for provenance detail.
+> (`gemini.google.com/app/545cf54445afcd33`), captured 2026-09-06 — all 20 turns, 79,181 characters,
+> no gaps. Capture method in [vision_capture.md](vision_capture.md).
 
 ---
 

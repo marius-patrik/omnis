@@ -1,6 +1,6 @@
 # ADR-0013 — Subsystems run beside the core, never inside it
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Supersedes**: the in-process subsystem model in `ARCHITECTURE.md` §2.2
 - **Depends on**: ADR-0011, ADR-0012
 
@@ -41,6 +41,19 @@ which answers both the memory cost of many processes and the cold-start cost of 
 
 **Subsystems are declared, not compiled in.** Enabling one is an option in the declaration
 (ADR-0012), which replaces the `features` block and the conditional-initialisation code behind it.
+
+**Disabling one removes it completely — including its system integration.** A subsystem is a declared
+unit together with its closure, so removing it from the declaration removes the processes, the
+packages, the installed files, *and* everything it contributed to the rest of the system: commands,
+keybindings, menu entries, file associations, protocol handlers, shell completions, credential
+helpers, settings surfaces. A user who does not want Git removes the Git backend and nothing of it
+remains anywhere. "Disabled" and "not installed" stop being different states.
+
+**This forces a constraint on subsystems.** Integration points are **declared and brokered by the
+core registry**, never registered imperatively by the subsystem itself. A subsystem that could reach
+out and install a shim, a menu item, or a `PATH` entry on its own would be a subsystem whose removal
+could never be complete. Declaring integration is therefore not bureaucracy — it is the only way the
+guarantee above can hold.
 
 ## Alternatives rejected
 

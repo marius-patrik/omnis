@@ -1,6 +1,6 @@
 # ADR-0006 — One context fragment normal form, addressed by URI
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `VISION.md` §9.5
+- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `notes/transcript.md` §9.5
 
 ## Context
 

@@ -9,7 +9,7 @@ How this repository was brought up, what still needs a human, and how to reprodu
 | Item | State |
 |---|---|
 | Repository `marius-patrik/omnis`, public | created |
-| Governance: `AGENTS.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `VISION.md` | committed |
+| Governance: `AGENTS.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `notes/transcript.md` | committed |
 | Decision records — 10 in `notes/adr/`, index and navigation generated | committed |
 | Workflows: CI, auto-format, docs deploy, bound-issue check, board automation, open-PR, approval auto-merge, agent | committed, green on `main` |
 | Automation scripts and their test suite | committed, passing |

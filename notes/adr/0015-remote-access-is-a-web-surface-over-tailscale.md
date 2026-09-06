@@ -1,6 +1,6 @@
 # ADR-0015 — Remote access is a web surface over Tailscale
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Depends on**: ADR-0001, ADR-0003, ADR-0011
 
 ## Context

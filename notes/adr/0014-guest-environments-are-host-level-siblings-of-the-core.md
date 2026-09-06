@@ -1,6 +1,6 @@
 # ADR-0014 — Guest environments are host-level siblings of the core
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Depends on**: ADR-0011, ADR-0012, ADR-0013 · **Constrains**: D4
 
 ## Context

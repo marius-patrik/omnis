@@ -1,6 +1,6 @@
 # ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `VISION.md` §9.4
+- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `notes/transcript.md` §9.4
 
 ## Context
 

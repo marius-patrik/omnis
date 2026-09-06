@@ -1,6 +1,6 @@
 # ADR-0016 — Hosts are declared execution targets, and processes are placed on them
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Depends on**: ADR-0012, ADR-0013, ADR-0015 · **Reshapes**: D4
 
 ## Context

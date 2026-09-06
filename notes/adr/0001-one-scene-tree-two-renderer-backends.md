@@ -1,7 +1,7 @@
 # ADR-0001 — One scene tree, two renderer backends
 
 - **Status**: Accepted · **Date**: 2026-09-06 · **Narrows**: D8
-- **Supersedes**: `VISION.md` §6's two-renderer switch
+- **Supersedes**: `notes/transcript.md` §6's two-renderer switch
 
 ## Context
 

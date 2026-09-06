@@ -2,7 +2,7 @@
 
 `AGENTS.md` rule 2 forbids storing a static documentation mirror and forbids a manually maintained
 index. The canonical documents live at the repository root (`README.md`, `ARCHITECTURE.md`,
-`ROADMAP.md`, `AGENTS.md`, `VISION.md`) and under `notes/`, with one file per decision in
+`ROADMAP.md`, `AGENTS.md`) and under `notes/`, with one file per decision in
 `notes/adr/`. Committing copies of them under `docs/` would create two sources of truth that drift.
 
 These hooks therefore:
@@ -27,8 +27,8 @@ PUBLISHED_PAGES: List[Tuple[str, str]] = [
     ("ARCHITECTURE.md", "architecture/index.md"),
     ("ROADMAP.md", "roadmap.md"),
     ("AGENTS.md", "agents.md"),
-    ("VISION.md", "vision.md"),
     ("notes/pipeline.md", "pipeline.md"),
+    ("notes/transcript.md", "notes/transcript.md"),
     ("notes/architecture_decisions.md", "architecture/decisions/process.md"),
     ("notes/vision_capture.md", "notes/vision_capture.md"),
     ("notes/bootstrap.md", "notes/bootstrap.md"),
@@ -40,12 +40,14 @@ LINK_REWRITES: Dict[str, str] = {
     "ARCHITECTURE.md": "architecture/index.md",
     "ROADMAP.md": "roadmap.md",
     "AGENTS.md": "agents.md",
-    "VISION.md": "vision.md",
     "CONTRIBUTING.md": "agents.md",
     "CLAUDE.md": "agents.md",
     "notes/pipeline.md": "pipeline.md",
     "notes/architecture_decisions.md": "architecture/decisions/process.md",
     "notes/vision_capture.md": "notes/vision_capture.md",
+    "notes/transcript.md": "notes/transcript.md",
+    "transcript.md": "notes/transcript.md",
+    "examples/omnis.nix": "declaration.md",
     "notes/bootstrap.md": "notes/bootstrap.md",
     "pipeline.md": "pipeline.md",
     "bootstrap.md": "notes/bootstrap.md",
@@ -53,6 +55,11 @@ LINK_REWRITES: Dict[str, str] = {
     "adr/": "architecture/decisions/index.md",
     "notes/adr/": "architecture/decisions/index.md",
 }
+
+#: The reference declaration, published as a page wrapped in a code fence so the documentation and
+#: the file can never disagree.
+DECLARATION_SOURCE = "examples/omnis.nix"
+DECLARATION_DEST = "declaration.md"
 
 #: Where ADR records live, and where they are published.
 ADR_SOURCE_DIR = os.path.join("notes", "adr")
@@ -170,6 +177,38 @@ def render_adr_index(records: List[Dict[str, str]]) -> str:
     return "\n".join(lines)
 
 
+def _render_declaration_page(body: str) -> str:
+    """Wraps the reference declaration in a page.
+
+    Rendered from the file at build time rather than transcribed, so the documentation and the
+    declaration it documents cannot disagree.
+
+    Args:
+        body: Contents of the reference declaration.
+
+    Returns:
+        Markdown for the declaration page.
+    """
+    source_url = f"https://github.com/marius-patrik/omnis/blob/main/{DECLARATION_SOURCE}"
+    return "\n".join(
+        [
+            "# The declaration",
+            "",
+            "The reference declaration, rendered from "
+            f"[`{DECLARATION_SOURCE}`]({source_url}) at build time — this page and the file cannot",
+            "disagree.",
+            "",
+            "See [Architecture §4](architecture/index.md) for what a declaration is, how generations",
+            "work, and why runtime changes are written back into it.",
+            "",
+            "```nix",
+            body.rstrip("\n"),
+            "```",
+            "",
+        ]
+    )
+
+
 def _rewrite_links(markdown: str, dest_path: str) -> str:
     """Rewrites repository-relative links so they resolve inside the built site.
 
@@ -231,14 +270,15 @@ def on_config(config: Any) -> Any:
                 {"Decisions": decisions},
             ]
         },
+        {"The declaration": "declaration.md"},
         {"Roadmap": "roadmap.md"},
         {"Automation pipeline": "pipeline.md"},
         {"Contributing & Agent Rules": "agents.md"},
-        {"Vision (reference only)": "vision.md"},
         {
             "Notes": [
                 {"Bootstrap runbook": "notes/bootstrap.md"},
-                {"Vision capture": "notes/vision_capture.md"},
+                {"Source transcript": "notes/transcript.md"},
+                {"Capture provenance": "notes/vision_capture.md"},
             ]
         },
     ]
@@ -280,6 +320,21 @@ def on_files(files: Files, config: Any) -> Files:
             content = handle.read()
 
         files.append(File.generated(config, dest, content=_rewrite_links(content, dest)))
+
+    declaration = os.path.join(root, DECLARATION_SOURCE)
+    if os.path.isfile(declaration):
+        with open(declaration, "r", encoding="utf-8") as handle:
+            body = handle.read()
+        existing_declaration = files.get_file_from_path(DECLARATION_DEST)
+        if existing_declaration is not None:
+            files.remove(existing_declaration)
+        files.append(
+            File.generated(
+                config,
+                DECLARATION_DEST,
+                content=_render_declaration_page(body),
+            )
+        )
 
     index_dest = f"{ADR_DEST_PREFIX}/index.md"
     existing_index = files.get_file_from_path(index_dest)

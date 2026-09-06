@@ -1,6 +1,6 @@
 # ADR-0007 — Every mutating VCS operation is invertible from an operation log
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `VISION.md` §9.5
+- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `notes/transcript.md` §9.5
 
 ## Context
 
@@ -13,6 +13,11 @@ worktree state, is not queryable, and does not exist for Sapling.
 Every mutating VCS operation appends an entry to an atomic operation log (`vcs_op_log`) that carries
 enough state to invert it. Undo is a first-class operation over that log, not a reconstruction from
 git internals. This holds identically for Git and Sapling — the log is Omnis's, not the backend's.
+
+The backends themselves are `git` and `sl`, driven as they are. The abstraction exists so they are
+**interchangeable and removable** (ADR-0011, ADR-0013) — so Sapling can stand where Git stands, and a
+user who wants only one can remove the other along with its entire installation and system integration — not so that either
+is reimplemented.
 
 ## Alternatives rejected
 

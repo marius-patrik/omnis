@@ -8,7 +8,7 @@ How decisions are made and recorded. The decisions themselves live one per file 
 
 - An open decision from `ARCHITECTURE.md` §8 is resolved.
 - Any deviation from `ARCHITECTURE.md` is approved (`AGENTS.md` rule 3).
-- Anything in `VISION.md` is promoted into the normative architecture. The vision is non-normative
+- Anything in `notes/transcript.md` is promoted into the normative architecture. The vision is non-normative
   source material; it never binds the implementation by being written down, only by being promoted
   through a record here.
 
@@ -33,7 +33,7 @@ table from each file's title and status line, and injects the navigation entries
 # ADR-NNNN — <title>
 
 - **Status**: Proposed · **Date**: YYYY-MM-DD · **Resolves**: D<n>
-- **Supersedes**: ADR-MMMM  ·  **Promotes**: `VISION.md` §<n>
+- **Supersedes**: ADR-MMMM  ·  **Promotes**: `notes/transcript.md` §<n>
 
 ## Context
 What forced the decision. Constraints, measurements, what broke.

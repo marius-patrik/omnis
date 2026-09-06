@@ -161,3 +161,55 @@ pytest -v && black --check . && properdocs build --strict
 ```
 
 Setup state and the reproduction sequence are in [bootstrap.md](bootstrap.md).
+
+---
+
+## Planned — specified, not built
+
+Everything below is design. None of it exists yet, and this section says so plainly rather than
+describing intentions in the present tense.
+
+### Release automation
+
+Versioning, tagging, changelog, and asset packaging should be one automated path, driven by the
+Conventional Commits `AGENTS.md` rule 5 already mandates.
+
+| Stage | Shape |
+|---|---|
+| **Version** | Derived from commit types since the last tag — `feat` minor, `fix` patch, `!`/`BREAKING CHANGE` major. Never hand-edited. |
+| **Release PR** | A standing pull request carrying the version bump and generated changelog, updated on every merge to `main`. Cutting a release is merging it. |
+| **Tag** | Created on that merge, not by hand. |
+| **Build** | Matrix across the platforms D4 settles, guarded by `hashFiles` exactly as `ci.yml` is, so it stays green while the product tree is a scaffold. |
+| **Assets** | Per-platform archives plus checksums, attached to the GitHub release. Signing is a decision, not a default — it needs a key custody answer first. |
+
+**Bind, not build** (P1): this is `release-please` or an equivalent action, not a release engine of
+ours. The repository owns the configuration and the packaging manifest.
+
+**Why it is not built yet.** There is nothing to package. A release pipeline whose build step is
+permanently skipped tests nothing and rots quietly; it lands with the first artifact worth shipping.
+
+### Decomposition and planning assistance
+
+The pipeline currently executes plans a human has approved. It should also help produce them:
+
+- **Epic decomposition** — propose the child `Request` issues an epic implies, with a sequence and
+  the gates each depends on, as a comment for review. Not filed automatically: `AGENTS.md` rule 13
+  permits an issue only for settled work.
+- **Gate analysis** — given a request, identify which open decisions block it and say so before a
+  plan is written, rather than discovering it mid-implementation.
+- **Sequencing** — surface which epics are unblocked right now, given the decision records that have
+  landed.
+
+The constraint is the same as everywhere else: it **proposes**, a human disposes. An agent that files
+its own work items is an agent that sets its own scope.
+
+### The pipeline becomes an Omnis automation
+
+`ARCHITECTURE.md` §7.3 defines automations as declared graphs with triggers, gates, checkpoints, and
+a termination condition. This pipeline — request, interpretation gate, plan, approval gate,
+implement, self-review loop, merge gate, checkpoint-and-resume on quota exhaustion — *is* one of
+those, currently expressed in GitHub Actions and Python because the product does not exist.
+
+When it does, this pipeline should be declared as an Omnis automation and run by it. That is the
+honest test of the abstraction: it was derived from a real workload rather than an imagined one, and
+the workload is this repository.

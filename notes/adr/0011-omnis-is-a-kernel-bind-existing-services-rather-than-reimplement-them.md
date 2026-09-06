@@ -1,6 +1,6 @@
 # ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them
 
-- **Status**: Proposed · **Date**: 2026-09-06
+- **Status**: Accepted · **Date**: 2026-09-06
 - **Underpins**: ADR-0012, ADR-0013, ADR-0014, ADR-0015
 
 ## Context
@@ -51,6 +51,12 @@ We **own** the abstractions that make them compose, and only those:
 it raw, write the adapter — not the tool. If something genuinely does not exist, it is almost
 certainly one of the abstractions above.
 
+**What an abstraction is for here.** Not to replace the tool behind it. An abstraction exists so that
+the tool is **interchangeable and removable**: so Sapling can stand where Git stands, so a user who
+wants neither can remove one and have its entire installation and system integration go with it (ADR-0012, ADR-0013), and so
+a subsystem that binds it does not have to be rewritten when the choice changes. An abstraction that
+does not make its backend swappable is just a layer.
+
 ## Alternatives rejected
 
 - **Reimplement for control and consistency.** The honest version of the transcript's ambition. It
@@ -74,10 +80,10 @@ certainly one of the abstractions above.
 - Some abstractions will be harder than the tools they wrap. The scene tree is more subtle than any
   single renderer; the bus schema is more subtle than any single subsystem. That is where the effort
   belongs.
-- Several existing records need re-reading against this test. ADR-0007 should say we *drive* `git`
-  and `sl` rather than implement a VCS engine; ADR-0008 owns the cross-repository graph while
-  delegating execution; ADR-0009 and ADR-0010 compose existing chunking, hashing, and
-  key-derivation libraries rather than writing algorithms.
+- Several existing records read more clearly against this test. ADR-0007's operation log is ours
+  while `git` and `sl` remain the backends; ADR-0008 owns the cross-repository graph while
+  delegating execution to each project's own runner; ADR-0009 and ADR-0010 compose existing
+  chunking, hashing, and key-derivation libraries rather than writing algorithms.
 
 ## What this forecloses
 

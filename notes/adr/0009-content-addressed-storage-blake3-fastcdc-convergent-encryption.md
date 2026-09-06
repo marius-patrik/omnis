@@ -1,6 +1,6 @@
 # ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `VISION.md` §9.5
+- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `notes/transcript.md` §9.5
 
 ## Context
 

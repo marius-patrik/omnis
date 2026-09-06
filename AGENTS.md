@@ -27,7 +27,7 @@ zero errors — and deploy automatically to GitHub Pages.
 
 ### 3. Architecture Conformance
 The system architecture is defined by `ARCHITECTURE.md`, which is the single normative source for
-process topology, crate boundaries, IPC contracts, and renderer separation. `VISION.md` is
+process topology, crate boundaries, IPC contracts, and renderer separation. `notes/transcript.md` is
 **non-normative reference material** captured from scoping conversations; it never overrides
 `ARCHITECTURE.md`. Any deviation from `ARCHITECTURE.md` must be explicitly approved by the user and
 recorded in `notes/architecture_decisions.md` as a numbered ADR before it is implemented.
@@ -133,7 +133,7 @@ issues labeled `Request` before any planning, branching, or code changes begin.
 Specification proceeds in one direction, and each stage is locked before the next begins:
 
 ```
-VISION.md  →  ARCHITECTURE.md  →  ADRs (notes/architecture_decisions.md)  →  ROADMAP.md  →  issues
+notes/transcript.md  →  ARCHITECTURE.md  →  ADRs (notes/architecture_decisions.md)  →  ROADMAP.md  →  issues
 ```
 
 - **An issue may only be filed for work that is settled.** Settled means one of two things: an

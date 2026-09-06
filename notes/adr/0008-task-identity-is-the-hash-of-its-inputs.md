@@ -1,6 +1,6 @@
 # ADR-0008 — Task identity is the hash of its inputs
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `VISION.md` §9.5
+- **Status**: Accepted · **Date**: 2026-09-06 · **Promotes**: `notes/transcript.md` §9.5
 
 ## Context
 
