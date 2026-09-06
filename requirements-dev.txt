@@ -1,3 +1,7 @@
 pytest>=8.0.0
 black>=24.0.0
 properdocs>=1.6.7
+# Provides the pymdownx.* extensions and the highlighter. Previously arrived transitively via
+# mkdocs-material; declared explicitly now that the theme is first-party.
+pymdown-extensions>=10.0
+Pygments>=2.17
