@@ -51,6 +51,7 @@ LINK_REWRITES: Dict[str, str] = {
     "bootstrap.md": "notes/bootstrap.md",
     "vision_capture.md": "notes/vision_capture.md",
     "adr/": "architecture/decisions/index.md",
+    "notes/adr/": "architecture/decisions/index.md",
 }
 
 #: Where ADR records live, and where they are published.
@@ -186,7 +187,15 @@ def _rewrite_links(markdown: str, dest_path: str) -> str:
         target = match.group("target")
         anchor = match.group("anchor") or ""
         normalized = target.lstrip("./")
+
         replacement = LINK_REWRITES.get(normalized)
+        if replacement is None:
+            # Records are addressed as `notes/adr/NNNN-slug.md` from the repository root and as
+            # `adr/NNNN-slug.md` from within notes/; both publish under the decisions section.
+            adr_match = re.fullmatch(r"(?:notes/)?adr/(?P<slug>[^/]+\.md)", normalized)
+            if adr_match:
+                replacement = f"{ADR_DEST_PREFIX}/{adr_match.group('slug')}"
+
         if replacement is None:
             return match.group(0)
         return f"]({prefix}{replacement}{anchor})"
