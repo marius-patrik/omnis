@@ -98,9 +98,9 @@ def test_ci_is_a_caller_pinned_to_a_commit():
     if not repo:
         pytest.skip("this repository owns its workflows rather than pinning them")
     content = _read(os.path.join(WORKFLOW_DIR, "ci.yml"))
-    assert f"{repo}/.github/workflows/ci.yml@{ref}" in content, (
-        "ci.yml must call the pinned pipeline at the commit the manifest records"
-    )
+    assert (
+        f"{repo}/.github/workflows/ci.yml@{ref}" in content
+    ), "ci.yml must call the pinned pipeline at the commit the manifest records"
     assert re.fullmatch(r"[0-9a-f]{40}", ref or ""), "the pin must be a full commit SHA"
 
 
@@ -134,9 +134,9 @@ def test_required_checks_match_what_the_caller_will_report():
         if check == "verify-bound-issue":
             continue
         prefix = check.split(" / ")[0]
-        assert prefix in caller_jobs, (
-            f"required check {check!r} is prefixed with {prefix!r}, which is not a caller job"
-        )
+        assert (
+            prefix in caller_jobs
+        ), f"required check {check!r} is prefixed with {prefix!r}, which is not a caller job"
 
 
 def test_verify_bound_issue_job_name_is_stable():
