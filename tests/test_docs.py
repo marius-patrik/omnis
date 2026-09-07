@@ -131,7 +131,7 @@ def test_pipeline_documentation_covers_the_moving_parts():
 def test_theme_is_first_party_and_self_contained():
     """The theme is ours: ProperDocs ships none, and a vendor theme would constrain the markup."""
     theme = os.path.join(REPO_ROOT, "theme")
-    for relative in ("main.html", "partials/nav.html", "assets/omnis.css", "assets/omnis.js"):
+    for relative in ("main.html", "partials/nav.html", "assets/theme.css", "assets/theme.js"):
         assert os.path.isfile(os.path.join(theme, *relative.split("/"))), f"{relative} missing"
 
 
@@ -145,7 +145,7 @@ def test_theme_is_declared_in_the_config():
 
 def test_stylesheet_defines_both_palettes():
     """A token defined in only one palette renders as an invalid colour in the other."""
-    with open(os.path.join(REPO_ROOT, "theme", "assets", "omnis.css"), encoding="utf-8") as handle:
+    with open(os.path.join(REPO_ROOT, "theme", "assets", "theme.css"), encoding="utf-8") as handle:
         css = handle.read()
 
     def tokens(block: str) -> set:
@@ -161,7 +161,7 @@ def test_stylesheet_defines_both_palettes():
 
 def test_no_hardcoded_colours_outside_the_token_blocks():
     """Every colour must resolve from a token, or the design system is decorative only."""
-    with open(os.path.join(REPO_ROOT, "theme", "assets", "omnis.css"), encoding="utf-8") as handle:
+    with open(os.path.join(REPO_ROOT, "theme", "assets", "theme.css"), encoding="utf-8") as handle:
         css = handle.read()
     body = css[css.index("/* ── Reset") :]
     stray = [m for m in re.findall(r"#[0-9a-fA-F]{3,8}\b", body)]
@@ -170,7 +170,7 @@ def test_no_hardcoded_colours_outside_the_token_blocks():
 
 def test_search_uses_the_generated_index():
     """The theme must read the index the search plugin emits rather than shipping its own."""
-    with open(os.path.join(REPO_ROOT, "theme", "assets", "omnis.js"), encoding="utf-8") as handle:
+    with open(os.path.join(REPO_ROOT, "theme", "assets", "theme.js"), encoding="utf-8") as handle:
         js = handle.read()
     assert "search/search_index.json" in js
     assert "textContent" in js, "results must be assigned as text, never as markup"

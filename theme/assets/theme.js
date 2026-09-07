@@ -20,7 +20,7 @@
       var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
       root.setAttribute("data-theme", next);
       try {
-        localStorage.setItem("omnis-theme", next);
+        localStorage.setItem("docs-theme", next);
       } catch (e) {
         /* Private browsing: the choice simply does not persist. */
       }
@@ -223,4 +223,104 @@
       input.focus();
     }
   });
+})();
+
+/**
+ * Populates the version and project switcher from `versions.json` at the site root.
+ *
+ * The documentation site holds several builds at once: the current one at the root, a preview per
+ * open pull request under `pr-<N>/`, and a build per tracked branch under `branch/<name>/`. Which
+ * of those exist changes whenever a pull request opens or closes, so the list is fetched at read
+ * time rather than baked into each page - a page built last week would otherwise offer previews
+ * that have since been torn down.
+ *
+ * The manifest is written by the deploy workflow and looks like:
+ *
+ *     {
+ *       "current": "",
+ *       "versions": [{"name": "main", "path": ""}, {"name": "PR #27", "path": "pr-27"}],
+ *       "projects": [{"name": "Omnis", "url": "https://marius-patrik.github.io/omnis/"}]
+ *     }
+ *
+ * A site without the file simply keeps the control hidden.
+ */
+(function () {
+  "use strict";
+
+  var root = document.querySelector("[data-switcher]");
+  if (!root) {
+    return;
+  }
+
+  /**
+   * Works out the site root from the current location and the page's own depth.
+   *
+   * Pages are nested arbitrarily deep, and a preview adds a further prefix, so the root cannot be
+   * assumed to be one level up.
+   *
+   * @returns {string} Absolute path of the site root, with a trailing slash.
+   */
+  function siteRoot() {
+    var base = document.querySelector("link[rel=stylesheet][href*='assets/theme.css']");
+    if (base) {
+      return base.getAttribute("href").replace(/assets\/theme\.css.*$/, "");
+    }
+    return "/";
+  }
+
+  /**
+   * Fills a select element and navigates on change.
+   *
+   * @param {HTMLSelectElement} select Element to populate.
+   * @param {Array<Object>} entries Items carrying `name` and either `path` or `url`.
+   * @param {string} base Site root, used to resolve `path` entries.
+   * @param {string} current The `path` currently being viewed.
+   */
+  function fill(select, entries, base, current) {
+    entries.forEach(function (entry) {
+      var option = document.createElement("option");
+      option.textContent = entry.name;
+      option.value = entry.url || base + (entry.path ? entry.path + "/" : "");
+      if (entry.url === undefined && (entry.path || "") === (current || "")) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+    select.addEventListener("change", function () {
+      if (select.value) {
+        window.location.href = select.value;
+      }
+    });
+  }
+
+  var base = siteRoot();
+  fetch(base + "versions.json", { cache: "no-cache" })
+    .then(function (response) {
+      return response.ok ? response.json() : null;
+    })
+    .then(function (manifest) {
+      if (!manifest) {
+        return;
+      }
+      var versions = manifest.versions || [];
+      var projects = manifest.projects || [];
+      if (versions.length > 1) {
+        fill(
+          root.querySelector("[data-switcher-versions]"),
+          versions,
+          base,
+          manifest.current || ""
+        );
+        root.hidden = false;
+      }
+      if (projects.length > 0) {
+        var group = root.querySelector("[data-switcher-projects-group]");
+        fill(root.querySelector("[data-switcher-projects]"), projects, base, null);
+        group.hidden = false;
+        root.hidden = false;
+      }
+    })
+    .catch(function () {
+      /* A site without a manifest keeps the control hidden; nothing to report. */
+    });
 })();
