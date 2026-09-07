@@ -22,13 +22,13 @@ EXPECTED_WORKFLOWS = [
     "verify-pr-issue.yml",
 ]
 
+#: Scripts this repository still owns. The agent runner, the harness registry and the settings
+#: reconciler live in the pinned pipeline; a consumer that kept copies would be maintaining a fork.
 EXPECTED_SCRIPTS = [
-    "agent_runner.py",
     "handle_pr_approval.py",
     "docs_hooks.py",
     "open_pr.py",
     "project_automation.py",
-    "repo_settings.py",
 ]
 
 
@@ -145,11 +145,15 @@ def test_verify_bound_issue_job_name_is_stable():
     assert re.search(r"^  verify-bound-issue:$", content, re.MULTILINE)
 
 
-def test_agent_workflow_never_leaks_secrets_into_the_log():
-    """Secrets are passed as container env, never echoed."""
+def test_agent_credentials_are_handed_over_and_never_echoed():
+    """The runner lives upstream, so this file hands credentials across rather than using them.
+
+    Secrets do not cross a `workflow_call` boundary on their own, so each must be passed by name -
+    and a credential omitted here would not error, it would silently drop a fallback tier.
+    """
     content = _read(os.path.join(WORKFLOW_DIR, "agent.yml"))
-    for secret in ("ANTIGRAVITY_REFRESH_TOKEN", "ANTIGRAVITY_CLIENT_SECRET"):
-        assert f"-e {secret}=" in content
+    for secret in ("ANTIGRAVITY_REFRESH_TOKEN", "ANTIGRAVITY_CLIENT_SECRET", "ANTHROPIC_API_KEY"):
+        assert f"{secret}: ${{{{ secrets.{secret} }}}}" in content, f"{secret} never reaches it"
         assert f"echo ${{{{ secrets.{secret}" not in content
 
 
@@ -161,37 +165,42 @@ def test_board_workflows_receive_project_coordinates():
         assert "PROJECT_NUMBER:" in content, f"{name} must pass PROJECT_NUMBER"
 
 
-def test_repo_settings_status_options_match_automation():
-    """One status taxonomy, three places: prose, board settings, and the automation."""
+def test_status_taxonomy_matches_the_automation():
+    """One status taxonomy, and the automation that moves items between them must share it."""
     import project_automation
-    import repo_settings
 
-    assert repo_settings.STATUS_OPTIONS == project_automation.STATUS_NAMES
-
-
-def test_repo_settings_labels_cover_every_area_and_status():
-    """Every label the pipeline can apply exists in the label taxonomy."""
-    import agent_runner
-    import project_automation
-    import repo_settings
-
-    label_names = {name for name, _color, _desc in repo_settings.LABELS}
-    for area in agent_runner.AREA_LABELS:
-        assert area in label_names, f"missing area label {area}"
-    for status in project_automation.STATUS_NAMES:
-        assert status in label_names, f"missing status label {status}"
-    for type_label in agent_runner.TYPE_LABELS:
-        assert type_label in label_names, f"missing type label {type_label}"
-    for role in ("Request", "Plan", "epic", "decision"):
-        assert role in label_names, f"missing pipeline label {role}"
+    assert project_automation.STATUS_NAMES == [
+        "Backlog",
+        "ToDo",
+        "In Progress",
+        "Blocked",
+        "Done",
+        "Superseded",
+        "Dropped",
+    ]
 
 
-def test_repo_settings_enables_bot_pr_approval():
-    """Without `can_approve_pull_request_reviews` every bot PR stalls at REVIEW_REQUIRED."""
-    content = _read(os.path.join(SCRIPT_DIR, "repo_settings.py"))
-    assert '"can_approve_pull_request_reviews": True' in content
-    assert '"delete_branch_on_merge": True' in content
-    assert '"allow_auto_merge": True' in content
+def test_the_declared_areas_are_this_projects_own():
+    """The area taxonomy is declared here and read by the shared runner's classifier.
+
+    It is the one part of the pipeline that must not be generic: a repository routing requests
+    into another project's domains labels everything wrongly and silently.
+    """
+    declared = set(_manifest().get("areas", {})) - {"$comment", "$default"}
+    assert declared, "this repository must declare its own areas"
+    assert {"core", "term", "ui", "agents"} <= declared, "omnis's own domains must be present"
+    assert "quests" not in declared, "that taxonomy belongs to a different repository"
+
+
+def test_the_required_checks_are_declared_for_a_caller():
+    """`repo_settings.py` lives upstream now, so what this repository must get right is its own
+    declaration: calling a reusable workflow prefixes every check with the caller's job name, and
+    protection requiring the bare names would block every merge on contexts nothing reports.
+    """
+    declared = _manifest().get("required_checks", [])
+    assert declared, "a repository that pins the pipeline must declare its required checks"
+    prefixed = [c for c in declared if " / " in c]
+    assert prefixed, "the checks produced through a caller carry its job name as a prefix"
 
 
 def test_issue_templates_present():
@@ -217,11 +226,13 @@ def test_pull_request_template_enforces_binding_and_matrix_rule():
 
 
 def test_gitignore_excludes_agent_checkpoint():
-    """The checkpoint file is runtime state and must never be committed."""
-    import agent_runner
+    """The checkpoint the runner writes on quota exhaustion is runtime state, never committed.
 
+    The runner lives upstream now, so the filename is asserted directly rather than imported: this
+    repository still receives the file, it just no longer owns the code that writes it.
+    """
     content = _read(os.path.join(REPO_ROOT, ".gitignore"))
-    assert agent_runner.CHECKPOINT_FILENAME in content
+    assert ".antigravity_checkpoint.json" in content
 
 
 def test_preview_workflow_exists_and_is_scoped():
@@ -265,10 +276,14 @@ def test_preview_is_torn_down_when_the_pull_request_closes():
 
 
 def test_pages_is_configured_for_the_branch_source():
-    """repo_settings must match the workflows, or the first deploy silently 404s."""
-    content = _read(os.path.join(SCRIPT_DIR, "repo_settings.py"))
-    assert '"branch": "gh-pages"' in content
-    assert '"build_type": "legacy"' in content
+    """The declared Pages source must be the branch one, or previews cannot share the site.
+
+    This moved from the settings script to the manifest when the script moved upstream; the
+    invariant is the same, and it is the one whose absence made the very first deploy 404.
+    """
+    pages = _manifest().get("pages", {})
+    assert pages.get("branch") == "gh-pages"
+    assert pages.get("build_type") == "legacy"
 
 
 def test_teardown_does_not_use_git_without_a_checkout():
