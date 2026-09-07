@@ -1,0 +1,317 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ADR-0022 — Self-optimisation is the system proposing generations against itself · Omnis</title>
+    <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../../../assets/omnis.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("omnis-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="../../..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav>
+        <nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../..">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="adr-0022-self-optimisation-is-the-system-proposing-generations-against-itself">ADR-0022 — Self-optimisation is the system proposing generations against itself<a class="headerlink" href="#adr-0022-self-optimisation-is-the-system-proposing-generations-against-itself" title="Permanent link">&para;</a></h1>
+<ul>
+<li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06</li>
+<li><strong>Depends on</strong>: ADR-0003, ADR-0006, ADR-0012</li>
+</ul>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>A system that observes its own behaviour can improve it: disable a subsystem nothing has called in a
+month, resize a cache that always misses, move a process off a saturated host, prefetch what is
+always fetched.</p>
+<p>The obvious way to build that is a tuner with privileged access that adjusts things directly. That
+version is also the one that produces "why is my machine different today" with no answer, which is
+exactly the unattributable change ADR-0003 exists to prevent.</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p><strong>Self-optimisation is not a new mechanism.</strong> The system acts as an agent against itself and goes
+through the ordinary path: it <strong>proposes a generation</strong>, carrying a diff, an author, and the
+measurements that motivated it, and that proposal passes the same escrow as any other change
+(ADR-0006).</p>
+<p>Approving it is the same action as approving anything else. Rolling it back is the same operation
+(ADR-0012).</p>
+<p><strong>It is never silent.</strong> Whether a class of optimisation may be auto-approved is a policy in the
+declaration — <strong>off by default</strong>, and never for anything that removes or relocates. A cache resize
+is a candidate for standing approval; removing a subsystem is not.</p>
+<h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>A privileged tuner that adjusts the system directly.</strong> Simplest to build and it creates changes
+  with no author, no diff, and no rollback — the precise failure ADR-0003 was written against. That
+  it is the system rather than an external agent making the change does not improve the position; it
+  makes it harder to notice.</li>
+<li><strong>Optimisation as configuration hints the daemon interprets at runtime.</strong> Keeps the declaration
+  honest and moves the behaviour somewhere unobservable: the running system stops matching the
+  declaration, which is the drift ADR-0012 rejects.</li>
+<li><strong>Everything auto-approved, with an undo.</strong> Sounds equivalent to gating and is not: undo requires
+  noticing, and the changes most worth gating are the ones least likely to be noticed.</li>
+<li><strong>No self-optimisation at all.</strong> Defensible, and it leaves real waste in place on a system whose
+  whole premise is knowing what it is running.</li>
+</ul>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>It is only as good as the telemetry.</strong> Data that answers "is this subsystem worth keeping"
+  is a design problem in its own right, not a side effect of logging, and building the proposer
+  before the measurements produces confident nonsense.</li>
+<li>Proposal quality matters more than proposal frequency. A system that suggests ten changes a day
+  trains the user to approve without reading, which defeats the gate — so the bar for proposing is
+  high, and silence is a valid output.</li>
+<li>Auto-approval policy is a security surface: an over-broad standing grant is a privileged tuner
+  reintroduced through configuration.</li>
+<li>Because proposals are generations, the history of what the system changed about itself is
+  inspectable after the fact — which is what makes the whole idea defensible.</li>
+</ul>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="../0021-one-input-bar-one-navigation-model-everything-addressable/">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">ADR-0021 — One input bar, one navigation model, everything addressable</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../process/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Process</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#context">Context</a>
+          </li>
+          <li><a href="#decision">Decision</a>
+          </li>
+          <li><a href="#alternatives-rejected">Alternatives rejected</a>
+          </li>
+          <li><a href="#consequences">Consequences</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">"../../.."</script>
+    <script src="../../../assets/omnis.js" defer></script>
+    <script src="../../../search/main.js" defer></script>
+  </body>
+</html>

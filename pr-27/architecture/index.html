@@ -1,0 +1,1165 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Overview · Omnis</title>
+    <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/omnis.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("omnis-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav>
+        <nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-architecture">Omnis — Architecture<a class="headerlink" href="#omnis-architecture" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE, and the only normative document.</strong> Vision and architecture are one file: what
+Omnis is, why, and how it is built. The scoping transcript that started it is kept as source material
+in <a href="../notes/transcript/"><code>notes/transcript.md</code></a> and specifies nothing.</p>
+<p>Changes require a decision record in <a href="decisions/"><code>notes/adr/</code></a>.</p>
+<hr />
+<h2 id="1-what-omnis-is">1. What Omnis is<a class="headerlink" href="#1-what-omnis-is" title="Permanent link">&para;</a></h2>
+<p><strong>An AI-first operating system for a power user's machine.</strong></p>
+<p><em>AI-first</em> here is a structural claim, not a description of a feature. An agent is a <strong>first-class
+operator</strong> of this system: it calls the same API as the user (P5), reads the same option schema the
+settings UI is generated from (P9), addresses the same objects by the same URIs (§10.3), and is bound
+by the same approval gate and audit trail (§7.1). It is not a panel bolted into an editor.</p>
+<p>That is only safe because of what §4.1 and §7.1 provide: every change an agent makes is a generation
+with an author and a diff, gated before it takes effect and reversible after. Giving an agent real
+power over a machine is defensible exactly to the degree that its actions are reviewable and
+undoable — so the accountability machinery is not a constraint on the AI-first goal, it is the thing
+that makes it achievable.</p>
+<p>Omnis is a headless daemon that owns nothing you could get elsewhere, and everything that makes those
+things compose. Version control, packages, tasks, terminals, containers, language servers,
+debuggers, a browser, agents, secrets, and storage are all <strong>bound, not built</strong> — <code>git</code>, <code>sl</code>, Nix,
+podman, libvirt, Chromium, Tailscale, the coding-agent CLIs. What Omnis owns is the seams: one bus,
+one scene tree, one declaration, one modification surface, one audit trail.</p>
+<p>Four properties follow, and they are the whole design:</p>
+<p><strong>The system is declared, not configured.</strong> One file describes the machine — subsystems, packages,
+guest operating systems, where each process runs, how it looks. Applying it produces a <em>generation</em>
+with a parent, a diff, and an author. Rollback is one operation. Removing something removes it
+entirely: the processes, the packages, the files, and everything it contributed to the rest of the
+system.</p>
+<p><strong>Everything is modifiable, by anyone authorised.</strong> The user, the built-in agent, and an external
+agent all change the system through the same API, pass the same approval gate, and land in the same
+audit trail. There is no privileged surface and no trusted caller.</p>
+<p><strong>The documentation is part of the product.</strong> The option schema that defines the declaration also
+generates the documentation, so you read about the system in the same window you are declaring it in
+— and so does the agent proposing the change.</p>
+<p><strong>The interface is a configuration state, not an implementation.</strong> Renderer output, layout, input
+routing, keymap, and chrome are orthogonal axes. A <em>profile</em> is a named point in that space; a
+<em>theme</em> is colours in the VS Code format, so the existing ecosystem loads unmodified.</p>
+<p><strong>We do not enumerate workflows.</strong> The subsystems compose: a task graph that reads a Cargo manifest,
+a terminal whose secrets came from the vault, a browser page harvested into a context fragment, an
+agent whose every action lands in the audit stream and whose risky ones wait in escrow. The
+capability surface is the specification; workflows are what a user assembles from it.</p>
+<p><strong>Non-goals.</strong> Reimplementing anything on the bound list. Reproducing another product's feature set.
+Cloud accounts, multi-user collaboration, or anything that requires a network service to start.</p>
+<hr />
+<h2 id="2-principles">2. Principles<a class="headerlink" href="#2-principles" title="Permanent link">&para;</a></h2>
+<p>Each is enforced somewhere — a lint, a test, a type, or a process boundary. A principle that is only
+a paragraph erodes on the first deadline.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Principle</th>
+<th>Enforced by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td><strong>Bind, don't reimplement.</strong> If it exists, bind it. If binding exposes it raw, write the adapter — not the tool.</td>
+<td>Review against ADR-0011's list of owned abstractions</td>
+</tr>
+<tr>
+<td>P2</td>
+<td><strong>An abstraction exists to make its backend swappable and removable</strong>, never to replace it.</td>
+<td>Two backends before an abstraction is called done</td>
+</tr>
+<tr>
+<td>P3</td>
+<td><strong>Declared, not imperative.</strong> State goes in the declaration; changes converge.</td>
+<td>Runtime mutations write the declaration (§4.2)</td>
+</tr>
+<tr>
+<td>P4</td>
+<td><strong>Removal is complete</strong>, including system integration.</td>
+<td>Integration is brokered, never self-registered (§5.3)</td>
+</tr>
+<tr>
+<td>P5</td>
+<td><strong>No privileged caller.</strong> The GUI has no capability the CLI or an external agent lacks.</td>
+<td>One API, one validation path, one escrow (§7)</td>
+</tr>
+<tr>
+<td>P6</td>
+<td><strong>No branching on a profile or theme name.</strong> Features branch on axis values or capability queries.</td>
+<td>Lint</td>
+</tr>
+<tr>
+<td>P7</td>
+<td><strong>Delegate as little as possible.</strong> A native surface is a region we no longer control; if content can be a texture, it should be.</td>
+<td>Review — every delegated region is argued (§9.4)</td>
+</tr>
+<tr>
+<td>P8</td>
+<td><strong>Subsystems cannot couple.</strong> The bus is the only ABI.</td>
+<td>Separate processes (§5.1)</td>
+</tr>
+<tr>
+<td>P9</td>
+<td><strong>One schema, three consumers.</strong> Option definitions drive the settings UI, the documentation, and the agent's vocabulary.</td>
+<td>Generated, never hand-written (§6)</td>
+</tr>
+<tr>
+<td>P10</td>
+<td><strong>Adding a thing is declaring a thing.</strong> Panes, sources, subsystems, environments, profiles, and themes are instances of shared abstractions, never bespoke implementations.</td>
+<td>A new instance touches data and declaration, not core code</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-topology">3. Topology<a class="headerlink" href="#3-topology" title="Permanent link">&para;</a></h2>
+<p>Four layers. Nothing runs inside the core.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SURFACES      gui · cli · web (over Tailscale) · external harnesses
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                    ▲
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>NEXT TO       vcs · terminals · lsp · dap · browser · cas · tasks · agent · docs · automation · exthost
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>              environments: containers · VMs · compat
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>              supervised peers — separate processes, the bus is the only ABI
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                                    ▲
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>CORE          omnisd — bus router · registry · capability broker · convergence &amp; generations
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                    ▲
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>BELOW         host OS · container runtime · Nix store · systemd · Tailscale · OS keychain
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>              bound, never owned
+</code></pre></div>
+<p><strong>Below</strong> is infrastructure that pre-exists. The core binds it and never assumes exclusive ownership.
+<strong>Next to</strong> are peers the core supervises but does not contain. <strong>The core is small</strong> — routing,
+registry, brokering, convergence.</p>
+<h3 id="31-responsibilities">3.1 Responsibilities<a class="headerlink" href="#31-responsibilities" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Process</th>
+<th>Owns</th>
+<th>Never does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnisd</code></td>
+<td>Bus routing, subsystem registry, capability brokering, convergence, generations</td>
+<td>Render; contain a subsystem; depend on a surface being attached</td>
+</tr>
+<tr>
+<td>Subsystems</td>
+<td>One domain each, behind an adapter</td>
+<td>Talk to each other except over the bus; self-register integration</td>
+</tr>
+<tr>
+<td><code>omnis-gui</code></td>
+<td>Window, renderer, input capture</td>
+<td>Own durable state; block on I/O</td>
+</tr>
+<tr>
+<td><code>omnis</code> (CLI)</td>
+<td>Scriptable surface, <code>--json</code> on every command</td>
+<td>Reimplement daemon logic</td>
+</tr>
+<tr>
+<td>Environments</td>
+<td>A guest userland or machine</td>
+<td>Nest inside the core</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-the-substrate-bus">3.2 The Substrate Bus<a class="headerlink" href="#32-the-substrate-bus" title="Permanent link">&para;</a></h3>
+<p><strong>Control</strong> (<code>omnis-control.sock</code>, <code>\\.\pipe\omnis-control</code>) — JSON-RPC 2.0. Capability checks,
+declaration reads and writes, generation transitions, escrow tickets, registry and schema queries.</p>
+<p><strong>Data</strong> (<code>omnis-data.sock</code>, <code>\\.\pipe\omnis-data</code>) — binary multiplexer, uniform 9-byte header:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[StreamID: u32][Opcode: u8][PayloadLength: u32]
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>0x01 PTY_STREAM   raw terminal stdout/stdin
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>0x02 PTY_RESIZE   [Cols: u16][Rows: u16]
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>0x03 DOCKER_LOG   demultiplexed container logs
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>0x04 CAS_CHUNK    decrypted content-addressed payloads
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>0x05 CDP_BINARY   browser screencast frames, guest window frames
+</code></pre></div>
+<p>Contract rules:</p>
+<ul>
+<li>The wire schema is <strong>versioned and additive</strong>. A surface built against version <em>N</em> runs against
+  daemon version <em>N+k</em>. New opcodes are appended, never renumbered.</li>
+<li>Every control message is expressible as JSON, whatever the encoding on the wire.</li>
+<li>Surfaces are <strong>stateless with respect to the daemon</strong>. Any surface may attach, detach, or crash at
+  any point without data loss — which is why a surface on another machine is legal (§8).</li>
+<li><strong>Tracing is part of the bus from the first message.</strong> With every subsystem out of process, one
+  stack trace becomes several processes and a correlation id. Retrofitting that is far more expensive
+  than carrying it from the start.</li>
+</ul>
+<hr />
+<h2 id="4-the-declaration">4. The declaration<a class="headerlink" href="#4-the-declaration" title="Permanent link">&para;</a></h2>
+<p><strong>One file defines the system.</strong> Not settings the daemon reads — the definition it converges toward.
+See <a href="../declaration/"><code>examples/omnis.nix</code></a> for the reference declaration.</p>
+<p>It is a <strong>Nix module</strong>. Not a format of our own that compiles to Nix: that means owning a language, a
+parser, a type system, an error-reporting story, and a compiler, to arrive where the Nix module
+system already is. We get typed options, merge semantics, <code>mkDefault</code>/<code>mkForce</code>, imports, and
+nixpkgs for nothing (P1).</p>
+<p>It declares hosts and placement, subsystems and their backends, guest environments, presentation,
+remote access, and secret <em>references</em> — never secret values.</p>
+<h3 id="41-generations">4.1 Generations<a class="headerlink" href="#41-generations" title="Permanent link">&para;</a></h3>
+<p>Applying a declaration produces a <strong>generation</strong>: a parent, a diff, an author, and a resulting system.
+Generations are listable, diffable, and roll back.</p>
+<p>This is the mechanism behind two guarantees that would otherwise be aspirations:</p>
+<ul>
+<li><strong>Reversibility.</strong> "Any change an agent makes can be rolled back" becomes one operation, identical
+  for a typo, a bad profile, and a misbehaving agent.</li>
+<li><strong>Attribution.</strong> A generation has an author. An agent reconfiguring your machine produces a
+  reviewable change with a parent, not an untraceable mutation.</li>
+</ul>
+<p>Audit answers <em>what happened</em>; generations answer <em>what the system now is, and who made it so</em>.</p>
+<h3 id="42-runtime-changes-write-the-declaration">4.2 Runtime changes write the declaration<a class="headerlink" href="#42-runtime-changes-write-the-declaration" title="Permanent link">&para;</a></h3>
+<p>A change made through the modification surface is <strong>staged into the declaration</strong> and applied by
+convergence. It is not an overlay and not a side channel. Overlays guarantee drift: the running
+system stops matching the declaration exactly when you need the declaration to be true.</p>
+<p>Resolution layers, later winning:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>defaults → profile → user → workspace → runtime
+</code></pre></div>
+<p>Every layer is inspectable: the settings surface can name which layer set any value.</p>
+<h3 id="43-what-this-costs">4.3 What this costs<a class="headerlink" href="#43-what-this-costs" title="Permanent link">&para;</a></h3>
+<p>Nix is a hard dependency with a real learning curve. Users who never open the file are served by the
+GUI writing typed options for them; users who do open it meet Nix. Convergence is also not instant —
+some changes apply live, others need a subsystem restart, and the option schema must say which, or
+the interface will lie about when a change took effect.</p>
+<hr />
+<h2 id="5-subsystems">5. Subsystems<a class="headerlink" href="#5-subsystems" title="Permanent link">&para;</a></h2>
+<p>A subsystem is <strong>a separate process that speaks the bus</strong>. That is the whole contract.</p>
+<h3 id="51-why-out-of-process">5.1 Why out of process<a class="headerlink" href="#51-why-out-of-process" title="Permanent link">&para;</a></h3>
+<p>"Every subsystem must be independently omittable" as a <em>rule</em> erodes: with seventeen subsystems in
+one address space, the first deadline produces a direct call between two of them and nothing fails to
+signal it. With separate processes and only a versioned wire schema between them, two subsystems
+<strong>cannot</strong> couple. The property becomes structural (P8).</p>
+<p>It also makes P1 mechanical: binding <code>git</code> is a thin adapter process, not a module inside the daemon,
+and a subsystem may be written in any language.</p>
+<h3 id="52-supervision-is-not-ours">5.2 Supervision is not ours<a class="headerlink" href="#52-supervision-is-not-ours" title="Permanent link">&para;</a></h3>
+<p>Restart policy, resource limits, ordering, health checks, and <strong>socket activation</strong> are systemd's.
+Socket activation matters specifically: a subsystem starts on its first bus message, which answers
+both the memory cost of many processes and the cold-start cost of starting them.</p>
+<h3 id="53-removal-is-complete">5.3 Removal is complete<a class="headerlink" href="#53-removal-is-complete" title="Permanent link">&para;</a></h3>
+<p>Disabling a subsystem removes the processes, the packages, the installed files, <strong>and everything it
+contributed to the rest of the system</strong> — commands, keybindings, menu entries, file associations,
+protocol handlers, shell completions, credential helpers, settings surfaces. Remove the Git backend
+and nothing of Git remains anywhere. "Disabled" and "not installed" are not different states.</p>
+<p><strong>This forces a constraint.</strong> Integration points are <strong>declared and brokered by the core registry</strong>,
+never registered imperatively by a subsystem. A subsystem that could install a shim, a menu entry, or
+a <code>PATH</code> entry on its own would be one whose removal could never be complete. Declaring integration
+is the only way the guarantee holds (P4).</p>
+<h3 id="54-backends-are-swappable">5.4 Backends are swappable<a class="headerlink" href="#54-backends-are-swappable" title="Permanent link">&para;</a></h3>
+<p>Where a subsystem fronts more than one implementation — <code>git</code> and <code>sl</code>, several task runners, several
+agent CLIs — the abstraction exists so they are <strong>interchangeable and removable</strong> (P2), not so either
+is reimplemented. Omnis owns the operation log, the cross-repository graph, and the harness registry.
+The tools stay the tools.</p>
+<hr />
+<h2 id="6-documentation-is-part-of-the-system">6. Documentation is part of the system<a class="headerlink" href="#6-documentation-is-part-of-the-system" title="Permanent link">&para;</a></h2>
+<p>A declaration is only usable if you can discover what you may declare. So documentation is not a
+website beside the product — it is a <strong>surface inside it</strong>.</p>
+<h3 id="61-one-schema-three-consumers">6.1 One schema, three consumers<a class="headerlink" href="#61-one-schema-three-consumers" title="Permanent link">&para;</a></h3>
+<p>Every option carries a type, a default, a description, and an example. That single schema drives:</p>
+<ol>
+<li><strong>The settings UI</strong> — forms generated from types, not hand-built per option.</li>
+<li><strong>The documentation</strong> — in-product and published, generated from the same definitions.</li>
+<li><strong>The agent's vocabulary</strong> — what an agent may set, with what values, and what each means.</li>
+</ol>
+<p>There is no second place to update, and therefore no way for the three to disagree (P9). An option
+without a description is an incomplete option, and CI can say so.</p>
+<h3 id="62-live-while-you-declare">6.2 Live while you declare<a class="headerlink" href="#62-live-while-you-declare" title="Permanent link">&para;</a></h3>
+<p>In the GUI, editing the declaration shows the documentation for the option under the
+cursor: what it does, its type, its default, what it interacts with, and whether changing it applies
+live or needs a restart. <strong>Declaring the system and reading about it are one activity</strong>, not a
+context switch to a browser.</p>
+<p>The same pane carries the architecture and decision records, so "why is it like this" is answerable
+without leaving the workspace.</p>
+<h3 id="63-the-agent-reads-what-you-read">6.3 The agent reads what you read<a class="headerlink" href="#63-the-agent-reads-what-you-read" title="Permanent link">&para;</a></h3>
+<p>When an agent proposes a change to the declaration it is working from the option schema, and its
+proposal cites the options it sets. An agent that must guess at option names produces
+plausible-looking configuration that does not evaluate — the failure mode this design removes.</p>
+<p>Combined with §7, the sequence is: the agent proposes a declaration change, the documentation for
+every option it touched is shown beside the diff, and you approve or reject with the reasoning in
+front of you.</p>
+<hr />
+<h2 id="7-the-modification-surface">7. The modification surface<a class="headerlink" href="#7-the-modification-surface" title="Permanent link">&para;</a></h2>
+<p><strong>Everything configurable is modifiable at runtime — by the user, the built-in agent, and external
+agents — through one API.</strong></p>
+<ul>
+<li><strong>No privileged surface.</strong> The GUI is a control-socket client like any other. If a setting can be
+  changed by clicking, it can be changed by <code>omnis</code> and by an agent over MCP, using the same
+  operation (P5).</li>
+<li><strong>Introspectable, not guessable.</strong> Clients enumerate the option schema, the axes and their legal
+  values, installed profiles, themes, keymaps, environments, and subsystems (§6.1).</li>
+<li><strong>One validation path, one approval path.</strong> Side-effectful mutations pass the same escrow whoever
+  sent them. There is no trusted-caller shortcut: identity is not a security boundary when both the
+  built-in and external agents run arbitrary model output. The gate is on the <em>action</em>.</li>
+<li><strong>Attributed.</strong> Every mutation records who made it. An unattributable change is indistinguishable
+  from a compromise.</li>
+<li><strong>Reversible</strong>, via generations (§4.1).</li>
+</ul>
+<h3 id="71-agent-accountability">7.1 Agent accountability<a class="headerlink" href="#71-agent-accountability" title="Permanent link">&para;</a></h3>
+<p>Every side-effectful agent action is <strong>recorded before it takes effect</strong> in an append-only audit
+stream — actor, action category, parameters, outcome — and <strong>gated by an escrow ticket</strong> that
+expires. An expired ticket is a denial, never a silent grant. A killswitch revokes in-flight
+execution, not merely future execution. Actions that cannot be recorded cannot be executed.</p>
+<p>Audit without escrow is a perfect record of damage already done. Escrow without audit is approvals
+with no history. They are one invariant.</p>
+<h3 id="72-self-optimisation">7.2 Self-optimisation<a class="headerlink" href="#72-self-optimisation" title="Permanent link">&para;</a></h3>
+<p>The system observes itself — which subsystems are used, latency and memory per process, cache hit
+rates, which placements are slow — and <strong>proposes changes to its own declaration</strong>: disable a
+subsystem nothing has called in a month, resize a cache, move a process to a host that is not
+saturated, prefetch what is always fetched.</p>
+<p><strong>Self-optimisation is not a new mechanism.</strong> It is the system acting as an agent against itself, and
+it goes through exactly the path in §7 and §7.1: a proposed generation, with a diff, an author, and
+the measurements that motivated it, passing the same escrow. Approving it is the same action as
+approving anything else, and rolling it back is the same operation.</p>
+<p><strong>It is never silent.</strong> A system that reconfigures itself without a reviewable generation is
+precisely the unattributable change §7 rejects, and "the computer decided" is not an acceptable
+answer to "why is my machine different today". Whether a class of optimisation may be auto-approved
+is a policy in the declaration — off by default, and never for anything that removes or relocates.</p>
+<p>The honest limit: this is only as good as the telemetry, and telemetry that answers "is this
+subsystem worth keeping" is a design problem in its own right, not a side effect of logging.</p>
+<h3 id="73-automation">7.3 Automation<a class="headerlink" href="#73-automation" title="Permanent link">&para;</a></h3>
+<p>Goal loops, workflow graphs, one-shot tasks, and scheduled jobs are <strong>one abstraction</strong>, not four
+features (P10).</p>
+<p>An <strong>automation</strong> is a declared graph of steps with:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Trigger</strong></td>
+<td>Manual, a schedule, a bus event, or a goal becoming unsatisfied</td>
+</tr>
+<tr>
+<td><strong>Steps</strong></td>
+<td>A graph — sequential, parallel, or conditional — of actions, each addressable (§10.3)</td>
+</tr>
+<tr>
+<td><strong>Gates</strong></td>
+<td>Escrow points where a human approves before the graph continues (§7.1)</td>
+</tr>
+<tr>
+<td><strong>Checkpoints</strong></td>
+<td>Durable progress, so an interrupted run resumes rather than restarts</td>
+</tr>
+<tr>
+<td><strong>Termination</strong></td>
+<td>An explicit stop condition. A goal loop without one is not a loop, it is a leak</td>
+</tr>
+</tbody>
+</table>
+<p>Every automation is declared (P3), every step is attributed and audited (§7.1), and a failed or
+blocked run checkpoints and reports rather than dying silently.</p>
+<p><strong>A goal loop is a graph with a satisfaction condition</strong> rather than a distinct mechanism: it runs,
+checks whether the goal holds, and either stops or re-enters. Self-optimisation (§7.2) is a goal loop
+whose action is proposing a generation. Scheduled jobs are graphs with a time trigger. The task graph
+(§11) is the execution engine underneath, not a parallel system.</p>
+<p><strong>The proof this abstraction is right is that it already exists.</strong> The pipeline that builds Omnis —
+request, interpretation gate, plan, approval gate, implement, self-review loop, merge gate, with
+checkpoint-and-resume on quota exhaustion — <em>is</em> a goal loop with human gates and durable
+checkpoints. It is currently GitHub Actions and Python because the product does not exist yet. When
+it does, that pipeline should be an Omnis automation, and the fact that it was built by hand first
+means the abstraction is validated against a real workload rather than an imagined one.</p>
+<p><strong>Not built yet.</strong> This section specifies the shape; no automation engine exists. Its position in the
+roadmap is deliberate — an automation abstraction is only worth building once the bus, the
+declaration, and the escrow it depends on are real.</p>
+<hr />
+<h2 id="8-hosts-and-placement">8. Hosts and placement<a class="headerlink" href="#8-hosts-and-placement" title="Permanent link">&para;</a></h2>
+<p>A <strong>host</strong> is a named execution target backed by a runtime: <code>native</code>, <code>docker</code>, <code>wsl</code>, <code>podman</code>,
+<code>nspawn</code>, or <code>remote</code> (another personal machine over the tailnet). The container runtime is itself an
+abstraction — pinning one would exclude users to save a thin dispatch.</p>
+<p>Each core process — <strong>daemon, CLI, GUI, web</strong> — is <strong>placed on a host</strong> in the declaration.
+Placement is a property of the system, not an installation detail: daemon on the workstation,
+interface on the laptop, is a configuration rather than a special build.</p>
+<p>Processes carry constraints, checked at evaluation time:</p>
+<table>
+<thead>
+<tr>
+<th>Process</th>
+<th>Requires</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>daemon</code></td>
+<td>The workspace filesystem; durable storage</td>
+</tr>
+<tr>
+<td><code>gui</code></td>
+<td>A display, a GPU, the platform window system — effectively <code>native</code></td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td>Nothing; attaches to a daemon wherever it is</td>
+</tr>
+<tr>
+<td><code>web</code></td>
+<td>Reachability on the tailnet</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resolution failure is a configuration error with a reason</strong>, reported when the generation is
+evaluated — not a runtime crash. The GUI constraint is load-bearing: a GPU compositor in a container
+without passthrough is crippled, and passthrough on macOS and Windows ranges from fragile to
+unavailable. <strong>The GUI runs natively; the daemon is what gets containerised.</strong></p>
+<h3 id="81-remote-access">8.1 Remote access<a class="headerlink" href="#81-remote-access" title="Permanent link">&para;</a></h3>
+<p>Remote access is a <strong>web surface served over Tailscale</strong> at the device's HTTPS name
+(<code>https://&lt;device&gt;.&lt;tailnet&gt;.ts.net</code>). Transport, naming, and certificates are Tailscale's; caller
+identity comes from the tailnet, which is what makes attribution satisfiable for a remote caller.</p>
+<p>It is <strong>optional</strong>. The daemon starts, runs, and is fully usable with no network at all.</p>
+<p>The web surface is a surface, not a renderer backend: the compositor is wgpu-based and wgpu targets
+WebGPU, so a browser hosts the <em>same</em> backend in a canvas.</p>
+<h3 id="82-what-splitting-costs">8.2 What splitting costs<a class="headerlink" href="#82-what-splitting-costs" title="Permanent link">&para;</a></h3>
+<p>A remote daemon means remote filesystem access, so the VFS and content-addressed store stop being
+optimisations and become load-bearing for correctness and latency. Input-to-frame latency crosses a
+network in split configurations. And the tested combinations must be named explicitly, or "it works
+on my placement" becomes the standard bug report.</p>
+<hr />
+<h2 id="9-rendering">9. Rendering<a class="headerlink" href="#9-rendering" title="Permanent link">&para;</a></h2>
+<p><strong>Sources are not renderers.</strong> Cell-grid layout, widget layout, web content, guest windows, and 3D
+all emit primitives into one scene tree. Two <strong>backends</strong> consume it.</p>
+<p>There is <strong>one backend</strong>: the GPU compositor (<code>omnis-render</code>), targeting a desktop window natively
+and a browser canvas over WebGPU (§8.1).</p>
+<p><code>cell-grid</code> presentation remains — the terminal <em>look</em>, fixed advance, ANSI palettes, pane-grid
+keyboard navigation, command-palette-first interaction — drawn by the compositor in a window. Looking
+like a terminal and running in one were always separate things; ADR-0017 dropped the second, and the
+aesthetic is untouched.</p>
+<p><strong>One backend does not make the scene tree optional.</strong> It is what keeps sources out of rendering: a
+source emits primitives and knows nothing about how they are drawn, which is what lets a browser
+page, a guest window, and a shader field coexist in one frame.</p>
+<h3 id="91-why-one-scene-tree">9.1 Why one scene tree<a class="headerlink" href="#91-why-one-scene-tree" title="Permanent link">&para;</a></h3>
+<p>A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with shaped advance —
+same atlas, same pipeline. A browser is a content source, not a rendering engine. And compositing a
+terminal pane, a video, a guest application window, and a particle field in one frame is a scheduling
+problem with one answer.</p>
+<p>The scene tree is also what makes a service presentable at all (§12): a source translates whatever it
+is fronting into primitives, and everything downstream — theming, layout, accessibility, the agent's
+view of the screen — works without knowing what produced them.</p>
+<h3 id="92-primitives">9.2 Primitives<a class="headerlink" href="#92-primitives" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quad — solid, gradient, rounded, bordered, shadowed</td>
+<td>backgrounds, panels, cell backgrounds, chrome</td>
+</tr>
+<tr>
+<td>Glyph run — shared atlas, fixed or shaped advance</td>
+<td>terminal cells, labels, code, semantic web text</td>
+</tr>
+<tr>
+<td>Texture</td>
+<td>screencast rasters, guest windows, icons, render targets</td>
+</tr>
+<tr>
+<td>Path — SDF or tessellated</td>
+<td>vector icons, graphs, DAG edges</td>
+</tr>
+<tr>
+<td>Material layer — custom shader with declared inputs</td>
+<td>3D scenes, particle fields, backdrops, transitions</td>
+</tr>
+<tr>
+<td><strong>Native surface</strong> — a delegated region we do not draw</td>
+<td>DRM playback, guest windows, hardware-decoded video, third-party webviews</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Adding a source must not add a primitive class.</strong> If it would, that is a design conversation, not a
+patch. The native surface is the one case that has earned it (ADR-0019), because no combination of
+the other five can express <em>content we are not permitted to look at</em>.</p>
+<h3 id="93-3d-shaders-particles">9.3 3D, shaders, particles<a class="headerlink" href="#93-3d-shaders-particles" title="Permanent link">&para;</a></h3>
+<p>The material layer is a first-class primitive, not an effects add-on, available in every presentation
+mode — including behind and between glyph runs in the cell grid. Two uses, deliberately not
+conflated: <strong>chrome</strong> (backdrops, transitions, agent-activity fields) authored by Omnis and profiles,
+and <strong>content</strong> (shader playgrounds, model preview, GPU-accelerated visualisation) supplied by a user
+or extension. The engine supports both; exposing authoring demands sandboxing, resource limits, and
+GPU-hang recovery, and is gated on D14.</p>
+<h3 id="94-native-surfaces-and-the-rule-for-them">9.4 Native surfaces, and the rule for them<a class="headerlink" href="#94-native-surfaces-and-the-rule-for-them" title="Permanent link">&para;</a></h3>
+<p>Some content cannot be drawn by us. DRM-protected playback requires a protected output path, so
+capturing it — in a browser canvas or from a guest window — yields black frames by design. Capture is
+the wrong verb.</p>
+<p>A <strong>native surface</strong> is delegated instead: Omnis declares the geometry, the clip, and the z-order, and
+the platform composites the content there through its own path. <strong>We never receive the pixels</strong>, which
+is exactly why it is permitted (Wayland subsurfaces, <code>CALayer</code>/<code>AVSampleBufferDisplayLayer</code>,
+DirectComposition visuals).</p>
+<p><strong>The rule: delegate as little as possible.</strong> Every delegated region is a piece of the interface we no
+longer control (P7). If content can be a texture, it should be.</p>
+<p>What a delegated region costs:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No styling</strong></td>
+<td>A profile does not reach inside it. It is someone else's rectangle.</td>
+</tr>
+<tr>
+<td><strong>No capture</strong></td>
+<td>We cannot screenshot or record it — so our own capture features must say so rather than emit black.</td>
+</tr>
+<tr>
+<td><strong>Constrained z-order</strong></td>
+<td>On several platforms an overlay sits above or below the scene, not freely interleaved. Modals over one may be impossible, not merely awkward.</td>
+</tr>
+<tr>
+<td><strong>Does not cross the network</strong></td>
+<td>It cannot be delegated through the web surface's canvas, so remote access to DRM playback does not work and must say so.</td>
+</tr>
+<tr>
+<td><strong>Four implementations</strong></td>
+<td>One per platform, in a project that otherwise confines platform differences to how the core is hosted.</td>
+</tr>
+</tbody>
+</table>
+<p>Its contents are opaque to us, so its accessibility is the platform's and the content's. The region
+must still be <strong>described</strong> in our tree, or a screen reader meets an unexplained gap.</p>
+<h3 id="95-what-owning-the-renderer-costs">9.5 What owning the renderer costs<a class="headerlink" href="#95-what-owning-the-renderer-costs" title="Permanent link">&para;</a></h3>
+<p>Text shaping, hit-testing, IME, and <strong>accessibility</strong>. A custom-rendered UI publishes no native
+accessibility tree unless built to, so UIA/AX/AT-SPI belongs in the compositor's acceptance criteria
+rather than a later epic.</p>
+<p>Dropping the TUI (ADR-0017) makes this <strong>non-negotiable rather than merely important</strong>: a text
+backend was one path to text-addressable output, and with it gone the published accessibility tree is
+the only one. The web surface sharpens it further — a browser is where users most expect assistive
+technology to work.</p>
+<hr />
+<h2 id="10-presentation">10. Presentation<a class="headerlink" href="#10-presentation" title="Permanent link">&para;</a></h2>
+<h3 id="101-themes-and-profiles">10.1 Themes and profiles<a class="headerlink" href="#101-themes-and-profiles" title="Permanent link">&para;</a></h3>
+<p><strong>A theme is colours</strong>, in the <strong>VS Code colour-theme format</strong> — <code>colors</code>, <code>tokenColors</code>,
+<code>semanticTokenColors</code>, <code>type</code>. Existing themes load unmodified, and the format already carries
+<code>terminal.ansi*</code>, so the sixteen ANSI colours the cell-grid presentation needs come free. Icon
+themes use the VS Code icon-theme format for the same reason.</p>
+<p><strong>A profile bundles</strong> a theme, an icon theme, the axis values below, window chrome, the app icon and
+its state animations, typography and density, an audio pack, material-layer backdrops, and settings
+overrides.</p>
+<p><strong>Agent persona is not part of a profile.</strong> A profile may <em>suggest</em> one; it never sets a provider,
+model, or reasoning effort behind the user's back.</p>
+<h3 id="102-the-capability-matrix">10.2 The capability matrix<a class="headerlink" href="#102-the-capability-matrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Option</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Presentation mode</td>
+<td><code>presentation</code></td>
+<td><code>cell-grid</code> · <code>widget</code> · <code>hybrid</code></td>
+</tr>
+<tr>
+<td>Layout topology</td>
+<td><code>layout</code></td>
+<td><code>chat-centric</code> · <code>ide-split</code> · <code>terminal-grid</code> · <code>vcs-dag</code></td>
+</tr>
+<tr>
+<td>Input routing</td>
+<td><code>inputBar</code></td>
+<td><code>global-hud</code> · <code>per-pane</code> · <code>hybrid</code></td>
+</tr>
+<tr>
+<td>Keymap</td>
+<td><code>keybindings</code></td>
+<td><code>default</code> · <code>vscode</code> · <code>zed</code> · <code>cursor-claude</code> · <code>vim</code> · <code>emacs</code></td>
+</tr>
+<tr>
+<td>Chrome &amp; tokens</td>
+<td><code>window.*</code>, <code>theme</code></td>
+<td>§10.1</td>
+</tr>
+</tbody>
+</table>
+<p>Which <em>backend</em> runs is not an axis and not a preference: it follows from the surface. <code>hybrid</code> mixes
+presentation modes per pane, so a cell-grid editor beside a widget settings panel is legal rather
+than a special case.</p>
+<p>Themes and profiles are <strong>data files</strong> and nothing else. Adding either requires zero code changes (P6).</p>
+<h3 id="103-one-input-bar-one-navigation-model">10.3 One input bar, one navigation model<a class="headerlink" href="#103-one-input-bar-one-navigation-model" title="Permanent link">&para;</a></h3>
+<p><strong>There is one input bar.</strong> Not a chat box, a search field, a terminal prompt, a command palette, and
+a browser address bar — one input, bound to whatever has focus. A chat, a quick search, a terminal, a
+web page, a settings filter, and a documentation query all reach the user through the same control.</p>
+<p>Panes do not ship their own input widgets. A pane declares an <strong>input contract</strong> — what it accepts,
+where completions come from, what history it draws on, and what submitting means — and the input bar
+renders and routes accordingly. That is P10 applied to the most duplicated widget in every
+comparable product.</p>
+<p>This clarifies the <code>inputBar</code> axis (§10.2): <code>global-hud</code> and <code>per-pane</code> are not two implementations,
+they are two <em>placements</em> of the same bar — floating and centred, or anchored into the focused pane.
+<code>hybrid</code> mixes them.</p>
+<p><strong>Everything is addressable.</strong> Panes, files, settings pages, documentation, chats, repositories,
+tasks, context fragments, and guest environments all have an <code>omnis://</code> address. Addressability is
+what makes the rest of this work: it is what the input bar navigates to, what the CLI takes as an
+argument, what an agent cites in a proposal, and what a link in the documentation points at.</p>
+<p><strong>Navigation is global.</strong> Because everything is addressed, <strong>back, forward, and reload</strong> are system
+controls rather than browser controls, over one history stack across every surface. Reload means
+<em>re-materialise this view from its source</em> — re-read the file, re-query the schema, re-fetch the page
+— and never <em>re-execute</em>: reloading a task view must not run the task. Confusing those two is how a
+navigation control becomes destructive.</p>
+<hr />
+<h2 id="11-data">11. Data<a class="headerlink" href="#11-data" title="Permanent link">&para;</a></h2>
+<p><strong>Configuration lives in files; user data lives in PGlite</strong> — embedded Postgres, not a server.</p>
+<p>The test: <em>would a user want this in version control, or be alarmed to find it there?</em> Themes,
+profiles, keymaps, layouts, feature flags, placement, and environments are the first. Workspaces,
+tabs, chat threads, audit entries, CAS metadata, VCS state, context fragments, and escrow tickets are
+the second.</p>
+<ul>
+<li><strong>Content-addressed storage</strong> — content-defined chunking, BLAKE3 keys, convergent encryption keyed
+  by a per-user master secret, reflink deduplication. Convergent encryption leaks equality <em>within</em>
+  one user's store: an attacker with store access who can guess a plaintext can confirm its presence.
+  A bounded, accepted property, not an oversight.</li>
+<li><strong>Context fragments</strong> — everything captured normalises to one envelope regardless of origin (code
+  selection, terminal buffer, browser page, container log), addressable as <code>omnis://context/&lt;id&gt;</code>,
+  payload in the CAS. Per-origin formats would mean an adapter per origin per consumer.</li>
+<li><strong>The VCS operation log</strong> — every mutating operation appends an entry carrying enough state to
+  invert it. Undo is a first-class operation over that log, not reconstruction from git internals,
+  and it holds identically for Git and Sapling because the log is Omnis's. Operations that are not
+  losslessly invertible must capture the discarded state into the CAS first, or refuse.</li>
+<li><strong>Task identity is the hash of its inputs</strong> — source content, dependency output hashes, the command
+  line, the declared environment. Not a timestamp: <code>mtime</code> changes on checkout and fails to change on
+  same-second writes, and is meaningless across machines or a sync mesh. Undeclared inputs produce
+  wrong cache hits, so detecting them is part of the work, not an extra.</li>
+</ul>
+<hr />
+<h2 id="12-services">12. Services<a class="headerlink" href="#12-services" title="Permanent link">&para;</a></h2>
+<p>A <strong>service</strong> — ChatGPT, DeepSeek, Google, YouTube, Netflix — is a <strong>backend of a domain subsystem</strong>.
+YouTube is to <code>streaming</code> what <code>git</code> is to <code>vcs</code>: the same swappability (P2), the same declaration,
+the same complete removal (§5.3).</p>
+<p>Three concerns, only one of them new:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Presentation</strong></td>
+<td>A source emitting scene-tree primitives (§9)</td>
+</tr>
+<tr>
+<td><strong>Action</strong></td>
+<td>A capability over the bus, brokered and escrow-gated (§7)</td>
+</tr>
+<tr>
+<td><strong>Aggregation</strong></td>
+<td>A <strong>domain schema</strong> every backend maps onto — the new part</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The universal translator already exists.</strong> <code>omnis-web-source</code>'s semantic mode — AXTree to layout to
+primitives — renders any service with a web interface <em>today</em>, as real primitives rather than a
+rectangle of pixels: keyboard-navigable, themeable, and legible to an agent.</p>
+<p>Four tiers, progressive, with no cliff:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>What</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Raster — screencast into a texture</td>
+<td>Nothing; always works</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Semantic translation — AXTree to primitives</td>
+<td>Nothing; the default</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Declared adapter — a mapping to the domain schema</td>
+<td>Data, not code (P10)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>API adapter — the service's own API</td>
+<td>An adapter subsystem, and credentials</td>
+</tr>
+</tbody>
+</table>
+<p>Everything is usable at tier 1 and upgraded in place. A service that changes its markup is fixed by
+editing data, not by shipping a release.</p>
+<p><strong>A domain schema names which capabilities a backend may decline.</strong> Not every provider supports every
+action, and a schema that assumes otherwise produces an interface full of controls that silently
+fail. DRM playback is the sharpest case: a backend supplies search, metadata, and queue, and declines
+playback, which is then delegated to a native surface (§9.4).</p>
+<p><strong>Terms of service is a decision, not a technical question.</strong> Re-presenting some services through our
+own interface is contractually restricted regardless of feasibility, and which adapters ship needs
+the same treatment as trade dress (D3).</p>
+<hr />
+<h2 id="13-security">13. Security<a class="headerlink" href="#13-security" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>The vault.</strong> Master key via Argon2id; the key-encryption key in a zeroising buffer with <code>mlock</code>,
+  never serialised. Device secrets bridge to the OS keychain.</li>
+<li><strong>Secrets reach child processes by injection at spawn time</strong> — never written to disk, never to a
+  file the child reads.</li>
+<li><strong>Secrets never enter agent context.</strong> An agent may reference a secret by name and cause it to be
+  injected; it may not read the value. Otherwise every secret reaches a model provider's logs and any
+  transcript the user later shares.</li>
+<li><strong>Git, forge, and SSH authentication</strong> go through a local agent socket, so private keys are
+  decrypted on demand and never handed out.</li>
+</ul>
+<p>The structure is fixed; the <strong>threat model is D10</strong> and may constrain it.</p>
+<hr />
+<h2 id="14-crate-and-package-layout">14. Crate and package layout<a class="headerlink" href="#14-crate-and-package-layout" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>crates/
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  omnis-core/          bus contracts, option schema, scene tree types, capability matrix
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  omnisd/              the core: routing, registry, brokering, convergence, generations
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  omnis-cli/           `omnis`, `--json` on every command
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  omnis-gui/           desktop host and window manager
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  omnis-layout/        cell-grid and widget layout modes
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  omnis-browser/       Chromium supervisor and CDP bridge
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  omnis-web-source/    AXTree→layout and screencast→texture bridges; the default service backend
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  omnis-cas/           chunking, convergent encryption, VFS
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  omnis-agent/         harness registry, session supervision, MCP bridge
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  omnis-docs/          option schema → documentation, search index, in-product docs surface
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>subsystems/            one adapter binary per bound tool — vcs, terminals, lsp, dap, tasks, …
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>packages/
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  frontend/            web surface shell
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>  profiles/            profiles and themes — data only, no code
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>nix/                   modules defining the declaration's option schema
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>examples/
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>  omnis.nix            the reference declaration
+</code></pre></div>
+<p>Nothing here exists yet. It is the target shape, and the reason <code>ci.yml</code> already carries guarded Rust
+and web jobs.</p>
+<hr />
+<h2 id="15-open-decisions">15. Open decisions<a class="headerlink" href="#15-open-decisions" title="Permanent link">&para;</a></h2>
+<p>Resolved decisions link to their record; see <a href="decisions/">the decision log</a>.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Blocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td><strong>First vertical slice</strong> — which single path through the substrate is built first, end to end. A sequencing choice, not a product thesis.</td>
+<td>E1, and the ordering of everything after</td>
+</tr>
+<tr>
+<td>~~D2~~</td>
+<td>Config/data boundary — resolved by <a href="decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005</a> and <a href="decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012</a></td>
+<td>~~E6~~</td>
+</tr>
+<tr>
+<td>D3</td>
+<td><strong>Trade-dress policy</strong> — which third-party names, marks, and icons may ship, and under what attribution</td>
+<td>E4</td>
+</tr>
+<tr>
+<td>D4</td>
+<td><strong>Host backends and tested placements per platform</strong> — reshaped by <a href="decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016</a> from "which platforms" to "which backends, and which placements do we test"</td>
+<td>E2, E3, E11</td>
+</tr>
+<tr>
+<td>D5</td>
+<td><strong>Extension host compatibility target</strong> — VS Code API emulation, or native-first with shims</td>
+<td>E8</td>
+</tr>
+<tr>
+<td>D6</td>
+<td><strong>Agent provider adapter contract</strong></td>
+<td>E5</td>
+</tr>
+<tr>
+<td>D7</td>
+<td><strong>Performance budgets</strong> — frame time, redraw latency, cold start, memory ceiling, and input-to-frame across a network</td>
+<td>E3, E7</td>
+</tr>
+<tr>
+<td>~~D8~~</td>
+<td>Renderer hot-swap — dissolved by <a href="decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001</a>; what remains is graphics device loss and adapter switching</td>
+<td>E3</td>
+</tr>
+<tr>
+<td>D9</td>
+<td><strong>Subsystem admission criteria</strong> — what a subsystem must satisfy to enter the "next to" layer</td>
+<td>Every subsystem</td>
+</tr>
+<tr>
+<td>D10</td>
+<td><strong>Vault threat model</strong> — what <code>mlock</code>, the Argon2id parameters, and spawn-time injection actually defend against</td>
+<td>E11, E19</td>
+</tr>
+<tr>
+<td>D11</td>
+<td><strong>Graphics baseline</strong> — API, minimum GPU capability, and what happens below it</td>
+<td>E3, E21</td>
+</tr>
+<tr>
+<td>D12</td>
+<td><strong>Text stack</strong> — shaping, atlas strategy, subpixel policy, bidi, IME</td>
+<td>E3</td>
+</tr>
+<tr>
+<td>~~D13~~</td>
+<td>Webview compositing — answered by <a href="decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019</a>: a native subsurface, not readback</td>
+<td>~~E3, E7, E8~~</td>
+</tr>
+<tr>
+<td>D14</td>
+<td><strong>Shader and 3D exposure</strong> — Omnis and profiles only, or users and extensions</td>
+<td>E21</td>
+</tr>
+<tr>
+<td>~~D15~~</td>
+<td>Terminal capability floor — moot, the TUI is dropped by <a href="decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017</a></td>
+<td>~~E22~~</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="16-repository-automation">16. Repository automation<a class="headerlink" href="#16-repository-automation" title="Permanent link">&para;</a></h2>
+<p>The development pipeline is part of the architecture: <a href="../agents/"><code>AGENTS.md</code></a> states the rules,
+<a href="../pipeline/"><code>notes/pipeline.md</code></a> explains how it works and how releases are cut,
+<code>.github/workflows/</code> enforces it, and <code>.github/scripts/</code> implements it. The pipeline is Python; that
+is deliberate and independent of the product stack.</p>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="..">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">Overview</span>
+          </a>
+          <a class="pager__link pager__link--next" href="decisions/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Overview</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-what-omnis-is">1. What Omnis is</a>
+          </li>
+          <li><a href="#2-principles">2. Principles</a>
+          </li>
+          <li><a href="#3-topology">3. Topology</a>
+            <ul>
+              <li><a href="#31-responsibilities">3.1 Responsibilities</a></li>
+              <li><a href="#32-the-substrate-bus">3.2 The Substrate Bus</a></li>
+            </ul>
+          </li>
+          <li><a href="#4-the-declaration">4. The declaration</a>
+            <ul>
+              <li><a href="#41-generations">4.1 Generations</a></li>
+              <li><a href="#42-runtime-changes-write-the-declaration">4.2 Runtime changes write the declaration</a></li>
+              <li><a href="#43-what-this-costs">4.3 What this costs</a></li>
+            </ul>
+          </li>
+          <li><a href="#5-subsystems">5. Subsystems</a>
+            <ul>
+              <li><a href="#51-why-out-of-process">5.1 Why out of process</a></li>
+              <li><a href="#52-supervision-is-not-ours">5.2 Supervision is not ours</a></li>
+              <li><a href="#53-removal-is-complete">5.3 Removal is complete</a></li>
+              <li><a href="#54-backends-are-swappable">5.4 Backends are swappable</a></li>
+            </ul>
+          </li>
+          <li><a href="#6-documentation-is-part-of-the-system">6. Documentation is part of the system</a>
+            <ul>
+              <li><a href="#61-one-schema-three-consumers">6.1 One schema, three consumers</a></li>
+              <li><a href="#62-live-while-you-declare">6.2 Live while you declare</a></li>
+              <li><a href="#63-the-agent-reads-what-you-read">6.3 The agent reads what you read</a></li>
+            </ul>
+          </li>
+          <li><a href="#7-the-modification-surface">7. The modification surface</a>
+            <ul>
+              <li><a href="#71-agent-accountability">7.1 Agent accountability</a></li>
+              <li><a href="#72-self-optimisation">7.2 Self-optimisation</a></li>
+              <li><a href="#73-automation">7.3 Automation</a></li>
+            </ul>
+          </li>
+          <li><a href="#8-hosts-and-placement">8. Hosts and placement</a>
+            <ul>
+              <li><a href="#81-remote-access">8.1 Remote access</a></li>
+              <li><a href="#82-what-splitting-costs">8.2 What splitting costs</a></li>
+            </ul>
+          </li>
+          <li><a href="#9-rendering">9. Rendering</a>
+            <ul>
+              <li><a href="#91-why-one-scene-tree">9.1 Why one scene tree</a></li>
+              <li><a href="#92-primitives">9.2 Primitives</a></li>
+              <li><a href="#93-3d-shaders-particles">9.3 3D, shaders, particles</a></li>
+              <li><a href="#94-native-surfaces-and-the-rule-for-them">9.4 Native surfaces, and the rule for them</a></li>
+              <li><a href="#95-what-owning-the-renderer-costs">9.5 What owning the renderer costs</a></li>
+            </ul>
+          </li>
+          <li><a href="#10-presentation">10. Presentation</a>
+            <ul>
+              <li><a href="#101-themes-and-profiles">10.1 Themes and profiles</a></li>
+              <li><a href="#102-the-capability-matrix">10.2 The capability matrix</a></li>
+              <li><a href="#103-one-input-bar-one-navigation-model">10.3 One input bar, one navigation model</a></li>
+            </ul>
+          </li>
+          <li><a href="#11-data">11. Data</a>
+          </li>
+          <li><a href="#12-services">12. Services</a>
+          </li>
+          <li><a href="#13-security">13. Security</a>
+          </li>
+          <li><a href="#14-crate-and-package-layout">14. Crate and package layout</a>
+          </li>
+          <li><a href="#15-open-decisions">15. Open decisions</a>
+          </li>
+          <li><a href="#16-repository-automation">16. Repository automation</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/omnis.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
