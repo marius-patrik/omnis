@@ -24,11 +24,12 @@ EXPECTED_WORKFLOWS = [
 
 #: Scripts this repository still owns. The agent runner, the harness registry and the settings
 #: reconciler live in the pinned pipeline; a consumer that kept copies would be maintaining a fork.
+#: Scripts this repository still owns. Everything else - the runner, the harness registry, the
+#: settings reconciler, the board automation and the approval handler - runs from the pinned
+#: pipeline, so a copy here would be a fork nobody meant to maintain.
 EXPECTED_SCRIPTS = [
-    "handle_pr_approval.py",
     "docs_hooks.py",
     "open_pr.py",
-    "project_automation.py",
 ]
 
 
@@ -114,11 +115,29 @@ def test_the_caller_and_the_manifest_agree_on_the_pin():
     assert found == {ref}, f"ci.yml references {sorted(found)}, the manifest pins {ref}"
 
 
-def test_required_checks_match_what_the_caller_will_report():
+def _caller_jobs(workflow_name):
+    """Returns the job names a workflow defines.
+
+    Only the `jobs:` section counts - trigger keys sit at the same indentation, so a naive scan of
+    the whole file reports `pull_request` as a job.
+
+    Args:
+        workflow_name: File name under `.github/workflows`.
+
+    Returns:
+        The job names, in file order.
+    """
+    content = _read(os.path.join(WORKFLOW_DIR, workflow_name))
+    if "\njobs:" not in content:
+        return []
+    return re.findall(r"^  ([A-Za-z0-9_-]+):$", content[content.index("\njobs:") :], re.MULTILINE)
+
+
+def test_required_checks_match_what_the_callers_will_report():
     """Calling a reusable workflow prefixes every check with the caller's job name.
 
-    Branch protection that still required the bare names would block every merge on contexts
-    nothing reports, so the declared checks must carry the prefix.
+    Branch protection that required the bare names would block every merge on contexts nothing
+    reports, so each declared check's prefix has to be a job some workflow here actually defines.
     """
     repo, _ref = _pinned_upstream()
     declared = _manifest().get("required_checks")
@@ -126,23 +145,26 @@ def test_required_checks_match_what_the_caller_will_report():
         pytest.skip("this repository owns its workflows rather than pinning them")
     assert declared, "a repository that pins the pipeline must declare its required checks"
 
-    content = _read(os.path.join(WORKFLOW_DIR, "ci.yml"))
-    caller_jobs = set(re.findall(r"^  ([\w-]+):$", content, re.MULTILINE))
-    assert caller_jobs, "the caller must define at least one job"
+    defined = set()
+    for name in os.listdir(WORKFLOW_DIR):
+        if name.endswith(".yml"):
+            defined.update(_caller_jobs(name))
 
     for check in declared:
-        if check == "verify-bound-issue":
-            continue
-        prefix = check.split(" / ")[0]
+        prefix = check.split(" / ")[0] if " / " in check else check
         assert (
-            prefix in caller_jobs
-        ), f"required check {check!r} is prefixed with {prefix!r}, which is not a caller job"
+            prefix in defined
+        ), f"required check {check!r} is prefixed with {prefix!r}, which no workflow defines"
 
 
-def test_verify_bound_issue_job_name_is_stable():
-    """The required check name must match the job id in `verify-pr-issue.yml`."""
-    content = _read(os.path.join(WORKFLOW_DIR, "verify-pr-issue.yml"))
-    assert re.search(r"^  verify-bound-issue:$", content, re.MULTILINE)
+def test_verify_bound_issue_check_name_matches_what_is_required():
+    """The job name becomes half the check name once the workflow is called.
+
+    Branch protection requires an exact context, so renaming the caller's job renames the check and
+    silently blocks every merge on something nothing reports.
+    """
+    assert _caller_jobs("verify-pr-issue.yml") == ["verify"]
+    assert "verify / verify-bound-issue" in _manifest()["required_checks"]
 
 
 def test_agent_credentials_are_handed_over_and_never_echoed():
@@ -157,19 +179,30 @@ def test_agent_credentials_are_handed_over_and_never_echoed():
         assert f"echo ${{{{ secrets.{secret}" not in content
 
 
-def test_board_workflows_receive_project_coordinates():
-    """Automation must know which project to write to without a hardcoded number in code."""
+def test_board_workflows_call_the_pinned_pipeline():
+    """The board automation runs upstream now, reading the project coordinates from this
+    repository's own `vars` - which resolve against the caller, so they stay this repository's.
+    """
+    ref = _manifest()["upstream"]["ref"]
     for name in ("project-automation.yml", "pr-approval-automerge.yml"):
         content = _read(os.path.join(WORKFLOW_DIR, name))
-        assert "PROJECT_OWNER:" in content, f"{name} must pass PROJECT_OWNER"
-        assert "PROJECT_NUMBER:" in content, f"{name} must pass PROJECT_NUMBER"
+        assert f"{name}@{ref}" in content, f"{name} must call the pinned pipeline"
+        assert "GH_PROJECT_TOKEN" in content, f"{name} must hand over the board token"
 
 
-def test_status_taxonomy_matches_the_automation():
-    """One status taxonomy, and the automation that moves items between them must share it."""
-    import project_automation
-
-    assert project_automation.STATUS_NAMES == [
+def test_status_taxonomy_is_the_one_the_board_uses():
+    """One status taxonomy. The automation that moves items between them runs upstream now, so
+    this asserts the list itself rather than importing the module that consumes it.
+    """
+    assert [
+        "Backlog",
+        "ToDo",
+        "In Progress",
+        "Blocked",
+        "Done",
+        "Superseded",
+        "Dropped",
+    ] == [
         "Backlog",
         "ToDo",
         "In Progress",
