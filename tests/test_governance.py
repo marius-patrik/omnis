@@ -64,13 +64,22 @@ def test_agents_mandates_plan_gate_and_verbatim_requests():
     assert "### Interpretation" in content
 
 
-def test_agents_defines_every_area_label_used_by_the_agent():
-    """The area taxonomy in prose matches the one the classifier can emit."""
-    import agent_runner
+def test_agents_documents_every_declared_area():
+    """The taxonomy in prose must match the one declared for the classifier.
 
+    The classifier lives upstream and reads `.github/darkfactory.json`, so the pairing to check is
+    prose against manifest: an area the agent can emit but the rules never mention is a label
+    nobody can interpret.
+    """
+    import json
+
+    with open(os.path.join(REPO_ROOT, ".github", "darkfactory.json"), encoding="utf-8") as handle:
+        areas = json.load(handle).get("areas", {})
     content = _read("AGENTS.md")
-    for label in agent_runner.AREA_LABELS:
-        assert label in content, f"AGENTS.md must document the {label!r} scope"
+    for name in areas:
+        if name.startswith("$"):
+            continue
+        assert f"area:{name}" in content, f"AGENTS.md must document the 'area:{name}' scope"
 
 
 def test_architecture_is_the_only_normative_document():
