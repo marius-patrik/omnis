@@ -4,7 +4,7 @@
   A first-party ProperDocs theme, owned outright rather than extended from a vendor's, so any part
   of the markup can change without fighting an upstream stylesheet. The visual system is shadcn/ui:
   neutral palette, 1px borders, small radius, and every colour expressed as an HSL token in
-  assets/omnis.css.
+  assets/theme.css.
 -#}
 {% set page_title = page.title ~ " · " ~ config.site_name if page and page.title else config.site_name %}
 <!doctype html>
@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-    <link rel="stylesheet" href="{{ 'assets/omnis.css'|url }}">
+    <link rel="stylesheet" href="{{ 'assets/theme.css'|url }}">
     {%- for path in config.extra_css %}
     <link rel="stylesheet" href="{{ path|url }}">
     {%- endfor %}
@@ -27,7 +27,7 @@
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem("omnis-theme");
+          var stored = localStorage.getItem("docs-theme");
           if (stored) document.documentElement.setAttribute("data-theme", stored);
           else if (window.matchMedia("(prefers-color-scheme: light)").matches)
             document.documentElement.setAttribute("data-theme", "light");
@@ -83,6 +83,7 @@
 
     <div class="layout">
       <aside class="sidebar" data-nav>
+        {%- include "partials/switcher.html" -%}
         <nav aria-label="Documentation">
           {%- include "partials/nav.html" -%}
         </nav>
@@ -139,7 +140,7 @@
     </div>
 
     <script id="search-base" type="application/json">{{ base_url|tojson }}</script>
-    <script src="{{ 'assets/omnis.js'|url }}" defer></script>
+    <script src="{{ 'assets/theme.js'|url }}" defer></script>
     {%- for path in config.extra_javascript %}
     <script src="{{ path|url }}" defer></script>
     {%- endfor %}

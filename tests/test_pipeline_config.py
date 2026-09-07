@@ -234,14 +234,26 @@ def test_preview_workflow_exists_and_is_scoped():
 
 
 def test_preview_and_main_deploy_share_one_pages_source():
-    """GitHub Pages has one source; two mechanisms would silently fight."""
+    """GitHub Pages has one source; two mechanisms would silently fight.
+
+    The main deploy is a caller now, so its mechanism lives upstream and the invariant is checked
+    against the manifest that declares the source instead of against the workflow body. The preview
+    is still this repository's own, so it is checked directly.
+    """
     preview = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
     deploy = _read(os.path.join(WORKFLOW_DIR, "deploy-docs.yml"))
-    for content in (preview, deploy):
-        assert "branch: gh-pages" in content
-    assert "upload-pages-artifact" not in deploy, "the Actions build type conflicts with a branch"
-    assert "clean-exclude" in deploy, "publishing the site must not delete live previews"
+
+    assert "branch: gh-pages" in preview
     assert "target-folder: pr-" in preview
+    assert "upload-pages-artifact" not in deploy, "the Actions build type conflicts with a branch"
+
+    pages = _manifest().get("pages", {})
+    assert pages.get("build_type") == "legacy", "a branch source is what previews need"
+    assert pages.get("branch") == "gh-pages", "the preview writes to gh-pages, so the site must too"
+
+    repo, _ref = _pinned_upstream()
+    if not repo:
+        assert "clean-exclude" in deploy, "publishing the site must not delete live previews"
 
 
 def test_preview_is_torn_down_when_the_pull_request_closes():
