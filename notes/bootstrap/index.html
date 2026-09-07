@@ -9,10 +9,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-    <link rel="stylesheet" href="../../assets/omnis.css"><script>
+    <link rel="stylesheet" href="../../assets/theme.css"><script>
       (function () {
         try {
-          var stored = localStorage.getItem("omnis-theme");
+          var stored = localStorage.getItem("docs-theme");
           if (stored) document.documentElement.setAttribute("data-theme", stored);
           else if (window.matchMedia("(prefers-color-scheme: light)").matches)
             document.documentElement.setAttribute("data-theme", "light");
@@ -65,8 +65,16 @@
     </header>
 
     <div class="layout">
-      <aside class="sidebar" data-nav>
-        <nav aria-label="Documentation">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
 
 
 <ul class="nav nav--depth-0">
@@ -418,7 +426,7 @@ every merge permanently. That is why the <code>rust</code> and <code>web</code> 
     </div>
 
     <script id="search-base" type="application/json">"../.."</script>
-    <script src="../../assets/omnis.js" defer></script>
+    <script src="../../assets/theme.js" defer></script>
     <script src="../../search/main.js" defer></script>
   </body>
 </html>

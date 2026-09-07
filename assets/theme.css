@@ -408,3 +408,50 @@ svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width:
   .layout { display: block; }
   .content { max-width: none; }
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Version and project switcher
+
+   Sits above the navigation because it changes what the navigation means: every link below it
+   resolves within whichever build is selected. Hidden until `versions.json` says there is more
+   than one build, so a single-version site shows no dead control.
+   --------------------------------------------------------------------------------------------- */
+.switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0 1rem;
+  margin: 0 0 1rem;
+  border-bottom: 1px solid var(--border, hsl(0 0% 89.8%));
+}
+
+.switcher__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.switcher__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground, hsl(0 0% 45.1%));
+}
+
+.switcher__select {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--foreground, hsl(0 0% 9%));
+  background-color: var(--background, hsl(0 0% 100%));
+  border: 1px solid var(--border, hsl(0 0% 89.8%));
+  border-radius: var(--radius, 0.5rem);
+  cursor: pointer;
+}
+
+.switcher__select:focus-visible {
+  outline: 2px solid var(--ring, hsl(0 0% 63.9%));
+  outline-offset: 2px;
+}
