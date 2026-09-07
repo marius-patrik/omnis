@@ -1,0 +1,184 @@
+{
+  "$comment": "Everything about this repository that the shared pipeline needs and cannot detect. The pipeline lives in marius-patrik/DarkFactory and is pinned below; the workflows here are callers, not copies.",
+  "identity": {
+    "owner": "marius-patrik",
+    "repo": "omnis",
+    "display_name": "Omnis",
+    "project_title": "Omnis",
+    "agent_slug": "omnis-agent",
+    "description": "Omnis - universal developer workspace and local-first personal data OS. Multi-process Rust daemon, Tauri shell, dual renderer (DOM + terminal cell-grid), multi-agent harness orchestration.",
+    "topics": [
+      "agentic-coding",
+      "agentic-development",
+      "ai-agents",
+      "autonomous-agents",
+      "automation",
+      "developer-tools",
+      "local-first",
+      "rust",
+      "tauri",
+      "terminal-ui",
+      "workspace"
+    ]
+  },
+  "upstream": {
+    "$comment": "The shared pipeline. `ref` is the pin: bump it to adopt a pipeline update, and the diff shows exactly what changed. Pinned to the branch that introduced the callable pipeline; re-pin to a `darkfactory` branch commit once it merges.",
+    "repo": "marius-patrik/DarkFactory",
+    "ref": "f93c12c22e55d48361f0affcc171485ad37c0142"
+  },
+  "versioning": {
+    "mode": "zerover",
+    "tag_prefix": "v",
+    "initial": "0.1.0"
+  },
+  "environment": {
+    "$comment": "Rust, TypeScript and the Python automation are all detected. The docs build is first-party, so it is declared.",
+    "documentation": {
+      "python": {
+        "command": "properdocs build --strict",
+        "source": "docstrings"
+      }
+    }
+  },
+  "areas": {
+    "$comment": "Omnis's own domains. Declaration order is match order, so specific areas come before general ones.",
+    "$default": "core",
+    "term": {
+      "description": "Terminal cell-grid renderer, ANSI/TrueColor pipeline, PTY integration",
+      "keywords": [
+        "terminal",
+        "cell-grid",
+        "ansi",
+        "sixel",
+        "braille",
+        "pty",
+        "tui",
+        "glyph",
+        "monospace"
+      ]
+    },
+    "browser": {
+      "description": "Embedded browser engine, CDP bridge, semantic and pixel render modes",
+      "keywords": [
+        "browser",
+        "chromium",
+        "cdp",
+        "axtree",
+        "webview",
+        "screencast",
+        "devtools"
+      ]
+    },
+    "agents": {
+      "description": "Harness orchestration, provider adapters, personas, approvals",
+      "keywords": [
+        "agent",
+        "harness",
+        "persona",
+        "provider",
+        "llm",
+        "prompt",
+        "approval"
+      ]
+    },
+    "ext": {
+      "description": "Extension host, plugin API, compatibility shims",
+      "keywords": [
+        "extension",
+        "plugin",
+        "addon",
+        "sandbox",
+        "shim"
+      ]
+    },
+    "data": {
+      "description": "Schema, persistence, migrations, sync, local-first storage",
+      "keywords": [
+        "schema",
+        "migration",
+        "persistence",
+        "storage",
+        "database",
+        "sync",
+        "pglite"
+      ]
+    },
+    "ui": {
+      "description": "DOM renderer, layout topology, theming, profiles, settings surfaces",
+      "keywords": [
+        "ui",
+        "gui",
+        "window",
+        "titlebar",
+        "theme",
+        "brand",
+        "icon",
+        "layout",
+        "typography",
+        "palette"
+      ]
+    },
+    "docs": {
+      "description": "Documentation, ProperDocs configuration, architecture notes",
+      "keywords": [
+        "doc",
+        "docs",
+        "documentation",
+        "properdocs",
+        "mkdocs",
+        "readme"
+      ]
+    },
+    "ci": {
+      "description": "GitHub Actions workflows, containers, runner scripts, repository automation",
+      "keywords": [
+        "ci",
+        "action",
+        "workflow",
+        "pipeline",
+        "docker",
+        "runner",
+        "automation"
+      ]
+    },
+    "core": {
+      "description": "Microkernel, process topology, IPC/substrate bus, daemon lifecycle, config",
+      "keywords": [
+        "daemon",
+        "omnisd",
+        "kernel",
+        "microkernel",
+        "ipc",
+        "bus",
+        "substrate",
+        "socket",
+        "process",
+        "topology",
+        "config",
+        "capability"
+      ]
+    }
+  },
+  "board": {
+    "global_title": "Global",
+    "link_boards": [
+      "Global",
+      "Omnis"
+    ]
+  },
+  "pages": {
+    "build_type": "legacy",
+    "branch": "gh-pages",
+    "path": "/"
+  },
+  "required_checks": [
+    "pipeline / pipeline (3.10)",
+    "pipeline / pipeline (3.11)",
+    "pipeline / pipeline (3.12)",
+    "pipeline / pipeline (3.13)",
+    "pipeline / rust",
+    "pipeline / web",
+    "pipeline / docs",
+    "verify-bound-issue"
+  ]
+}
