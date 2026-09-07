@@ -1,5 +1,6 @@
 """Tests that the workflow files and repository settings script stay consistent with the rules."""
 
+import json
 import os
 import re
 from typing import Dict, List
@@ -64,38 +65,78 @@ def test_script_exists(name: str):
     assert os.path.isfile(os.path.join(SCRIPT_DIR, name)), f"{name} must exist"
 
 
-def test_ci_language_jobs_are_guarded_not_skipped():
-    """Guarded steps keep language jobs green — a skipped job can never satisfy a required check."""
+def _manifest():
+    """Reads the repository manifest.
+
+    Returns:
+        The parsed manifest, or an empty mapping when this repository declares none.
+    """
+    path = os.path.join(REPO_ROOT, ".github", "darkfactory.json")
+    if not os.path.isfile(path):
+        return {}
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _pinned_upstream():
+    """Returns the pinned pipeline, if this repository consumes one.
+
+    Returns:
+        A `(repo, ref)` pair, or `(None, None)` when this repository owns its own workflows.
+    """
+    upstream = _manifest().get("upstream", {}) or {}
+    return upstream.get("repo"), upstream.get("ref")
+
+
+def test_ci_is_a_caller_pinned_to_a_commit():
+    """The pipeline lives upstream, so `ci.yml` must call it at a fixed commit.
+
+    A branch or tag reference would let the pipeline change under this repository without a
+    reviewable diff, which is the whole thing the pin exists to prevent.
+    """
+    repo, ref = _pinned_upstream()
+    if not repo:
+        pytest.skip("this repository owns its workflows rather than pinning them")
     content = _read(os.path.join(WORKFLOW_DIR, "ci.yml"))
-    assert "hashFiles('Cargo.toml')" in content
-    assert "hashFiles('package.json')" in content
-    # The guards must sit on steps, not on the jobs themselves.
-    job_headers = re.findall(r"^  (\w[\w-]*):\n(?:    .*\n)*?    runs-on:", content, re.MULTILINE)
-    assert {"pipeline", "rust", "web", "docs"} <= set(job_headers)
-    for job in ("rust:", "web:"):
-        block_start = content.index(f"\n  {job}")
-        block = content[block_start : block_start + 200]
-        assert "\n    if:" not in block, f"job {job} must not be conditionally skipped"
+    assert f"{repo}/.github/workflows/ci.yml@{ref}" in content, (
+        "ci.yml must call the pinned pipeline at the commit the manifest records"
+    )
+    assert re.fullmatch(r"[0-9a-f]{40}", ref or ""), "the pin must be a full commit SHA"
 
 
-def test_required_checks_match_ci_job_names():
-    """Branch protection may only require checks that `ci.yml` actually produces."""
-    import repo_settings
+def test_the_caller_and_the_manifest_agree_on_the_pin():
+    """Two copies of the same SHA drift the moment one is bumped alone."""
+    repo, ref = _pinned_upstream()
+    if not repo:
+        pytest.skip("this repository owns its workflows rather than pinning them")
+    content = _read(os.path.join(WORKFLOW_DIR, "ci.yml"))
+    found = set(re.findall(r"[0-9a-f]{40}", content))
+    assert found == {ref}, f"ci.yml references {sorted(found)}, the manifest pins {ref}"
 
-    ci = _read(os.path.join(WORKFLOW_DIR, "ci.yml"))
-    job_names = set(re.findall(r"^    name: ([\w-]+)$", ci, re.MULTILINE))
-    matrix_versions = re.findall(r'"(3\.\d+)"', ci)
 
-    produced = set()
-    for name in job_names:
-        if name == "pipeline":
-            produced.update(f"pipeline ({v})" for v in matrix_versions)
-        else:
-            produced.add(name)
-    produced.add("verify-bound-issue")
+def test_required_checks_match_what_the_caller_will_report():
+    """Calling a reusable workflow prefixes every check with the caller's job name.
 
-    missing = set(repo_settings.REQUIRED_CHECKS) - produced
-    assert not missing, f"required checks with no producing job: {sorted(missing)}"
+    Branch protection that still required the bare names would block every merge on contexts
+    nothing reports, so the declared checks must carry the prefix.
+    """
+    repo, _ref = _pinned_upstream()
+    declared = _manifest().get("required_checks")
+    if not repo:
+        pytest.skip("this repository owns its workflows rather than pinning them")
+    assert declared, "a repository that pins the pipeline must declare its required checks"
+
+    content = _read(os.path.join(WORKFLOW_DIR, "ci.yml"))
+    caller_jobs = set(re.findall(r"^  ([\w-]+):$", content, re.MULTILINE))
+    assert caller_jobs, "the caller must define at least one job"
+
+    for check in declared:
+        if check == "verify-bound-issue":
+            continue
+        prefix = check.split(" / ")[0]
+        assert prefix in caller_jobs, (
+            f"required check {check!r} is prefixed with {prefix!r}, which is not a caller job"
+        )
 
 
 def test_verify_bound_issue_job_name_is_stable():
