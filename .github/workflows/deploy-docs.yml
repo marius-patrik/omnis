@@ -12,10 +12,9 @@ permissions:
   contents: write
   deployments: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
+# No `concurrency` here on purpose. The shared workflow already declares the `pages` group, and a
+# caller holding the same group deadlocks the run it is calling: the callee queues behind a group
+# its own caller owns, and the whole run fails before a single job starts.
 jobs:
   deploy:
     uses: marius-patrik/DarkFactory/.github/workflows/deploy-docs.yml@f87fecc9f0f64b395f4195f04e668c0bd00060f8
