@@ -27,9 +27,10 @@ EXPECTED_WORKFLOWS = [
 #: Scripts this repository still owns. Everything else - the runner, the harness registry, the
 #: settings reconciler, the board automation and the approval handler - runs from the pinned
 #: pipeline, so a copy here would be a fork nobody meant to maintain.
+#: The only script this repository still owns. Everything else runs from the pinned pipeline, so a
+#: copy here would be a fork nobody meant to maintain.
 EXPECTED_SCRIPTS = [
     "docs_hooks.py",
-    "open_pr.py",
 ]
 
 
@@ -268,46 +269,6 @@ def test_gitignore_excludes_agent_checkpoint():
     assert ".antigravity_checkpoint.json" in content
 
 
-def test_preview_workflow_exists_and_is_scoped():
-    """Pull request previews must not run for forks, whose token cannot write here."""
-    content = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
-    assert "pull_request" in content
-    assert "head.repo.full_name == github.repository" in content, "forks must be skipped"
-    assert "deployments: write" in content, "the preview must register a GitHub deployment"
-    assert "transient_environment" in content, "preview environments are transient"
-
-
-def test_preview_and_main_deploy_share_one_pages_source():
-    """GitHub Pages has one source; two mechanisms would silently fight.
-
-    The main deploy is a caller now, so its mechanism lives upstream and the invariant is checked
-    against the manifest that declares the source instead of against the workflow body. The preview
-    is still this repository's own, so it is checked directly.
-    """
-    preview = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
-    deploy = _read(os.path.join(WORKFLOW_DIR, "deploy-docs.yml"))
-
-    assert "branch: gh-pages" in preview
-    assert "target-folder: pr-" in preview
-    assert "upload-pages-artifact" not in deploy, "the Actions build type conflicts with a branch"
-
-    pages = _manifest().get("pages", {})
-    assert pages.get("build_type") == "legacy", "a branch source is what previews need"
-    assert pages.get("branch") == "gh-pages", "the preview writes to gh-pages, so the site must too"
-
-    repo, _ref = _pinned_upstream()
-    if not repo:
-        assert "clean-exclude" in deploy, "publishing the site must not delete live previews"
-
-
-def test_preview_is_torn_down_when_the_pull_request_closes():
-    """A preview left behind after merge accumulates forever."""
-    content = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
-    assert "closed" in content
-    assert "git rm" in content, "the preview directory must be removed"
-    assert "inactive" in content, "the deployment must be deactivated"
-
-
 def test_pages_is_configured_for_the_branch_source():
     """The declared Pages source must be the branch one, or previews cannot share the site.
 
@@ -319,15 +280,21 @@ def test_pages_is_configured_for_the_branch_source():
     assert pages.get("build_type") == "legacy"
 
 
-def test_teardown_does_not_use_git_without_a_checkout():
-    """The teardown job has no checkout, so `git ls-remote origin` silently no-ops.
-
-    That is not hypothetical: it shipped once and left the preview for #22 behind while reporting
-    success.
+def test_preview_workflow_calls_the_pinned_pipeline():
+    """Previews are what the version switcher offers, so they come from the same pipeline that
+    builds the published site. The fork guard, the teardown and the shared Pages source all live
+    upstream now and are asserted there; what this repository must get right is the pin.
     """
+    ref = _manifest()["upstream"]["ref"]
     content = _read(os.path.join(WORKFLOW_DIR, "preview-docs.yml"))
-    teardown = content[content.index("  teardown:") :]
-    assert (
-        "actions/checkout" in teardown or "git ls-remote" not in teardown
-    ), "teardown must either check out the repository or avoid git commands that need a remote"
-    assert "branches/gh-pages" in teardown, "branch existence must be checked through the API"
+    assert f"preview-docs.yml@{ref}" in content, "the preview must call the pinned pipeline"
+    assert "pull_request" in content
+    assert "closed" in content, "the teardown needs the closed event to fire at all"
+    assert "deployments: write" in content, "the preview registers a GitHub deployment"
+
+
+def test_the_pages_source_is_the_branch_one():
+    """GitHub Pages has one source, and previews can only share the site on a branch source."""
+    pages = _manifest().get("pages", {})
+    assert pages.get("build_type") == "legacy"
+    assert pages.get("branch") == "gh-pages"
