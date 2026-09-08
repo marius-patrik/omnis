@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   preview:
-    uses: marius-patrik/DarkFactory/.github/workflows/preview-docs.yml@69582bf743933597ee34a31dc2611b0f1972e1ab
+    uses: marius-patrik/DarkFactory/.github/workflows/preview-docs.yml@f0d838e891c73656952ca18bc49a8cae871dfed5
     with:
       pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: 69582bf743933597ee34a31dc2611b0f1972e1ab
+      pipeline-ref: f0d838e891c73656952ca18bc49a8cae871dfed5
