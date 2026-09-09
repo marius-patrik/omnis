@@ -1,0 +1,397 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Overview · Omnis</title>
+    <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href=".">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href=".">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis">Omnis<a class="headerlink" href="#omnis" title="Permanent link">&para;</a></h1>
+<p><strong>An AI operating system. Talk to your machine, and it does the thing.</strong></p>
+<p>"Install Rust, give me a Windows VM with Photoshop, put the daemon on my workstation and the
+interface here, and make it look like Zed" is a sentence, not an afternoon. Omnis takes it, writes
+the change into one declaration, shows you exactly what it will do, and applies it. If you don't like
+the result, you roll it back — one command, every time, whatever changed.</p>
+<p>It is very smart because it can see the whole machine: your repositories, terminals, packages,
+containers, guest operating systems, browser, and secrets are one system with one API, and the agent
+is a first-class operator of it rather than a chat box bolted onto an editor.</p>
+<p>Underneath, Omnis is a <strong>kernel</strong>. It owns nothing you could get elsewhere — <code>git</code>, <code>sl</code>, Nix,
+podman, libvirt, Chromium, Tailscale, and the coding-agent CLIs are all <strong>bound, not built</strong> — and
+everything that makes them compose: one bus, one scene tree, one declaration, one modification
+surface, one audit trail.</p>
+<blockquote>
+<p><strong>Status: specification.</strong> The governance rules and the autonomous delivery pipeline are in place
+and running. The product tree is not: it is specified in <a href="architecture/">ARCHITECTURE.md</a>,
+decided in <a href="architecture/decisions/">decision records</a>, and sequenced in <a href="roadmap/">ROADMAP.md</a>.</p>
+</blockquote>
+<h2 id="the-whole-machine-in-one-file">The whole machine, in one file<a class="headerlink" href="#the-whole-machine-in-one-file" title="Permanent link">&para;</a></h2>
+<p>Subsystems, guest operating systems, where each process runs, and how it looks are one declaration.
+Applying it produces a <strong>generation</strong> — a parent, a diff, an author — so rollback is one operation
+and an agent reconfiguring your machine leaves a reviewable change rather than a mutation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="ss">omnis</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    hosts<span class="o">.</span>core<span class="o">.</span><span class="ss">backend</span> <span class="o">=</span> <span class="s2">"docker"</span><span class="p">;</span>        <span class="c1"># native · docker · wsl · podman · nspawn · remote</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="ss">placement</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">daemon</span> <span class="o">=</span> <span class="s2">"core"</span><span class="p">;</span> <span class="ss">gui</span> <span class="o">=</span> <span class="s2">"workstation"</span><span class="p">;</span> <span class="p">};</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    subsystems<span class="o">.</span><span class="ss">vcs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>      <span class="ss">enable</span>   <span class="o">=</span> <span class="no">true</span><span class="p">;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>      <span class="ss">backends</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">"git"</span> <span class="s2">"sapling"</span> <span class="p">];</span>     <span class="c1"># drop one and it leaves entirely — binary,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="ss">default</span>  <span class="o">=</span> <span class="s2">"git"</span><span class="p">;</span>                   <span class="c1"># completions, credential helper, menu entries, all</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="p">};</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    environments<span class="o">.</span><span class="ss">windows</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>      <span class="ss">kind</span> <span class="o">=</span> <span class="s2">"vm"</span><span class="p">;</span>                        <span class="c1"># container · vm · compat (Wine/Proton)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>      apps<span class="o">.</span><span class="ss">integration</span> <span class="o">=</span> <span class="s2">"remoteapp"</span><span class="p">;</span>     <span class="c1"># Windows apps as ordinary windows</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="p">};</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="ss">presentation</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">profile</span> <span class="o">=</span> <span class="s2">"zed"</span><span class="p">;</span> <span class="ss">theme</span> <span class="o">=</span> <span class="s2">"catppuccin-mocha"</span><span class="p">;</span> <span class="p">};</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="ss">remote</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">enable</span> <span class="o">=</span> <span class="no">true</span><span class="p">;</span> <span class="ss">via</span> <span class="o">=</span> <span class="s2">"tailscale"</span><span class="p">;</span> <span class="p">};</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="p">};</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
+</code></pre></div>
+<p>The full reference is <a href="declaration/"><code>examples/omnis.nix</code></a>.</p>
+<p>Removing something removes it <strong>completely</strong> — the processes, the packages, the files, and
+everything it contributed to the rest of the system. "Disabled" and "not installed" are not
+different states.</p>
+<h2 id="what-makes-it-ai-first">What makes it AI-first<a class="headerlink" href="#what-makes-it-ai-first" title="Permanent link">&para;</a></h2>
+<p>Not a chat panel. An agent is a <strong>first-class operator</strong>: it calls the same API as you, reads the
+same option schema the settings UI is generated from, addresses the same objects by the same URIs,
+and is bound by the same approval gate and audit trail.</p>
+<p>That is only safe because every change is a generation — gated before it takes effect, reversible
+after. The accountability machinery is not a constraint on the goal; it is what makes the goal
+achievable.</p>
+<p>The documentation is generated from that same option schema and lives <strong>inside</strong> the product, so you
+read about the system in the window you are declaring it in — and so does the agent proposing the
+change.</p>
+<h2 id="start-here">Start here<a class="headerlink" href="#start-here" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="architecture/">ARCHITECTURE.md</a></td>
+<td><strong>The only normative document.</strong> What Omnis is, why, and how it is built.</td>
+</tr>
+<tr>
+<td><a href="architecture/decisions/">Decision records</a></td>
+<td>Every decision that binds the implementation, with the alternatives it rejected.</td>
+</tr>
+<tr>
+<td><a href="roadmap/">ROADMAP.md</a></td>
+<td>Epics, entry gates, sequencing.</td>
+</tr>
+<tr>
+<td><a href="agents/">AGENTS.md</a></td>
+<td>Binding rules for every contributor, human or agent. Also <code>CONTRIBUTING.md</code>.</td>
+</tr>
+<tr>
+<td><a href="pipeline/">notes/pipeline.md</a></td>
+<td>How the delivery pipeline works, and how it fails.</td>
+</tr>
+<tr>
+<td><a href="notes/transcript/">notes/transcript.md</a></td>
+<td>Source material only. Specifies nothing.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-work-happens-here">How work happens here<a class="headerlink" href="#how-work-happens-here" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>user request  ──▶  Request issue      ──▶  interpretation  ──▶  you comment `approve`
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                   (verbatim wording)      (agent)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                                                    │
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>                                                    ▼
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>                   Plan issue (sub-issue) ──▶  you comment `approve`
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                                                    │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>                                                    ▼
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>                   branch ─▶ Draft PR (bot-authored) ─▶ self-review loop ─▶ plan alignment
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>                                                    │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>                                                    ▼
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>                   you Approve  ──▶  auto-merge  ──▶  issues closed, board set to Done
+</code></pre></div>
+<p>Two human gates before anything is written, one before anything merges. Specification runs
+<strong>architecture → decision records → roadmap → issues</strong>, and an issue is only filed for work that is
+already settled.</p>
+<p>Full rules in <a href="agents/">AGENTS.md</a>; mechanics in <a href="pipeline/">notes/pipeline.md</a>.</p>
+<h2 id="local-development">Local development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-dev.txt
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>pytest<span class="w"> </span>-v<span class="w">                    </span><span class="c1"># repository automation tests</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>black<span class="w"> </span>--check<span class="w"> </span>.<span class="w">              </span><span class="c1"># formatting</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>properdocs<span class="w"> </span>serve<span class="w">             </span><span class="c1"># documentation site</span>
+</code></pre></div>
+<p>Reproduce the GitHub-side configuration — labels, board, protection, permissions — at any time:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>.github/scripts/repo_settings.py<span class="w"> </span>--plan<span class="w">     </span><span class="c1"># show drift</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python<span class="w"> </span>.github/scripts/repo_settings.py<span class="w"> </span>--apply<span class="w">    </span><span class="c1"># reconcile</span>
+</code></pre></div>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
+<p>GPL-3.0. See <a href="https://github.com/marius-patrik/omnis/blob/main/LICENSE">LICENSE</a>.</p>
+        </article>
+        <nav class="pager" aria-label="Page navigation"><span></span>
+          <a class="pager__link pager__link--next" href="architecture/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Overview</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#the-whole-machine-in-one-file">The whole machine, in one file</a>
+          </li>
+          <li><a href="#what-makes-it-ai-first">What makes it AI-first</a>
+          </li>
+          <li><a href="#start-here">Start here</a>
+          </li>
+          <li><a href="#how-work-happens-here">How work happens here</a>
+          </li>
+          <li><a href="#local-development">Local development</a>
+          </li>
+          <li><a href="#license">License</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">"."</script>
+    <script src="assets/theme.js" defer></script>
+    <script src="search/main.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,588 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Automation pipeline · Omnis</title>
+    <meta name="description" content="Universal developer workspace and local-first personal data OS - one engine, many profiles.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="the-automation-pipeline">The automation pipeline<a class="headerlink" href="#the-automation-pipeline" title="Permanent link">&para;</a></h1>
+<p>Omnis is built by an autonomous agent pipeline under human approval gates. This documents how it
+works, what each part is for, and where it can fail. The binding rules are in <code>AGENTS.md</code>; this is
+the explanation behind them.</p>
+<hr />
+<h2 id="the-lifecycle">The lifecycle<a class="headerlink" href="#the-lifecycle" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>  you file a Request  ──▶  agent posts an Interpretation  ──▶  you comment `approve`
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   (verbatim wording)          (scope, plan of attack)              [GATE 1]
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                                                                        │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                                                                        ▼
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                          agent opens a child Plan issue  ──▶  you comment `approve`
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                            (linked as a sub-issue)                 [GATE 2]
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                                                                        │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                                                        ▼
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        branch ──▶ implement ──▶ format ──▶ test ──▶ Draft PR ──▶ self-review loop
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                                                        │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                                                                        ▼
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                              plan alignment  ──▶  you Approve the PR
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                                                          [GATE 3]
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                                                                        │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                                                                        ▼
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                    bot proxy approval ──▶ auto-merge ──▶ issues closed, board → Done
+</code></pre></div>
+<p><strong>Three human gates, all explicit.</strong> You approve the <em>interpretation</em> before anything is planned, the
+<em>plan</em> before anything is written, and the <em>pull request</em> before anything merges. The agent never
+crosses a gate on its own, and it never merges anything.</p>
+<hr />
+<h2 id="why-each-gate-exists">Why each gate exists<a class="headerlink" href="#why-each-gate-exists" title="Permanent link">&para;</a></h2>
+<p><strong>Gate 1 — interpretation.</strong> The most expensive failure in agent work is a confident implementation
+of the wrong thing. Rule 12 requires the <code>Request</code> issue to carry your <em>verbatim</em> wording, then an
+<code>### Interpretation</code> section stating how the agent read it. Approving that is cheap; discovering the
+misreading after a branch and a PR is not.</p>
+<p><strong>Gate 2 — plan.</strong> The plan is a child issue linked as a native sub-issue of the request. It states
+objectives, the code changes, and the verification. This is where scope creep gets caught, because
+scope creep is legible in a plan and invisible in a diff.</p>
+<p><strong>Gate 3 — pull request review.</strong> Branch protection requires one approving review; nothing reaches
+<code>main</code> without it.</p>
+<hr />
+<h2 id="components">Components<a class="headerlink" href="#components" title="Permanent link">&para;</a></h2>
+<h3 id="workflows">Workflows<a class="headerlink" href="#workflows" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Trigger</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ci.yml</code></td>
+<td>push, PR</td>
+<td><code>pipeline</code> (Python 3.10–3.13), <code>rust</code>, <code>web</code>, <code>docs</code>. Language jobs guard their <em>steps</em> with <code>hashFiles</code>, so they report green rather than being skipped — a skipped job never satisfies a required check and would block every merge permanently.</td>
+</tr>
+<tr>
+<td><code>agent.yml</code></td>
+<td>issue opened, comment created</td>
+<td>Builds the agent container and dispatches it. Gated on the <code>AGENT_ENABLED</code> variable.</td>
+</tr>
+<tr>
+<td><code>project-automation.yml</code></td>
+<td>issue/PR lifecycle, push to main</td>
+<td>Moves items on the board and maintains status labels.</td>
+</tr>
+<tr>
+<td><code>pr-approval-automerge.yml</code></td>
+<td>review submitted, comment created</td>
+<td>Detects your approval, readies the draft, submits the bot's proxy review, arms auto-merge, reconciles afterwards.</td>
+</tr>
+<tr>
+<td><code>open-pr.yml</code></td>
+<td><code>workflow_dispatch</code></td>
+<td>Opens the draft PR, so PRs are not authored by your local credentials.</td>
+</tr>
+<tr>
+<td><code>auto-format.yml</code></td>
+<td>push to any branch</td>
+<td>Formats and commits. Formatting is never a review topic.</td>
+</tr>
+<tr>
+<td><code>deploy-docs.yml</code></td>
+<td>push to main</td>
+<td>Builds with <code>properdocs build --strict</code> and deploys to Pages.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scripts">Scripts<a class="headerlink" href="#scripts" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>harnesses.py</code></td>
+<td>The harness registry (ADR-0004). Declares each coding-agent CLI as a binary, an argv template, a model chain, and credential keys.</td>
+</tr>
+<tr>
+<td><code>agent_runner.py</code></td>
+<td>The stages: interpret, plan, implement, self-review, plan-alignment, respond. Knows nothing about which CLI is executing.</td>
+</tr>
+<tr>
+<td><code>project_automation.py</code></td>
+<td>Board transitions and exclusive status labels. Field and option ids are resolved at runtime, never hardcoded.</td>
+</tr>
+<tr>
+<td><code>handle_pr_approval.py</code></td>
+<td>Approval detection, proxy review, auto-merge, post-merge reconciliation.</td>
+</tr>
+<tr>
+<td><code>open_pr.py</code></td>
+<td>Dispatches <code>open-pr.yml</code> and waits for the PR to appear.</td>
+</tr>
+<tr>
+<td><code>repo_settings.py</code></td>
+<td>Every GitHub setting that otherwise exists only in the web UI, as re-runnable code.</td>
+</tr>
+<tr>
+<td><code>docs_hooks.py</code></td>
+<td>Publishes the canonical root documents and the ADR directory as site pages, and generates the decision index and navigation.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="harness-agnosticism">Harness agnosticism<a class="headerlink" href="#harness-agnosticism" title="Permanent link">&para;</a></h2>
+<p>Per ADR-0004, no pipeline code knows which CLI is running. <code>harnesses.py</code> declares Antigravity
+(<code>agy</code>), Claude Code (<code>claude</code>), Codex (<code>codex</code>), Kimi (<code>kimi</code>), Grok (<code>grok</code>), Cursor
+(<code>cursor-agent</code>), and opencode (<code>opencode</code>).</p>
+<ul>
+<li><strong>Fallback escalates across harnesses</strong>, not only across models. One provider's quota outage no
+  longer halts delivery — which it demonstrably did before this existed.</li>
+<li><strong>Missing binaries and missing credentials are skipped, not failed.</strong> An image carrying four of
+  seven CLIs works with a shorter chain, and the container build prints a manifest of what landed.</li>
+<li><strong>Everything is overridable at runtime.</strong> <code>AGENT_HARNESS_CHAIN</code> sets the order;
+  <code>AGENT_HARNESS_CONFIG</code> overrides any field of any harness, and can define one the code has never
+  heard of. An upstream flag rename is a variable change, not a code change and a rebuild.</li>
+<li><strong>Prompts are argv elements, never shell strings</strong>, so a prompt containing shell metacharacters
+  cannot escape into a command.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>// AGENT_HARNESS_CONFIG — a repository variable
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>{
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  "claude": { "model_chain": ["opus", "sonnet"], "extra_args": ["--add-dir", "/workspace"] },
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  "grok":   { "binary": "grok-cli" }
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>}
+</code></pre></div>
+<h2 id="quota-exhaustion-and-resume">Quota exhaustion and resume<a class="headerlink" href="#quota-exhaustion-and-resume" title="Permanent link">&para;</a></h2>
+<p>When every harness and model is exhausted, the agent does not fail loudly and lose its work. It
+writes a checkpoint, commits and pushes it on the branch, moves the item to <code>Blocked</code>, and comments
+with the completed steps and how to resume. Commenting <code>resume</code> picks up from the checkpoint on
+whichever harness is then available.</p>
+<hr />
+<h2 id="the-board">The board<a class="headerlink" href="#the-board" title="Permanent link">&para;</a></h2>
+<p>Seven statuses, and an item carries exactly one at a time: <code>Backlog</code>, <code>ToDo</code>, <code>In Progress</code>,
+<code>Blocked</code>, <code>Done</code>, <code>Superseded</code>, <code>Dropped</code>.</p>
+<p>Status labels are <strong>exclusive</strong>: applying one removes the other six in the same <code>gh issue edit</code>, and
+<code>add_issue_label</code> delegates to that setter so no call site can bypass the invariant. Without this a
+closed issue keeps advertising itself as <code>In Progress</code>, and the board and the labels disagree.</p>
+<p>Board field and option ids are discovered through <code>gh project field-list</code> and cached per process.
+Hardcoding them means the automation breaks silently the first time the board is rebuilt — the writes
+fail, the exception is caught, and the workflow still reports success.</p>
+<hr />
+<h2 id="tokens-and-why-there-are-two">Tokens, and why there are two<a class="headerlink" href="#tokens-and-why-there-are-two" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Used for</th>
+<th>Why it cannot be the other</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GH_PROJECT_TOKEN</code></td>
+<td>Checkout, board writes, opening PRs</td>
+<td>The default <code>GITHUB_TOKEN</code> cannot write to a <strong>user-owned</strong> Projects v2 board, and events it causes do not start workflow runs — so a PR it opens never triggers the required checks.</td>
+</tr>
+<tr>
+<td><code>BOT_TOKEN</code> (<code>secrets.GITHUB_TOKEN</code>)</td>
+<td>The proxy approving review only</td>
+<td><code>GH_PROJECT_TOKEN</code> belongs to the maintainer, and the PR is opened with it — so an approval sent with it is <strong>self-approval, which GitHub rejects</strong>. The approval must come from <code>github-actions[bot]</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>This is subtle and it bit us: the approval failed, the error was swallowed, auto-merge armed anyway,
+and the pull request sat at <code>REVIEW_REQUIRED</code> with nothing in the log. The handler now sends the
+review with <code>BOT_TOKEN</code> and <strong>reads the reviews back to verify it landed</strong>, reporting plainly when it
+did not.</p>
+<p>It also requires the repository's <code>can_approve_pull_request_reviews</code> permission, which
+<code>repo_settings.py</code> sets.</p>
+<hr />
+<h2 id="failure-modes-worth-knowing">Failure modes worth knowing<a class="headerlink" href="#failure-modes-worth-knowing" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Board stops updating, workflows still green</td>
+<td>Token cannot write user-owned Projects v2. Look for <code>gh project item-add</code> exiting 1 in the logs.</td>
+</tr>
+<tr>
+<td>PR stuck at <code>REVIEW_REQUIRED</code> with auto-merge armed</td>
+<td>Proxy approval failed. Check <code>BOT_TOKEN</code> is set.</td>
+</tr>
+<tr>
+<td>Every merge blocked forever</td>
+<td>A required status check names a job that can be <em>skipped</em>. Required checks may only name jobs that always report.</td>
+</tr>
+<tr>
+<td>Agent does nothing on a new issue</td>
+<td><code>AGENT_ENABLED</code> is not <code>"true"</code>, or no harness has credentials.</td>
+</tr>
+<tr>
+<td>Agent replies to itself in a loop</td>
+<td>Bot-comment detection. Agent comments carry an <code>&lt;!-- omnis-agent --&gt;</code> marker and are ignored on the way back in.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="running-it-locally">Running it locally<a class="headerlink" href="#running-it-locally" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>.github/scripts/repo_settings.py<span class="w"> </span>--plan<span class="w">      </span><span class="c1"># show GitHub-side drift</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>python<span class="w"> </span>.github/scripts/repo_settings.py<span class="w"> </span>--apply<span class="w">     </span><span class="c1"># reconcile it</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>pytest<span class="w"> </span>-v<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>black<span class="w"> </span>--check<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>properdocs<span class="w"> </span>build<span class="w"> </span>--strict
+</code></pre></div>
+<p>Setup state and the reproduction sequence are in <a href="../notes/bootstrap/">bootstrap.md</a>.</p>
+<hr />
+<h2 id="planned-specified-not-built">Planned — specified, not built<a class="headerlink" href="#planned-specified-not-built" title="Permanent link">&para;</a></h2>
+<p>Everything below is design. None of it exists yet, and this section says so plainly rather than
+describing intentions in the present tense.</p>
+<h3 id="release-automation">Release automation<a class="headerlink" href="#release-automation" title="Permanent link">&para;</a></h3>
+<p>Versioning, tagging, changelog, and asset packaging should be one automated path, driven by the
+Conventional Commits <code>AGENTS.md</code> rule 5 already mandates.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Version</strong></td>
+<td>Derived from commit types since the last tag — <code>feat</code> minor, <code>fix</code> patch, <code>!</code>/<code>BREAKING CHANGE</code> major. Never hand-edited.</td>
+</tr>
+<tr>
+<td><strong>Release PR</strong></td>
+<td>A standing pull request carrying the version bump and generated changelog, updated on every merge to <code>main</code>. Cutting a release is merging it.</td>
+</tr>
+<tr>
+<td><strong>Tag</strong></td>
+<td>Created on that merge, not by hand.</td>
+</tr>
+<tr>
+<td><strong>Build</strong></td>
+<td>Matrix across the platforms D4 settles, guarded by <code>hashFiles</code> exactly as <code>ci.yml</code> is, so it stays green while the product tree is a scaffold.</td>
+</tr>
+<tr>
+<td><strong>Assets</strong></td>
+<td>Per-platform archives plus checksums, attached to the GitHub release. Signing is a decision, not a default — it needs a key custody answer first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bind, not build</strong> (P1): this is <code>release-please</code> or an equivalent action, not a release engine of
+ours. The repository owns the configuration and the packaging manifest.</p>
+<p><strong>Why it is not built yet.</strong> There is nothing to package. A release pipeline whose build step is
+permanently skipped tests nothing and rots quietly; it lands with the first artifact worth shipping.</p>
+<h3 id="decomposition-and-planning-assistance">Decomposition and planning assistance<a class="headerlink" href="#decomposition-and-planning-assistance" title="Permanent link">&para;</a></h3>
+<p>The pipeline currently executes plans a human has approved. It should also help produce them:</p>
+<ul>
+<li><strong>Epic decomposition</strong> — propose the child <code>Request</code> issues an epic implies, with a sequence and
+  the gates each depends on, as a comment for review. Not filed automatically: <code>AGENTS.md</code> rule 13
+  permits an issue only for settled work.</li>
+<li><strong>Gate analysis</strong> — given a request, identify which open decisions block it and say so before a
+  plan is written, rather than discovering it mid-implementation.</li>
+<li><strong>Sequencing</strong> — surface which epics are unblocked right now, given the decision records that have
+  landed.</li>
+</ul>
+<p>The constraint is the same as everywhere else: it <strong>proposes</strong>, a human disposes. An agent that files
+its own work items is an agent that sets its own scope.</p>
+<h3 id="the-pipeline-becomes-an-omnis-automation">The pipeline becomes an Omnis automation<a class="headerlink" href="#the-pipeline-becomes-an-omnis-automation" title="Permanent link">&para;</a></h3>
+<p><code>ARCHITECTURE.md</code> §7.3 defines automations as declared graphs with triggers, gates, checkpoints, and
+a termination condition. This pipeline — request, interpretation gate, plan, approval gate,
+implement, self-review loop, merge gate, checkpoint-and-resume on quota exhaustion — <em>is</em> one of
+those, currently expressed in GitHub Actions and Python because the product does not exist.</p>
+<p>When it does, this pipeline should be declared as an Omnis automation and run by it. That is the
+honest test of the abstraction: it was derived from a real workload rather than an imagined one, and
+the workload is this repository.</p>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="../roadmap/">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">Roadmap</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../agents/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Contributing & Agent Rules</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#the-lifecycle">The lifecycle</a>
+          </li>
+          <li><a href="#why-each-gate-exists">Why each gate exists</a>
+          </li>
+          <li><a href="#components">Components</a>
+            <ul>
+              <li><a href="#workflows">Workflows</a></li>
+              <li><a href="#scripts">Scripts</a></li>
+            </ul>
+          </li>
+          <li><a href="#harness-agnosticism">Harness agnosticism</a>
+          </li>
+          <li><a href="#quota-exhaustion-and-resume">Quota exhaustion and resume</a>
+          </li>
+          <li><a href="#the-board">The board</a>
+          </li>
+          <li><a href="#tokens-and-why-there-are-two">Tokens, and why there are two</a>
+          </li>
+          <li><a href="#failure-modes-worth-knowing">Failure modes worth knowing</a>
+          </li>
+          <li><a href="#running-it-locally">Running it locally</a>
+          </li>
+          <li><a href="#planned-specified-not-built">Planned — specified, not built</a>
+            <ul>
+              <li><a href="#release-automation">Release automation</a></li>
+              <li><a href="#decomposition-and-planning-assistance">Decomposition and planning assistance</a></li>
+              <li><a href="#the-pipeline-becomes-an-omnis-automation">The pipeline becomes an Omnis automation</a></li>
+            </ul>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
