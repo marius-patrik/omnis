@@ -12,8 +12,8 @@ permissions:
 
 jobs:
   report-failure:
-    uses: marius-patrik/DarkFactory/.github/workflows/report-failure.yml@4f26dd3a4b23e120ac40c94836f3e065d1f82237
+    uses: marius-patrik/DarkFactory/.github/workflows/report-failure.yml@6d42a0ea793a3e1fc26876ff99662a94f82bb987
     with:
       pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "4f26dd3a4b23e120ac40c94836f3e065d1f82237"
+      pipeline-ref: "6d42a0ea793a3e1fc26876ff99662a94f82bb987"
     secrets: inherit
