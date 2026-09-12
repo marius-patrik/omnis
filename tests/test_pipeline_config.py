@@ -175,7 +175,6 @@ def test_agent_credentials_are_handed_over_and_never_echoed():
     assert "echo ${{ secrets." not in content
 
 
-
 def test_board_workflows_call_the_pinned_pipeline():
     """The board automation runs upstream now, reading the project coordinates from this
     repository's own `vars` - which resolve against the caller, so they stay this repository's.
