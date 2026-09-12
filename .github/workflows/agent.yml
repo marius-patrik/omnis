@@ -24,22 +24,10 @@ permissions:
 
 jobs:
   agent:
-    uses: marius-patrik/DarkFactory/.github/workflows/agent.yml@826f883ab1b7363a9bdbb39cf30af3437e5691ee
+    uses: marius-patrik/DarkFactory/.github/workflows/agent.yml@f758971e77cdbb6ba5f2dbdbba3146c7f77b4e8d
     with:
       pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: 826f883ab1b7363a9bdbb39cf30af3437e5691ee
+      pipeline-ref: f758971e77cdbb6ba5f2dbdbba3146c7f77b4e8d
       agent-enabled: ${{ vars.AGENT_ENABLED }}
-    secrets:
-      GH_PROJECT_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
-      ANTIGRAVITY_REFRESH_TOKEN: ${{ secrets.ANTIGRAVITY_REFRESH_TOKEN }}
-      ANTIGRAVITY_CLIENT_ID: ${{ secrets.ANTIGRAVITY_CLIENT_ID }}
-      ANTIGRAVITY_CLIENT_SECRET: ${{ secrets.ANTIGRAVITY_CLIENT_SECRET }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
-      KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
-      XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
-      GROK_API_KEY: ${{ secrets.GROK_API_KEY }}
-      CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+    secrets: inherit
+
