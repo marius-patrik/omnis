@@ -41,3 +41,6 @@ site/
 *.swo
 .DS_Store
 Thumbs.db
+
+.pipeline/
+.darkfactory/
