@@ -39,6 +39,7 @@ LINK_REWRITES: Dict[str, str] = {
     "ROADMAP.md": "roadmap.md",
     "AGENTS.md": "agents.md",
     "docs/IMPLEMENTATION.md": "IMPLEMENTATION.md",
+    "docs/DECISION_COMPLETE_V0.md": "DECISION_COMPLETE_V0.md",
     "docs/GRAPH.md": "GRAPH.md",
     "docs/OMNIS_OS.md": "OMNIS_OS.md",
     "docs/OMNIS_MANAGER.md": "OMNIS_MANAGER.md",
@@ -273,6 +274,7 @@ def on_config(config: Any) -> Any:
             "Architecture": [
                 {"Overview": "architecture/index.md"},
                 {"Implementation": "IMPLEMENTATION.md"},
+                {"Decision-complete v0": "DECISION_COMPLETE_V0.md"},
                 {"Shared graph": "GRAPH.md"},
                 {"OmnisOS": "OMNIS_OS.md"},
                 {"OmnisManager": "OMNIS_MANAGER.md"},

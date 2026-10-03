@@ -2,7 +2,9 @@
 
 **Status: NORMATIVE.** This document defines the system architecture. Supporting documents may
 expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
-[`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and ADR-0024.
+[`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and ADR-0024. All remaining v0 algorithms,
+constants, defaults and fallback behavior are frozen by
+[`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025.
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.
@@ -944,3 +946,12 @@ A first complete Omnis implementation exists when one machine can:
 At that point Omnis is not merely an AI-enabled Linux distribution. It is a machine whose operating
 state, available actions, cognition, and interface are all different projections of one persistent,
 addressable system.
+
+---
+
+### 18.1 Decision completeness
+
+For v0, implementation workers do not choose observable behavior. If `ARCHITECTURE.md`,
+`docs/IMPLEMENTATION.md`, `docs/DECISION_COMPLETE_V0.md`, subsystem specs, protocol schemas and
+tests do not determine a behavior, the item is blocked as a specification defect. "Reasonable
+default", "equivalent library", and "temporary fallback" are not implementation authority.

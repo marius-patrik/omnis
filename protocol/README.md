@@ -12,5 +12,6 @@ Rules:
 - minor revisions may add optional fields/operations with capability negotiation;
 - JSON/debug projections are not alternate wire contracts.
 
-The first implementation should add a CI job that runs `capnp compile` plus language binding
-generation/golden compatibility tests once component source repositories are created.
+The first component bootstrap change must add CI that runs `capnp compile`, generates Rust/C++
+bindings from these sources, and runs golden compatibility tests. This is a required gate, not an
+implementation choice.

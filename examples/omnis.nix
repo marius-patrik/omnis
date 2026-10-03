@@ -62,17 +62,20 @@
       defaultMode = "2d";
       shell = pkgs.zsh;
       xwayland.enable = true;
+      scrollbackLines = 100000;
     };
 
     hosts = {
       nativeRemote.enable = true;
       quic.enable = true;
+      quic.port = 7443;
     };
 
     security = {
       protectedHandles.enable = true;
       systemdCredentials.enable = true;
       executionIsolation.enable = true;
+      defaultWorkerNetwork = "deny";
     };
   };
 }

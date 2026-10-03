@@ -1,8 +1,9 @@
 # Omnis — Implementation Roadmap
 
 This roadmap replaces the old daemon/workspace epic sequence. The ordering is dependency-driven and
-is intended to reach a bootable vertical slice as early as possible. Concrete mechanisms and paths
-are frozen by `docs/IMPLEMENTATION.md`; roadmap workers implement them rather than selecting substitutes.
+is intended to reach a bootable vertical slice as early as possible. Concrete mechanisms and paths are frozen by `docs/IMPLEMENTATION.md`; all remaining algorithms,
+defaults and constants are frozen by `docs/DECISION_COMPLETE_V0.md`. Roadmap workers implement those
+contracts and must report a specification defect instead of selecting substitutes.
 
 ## Phase 0 — Architecture reset and repository split
 

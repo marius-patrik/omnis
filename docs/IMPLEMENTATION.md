@@ -1,8 +1,9 @@
 # Omnis v0 Implementation Blueprint
 
 **Status: NORMATIVE SUPPORTING SPECIFICATION.** `ARCHITECTURE.md` defines semantic architecture;
-this document freezes the first implementation profile. Implementations may replace a mechanism later
-only while preserving the contracts defined here or through an explicit architecture/ADR change.
+this document freezes the first implementation profile. `DECISION_COMPLETE_V0.md` freezes all v0
+algorithms, constants, defaults and fallback behavior. Implementations may replace a mechanism later
+only through an explicit architecture/ADR change.
 
 ## 1. Implementation profile
 
@@ -906,7 +907,7 @@ model, protocol schemas/versioning, authority boundaries and Control structural 
 
 ## 20. Definition of implementation-ready
 
-The design is implementation-ready when a coding worker can choose a roadmap item and determine,
+The design is decision-complete when a coding worker can take an assigned roadmap item and determine,
 without inventing architecture:
 
 - which repository/product owns it;
@@ -921,3 +922,11 @@ without inventing architecture:
 
 This document supplies those answers for the v0 substrate. Future ADRs refine behavior; they must not
 silently create parallel identity, event, configuration, rendering or cognition systems.
+
+
+## 21. No implementation-design discretion
+
+Observable v0 behavior that is not determined by this document, `DECISION_COMPLETE_V0.md`, the
+owning subsystem spec, protocol schema or acceptance tests is a `SpecificationDefect`. Coding agents
+must not choose a library, algorithm, default, fallback, timeout, queue size, persistence behavior,
+layout, routing rule or security policy on their own.

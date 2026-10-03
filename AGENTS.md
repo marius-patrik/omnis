@@ -392,3 +392,16 @@ Before declaring work complete, an implementation agent must:
 5. inspect the diff for duplicate semantic authorities;
 6. update docs/contracts if behavior changed;
 7. state any remaining incompatibility or unimplemented contract explicitly.
+
+
+### A23. No v0 design discretion
+
+For Omnis v0, coding agents implement the frozen design; they do not finish it.
+
+Before implementation, read `docs/DECISION_COMPLETE_V0.md`. If an observable behavior remains
+unspecified, stop that item and report a `SpecificationDefect`. Do not introduce a reasonable
+default, equivalent dependency, substitute algorithm, temporary fallback, or locally convenient
+policy without updating the normative specification/ADR first.
+
+Private helper decomposition, variable names and semantics-preserving refactors remain ordinary
+implementation choices.

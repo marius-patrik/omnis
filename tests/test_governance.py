@@ -241,3 +241,62 @@ def test_protocol_schema_sources_exist():
     common = _read("protocol", "common.capnp")
     assert "struct Uuid" in common
     assert "struct ArtifactId" in common
+
+
+def test_decision_complete_v0_contract():
+    """Implementation workers must receive frozen algorithms/defaults instead of design gaps."""
+    spec = _read("docs", "DECISION_COMPLETE_V0.md")
+    required = (
+        "Frozen source baselines",
+        "Manager resolution and placement algorithm",
+        "Agent event priority and cognition",
+        "Agent candidate scheduling",
+        "Agent retrieval",
+        "Agent context compilation",
+        "Control input routing",
+        "Control graph layout",
+        "Backup and recovery",
+        "Package persistence scopes",
+        "Inference gateway and universal model-event interception",
+        "Desktop compatibility services",
+        "Specification completeness invariant",
+        "SpecificationDefect",
+    )
+    for heading in required:
+        assert heading in spec, f"decision-complete spec is missing {heading!r}"
+
+    for token in (
+        "be5021eb406d32e8df6462a1c0986a70bdf03e02",
+        "2ab29c63d3273d4e2b4d1346b1aefede9b5af350",
+        "Rust toolchain:",
+        "1.99.0",
+        "cddab5f1c359539147959163142ff95a24995f6a",
+        "NullIntention priority = 0.15",
+        "RRF score = sum(1 / (60 + rank))",
+        "127.0.0.1:7331",
+        "UDP 7443",
+    ):
+        assert token in spec, f"decision-complete spec must freeze {token!r}"
+
+
+def test_active_specs_forbid_implementer_choice_markers():
+    """Active v0 specs may describe runtime alternatives but must not delegate design decisions."""
+    documents = (
+        "ARCHITECTURE.md",
+        "ROADMAP.md",
+        "docs/IMPLEMENTATION.md",
+        "docs/DECISION_COMPLETE_V0.md",
+        "AGENTS.md",
+    )
+    forbidden = (
+        "TBD",
+        "TO BE DECIDED",
+        "choose a reasonable",
+        "reasonable default",
+        "or equivalent library",
+        "we can decide later",
+    )
+    for document in documents:
+        content = _read(*document.split("/")).upper()
+        for marker in forbidden:
+            assert marker.upper() not in content, f"{document} contains delegated-choice marker {marker!r}"
