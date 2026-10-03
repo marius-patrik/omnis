@@ -96,6 +96,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -587,6 +591,14 @@ README, architecture, protocol docs, and implementation to drift.</p>
 <li>update docs/contracts if behavior changed;</li>
 <li>state any remaining incompatibility or unimplemented contract explicitly.</li>
 </ol>
+<h3 id="a23-no-v0-design-discretion">A23. No v0 design discretion<a class="headerlink" href="#a23-no-v0-design-discretion" title="Permanent link">&para;</a></h3>
+<p>For Omnis v0, coding agents implement the frozen design; they do not finish it.</p>
+<p>Before implementation, read <code>docs/DECISION_COMPLETE_V0.md</code>. If an observable behavior remains
+unspecified, stop that item and report a <code>SpecificationDefect</code>. Do not introduce a reasonable
+default, equivalent dependency, substitute algorithm, temporary fallback, or locally convenient
+policy without updating the normative specification/ADR first.</p>
+<p>Private helper decomposition, variable names and semantics-preserving refactors remain ordinary
+implementation choices.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../pipeline/">
@@ -663,6 +675,7 @@ README, architecture, protocol docs, and implementation to drift.</p>
               <li><a href="#a20-cross-component-testing">A20. Cross-component testing</a></li>
               <li><a href="#a21-documentation-changes">A21. Documentation changes</a></li>
               <li><a href="#a22-completion-behavior-for-coding-agents">A22. Completion behavior for coding agents</a></li>
+              <li><a href="#a23-no-v0-design-discretion">A23. No v0 design discretion</a></li>
             </ul>
           </li>
         </ul>

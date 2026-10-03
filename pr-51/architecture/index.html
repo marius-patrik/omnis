@@ -96,6 +96,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -280,7 +284,9 @@
           <h1 id="omnis-architecture">Omnis — Architecture<a class="headerlink" href="#omnis-architecture" title="Permanent link">&para;</a></h1>
 <p><strong>Status: NORMATIVE.</strong> This document defines the system architecture. Supporting documents may
 expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
-<a href="../IMPLEMENTATION/"><code>docs/IMPLEMENTATION.md</code></a> and ADR-0024.</p>
+<a href="../IMPLEMENTATION/"><code>docs/IMPLEMENTATION.md</code></a> and ADR-0024. All remaining v0 algorithms,
+constants, defaults and fallback behavior are frozen by
+<a href="../DECISION_COMPLETE_V0/"><code>docs/DECISION_COMPLETE_V0.md</code></a> and ADR-0025.</p>
 <p>Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.</p>
 <p>The system has four first-class authorities:</p>
@@ -1006,6 +1012,12 @@ semantics, security, or performance.</p>
 <p>At that point Omnis is not merely an AI-enabled Linux distribution. It is a machine whose operating
 state, available actions, cognition, and interface are all different projections of one persistent,
 addressable system.</p>
+<hr />
+<h3 id="181-decision-completeness">18.1 Decision completeness<a class="headerlink" href="#181-decision-completeness" title="Permanent link">&para;</a></h3>
+<p>For v0, implementation workers do not choose observable behavior. If <code>ARCHITECTURE.md</code>,
+<code>docs/IMPLEMENTATION.md</code>, <code>docs/DECISION_COMPLETE_V0.md</code>, subsystem specs, protocol schemas and
+tests do not determine a behavior, the item is blocked as a specification defect. "Reasonable
+default", "equivalent library", and "temporary fallback" are not implementation authority.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="..">
@@ -1130,6 +1142,9 @@ addressable system.</p>
           <li><a href="#17-non-goals">17. Non-goals</a>
           </li>
           <li><a href="#18-completion-criterion">18. Completion criterion</a>
+            <ul>
+              <li><a href="#181-decision-completeness">18.1 Decision completeness</a></li>
+            </ul>
           </li>
         </ul>
       </aside>
