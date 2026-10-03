@@ -209,7 +209,7 @@ evolution
 domain specialists
 ```
 
-A worker receives a compiled context capsule and resource/capability grants. It may use deterministic
+A worker receives a compiled context capsule and resource/capability grants. It can use deterministic
 code, local models, remote models, external agent harnesses, or combinations thereof.
 
 Worker outputs always return as events/artifacts.
@@ -370,7 +370,7 @@ and event stream.
 
 ## 15. Persistence
 
-Initial local implementation should use an embedded durable database for:
+Omnis v0 persists per-user Agent state under `$XDG_STATE_HOME/omnis/agent/`. The canonical
 
 ```text
 worldline events
@@ -408,3 +408,30 @@ availability a recovery dependency.
 10. No semantic `IDLE` state exists.
 11. Null/no work is valid.
 12. Agent does not need to observe Control/OS snapshots to know first-party transitions.
+---
+
+## 17. v0 event and memory pipeline
+
+Canonical history is `$XDG_STATE_HOME/omnis/agent/worldline.sqlite3`; rebuildable retrieval state is
+`index.sqlite3`; worker checkpoints are immutable artifacts under `checkpoints/` plus graph refs.
+
+Agent receives durable events by draining `omnis-graphd`'s outbox. It persists EventId before ACK;
+replayed deliveries are deduplicated by EventId. The worldline is append-only except schema metadata.
+
+Every event passes through this executable pipeline:
+
+```text
+dedupe -> deterministic reducers -> salience/domain classification
+       -> memory activation/retrieval -> candidate intentions (including null)
+       -> feasibility/Pareto filter -> budget allocation -> workers -> resulting events
+```
+
+FTS5 supplies lexical retrieval. A pinned sqlite-vec build supplies a derived vector index keyed by
+the embedding model identity. Vector state is disposable and rebuilt from graph/worldline data.
+
+Context compilation persists the selected source references and final ContextCapsule so a model or
+worker result can be traced back to the exact evidence and capability descriptors it received.
+
+Model roles are Manager capabilities (`model.classify`, `model.embed`, `model.rerank`,
+`model.generate`, `model.reason`, `model.vision`, `model.audio.transcribe`, `agent.code`). No provider
+name is part of Agent core logic.

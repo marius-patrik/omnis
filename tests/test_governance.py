@@ -197,3 +197,28 @@ def test_core_documents_are_present_and_substantial(document: str):
     """
     content = _read(document)
     assert len(content) > 500, f"{document} looks like a placeholder"
+
+
+def test_v0_implementation_profile_is_concrete():
+    """Foundational implementation choices must be frozen rather than delegated to workers."""
+    implementation = _read("docs", "IMPLEMENTATION.md")
+    for term in (
+        "Rust 2024",
+        "Tokio",
+        "Cap'n Proto",
+        "UUIDv7",
+        "BLAKE3",
+        "SQLite",
+        "FTS5",
+        "Smithay",
+        "wgpu",
+        "systemd",
+        "QUIC",
+        "omnis-graphd",
+        "omnis-managerd",
+        "omnis-agentd",
+        "omnis-control",
+    ):
+        assert term in implementation, f"v0 implementation profile must freeze {term}"
+    assert "durable event outbox" in implementation.lower()
+    assert "at-least-once" in implementation

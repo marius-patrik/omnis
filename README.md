@@ -122,6 +122,7 @@ architecture defined in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Implementation specifications:
 
+- [Concrete v0 implementation](docs/IMPLEMENTATION.md)
 - [Shared graph](docs/GRAPH.md)
 - [OmnisOS](docs/OMNIS_OS.md)
 - [OmnisManager](docs/OMNIS_MANAGER.md)

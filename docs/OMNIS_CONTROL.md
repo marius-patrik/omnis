@@ -181,11 +181,11 @@ It must never become the semantic source of truth.
 
 ## 9. Renderer implementation
 
-Initial Linux implementation should use:
+OmnisControl v0 uses:
 
-- Wayland compositor foundations from Smithay or equivalent modular compositor tooling;
-- wgpu or equivalent modern GPU abstraction;
-- a mature text shaping/font stack;
+- Smithay for Wayland compositor/DRM/input foundations;
+- wgpu for the GPU renderer;
+- a Rust text shaping/font stack pinned by the component lockfile;
 - XWayland compatibility;
 - platform accessibility publication;
 - direct input handling.
@@ -266,7 +266,7 @@ structured Control cmd  -> Control mutation
 otherwise               -> Agent semantic event
 ```
 
-The resolver should use deterministic parsing before classification/LLM reasoning.
+The resolver uses deterministic parsing before classification/LLM reasoning.
 
 ---
 
@@ -363,3 +363,26 @@ Agent may propose/persist useful workspace arrangements through the same Control
 8. Existing native apps remain runnable without Omnis rewrites.
 9. Shell is real Linux shell execution, not an imitation.
 10. Deterministic routing precedes model reasoning.
+---
+
+## 19. v0 runtime binding
+
+`omnis-control` is one process with three execution domains: Smithay/calloop on the compositor
+thread, a dedicated wgpu render thread, and a Tokio runtime for graph/Agent/Manager RPC, PTYs and
+browser protocol I/O. All queues are bounded and the frame loop never waits for Agent/model work.
+
+The render pipeline is:
+
+```text
+graph revision -> ProjectionSpec/Lens -> ControlTree -> layout -> RenderScene -> wgpu -> DRM/KMS
+```
+
+Initial render primitives are `Group`, `Rect`, `RoundedRect`, `Path`, `GlyphRun`, `Image`, `Mesh`,
+`NativeSurface`, `Clip` and `Transform`.
+
+The shell uses a real PTY, parses terminal output through `vte` into a cell model, then renders cells
+as normal scene primitives. XWayland is a managed child. Existing browsers are Wayland clients; CDP,
+WebDriver BiDi and accessibility data are Manager bindings rather than a second browser renderer.
+
+2D and 3D consume the same selected graph identities. Mode switching changes only layout/projection
+state and therefore preserves focus, selection, lens and timeline frontier.

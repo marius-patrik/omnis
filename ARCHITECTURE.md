@@ -1,7 +1,8 @@
 # Omnis — Architecture
 
 **Status: NORMATIVE.** This document defines the system architecture. Supporting documents may
-expand implementation detail but must not contradict it.
+expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
+[`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and ADR-0024.
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.
@@ -194,7 +195,7 @@ for OmnisAgent's causal worldline.
 
 ### 3.6 Internal graph service
 
-OmnisOS provides a minimal internal service, working name `omnis-graphd`, responsible only for:
+OmnisOS provides the internal service `omnis-graphd`, responsible only for:
 
 - stable identity allocation;
 - atomic graph transactions;
@@ -206,8 +207,9 @@ OmnisOS provides a minimal internal service, working name `omnis-graphd`, respon
 
 It contains no cognition, capability policy, UI logic, package semantics, or memory semantics.
 
-The first implementation may use SQLite/WAL plus purpose-built indexes. Storage is replaceable; the
-graph contract is not.
+Omnis v0 uses SQLite in WAL mode with one serialized writer, revision-addressable validity rows, a
+durable event outbox, and a filesystem BLAKE3 CAS as specified in `docs/IMPLEMENTATION.md`. Storage
+remains replaceable behind the graph contract.
 
 ---
 
@@ -345,7 +347,14 @@ boundaries, mount/network namespaces, device isolation, and credential brokers.
 
 The Agent may reason freely; execution receives only the capabilities physically granted to it.
 
-### 5.6 Reference configuration\n\nThe umbrella repository carries an illustrative OmnisOS configuration at [`examples/omnis.nix`](examples/omnis.nix). The exact option paths may evolve until the OmnisOS module schema is implemented; the four-authority split and persistent/transient boundary are normative.\n\n### 5.7 Persistent transitions
+### 5.6 Reference configuration
+
+The umbrella repository carries the v0 reference shape at [`examples/omnis.nix`](examples/omnis.nix).
+`docs/IMPLEMENTATION.md` freezes the initial module families and the machine-managed Nix mutation
+boundary; implementation must converge the example to those exact option paths rather than inventing
+a second declaration schema.
+
+### 5.7 Persistent transitions
 
 Persistent structural changes use candidate system generations:
 
@@ -722,8 +731,9 @@ omnis://scene/<id>
 omnis://memory/<id>
 ```
 
-Public URI details are implementation-specific until the protocol spec freezes them, but all first-
-party surfaces must be able to exchange stable references rather than copied descriptive text.
+Protocol v0 uses `omnis://` stable-reference URIs as defined by `docs/PROTOCOLS.md`; first-party
+surfaces exchange NodeId/EventId/ArtifactId values directly on the wire rather than copied
+descriptive text.
 
 ---
 
@@ -794,8 +804,8 @@ and worker strategies.
 Changes to Omnis components themselves are candidate implementations/generations. They are built and
 evaluated outside the currently active implementation before promotion.
 
-For OmnisOS and Manager, Nix derivations/generations provide the natural realization boundary.
-Agent/Control variants should use similarly reproducible candidate artifacts and explicit lineage.
+For OmnisOS and Manager, Nix derivations/generations provide the realization boundary. Agent and
+Control variants are built as pinned Nix artifacts with explicit lineage before promotion.
 
 ---
 

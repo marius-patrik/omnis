@@ -1,17 +1,19 @@
 # Omnis Protocols and Cross-Component Contracts
 
-**Status: implementation contract draft.**
+**Status: normative implementation contract.**
 
 This document freezes the minimum cross-component semantics required to implement Omnis without
 creating parallel subsystem-specific models.
 
 ---
 
-## 1. Transport rule
+## 1. Wire protocol and transport
 
-Protocol semantics are transport-independent. Initial local transport should use Unix domain sockets
-with a binary-capable framed protocol. JSON/CBOR/MessagePack/protobuf are implementation choices;
-the data model below is normative.
+Canonical v0 schemas are Cap'n Proto. Rust and C++ bindings are generated from the same `.capnp`
+sources owned by the umbrella `omnis` repository. Local RPC runs over Unix-domain `SOCK_STREAM`;
+native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.
+
+JSON is allowed only as a diagnostic/export representation; it is not a second RPC contract.
 
 Every request/event carries:
 
@@ -59,13 +61,16 @@ event_payload_ref
 
 ## 3. Event API
 
-Components publish events to OmnisAgent:
+Components durably enqueue first-party events through the graph substrate:
 
 ```text
-event.publish(EventEnvelope)
-event.publish_batch([...])
+outbox.enqueue(EventEnvelope)
+outbox.enqueue_batch([...])
 artifact.put(...)
 ```
+
+Graph transactions enqueue their events atomically with graph mutations. OmnisAgent drains the
+outbox into its worldline and then calls `outbox.ack(event_id)`.
 
 Agent exposes durable subscriptions/query:
 
@@ -77,8 +82,8 @@ worldline.causes(event_id)
 worldline.effects(event_id)
 ```
 
-Publishing success means Agent durably accepted the event or the configured local spool accepted it
-for lossless delivery. Silent event drop is not valid first-party behavior.
+Enqueue success means graphd durably owns the event for lossless delivery. Delivery to Agent is
+at-least-once and Agent deduplicates EventId. Silent event drop is not valid first-party behavior.
 
 ---
 
@@ -296,3 +301,32 @@ Control unavailable
 
 A model failure must not imply Manager/OS failure. The machine must retain deterministic operation
 without AI availability.
+
+---
+
+## 13. v0 endpoints and handshake
+
+System endpoints:
+
+```text
+/run/omnis/graph.sock
+/run/omnis/os.sock
+/run/omnis/manager.sock
+/run/omnis/nix-control.sock
+```
+
+User endpoints:
+
+```text
+$XDG_RUNTIME_DIR/omnis/agent.sock
+$XDG_RUNTIME_DIR/omnis/control.sock
+```
+
+Each connection negotiates protocol major/minor, component identity, build ID and supported
+interfaces. Major mismatch rejects the connection; minor versions intersect optional features.
+
+Effectful requests carry RequestId, TraceId, actor NodeId, causal EventIds, authority scope, deadline
+and an idempotency key when retry is legal. Execution creation is idempotent on ExecutionId.
+
+Semantic/event IDs are UUIDv7 binary 16-byte values. Artifact IDs are BLAKE3-256. Inline payloads
+remain small; large payloads travel by ArtifactRef through the graphd CAS.

@@ -1,7 +1,8 @@
 # Omnis — Implementation Roadmap
 
 This roadmap replaces the old daemon/workspace epic sequence. The ordering is dependency-driven and
-is intended to reach a bootable vertical slice as early as possible.
+is intended to reach a bootable vertical slice as early as possible. Concrete mechanisms and paths
+are frozen by `docs/IMPLEMENTATION.md`; roadmap workers implement them rather than selecting substitutes.
 
 ## Phase 0 — Architecture reset and repository split
 
@@ -23,7 +24,9 @@ Implement in OmnisOS/integration layer:
 
 - stable NodeId/EdgeId identity;
 - graph namespaces/dimension ownership;
-- SQLite/WAL graph store;
+- SQLite/WAL graph store with serialized writer, validity intervals and migrations;
+- BLAKE3 artifact CAS;
+- durable graphd event outbox with Agent ACK/dedup;
 - atomic transactions/revisions;
 - query/traversal API;
 - subscriptions;
@@ -84,8 +87,8 @@ and navigate system graph in 2D.
 
 Implement:
 
-- durable event gateway/worldline;
-- causal DAG + append replay order;
+- durable SQLite worldline fed from graphd outbox;
+- EventId deduplication + causal DAG + append ingest order;
 - graph-change and Control/Manager/OS event ingestion;
 - embedded artifact CAS;
 - event/entity/project state;
@@ -105,7 +108,7 @@ Implement:
 - assertions with temporal validity;
 - evidence/provenance;
 - contradictions/supersession;
-- graph + lexical + vector retrieval;
+- graph + FTS5 lexical + pinned sqlite-vec derived vector retrieval;
 - activation/reranking;
 - context compiler;
 - projection deduplication/feedback-loop prevention;
@@ -169,7 +172,7 @@ Implement:
 - artifact transfer/cache;
 - GPU/CPU placement;
 - remote graph synchronization required for shared identities;
-- transport-independent event/trace correlation.
+- QUIC/TLS remote RPC with the same EventId/TraceId/NodeId contracts.
 
 Exit: one Agent activity can use local Control, remote GPU, local repository, and remote worker while
 preserving shared graph/activity/event identity.

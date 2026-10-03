@@ -46,8 +46,8 @@ Every graph object has an opaque `NodeId` that survives changes to:
 - UI position;
 - execution runtime.
 
-The initial implementation should use UUIDv7 for allocated semantic identities because it is opaque,
-locally generatable, and roughly time ordered.
+Omnis v0 uses UUIDv7 for allocated semantic identities. IDs are encoded as 16 bytes on the wire and
+as canonical lowercase hyphenated UUID text only at human-facing boundaries.
 
 Immutable artifacts may additionally use content identity (`blake3:<digest>`), but content identity
 must not replace semantic identity for mutable concepts.
@@ -556,8 +556,8 @@ Host:h --physical.runs--> Process:p
 Generation:g42 --system.active_on--> Host:h
 ```
 
-OmnisOS may retain implementation-specific caches, but graph identity must be the cross-system
-reference point.
+OmnisOS may retain rebuildable caches, but every cached object keeps its shared NodeId and graph
+identity remains the cross-system reference point.
 
 ---
 
@@ -574,3 +574,30 @@ reference point.
 8. Control render state is not graph truth.
 9. Derived indexes are disposable.
 10. Every committed first-party graph mutation emits an Agent event.
+---
+
+## 20. v0 storage and delivery binding
+
+The concrete v0 graph implementation is `omnis-graphd` from OmnisOS.
+
+Canonical locations:
+
+```text
+/var/lib/omnis/graph/graph.sqlite3
+/var/lib/omnis/cas/blake3/
+/run/omnis/graph.sock
+```
+
+`graph.sqlite3` uses SQLite WAL, `synchronous=FULL`, one serialized writer task, independent reader
+connections, validity intervals for revision reads, and schema migrations owned by graphd.
+
+The graph database also contains the durable event outbox. A graph transaction commits graph
+mutations and its normalized event envelopes atomically. Non-graph first-party producers enqueue
+events through graphd before considering publication durable. OmnisAgent drains the outbox into its
+worldline and acknowledges EventId; delivery is at-least-once and deduplicated by EventId.
+
+Large payloads use the BLAKE3 CAS rather than SQLite/RPC blobs. The graph stores ArtifactId references
+plus media/protection/provenance metadata.
+
+The exact relational table families, transaction operations and query policy are frozen in
+`IMPLEMENTATION.md`. No alternative graph DB, broker or query language is introduced in v0.

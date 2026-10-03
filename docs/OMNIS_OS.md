@@ -11,7 +11,7 @@ it.
 
 ## 1. Upstream relationship
 
-OmnisOS should begin as a fork/patch stack over `NixOS/nixpkgs`, preserving nixpkgs package
+OmnisOS is implemented as a fork/patch stack over `NixOS/nixpkgs`, preserving nixpkgs package
 compatibility and upstream mergeability.
 
 The fork exists for changes that require system-wide integration which cannot cleanly live as an
@@ -37,16 +37,16 @@ UEFI/firmware
   -> Linux kernel + initrd
   -> NixOS activation
   -> omnis-graphd
-  -> OmnisManager
-  -> OmnisAgent
-  -> OmnisControl/compositor session
+  -> {omnis-osd, nix-daemon, omnis-managerd}
+  -> user session
+  -> {omnis-agentd, omnis-control}
 ```
 
 OmnisControl is the default local interactive environment. A headless target may omit Control while
 retaining OS, Manager, Agent, graph, and remote-control capability.
 
-Systemd may be retained initially as the service supervisor where useful. It is physical mechanism,
-not a second semantic system model; desired service semantics remain represented in NixOS + graph.
+systemd is the v0 service supervisor and transient-scope executor. It is a physical mechanism, not a
+second semantic system model; desired service semantics remain represented in NixOS + graph.
 
 ---
 
@@ -177,7 +177,7 @@ IPC endpoints
 lifetime/cancellation relationship
 ```
 
-Linux implementation should compose existing primitives instead of inventing parallel isolation:
+The Linux implementation composes existing primitives instead of inventing parallel isolation:
 
 - cgroup v2;
 - namespaces;
@@ -195,8 +195,9 @@ Every Omnis installation has a stable Host graph identity.
 Remote hosts can participate through Manager placement. A host advertises authoritative physical
 capabilities and availability into the graph.
 
-The first implementation may use SSH/Tailscale or another bound transport, but transport identity is
-not host semantic identity.
+Native Omnis remote RPC uses QUIC with TLS 1.3 mutual host authentication. SSH remains an ordinary
+Manager binding and Tailscale may carry QUIC traffic, but neither transport identity is host semantic
+identity.
 
 Remote execution must preserve:
 
@@ -289,3 +290,29 @@ Initial OmnisOS does not:
 - own Control layout/presentation.
 
 A future custom kernel is only justified by measured limitations of Linux against Omnis requirements.
+
+---
+
+## 14. v0 process and persistence binding
+
+`omnis-graphd`, `omnis-osd` and `omnis-managerd` are system services. `omnis-agentd` and
+`omnis-control` are per-user services/session processes. Agent and Control are never boot-critical.
+
+OmnisOS adds the `omnis.*` NixOS module family and two concrete configuration files:
+
+```text
+/etc/omnis/configuration.nix
+/etc/omnis/managed.nix
+```
+
+The first imports the ordinary user NixOS configuration plus the second. OmnisManager edits only
+`managed.nix` through the forked Nix parser/AST. Candidate files live under
+`/var/lib/omnis/candidates/<GenerationId>/` until build/invariant checks succeed.
+
+`omnis-osd` publishes exact Linux facts from systemd D-Bus, udev, rtnetlink, `/proc`, process eBPF
+tracepoints, watched-scope fanotify/inotify, logind and cgroup v2. Startup reconciliation precedes
+incremental event handling.
+
+On graph corruption or unrecoverable startup failure, OmnisOS enters `omnis-recovery.target` with a
+conventional TTY, Nix generation rollback and graph restore/rebuild tools. No model is required for
+boot, recovery or enforcement.
