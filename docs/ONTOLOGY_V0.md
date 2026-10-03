@@ -310,6 +310,7 @@ omnis.capability.graph.query
 omnis.capability.control.materialize
 omnis.capability.control.mutate
 omnis.capability.ingest
+omnis.capability.host.pairing_code
 omnis.capability.host.pair
 omnis.capability.host.unpair
 ```

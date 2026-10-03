@@ -76,3 +76,24 @@ struct ControlMutateInput { transaction @0 :C.ArtifactRef; }
 
 struct IngestInput { paths @0 :List(Text); explicitLargeFiles @1 :Bool; }
 struct IngestOutput { resources @0 :List(C.Uuid); artifacts @1 :List(C.ArtifactRef); }
+
+
+struct HostPairingCodeOutput {
+  code @0 :Text;
+  expiresUnixNs @1 :Int64;
+}
+
+struct HostPairInput {
+  address @0 :Text;
+  code @1 :Text;
+}
+
+struct HostPairOutput {
+  host @0 :C.Uuid;
+  publicKey @1 :Data;
+  certificateFingerprint @2 :Data;
+}
+
+struct HostUnpairInput {
+  host @0 :C.Uuid;
+}

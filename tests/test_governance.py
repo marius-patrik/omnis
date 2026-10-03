@@ -445,3 +445,40 @@ def test_worldline_stores_exact_event_envelope_bytes():
     assert "envelope BLOB NOT NULL" in worldline
     assert "inline_payload" not in worldline
     assert "payload_artifact" not in worldline
+
+
+def test_event_priorities_cover_every_registered_event():
+    """Every registered first-party event must have an explicit base priority."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    def load(name):
+        with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
+            return tomllib.load(handle)
+
+    ontology = load("ontology.toml")
+    priorities = load("event_priorities.toml")["events"]
+    assert set(priorities) == set(ontology["events"])
+    assert all(0.0 <= float(value) <= 1.0 for value in priorities.values())
+
+
+def test_capability_registry_has_wire_schema_mapping():
+    """Every first-party capability must map to fixed input/output/effect contracts."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    def load(name):
+        with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
+            return tomllib.load(handle)
+
+    ontology = load("ontology.toml")
+    capabilities = load("capabilities.toml")["capabilities"]
+    assert set(capabilities) == set(ontology["capabilities"])
+    capnp = _read("protocol", "capabilities.capnp")
+    for contract in capabilities.values():
+        assert f"struct {contract['input']}" in capnp or contract["input"] == "Empty"
+        assert f"struct {contract['output']}" in capnp or contract["output"] == "Empty"

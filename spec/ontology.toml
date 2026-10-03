@@ -72,7 +72,8 @@ capabilities = [
   "omnis.capability.browser.inspect","omnis.capability.browser.interact",
   "omnis.capability.http.request","omnis.capability.mcp.invoke","omnis.capability.container.run",
   "omnis.capability.vm.run","omnis.capability.graph.query","omnis.capability.control.materialize",
-  "omnis.capability.control.mutate","omnis.capability.ingest","omnis.capability.host.pair","omnis.capability.host.unpair"
+  "omnis.capability.control.mutate","omnis.capability.ingest","omnis.capability.host.pairing_code",
+  "omnis.capability.host.pair","omnis.capability.host.unpair"
 ]
 
 events = [
@@ -107,7 +108,8 @@ events = [
   "omnis.event.control.native_surface.created","omnis.event.control.native_surface.closed",
   "omnis.event.control.terminal.created","omnis.event.control.terminal.closed",
   "omnis.event.control.navigation","omnis.event.control.notification.created",
-  "omnis.event.control.notification.dismissed","omnis.event.timer.minute","omnis.event.timer.hour"
+  "omnis.event.control.notification.dismissed","omnis.event.manager.host.paired",
+  "omnis.event.manager.host.unpaired","omnis.event.timer.minute","omnis.event.timer.hour"
 ]
 
 [states]

@@ -169,3 +169,19 @@ effect = "idempotent"
 input = "IngestInput"
 output = "IngestOutput"
 effect = "idempotent"
+
+
+[capabilities."omnis.capability.host.pairing_code"]
+input = "Empty"
+output = "HostPairingCodeOutput"
+effect = "idempotent"
+
+[capabilities."omnis.capability.host.pair"]
+input = "HostPairInput"
+output = "HostPairOutput"
+effect = "persistentExternal"
+
+[capabilities."omnis.capability.host.unpair"]
+input = "HostUnpairInput"
+output = "Empty"
+effect = "persistentExternal"
