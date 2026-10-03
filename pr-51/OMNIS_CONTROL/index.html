@@ -92,6 +92,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -400,11 +404,11 @@ change graph identity.</p>
 <p>It must never become the semantic source of truth.</p>
 <hr />
 <h2 id="9-renderer-implementation">9. Renderer implementation<a class="headerlink" href="#9-renderer-implementation" title="Permanent link">&para;</a></h2>
-<p>Initial Linux implementation should use:</p>
+<p>OmnisControl v0 uses:</p>
 <ul>
-<li>Wayland compositor foundations from Smithay or equivalent modular compositor tooling;</li>
-<li>wgpu or equivalent modern GPU abstraction;</li>
-<li>a mature text shaping/font stack;</li>
+<li>Smithay for Wayland compositor/DRM/input foundations;</li>
+<li>wgpu for the GPU renderer;</li>
+<li>a Rust text shaping/font stack pinned by the component lockfile;</li>
 <li>XWayland compatibility;</li>
 <li>platform accessibility publication;</li>
 <li>direct input handling.</li>
@@ -462,7 +466,7 @@ reasoning.</p>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>structured Control cmd  -&gt; Control mutation
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>otherwise               -&gt; Agent semantic event
 </code></pre></div>
-<p>The resolver should use deterministic parsing before classification/LLM reasoning.</p>
+<p>The resolver uses deterministic parsing before classification/LLM reasoning.</p>
 <hr />
 <h2 id="14-user-and-agent-authority">14. User and Agent authority<a class="headerlink" href="#14-user-and-agent-authority" title="Permanent link">&para;</a></h2>
 <p>User and Agent interact with the same Control state but through different affordances.</p>
@@ -535,6 +539,21 @@ interfaces.</p>
 <li>Shell is real Linux shell execution, not an imitation.</li>
 <li>Deterministic routing precedes model reasoning.</li>
 </ol>
+<hr />
+<h2 id="19-v0-runtime-binding">19. v0 runtime binding<a class="headerlink" href="#19-v0-runtime-binding" title="Permanent link">&para;</a></h2>
+<p><code>omnis-control</code> is one process with three execution domains: Smithay/calloop on the compositor
+thread, a dedicated wgpu render thread, and a Tokio runtime for graph/Agent/Manager RPC, PTYs and
+browser protocol I/O. All queues are bounded and the frame loop never waits for Agent/model work.</p>
+<p>The render pipeline is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>graph revision -&gt; ProjectionSpec/Lens -&gt; ControlTree -&gt; layout -&gt; RenderScene -&gt; wgpu -&gt; DRM/KMS
+</code></pre></div>
+<p>Initial render primitives are <code>Group</code>, <code>Rect</code>, <code>RoundedRect</code>, <code>Path</code>, <code>GlyphRun</code>, <code>Image</code>, <code>Mesh</code>,
+<code>NativeSurface</code>, <code>Clip</code> and <code>Transform</code>.</p>
+<p>The shell uses a real PTY, parses terminal output through <code>vte</code> into a cell model, then renders cells
+as normal scene primitives. XWayland is a managed child. Existing browsers are Wayland clients; CDP,
+WebDriver BiDi and accessibility data are Manager bindings rather than a second browser renderer.</p>
+<p>2D and 3D consume the same selected graph identities. Mode switching changes only layout/projection
+state and therefore preserves focus, selection, lens and timeline frontier.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_AGENT/">
@@ -591,6 +610,8 @@ interfaces.</p>
           <li><a href="#17-persistence">17. Persistence</a>
           </li>
           <li><a href="#18-hard-invariants">18. Hard invariants</a>
+          </li>
+          <li><a href="#19-v0-runtime-binding">19. v0 runtime binding</a>
           </li>
         </ul>
       </aside>

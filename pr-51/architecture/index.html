@@ -92,6 +92,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -271,7 +275,8 @@
         <article class="prose">
           <h1 id="omnis-architecture">Omnis — Architecture<a class="headerlink" href="#omnis-architecture" title="Permanent link">&para;</a></h1>
 <p><strong>Status: NORMATIVE.</strong> This document defines the system architecture. Supporting documents may
-expand implementation detail but must not contradict it.</p>
+expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
+<a href="../IMPLEMENTATION/"><code>docs/IMPLEMENTATION.md</code></a> and ADR-0024.</p>
 <p>Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.</p>
 <p>The system has four first-class authorities:</p>
@@ -430,7 +435,7 @@ OmnisAgent.</p>
 <p>The graph service may keep an implementation WAL for crash recovery. That WAL is not a replacement
 for OmnisAgent's causal worldline.</p>
 <h3 id="36-internal-graph-service">3.6 Internal graph service<a class="headerlink" href="#36-internal-graph-service" title="Permanent link">&para;</a></h3>
-<p>OmnisOS provides a minimal internal service, working name <code>omnis-graphd</code>, responsible only for:</p>
+<p>OmnisOS provides the internal service <code>omnis-graphd</code>, responsible only for:</p>
 <ul>
 <li>stable identity allocation;</li>
 <li>atomic graph transactions;</li>
@@ -441,8 +446,9 @@ for OmnisAgent's causal worldline.</p>
 <li>revisioning and local recovery.</li>
 </ul>
 <p>It contains no cognition, capability policy, UI logic, package semantics, or memory semantics.</p>
-<p>The first implementation may use SQLite/WAL plus purpose-built indexes. Storage is replaceable; the
-graph contract is not.</p>
+<p>Omnis v0 uses SQLite in WAL mode with one serialized writer, revision-addressable validity rows, a
+durable event outbox, and a filesystem BLAKE3 CAS as specified in <code>docs/IMPLEMENTATION.md</code>. Storage
+remains replaceable behind the graph contract.</p>
 <hr />
 <h2 id="4-worldline-and-events">4. Worldline and events<a class="headerlink" href="#4-worldline-and-events" title="Permanent link">&para;</a></h2>
 <h3 id="41-ownership">4.1 Ownership<a class="headerlink" href="#41-ownership" title="Permanent link">&para;</a></h3>
@@ -547,7 +553,12 @@ may be continuously evaluated from current graph state and enforced by physical 
 use Linux mechanisms such as namespaces, cgroups, seccomp, LSM/Landlock/eBPF hooks, UID/GID
 boundaries, mount/network namespaces, device isolation, and credential brokers.</p>
 <p>The Agent may reason freely; execution receives only the capabilities physically granted to it.</p>
-<h3 id="56-reference-configurationnnthe-umbrella-repository-carries-an-illustrative-omnisos-configuration-at-examplesomnisnix-the-exact-option-paths-may-evolve-until-the-omnisos-module-schema-is-implemented-the-four-authority-split-and-persistenttransient-boundary-are-normativenn-57-persistent-transitions">5.6 Reference configuration\n\nThe umbrella repository carries an illustrative OmnisOS configuration at <a href="../declaration/"><code>examples/omnis.nix</code></a>. The exact option paths may evolve until the OmnisOS module schema is implemented; the four-authority split and persistent/transient boundary are normative.\n\n### 5.7 Persistent transitions<a class="headerlink" href="#56-reference-configurationnnthe-umbrella-repository-carries-an-illustrative-omnisos-configuration-at-examplesomnisnix-the-exact-option-paths-may-evolve-until-the-omnisos-module-schema-is-implemented-the-four-authority-split-and-persistenttransient-boundary-are-normativenn-57-persistent-transitions" title="Permanent link">&para;</a></h3>
+<h3 id="56-reference-configuration">5.6 Reference configuration<a class="headerlink" href="#56-reference-configuration" title="Permanent link">&para;</a></h3>
+<p>The umbrella repository carries the v0 reference shape at <a href="../declaration/"><code>examples/omnis.nix</code></a>.
+<code>docs/IMPLEMENTATION.md</code> freezes the initial module families and the machine-managed Nix mutation
+boundary; implementation must converge the example to those exact option paths rather than inventing
+a second declaration schema.</p>
+<h3 id="57-persistent-transitions">5.7 Persistent transitions<a class="headerlink" href="#57-persistent-transitions" title="Permanent link">&para;</a></h3>
 <p>Persistent structural changes use candidate system generations:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Agent/user intention
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  -&gt; Manager resolves plan/resources
@@ -832,8 +843,9 @@ surface rather than a separate product.</p>
 <a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>omnis://scene/&lt;id&gt;
 <a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>omnis://memory/&lt;id&gt;
 </code></pre></div>
-<p>Public URI details are implementation-specific until the protocol spec freezes them, but all first-
-party surfaces must be able to exchange stable references rather than copied descriptive text.</p>
+<p>Protocol v0 uses <code>omnis://</code> stable-reference URIs as defined by <code>docs/PROTOCOLS.md</code>; first-party
+surfaces exchange NodeId/EventId/ArtifactId values directly on the wire rather than copied
+descriptive text.</p>
 <hr />
 <h2 id="10-api-and-protocol-principles">10. API and protocol principles<a class="headerlink" href="#10-api-and-protocol-principles" title="Permanent link">&para;</a></h2>
 <h3 id="101-shared-semantics">10.1 Shared semantics<a class="headerlink" href="#101-shared-semantics" title="Permanent link">&para;</a></h3>
@@ -878,8 +890,8 @@ and worker strategies.</p>
 <h3 id="123-structural-evolution">12.3 Structural evolution<a class="headerlink" href="#123-structural-evolution" title="Permanent link">&para;</a></h3>
 <p>Changes to Omnis components themselves are candidate implementations/generations. They are built and
 evaluated outside the currently active implementation before promotion.</p>
-<p>For OmnisOS and Manager, Nix derivations/generations provide the natural realization boundary.
-Agent/Control variants should use similarly reproducible candidate artifacts and explicit lineage.</p>
+<p>For OmnisOS and Manager, Nix derivations/generations provide the realization boundary. Agent and
+Control variants are built as pinned Nix artifacts with explicit lineage before promotion.</p>
 <hr />
 <h2 id="13-host-independence">13. Host independence<a class="headerlink" href="#13-host-independence" title="Permanent link">&para;</a></h2>
 <p>A semantic resource or activity is not identified by the machine currently executing it.</p>
@@ -996,9 +1008,9 @@ addressable system.</p>
             <span class="pager__label">Previous</span>
             <span class="pager__title">Overview</span>
           </a>
-          <a class="pager__link pager__link--next" href="../GRAPH/">
+          <a class="pager__link pager__link--next" href="../IMPLEMENTATION/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">Shared graph</span>
+            <span class="pager__title">Implementation</span>
           </a>
         </nav>
 
@@ -1046,7 +1058,8 @@ addressable system.</p>
               <li><a href="#53-desired-and-actual-state">5.3 Desired and actual state</a></li>
               <li><a href="#54-invariants">5.4 Invariants</a></li>
               <li><a href="#55-physical-enforcement">5.5 Physical enforcement</a></li>
-              <li><a href="#56-reference-configurationnnthe-umbrella-repository-carries-an-illustrative-omnisos-configuration-at-examplesomnisnix-the-exact-option-paths-may-evolve-until-the-omnisos-module-schema-is-implemented-the-four-authority-split-and-persistenttransient-boundary-are-normativenn-57-persistent-transitions">5.6 Reference configuration\n\nThe umbrella repository carries an illustrative OmnisOS configuration at examples/omnis.nix. The exact option paths may evolve until the OmnisOS module schema is implemented; the four-authority split and persistent/transient boundary are normative.\n\n### 5.7 Persistent transitions</a></li>
+              <li><a href="#56-reference-configuration">5.6 Reference configuration</a></li>
+              <li><a href="#57-persistent-transitions">5.7 Persistent transitions</a></li>
             </ul>
           </li>
           <li><a href="#6-omnismanager">6. OmnisManager</a>

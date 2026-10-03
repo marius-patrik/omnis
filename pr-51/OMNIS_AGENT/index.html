@@ -92,6 +92,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -424,7 +428,7 @@ evidence.</p>
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>evolution
 <a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>domain specialists
 </code></pre></div>
-<p>A worker receives a compiled context capsule and resource/capability grants. It may use deterministic
+<p>A worker receives a compiled context capsule and resource/capability grants. It can use deterministic
 code, local models, remote models, external agent harnesses, or combinations thereof.</p>
 <p>Worker outputs always return as events/artifacts.</p>
 <hr />
@@ -539,7 +543,7 @@ identity is not itself relevant.</p>
 and event stream.</p>
 <hr />
 <h2 id="15-persistence">15. Persistence<a class="headerlink" href="#15-persistence" title="Permanent link">&para;</a></h2>
-<p>Initial local implementation should use an embedded durable database for:</p>
+<p>Omnis v0 persists per-user Agent state under <code>$XDG_STATE_HOME/omnis/agent/</code>. The canonical</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>worldline events
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>causal edges
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>memories
@@ -572,6 +576,24 @@ availability a recovery dependency.</p>
 <li>Null/no work is valid.</li>
 <li>Agent does not need to observe Control/OS snapshots to know first-party transitions.</li>
 </ol>
+<hr />
+<h2 id="17-v0-event-and-memory-pipeline">17. v0 event and memory pipeline<a class="headerlink" href="#17-v0-event-and-memory-pipeline" title="Permanent link">&para;</a></h2>
+<p>Canonical history is <code>$XDG_STATE_HOME/omnis/agent/worldline.sqlite3</code>; rebuildable retrieval state is
+<code>index.sqlite3</code>; worker checkpoints are immutable artifacts under <code>checkpoints/</code> plus graph refs.</p>
+<p>Agent receives durable events by draining <code>omnis-graphd</code>'s outbox. It persists EventId before ACK;
+replayed deliveries are deduplicated by EventId. The worldline is append-only except schema metadata.</p>
+<p>Every event passes through this executable pipeline:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>dedupe -&gt; deterministic reducers -&gt; salience/domain classification
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>       -&gt; memory activation/retrieval -&gt; candidate intentions (including null)
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>       -&gt; feasibility/Pareto filter -&gt; budget allocation -&gt; workers -&gt; resulting events
+</code></pre></div>
+<p>FTS5 supplies lexical retrieval. A pinned sqlite-vec build supplies a derived vector index keyed by
+the embedding model identity. Vector state is disposable and rebuilt from graph/worldline data.</p>
+<p>Context compilation persists the selected source references and final ContextCapsule so a model or
+worker result can be traced back to the exact evidence and capability descriptors it received.</p>
+<p>Model roles are Manager capabilities (<code>model.classify</code>, <code>model.embed</code>, <code>model.rerank</code>,
+<code>model.generate</code>, <code>model.reason</code>, <code>model.vision</code>, <code>model.audio.transcribe</code>, <code>agent.code</code>). No provider
+name is part of Agent core logic.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_MANAGER/">
@@ -630,6 +652,8 @@ availability a recovery dependency.</p>
           <li><a href="#15-persistence">15. Persistence</a>
           </li>
           <li><a href="#16-hard-invariants">16. Hard invariants</a>
+          </li>
+          <li><a href="#17-v0-event-and-memory-pipeline">17. v0 event and memory pipeline</a>
           </li>
         </ul>
       </aside>

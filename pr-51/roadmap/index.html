@@ -92,6 +92,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -271,7 +275,8 @@
         <article class="prose">
           <h1 id="omnis-implementation-roadmap">Omnis — Implementation Roadmap<a class="headerlink" href="#omnis-implementation-roadmap" title="Permanent link">&para;</a></h1>
 <p>This roadmap replaces the old daemon/workspace epic sequence. The ordering is dependency-driven and
-is intended to reach a bootable vertical slice as early as possible.</p>
+is intended to reach a bootable vertical slice as early as possible. Concrete mechanisms and paths
+are frozen by <code>docs/IMPLEMENTATION.md</code>; roadmap workers implement them rather than selecting substitutes.</p>
 <h2 id="phase-0-architecture-reset-and-repository-split">Phase 0 — Architecture reset and repository split<a class="headerlink" href="#phase-0-architecture-reset-and-repository-split" title="Permanent link">&para;</a></h2>
 <p>Deliverables:</p>
 <ul>
@@ -289,7 +294,9 @@ normative.</p>
 <ul>
 <li>stable NodeId/EdgeId identity;</li>
 <li>graph namespaces/dimension ownership;</li>
-<li>SQLite/WAL graph store;</li>
+<li>SQLite/WAL graph store with serialized writer, validity intervals and migrations;</li>
+<li>BLAKE3 artifact CAS;</li>
+<li>durable graphd event outbox with Agent ACK/dedup;</li>
 <li>atomic transactions/revisions;</li>
 <li>query/traversal API;</li>
 <li>subscriptions;</li>
@@ -342,8 +349,8 @@ and navigate system graph in 2D.</p>
 <h2 id="phase-5-omnisagent-eventworldline-core">Phase 5 — OmnisAgent event/worldline core<a class="headerlink" href="#phase-5-omnisagent-eventworldline-core" title="Permanent link">&para;</a></h2>
 <p>Implement:</p>
 <ul>
-<li>durable event gateway/worldline;</li>
-<li>causal DAG + append replay order;</li>
+<li>durable SQLite worldline fed from graphd outbox;</li>
+<li>EventId deduplication + causal DAG + append ingest order;</li>
 <li>graph-change and Control/Manager/OS event ingestion;</li>
 <li>embedded artifact CAS;</li>
 <li>event/entity/project state;</li>
@@ -361,7 +368,7 @@ transitions without polling.</p>
 <li>assertions with temporal validity;</li>
 <li>evidence/provenance;</li>
 <li>contradictions/supersession;</li>
-<li>graph + lexical + vector retrieval;</li>
+<li>graph + FTS5 lexical + pinned sqlite-vec derived vector retrieval;</li>
 <li>activation/reranking;</li>
 <li>context compiler;</li>
 <li>projection deduplication/feedback-loop prevention;</li>
@@ -419,7 +426,7 @@ are indistinguishable in authority from user-created Control arrangements.</p>
 <li>artifact transfer/cache;</li>
 <li>GPU/CPU placement;</li>
 <li>remote graph synchronization required for shared identities;</li>
-<li>transport-independent event/trace correlation.</li>
+<li>QUIC/TLS remote RPC with the same EventId/TraceId/NodeId contracts.</li>
 </ul>
 <p>Exit: one Agent activity can use local Control, remote GPU, local repository, and remote worker while
 preserving shared graph/activity/event identity.</p>

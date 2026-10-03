@@ -92,6 +92,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../GRAPH/">Shared graph</a>
     </li>
     <li class="nav__item">
@@ -277,7 +281,7 @@ the system composition, graph integration, enforcement, and persistent generatio
 it.</p>
 <hr />
 <h2 id="1-upstream-relationship">1. Upstream relationship<a class="headerlink" href="#1-upstream-relationship" title="Permanent link">&para;</a></h2>
-<p>OmnisOS should begin as a fork/patch stack over <code>NixOS/nixpkgs</code>, preserving nixpkgs package
+<p>OmnisOS is implemented as a fork/patch stack over <code>NixOS/nixpkgs</code>, preserving nixpkgs package
 compatibility and upstream mergeability.</p>
 <p>The fork exists for changes that require system-wide integration which cannot cleanly live as an
 ordinary downstream NixOS module, especially:</p>
@@ -297,14 +301,14 @@ ordinary downstream NixOS module, especially:</p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; Linux kernel + initrd
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; NixOS activation
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; omnis-graphd
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; OmnisManager
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; OmnisAgent
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  -&gt; OmnisControl/compositor session
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; {omnis-osd, nix-daemon, omnis-managerd}
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; user session
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  -&gt; {omnis-agentd, omnis-control}
 </code></pre></div>
 <p>OmnisControl is the default local interactive environment. A headless target may omit Control while
 retaining OS, Manager, Agent, graph, and remote-control capability.</p>
-<p>Systemd may be retained initially as the service supervisor where useful. It is physical mechanism,
-not a second semantic system model; desired service semantics remain represented in NixOS + graph.</p>
+<p>systemd is the v0 service supervisor and transient-scope executor. It is a physical mechanism, not a
+second semantic system model; desired service semantics remain represented in NixOS + graph.</p>
 <hr />
 <h2 id="3-graph-publication">3. Graph publication<a class="headerlink" href="#3-graph-publication" title="Permanent link">&para;</a></h2>
 <p>OmnisOS adapters publish authoritative physical facts to the shared graph.</p>
@@ -401,7 +405,7 @@ enforcement response without requiring an LLM decision in the critical path.</p>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>IPC endpoints
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>lifetime/cancellation relationship
 </code></pre></div>
-<p>Linux implementation should compose existing primitives instead of inventing parallel isolation:</p>
+<p>The Linux implementation composes existing primitives instead of inventing parallel isolation:</p>
 <ul>
 <li>cgroup v2;</li>
 <li>namespaces;</li>
@@ -415,8 +419,9 @@ enforcement response without requiring an LLM decision in the critical path.</p>
 <p>Every Omnis installation has a stable Host graph identity.</p>
 <p>Remote hosts can participate through Manager placement. A host advertises authoritative physical
 capabilities and availability into the graph.</p>
-<p>The first implementation may use SSH/Tailscale or another bound transport, but transport identity is
-not host semantic identity.</p>
+<p>Native Omnis remote RPC uses QUIC with TLS 1.3 mutual host authentication. SSH remains an ordinary
+Manager binding and Tailscale may carry QUIC traffic, but neither transport identity is host semantic
+identity.</p>
 <p>Remote execution must preserve:</p>
 <ul>
 <li>activity/execution ID;</li>
@@ -486,6 +491,23 @@ than becoming invisible side configuration.</p>
 <li>own Control layout/presentation.</li>
 </ul>
 <p>A future custom kernel is only justified by measured limitations of Linux against Omnis requirements.</p>
+<hr />
+<h2 id="14-v0-process-and-persistence-binding">14. v0 process and persistence binding<a class="headerlink" href="#14-v0-process-and-persistence-binding" title="Permanent link">&para;</a></h2>
+<p><code>omnis-graphd</code>, <code>omnis-osd</code> and <code>omnis-managerd</code> are system services. <code>omnis-agentd</code> and
+<code>omnis-control</code> are per-user services/session processes. Agent and Control are never boot-critical.</p>
+<p>OmnisOS adds the <code>omnis.*</code> NixOS module family and two concrete configuration files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/etc/omnis/configuration.nix
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>/etc/omnis/managed.nix
+</code></pre></div>
+<p>The first imports the ordinary user NixOS configuration plus the second. OmnisManager edits only
+<code>managed.nix</code> through the forked Nix parser/AST. Candidate files live under
+<code>/var/lib/omnis/candidates/&lt;GenerationId&gt;/</code> until build/invariant checks succeed.</p>
+<p><code>omnis-osd</code> publishes exact Linux facts from systemd D-Bus, udev, rtnetlink, <code>/proc</code>, process eBPF
+tracepoints, watched-scope fanotify/inotify, logind and cgroup v2. Startup reconciliation precedes
+incremental event handling.</p>
+<p>On graph corruption or unrecoverable startup failure, OmnisOS enters <code>omnis-recovery.target</code> with a
+conventional TTY, Nix generation rollback and graph restore/rebuild tools. No model is required for
+boot, recovery or enforcement.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../GRAPH/">
@@ -536,6 +558,8 @@ than becoming invisible side configuration.</p>
           <li><a href="#12-required-implementation-interfaces">12. Required implementation interfaces</a>
           </li>
           <li><a href="#13-non-goals">13. Non-goals</a>
+          </li>
+          <li><a href="#14-v0-process-and-persistence-binding">14. v0 process and persistence binding</a>
           </li>
         </ul>
       </aside>

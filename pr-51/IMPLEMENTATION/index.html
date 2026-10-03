@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Omnis v0 Implementation Blueprint · Omnis</title>
+    <title>Implementation · Omnis</title>
     <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,13 +82,17 @@
       <a class="nav__link"
          href="..">Overview</a>
     </li>
-    <li class="nav__section">
+    <li class="nav__section nav__section--active">
       <span class="nav__label">Architecture</span>
       
 <ul class="nav nav--depth-1">
     <li class="nav__item">
       <a class="nav__link"
          href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">Implementation</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -949,6 +953,16 @@ without inventing architecture:</p>
 <p>This document supplies those answers for the v0 substrate. Future ADRs refine behavior; they must not
 silently create parallel identity, event, configuration, rendering or cognition systems.</p>
         </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="../architecture/">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">Overview</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../GRAPH/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Shared graph</span>
+          </a>
+        </nav>
 
         <footer class="footer">
           <span>Omnis</span>

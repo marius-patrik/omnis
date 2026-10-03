@@ -91,6 +91,10 @@
          href="../architecture/">Overview</a>
     </li>
     <li class="nav__item">
+      <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
       <a class="nav__link nav__link--active"
          href="./">Shared graph</a>
     </li>
@@ -307,8 +311,8 @@ causal past. The causal past belongs to OmnisAgent's worldline.</p>
 <li>UI position;</li>
 <li>execution runtime.</li>
 </ul>
-<p>The initial implementation should use UUIDv7 for allocated semantic identities because it is opaque,
-locally generatable, and roughly time ordered.</p>
+<p>Omnis v0 uses UUIDv7 for allocated semantic identities. IDs are encoded as 16 bytes on the wire and
+as canonical lowercase hyphenated UUID text only at human-facing boundaries.</p>
 <p>Immutable artifacts may additionally use content identity (<code>blake3:&lt;digest&gt;</code>), but content identity
 must not replace semantic identity for mutable concepts.</p>
 <h3 id="22-aliases">2.2 Aliases<a class="headerlink" href="#22-aliases" title="Permanent link">&para;</a></h3>
@@ -680,8 +684,8 @@ identity.</p>
 <a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>Host:h --physical.runs--&gt; Process:p
 <a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>Generation:g42 --system.active_on--&gt; Host:h
 </code></pre></div>
-<p>OmnisOS may retain implementation-specific caches, but graph identity must be the cross-system
-reference point.</p>
+<p>OmnisOS may retain rebuildable caches, but every cached object keeps its shared NodeId and graph
+identity remains the cross-system reference point.</p>
 <hr />
 <h2 id="19-hard-invariants">19. Hard invariants<a class="headerlink" href="#19-hard-invariants" title="Permanent link">&para;</a></h2>
 <ol>
@@ -697,11 +701,29 @@ reference point.</p>
 <li>Derived indexes are disposable.</li>
 <li>Every committed first-party graph mutation emits an Agent event.</li>
 </ol>
+<hr />
+<h2 id="20-v0-storage-and-delivery-binding">20. v0 storage and delivery binding<a class="headerlink" href="#20-v0-storage-and-delivery-binding" title="Permanent link">&para;</a></h2>
+<p>The concrete v0 graph implementation is <code>omnis-graphd</code> from OmnisOS.</p>
+<p>Canonical locations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>/var/lib/omnis/graph/graph.sqlite3
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>/var/lib/omnis/cas/blake3/
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>/run/omnis/graph.sock
+</code></pre></div>
+<p><code>graph.sqlite3</code> uses SQLite WAL, <code>synchronous=FULL</code>, one serialized writer task, independent reader
+connections, validity intervals for revision reads, and schema migrations owned by graphd.</p>
+<p>The graph database also contains the durable event outbox. A graph transaction commits graph
+mutations and its normalized event envelopes atomically. Non-graph first-party producers enqueue
+events through graphd before considering publication durable. OmnisAgent drains the outbox into its
+worldline and acknowledges EventId; delivery is at-least-once and deduplicated by EventId.</p>
+<p>Large payloads use the BLAKE3 CAS rather than SQLite/RPC blobs. The graph stores ArtifactId references
+plus media/protection/provenance metadata.</p>
+<p>The exact relational table families, transaction operations and query policy are frozen in
+<code>IMPLEMENTATION.md</code>. No alternative graph DB, broker or query language is introduced in v0.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../architecture/">
+          <a class="pager__link pager__link--prev" href="../IMPLEMENTATION/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">Overview</span>
+            <span class="pager__title">Implementation</span>
           </a>
           <a class="pager__link pager__link--next" href="../OMNIS_OS/">
             <span class="pager__label">Next</span>
@@ -767,6 +789,8 @@ reference point.</p>
           <li><a href="#18-os-relationship">18. OS relationship</a>
           </li>
           <li><a href="#19-hard-invariants">19. Hard invariants</a>
+          </li>
+          <li><a href="#20-v0-storage-and-delivery-binding">20. v0 storage and delivery binding</a>
           </li>
         </ul>
       </aside>
