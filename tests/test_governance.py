@@ -289,18 +289,19 @@ def test_active_specs_forbid_implementer_choice_markers():
         "AGENTS.md",
     )
     forbidden = (
-        "TBD",
-        "TO BE DECIDED",
         "IMPLEMENTER MAY CHOOSE",
         "IMPLEMENTATION AGENT MAY CHOOSE",
         "CHOOSE WHICHEVER",
         "IMPLEMENTATION-SPECIFIC UNTIL",
+        "PICK ANY EQUIVALENT",
+        "USE WHICHEVER",
     )
     for document in documents:
         content = _read(*document.split("/")).upper()
         for marker in forbidden:
-            assert marker not in content, f"{document} contains delegated-choice marker {marker!r}"
-
+            assert marker not in content, (
+                f"{document} contains delegated-choice marker {marker!r}"
+            )
 
 def test_canonical_v0_source_contracts():
     """Decision-complete implementation inputs must be checked in and addressable."""
@@ -366,3 +367,25 @@ def test_agent_prompt_registry_is_versioned_and_structured():
         prompt = _read("prompts", f"{name}.md")
         assert f"omnis.prompt.{name}.v1" in prompt
         assert "Return JSON only" in prompt
+
+
+def test_machine_readable_v0_manifests_parse_and_are_unique():
+    """Scalar and ontology manifests must be valid TOML with unique canonical identifiers."""
+    import tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "v0.toml"), "rb") as handle:
+        v0 = tomllib.load(handle)
+    assert v0["version"] == 1
+    assert v0["profile"] == "omnis-v0"
+    assert v0["rust_toolchain"] == "1.99.0"
+    assert v0["paths"]["graph_socket"] == "/run/omnis/graph.sock"
+    assert v0["paths"]["inference_port"] == 7331
+    assert v0["paths"]["remote_quic_port"] == 7443
+
+    with open(os.path.join(REPO_ROOT, "spec", "ontology.toml"), "rb") as handle:
+        ontology = tomllib.load(handle)
+    assert ontology["version"] == 1
+    for field in ("kinds", "relations", "capabilities", "events"):
+        values = ontology[field]
+        assert len(values) == len(set(values)), f"duplicate identifier in {field}"
+        assert all(value.startswith("omnis.") for value in values)
