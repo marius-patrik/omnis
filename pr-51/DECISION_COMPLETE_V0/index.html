@@ -1945,6 +1945,147 @@ updating the adapter compatibility fixture before it can claim full/hook/gateway
    <code>CHOOSE WHICHEVER</code>, or <code>IMPLEMENTATION-SPECIFIC UNTIL</code>.</li>
 </ol>
 <p>Exit 0 only if all checks pass; otherwise exit 9.</p>
+<hr />
+<h2 id="62-static-and-dynamic-identity-derivation">62. Static and dynamic identity derivation<a class="headerlink" href="#62-static-and-dynamic-identity-derivation" title="Permanent link">&para;</a></h2>
+<p>Dynamic semantic identities use UUIDv7.</p>
+<p>Registry-defined immutable concept nodes use deterministic UUIDv5 so all hosts refer to the same
+concept NodeId without prior synchronization.</p>
+<p>UUIDv5 algorithm:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>namespace = UUID namespace URL = 6ba7b811-9dad-11d1-80b4-00c04fd430c8
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>name = UTF-8 bytes of "urn:omnis:v0:" + canonical_identifier
+</code></pre></div>
+<p>Use this only for registry concepts that are materialized as nodes, including first-party Capability
+nodes. Example conceptual input:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>urn:omnis:v0:omnis.capability.model.embed
+</code></pre></div>
+<p>Kinds, relations, event type names and property keys remain canonical strings and do not need NodeIds
+unless explicitly materialized as graph resources.</p>
+<p>Dynamic objects—including hosts, processes, resources discovered from reality, bindings,
+executions, events, activities, workers, memories, workspaces and surfaces—use UUIDv7.</p>
+<h3 id="621-host-identity">62.1 Host identity<a class="headerlink" href="#621-host-identity" title="Permanent link">&para;</a></h3>
+<p>On the first successful OmnisOS activation:</p>
+<ol>
+<li>if <code>/var/lib/omnis/host-id</code> exists, parse exactly one canonical UUIDv7;</li>
+<li>otherwise generate one UUIDv7 using kernel CSPRNG;</li>
+<li>write temp file, fsync, rename atomically, fsync directory;</li>
+<li>owner root:root, mode 0444.</li>
+</ol>
+<p>Reinstall preserving <code>/var/lib/omnis</code> preserves HostId.
+Restoring a full machine clone to become a distinct machine requires <code>omnis system rekey-host</code>,
+which generates a new HostId and host key before network participation.</p>
+<h3 id="622-agent-identity">62.2 Agent identity<a class="headerlink" href="#622-agent-identity" title="Permanent link">&para;</a></h3>
+<p>Each enabled Omnis Agent user has:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>$XDG_STATE_HOME/omnis/agent/identity
+</code></pre></div>
+<p>containing one UUIDv7, mode 0600, created atomically on first Agent start. It survives Agent/provider
+replacement.</p>
+<h3 id="623-foreign-identity-reuse">62.3 Foreign identity reuse<a class="headerlink" href="#623-foreign-identity-reuse" title="Permanent link">&para;</a></h3>
+<p>For a foreign object with stable foreign identity, Manager exact alias namespace is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>foreign:&lt;lowercase-provider-or-protocol-name&gt;
+</code></pre></div>
+<p>alias bytes are the provider's canonical textual identifier.</p>
+<p>Rediscovery performs exact alias lookup first:
+- one match =&gt; reuse NodeId;
+- zero =&gt; allocate UUIDv7 and create alias;
+- multiple =&gt; Conflict and discovery stops for that object.</p>
+<p>No fuzzy match can merge semantic identities.</p>
+<hr />
+<h2 id="63-component-repository-bootstrap">63. Component repository bootstrap<a class="headerlink" href="#63-component-repository-bootstrap" title="Permanent link">&para;</a></h2>
+<p>The v0 implementation repositories are exactly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>marius-patrik/omnis
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>marius-patrik/omnis-os
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>marius-patrik/omnis-manager
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>marius-patrik/omnis-agent
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>marius-patrik/omnis-control
+</code></pre></div>
+<p>All are private during v0 development.</p>
+<h3 id="631-omnis-os">63.1 omnis-os<a class="headerlink" href="#631-omnis-os" title="Permanent link">&para;</a></h3>
+<p>Create by forking/importing the complete <code>NixOS/nixpkgs</code> history at the frozen baseline.</p>
+<p>Remotes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>origin   git@github.com:marius-patrik/omnis-os.git
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>upstream https://github.com/NixOS/nixpkgs.git
+</code></pre></div>
+<p>Default branch: <code>main</code>.
+<code>main</code> begins at the frozen nixpkgs commit with one Omnis bootstrap commit on top.</p>
+<p>Upstream MIT licensing remains intact. Omnis changes inside this fork are distributed under the same
+MIT license to avoid file-level license ambiguity.</p>
+<h3 id="632-omnis-manager">63.2 omnis-manager<a class="headerlink" href="#632-omnis-manager" title="Permanent link">&para;</a></h3>
+<p>Create from the complete <code>NixOS/nix</code> history at the frozen baseline.</p>
+<p>Remotes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>origin   git@github.com:marius-patrik/omnis-manager.git
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>upstream https://github.com/NixOS/nix.git
+</code></pre></div>
+<p>Default branch: <code>main</code>.</p>
+<p>Existing Nix LGPL-2.1-or-later licensing remains intact; Omnis derivative changes inside the fork use
+LGPL-2.1-or-later. The Rust managerd code in the same repository also uses LGPL-2.1-or-later so the
+repository has one clear redistribution regime.</p>
+<h3 id="633-omnis-agent-omnis-control-umbrella-omnis">63.3 omnis-agent / omnis-control / umbrella omnis<a class="headerlink" href="#633-omnis-agent-omnis-control-umbrella-omnis" title="Permanent link">&para;</a></h3>
+<p>Original Omnis code remains <strong>not licensed for third-party reuse</strong> in v0, matching the umbrella
+repository's existing <code>license.spdx = NONE</code> decision. No agent inserts an OSS license automatically.</p>
+<h3 id="634-branchrelease-policy">63.4 branch/release policy<a class="headerlink" href="#634-branchrelease-policy" title="Permanent link">&para;</a></h3>
+<p>Every component:
+- default branch <code>main</code>;
+- implementation only through PRs;
+- branch names <code>&lt;area&gt;/&lt;short-description&gt;</code>;
+- conventional commits under existing Omnis governance;
+- Cargo.lock/flake.lock committed;
+- tags use <code>v0.MINOR.PATCH</code>;
+- first integrated release is <code>v0.1.0</code>.</p>
+<p>The umbrella <code>omnis</code> release tag is the system release identity. Its flake.lock pins exact component
+commits plus exact Nix/nixpkgs baselines. Component tags are convenience markers; the umbrella lock
+is authoritative for a complete OmnisOS release.</p>
+<p>No component independently selects an incompatible protocol major.</p>
+<hr />
+<h2 id="64-first-boot-and-first-login">64. First boot and first login<a class="headerlink" href="#64-first-boot-and-first-login" title="Permanent link">&para;</a></h2>
+<h3 id="641-first-boot">64.1 first boot<a class="headerlink" href="#641-first-boot" title="Permanent link">&para;</a></h3>
+<p>Exact sequence after NixOS activation:</p>
+<ol>
+<li>initialize HostId if absent;</li>
+<li>initialize host Ed25519 identity credential if absent;</li>
+<li>create/upgrade graph schema;</li>
+<li>start graphd and publish Host node;</li>
+<li>start nix-daemon and Omnis Nix observer endpoint;</li>
+<li>start osd;</li>
+<li>perform full OS reconciliation;</li>
+<li>start managerd;</li>
+<li>materialize canonical Capability nodes from <code>spec/ontology.toml</code> using §62 UUIDv5;</li>
+<li>run deterministic Manager discovery for enabled built-in providers;</li>
+<li>enable login/session target.</li>
+</ol>
+<p>No Agent/model is called during this sequence.</p>
+<h3 id="642-first-login-for-an-enabled-user">64.2 first login for an enabled user<a class="headerlink" href="#642-first-login-for-an-enabled-user" title="Permanent link">&para;</a></h3>
+<ol>
+<li>initialize Agent UUIDv7 identity if absent;</li>
+<li>initialize/upgrade worldline/index DB;</li>
+<li>start Agent outbox drain;</li>
+<li>create default Workspace if none exists;</li>
+<li>start Control compositor;</li>
+<li>materialize §57 default workspace;</li>
+<li>focus primary terminal/input view;</li>
+<li>publish user-session/control lifecycle events.</li>
+</ol>
+<p>Agent may still be catching up on queued events while Control becomes usable. Control does not wait
+for Agent catch-up.</p>
+<hr />
+<h2 id="65-system-release-provenance">65. System release provenance<a class="headerlink" href="#65-system-release-provenance" title="Permanent link">&para;</a></h2>
+<p>Every Omnis system closure embeds a generated read-only
+<code>/etc/omnis/release.json</code> containing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="p">{</span>
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.MINOR.PATCH"</span><span class="p">,</span>
+<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a><span class="w">  </span><span class="nt">"umbrella_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-4" name="__codelineno-73-4" href="#__codelineno-73-4"></a><span class="w">  </span><span class="nt">"omnis_os_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-5" name="__codelineno-73-5" href="#__codelineno-73-5"></a><span class="w">  </span><span class="nt">"omnis_manager_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-6" name="__codelineno-73-6" href="#__codelineno-73-6"></a><span class="w">  </span><span class="nt">"omnis_agent_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-7" name="__codelineno-73-7" href="#__codelineno-73-7"></a><span class="w">  </span><span class="nt">"omnis_control_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-8" name="__codelineno-73-8" href="#__codelineno-73-8"></a><span class="w">  </span><span class="nt">"nixpkgs_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-9" name="__codelineno-73-9" href="#__codelineno-73-9"></a><span class="w">  </span><span class="nt">"nix_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-73-10" name="__codelineno-73-10" href="#__codelineno-73-10"></a><span class="w">  </span><span class="nt">"protocol_major"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-73-11" name="__codelineno-73-11" href="#__codelineno-73-11"></a><span class="w">  </span><span class="nt">"protocol_minor"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-73-12" name="__codelineno-73-12" href="#__codelineno-73-12"></a><span class="w">  </span><span class="nt">"spec_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-73-13" name="__codelineno-73-13" href="#__codelineno-73-13"></a><span class="p">}</span>
+</code></pre></div>
+<p>Keys are emitted in the exact order above, UTF-8, LF newline, two-space JSON indentation.
+The file is generated by Nix from pinned inputs; no runtime mutation is permitted.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../IMPLEMENTATION/">
@@ -2166,6 +2307,29 @@ updating the adapter compatibility fixture before it can claim full/hook/gateway
           <li><a href="#60-external-harness-versionpackage-policy">60. External harness version/package policy</a>
           </li>
           <li><a href="#61-omnis-spec-check">61. omnis spec check</a>
+          </li>
+          <li><a href="#62-static-and-dynamic-identity-derivation">62. Static and dynamic identity derivation</a>
+            <ul>
+              <li><a href="#621-host-identity">62.1 Host identity</a></li>
+              <li><a href="#622-agent-identity">62.2 Agent identity</a></li>
+              <li><a href="#623-foreign-identity-reuse">62.3 Foreign identity reuse</a></li>
+            </ul>
+          </li>
+          <li><a href="#63-component-repository-bootstrap">63. Component repository bootstrap</a>
+            <ul>
+              <li><a href="#631-omnis-os">63.1 omnis-os</a></li>
+              <li><a href="#632-omnis-manager">63.2 omnis-manager</a></li>
+              <li><a href="#633-omnis-agent-omnis-control-umbrella-omnis">63.3 omnis-agent / omnis-control / umbrella omnis</a></li>
+              <li><a href="#634-branchrelease-policy">63.4 branch/release policy</a></li>
+            </ul>
+          </li>
+          <li><a href="#64-first-boot-and-first-login">64. First boot and first login</a>
+            <ul>
+              <li><a href="#641-first-boot">64.1 first boot</a></li>
+              <li><a href="#642-first-login-for-an-enabled-user">64.2 first login for an enabled user</a></li>
+            </ul>
+          </li>
+          <li><a href="#65-system-release-provenance">65. System release provenance</a>
           </li>
         </ul>
       </aside>
