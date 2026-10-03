@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0014 — Guest environments are host-level siblings of the core · Omnis</title>
+    <title>ADR-0025 — Make Omnis v0 decision-complete · Omnis</title>
     <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -179,8 +179,8 @@
          href="../0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0014 — Guest environments are host-level siblings of the core</a>
+      <a class="nav__link"
+         href="../0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -223,8 +223,8 @@
          href="../0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0025 — Make Omnis v0 decision-complete</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -277,107 +277,59 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0014-guest-environments-are-host-level-siblings-of-the-core">ADR-0014 — Guest environments are host-level siblings of the core<a class="headerlink" href="#adr-0014-guest-environments-are-host-level-siblings-of-the-core" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0025-make-omnis-v0-decision-complete">ADR-0025 — Make Omnis v0 decision-complete<a class="headerlink" href="#adr-0025-make-omnis-v0-decision-complete" title="Permanent link">&para;</a></h1>
 <ul>
-<li><strong>Status</strong>: Superseded by ADR-0023 · <strong>Date</strong>: 2026-09-06</li>
-<li><strong>Depends on</strong>: ADR-0011, ADR-0012, ADR-0013 · <strong>Constrains</strong>: D4</li>
+<li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-10-03</li>
+<li><strong>Depends on</strong>: ADR-0023, ADR-0024</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>A power user's tools are not all on one distribution, and some are not on Linux at all. Omnis should
-let a user run other operating systems beside the core — another distribution's userland, a full
-guest, and ideally Windows applications.</p>
+<p>The graph-native architecture and v0 substrate were frozen, but an implementation worker could still
+make consequential choices inside phrases such as ranking policy, context budget, graph layout,
+retry behavior, queue sizing, recovery cadence, dependency bootstrap, remote graph behavior and
+security defaults.</p>
+<p>That discretion is incompatible with the goal that multiple agents implement one system rather than
+independently designing variants of it.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>An <strong>environment</strong> is a declared OS userland or machine running beside the core, presented through
-one contract regardless of what is inside it.</p>
-<table>
-<thead>
-<tr>
-<th>Kind</th>
-<th>Mechanism</th>
-<th>Cost</th>
-<th>For</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>container</code></td>
-<td>podman, systemd-nspawn, distrobox-style integration</td>
-<td>Near zero; shares the kernel</td>
-<td>Arch, Debian, Fedora, Ubuntu userlands</td>
-</tr>
-<tr>
-<td><code>vm</code></td>
-<td>libvirt/QEMU, or the platform hypervisor</td>
-<td>Heavy; own kernel</td>
-<td>Windows, or a different kernel</td>
-</tr>
-<tr>
-<td><code>compat</code></td>
-<td>Wine / Proton</td>
-<td>Light; no guest OS at all</td>
-<td>Windows <em>applications</em>, without Windows</td>
-</tr>
-</tbody>
-</table>
-<p>Every mechanism is bound, never built (ADR-0011). Environments are declared in the configuration
-(ADR-0012) and are subsystems in the "next to" layer (ADR-0013), fronted by an adapter that speaks
-the bus.</p>
-<h3 id="placement-is-forced">Placement is forced<a class="headerlink" href="#placement-is-forced" title="Permanent link">&para;</a></h3>
-<p><strong>Environments are siblings of the core at host level. They are never nested inside it.</strong></p>
-<p>This is not a preference. Where the core itself is hosted in a VM, running a guest VM <em>inside</em> it
-means nested virtualisation — commonly unavailable, and unusably slow where it is available. Siblings
-avoid the problem entirely and keep one placement rule on every platform.</p>
-<h3 id="windows-in-three-tiers">Windows in three tiers<a class="headerlink" href="#windows-in-three-tiers" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Wine/Proton</strong> — no guest, per-application compatibility, best experience where it works.</li>
-<li><strong>VM with RDP RemoteApp</strong> — a real Windows guest, but individual applications presented as
-   ordinary windows rather than a desktop in a box.</li>
-<li><strong>Full desktop session</strong> — the fallback when neither of the above works.</li>
-</ol>
-<p>Two limits stated rather than discovered: <strong>we cannot ship Windows</strong> — the user supplies a licence
-and an image — and <strong>Wine compatibility is per-application and never a blanket guarantee</strong>.
-"Runs Windows apps" is a promise that cannot be kept; a three-tier path with honest fallbacks can.</p>
-<h3 id="guest-windows-add-no-primitive">Guest windows add no primitive<a class="headerlink" href="#guest-windows-add-no-primitive" title="Permanent link">&para;</a></h3>
-<p>A guest application window is a <strong>pixel source composited into the scene tree</strong> — the same shape as
-browser raster mode. It rides the existing <code>texture</code> primitive and therefore passes the test
-<code>ARCHITECTURE.md</code> §4.2 sets: adding a source must not add a primitive class.</p>
-<p>In the TUI backend a guest GUI window degrades to its declared fallback (§4.7). A Windows
-application cannot render in a terminal, and the architecture says so rather than implying parity it
-cannot hold.</p>
+<p>Adopt <code>docs/DECISION_COMPLETE_V0.md</code> as normative for all remaining v0 algorithms, constants,
+defaults, ordering, fallback behavior and acceptance gates.</p>
+<p>Implementation agents may choose only semantically invisible code expression. If the specification
+does not answer a behaviorally observable choice, that is a specification defect rather than an
+invitation to exercise judgment.</p>
+<p>The initial upstream baselines are frozen to:</p>
+<ul>
+<li>nixpkgs <code>be5021eb406d32e8df6462a1c0986a70bdf03e02</code>;</li>
+<li>Nix <code>2ab29c63d3273d4e2b4d1346b1aefede9b5af350</code>;</li>
+<li>Rust 1.99.0;</li>
+<li>crates.io-index <code>cddab5f1c359539147959163142ff95a24995f6a</code>.</li>
+</ul>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>VMs only, uniformly.</strong> Conceptually simple and needlessly heavy: most of the value is another
-  Linux userland, which a container delivers at near-zero cost.</li>
-<li><strong>Containers only.</strong> Cannot run Windows or a different kernel, which is a large part of the point.</li>
-<li><strong>Nesting environments inside the core container.</strong> Tidy on Linux, broken everywhere else, and it
-  would make the topology differ per platform.</li>
-<li><strong>Writing our own guest-window integration.</strong> RDP RemoteApp, Wayland socket sharing, and Wine's
-  own window handling already exist. Ours would be worse and permanent.</li>
-<li><strong>Shipping a curated Windows image.</strong> Removes the licensing problem by committing a licensing
-  violation.</li>
+<li><strong>Let implementers choose conventional defaults.</strong> Different workers would produce incompatible
+  behavior and hidden architecture.</li>
+<li><strong>Specify only interfaces and leave algorithms replaceable.</strong> That is appropriate after v0 exists,
+  but it does not produce one deterministic initial system.</li>
+<li><strong>Encode every choice only in tests.</strong> Tests are enforcement; documentation remains the human and
+  agent implementation authority.</li>
+<li><strong>Freeze only library versions.</strong> Behavioral choices such as retrieval, placement and layout remain
+  more consequential than patch versions.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The environment abstraction, its declaration schema, its lifecycle contract, and the
-  window-to-scene-tree binding are ours. The mechanisms are not. That is a small owned surface for a
-  large capability.</li>
-<li>Environments are a substantial epic in their own right, and the three Windows tiers have very
-  different costs — tier 1 is a dependency, tier 2 is a subsystem, tier 3 is nearly free once tier 2
-  exists.</li>
-<li><strong>D4 is constrained but not resolved.</strong> The placement rule holds on every platform; whether
-  macOS and Windows are v1 targets or later ports remains open, and this record does not decide it.</li>
-<li>Guest filesystem and clipboard integration are where this design will actually be judged, and
-  neither is specified here.</li>
+<li>v0 implementation becomes highly prescriptive.</li>
+<li>Some constants will later prove suboptimal; changing them is an explicit measured change rather than
+  invisible worker discretion.</li>
+<li>Parallel coding agents can implement separate components against identical assumptions.</li>
+<li>Specification defects block an item instead of silently creating divergent architecture.</li>
 </ul>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0013-subsystems-run-beside-the-core-never-inside-it/">
+          <a class="pager__link pager__link--prev" href="../0024-freeze-v0-implementation-substrate/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0013 — Subsystems run beside the core, never inside it</span>
+            <span class="pager__title">ADR-0024 — Freeze the Omnis v0 implementation substrate</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0015-remote-access-is-a-web-surface-over-tailscale/">
+          <a class="pager__link pager__link--next" href="../process/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0015 — Remote access is a web surface over Tailscale</span>
+            <span class="pager__title">Process</span>
           </a>
         </nav>
 
@@ -392,11 +344,6 @@ cannot hold.</p>
           <li><a href="#context">Context</a>
           </li>
           <li><a href="#decision">Decision</a>
-            <ul>
-              <li><a href="#placement-is-forced">Placement is forced</a></li>
-              <li><a href="#windows-in-three-tiers">Windows in three tiers</a></li>
-              <li><a href="#guest-windows-add-no-primitive">Guest windows add no primitive</a></li>
-            </ul>
           </li>
           <li><a href="#alternatives-rejected">Alternatives rejected</a>
           </li>
