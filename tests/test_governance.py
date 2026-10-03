@@ -302,3 +302,69 @@ def test_active_specs_forbid_implementer_choice_markers():
         content = _read(*document.split("/")).upper()
         for marker in forbidden:
             assert marker not in content, f"{document} contains delegated-choice marker {marker!r}"
+
+
+def test_canonical_v0_source_contracts():
+    """Decision-complete implementation inputs must be checked in and addressable."""
+    required = (
+        "docs/ONTOLOGY_V0.md",
+        "docs/NIX_OPTIONS_V0.md",
+        "schema/graph.sql",
+        "schema/worldline.sql",
+        "schema/index.sql",
+        "prompts/judgement.md",
+        "prompts/intention.md",
+        "prompts/memory_extract.md",
+        "prompts/reason.md",
+        "prompts/code_worker.md",
+        "prompts/candidate_evaluate.md",
+    )
+    for rel in required:
+        assert os.path.isfile(os.path.join(REPO_ROOT, rel)), f"missing canonical v0 source {rel}"
+
+    ontology = _read("docs", "ONTOLOGY_V0.md")
+    for token in (
+        "omnis.capability.ingest",
+        "omnis.event.graph.committed",
+        "Execution state machine",
+        "Worker state machine",
+        "Memory ontology",
+    ):
+        assert token in ontology
+
+    nix_options = _read("docs", "NIX_OPTIONS_V0.md")
+    for token in (
+        "omnis.graph.writerQueue",
+        "omnis.manager.inferenceGateway.port",
+        "omnis.agent.users",
+        "omnis.control.users",
+        "omnis.security.defaultWorkerNetwork",
+    ):
+        assert token in nix_options
+
+
+def test_sql_v1_schemas_parse_with_sqlite():
+    """The canonical SQLite v1 schemas must execute on the runtime SQLite parser."""
+    import sqlite3
+
+    for name in ("graph", "worldline", "index"):
+        sql = _read("schema", f"{name}.sql")
+        db = sqlite3.connect(":memory:")
+        try:
+            db.executescript(sql)
+        finally:
+            db.close()
+
+
+def test_agent_prompt_registry_is_versioned_and_structured():
+    """First-party generative calls must use checked-in prompts with structured outputs."""
+    for name in (
+        "judgement",
+        "intention",
+        "memory_extract",
+        "reason",
+        "candidate_evaluate",
+    ):
+        prompt = _read("prompts", f"{name}.md")
+        assert f"omnis.prompt.{name}.v1" in prompt
+        assert "Return JSON only" in prompt

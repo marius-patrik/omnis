@@ -38,13 +38,13 @@
         systemd.enable = true;
         http.enable = true;
         mcp.enable = true;
-        models.openaiCompatible.enable = true;
-        models.anthropic.enable = true;
-        models.llamaCpp.enable = true;
-        models.onnx.enable = true;
-        harnesses.claude.enable = true;
-        harnesses.codex.enable = true;
-        harnesses.opencode.enable = true;
+        models.openaiCompatible.enable = false;
+        models.anthropic.enable = false;
+        models.llamaCpp.enable = false;
+        models.onnx.enable = false;
+        harnesses.claude.enable = false;
+        harnesses.codex.enable = false;
+        harnesses.opencode.enable = false;
       };
     };
 

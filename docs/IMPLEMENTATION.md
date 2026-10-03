@@ -2,7 +2,8 @@
 
 **Status: NORMATIVE SUPPORTING SPECIFICATION.** `ARCHITECTURE.md` defines semantic architecture;
 this document freezes the first implementation profile. `DECISION_COMPLETE_V0.md` freezes all v0
-algorithms, constants, defaults and fallback behavior. Implementations may replace a mechanism later
+algorithms, constants, defaults and fallback behavior. `ONTOLOGY_V0.md` freezes semantic names/state
+machines and `NIX_OPTIONS_V0.md` freezes the public NixOS option surface. Implementations may replace a mechanism later
 only through an explicit architecture/ADR change.
 
 ## 1. Implementation profile
@@ -930,3 +931,20 @@ Observable v0 behavior that is not determined by this document, `DECISION_COMPLE
 owning subsystem spec, protocol schema or acceptance tests is a `SpecificationDefect`. Coding agents
 must not choose a library, algorithm, default, fallback, timeout, queue size, persistence behavior,
 layout, routing rule or security policy on their own.
+
+
+## 22. Canonical generated/runtime inputs
+
+Database creation/migration v1 begins from the checked-in SQL sources:
+
+```text
+schema/graph.sql
+schema/worldline.sql
+schema/index.sql
+```
+
+Cross-process wire code is generated from `protocol/*.capnp`. Agent generative calls use
+`prompts/*.md`. First-party graph identifiers come from `ONTOLOGY_V0.md`. NixOS modules implement
+`NIX_OPTIONS_V0.md` exactly.
+
+These files eliminate local schema/prompt/ontology/config design inside component repos.

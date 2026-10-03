@@ -15,6 +15,10 @@ native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.
 
 JSON is allowed only as a diagnostic/export representation; it is not a second RPC contract.
 
+Every RPC returns a `C.RpcStatus`. Transport failures use Cap'n Proto transport exceptions; all
+expected/domain failures use `RpcStatus.error` with `RpcError`. Callers never infer absence from zero
+UUIDs or empty strings when a `Maybe*` union exists.
+
 Every request/event carries:
 
 ```text
@@ -26,7 +30,9 @@ causal_parents[] where applicable
 graph_revision where applicable
 ```
 
-Large payloads are referenced as artifacts rather than copied through every message.
+Large payloads are referenced as artifacts rather than copied through every message. Artifact bytes
+use `ArtifactUpload`/`ArtifactDownload`; each chunk is at most 1 MiB. The old whole-payload put/get
+shape is not a v0 API.
 
 ---
 
@@ -61,7 +67,8 @@ event_payload_ref
 
 ## 3. Event API
 
-Components durably enqueue first-party events through the graph substrate:
+Components durably enqueue first-party events through the graph substrate. OmnisAgent has no public
+`submitEvent` bypass; graphd outbox is the sole first-party durable event ingress:
 
 ```text
 outbox.enqueue(EventEnvelope)
@@ -365,3 +372,13 @@ negotiate optional operations without guessing.
 Graph subscriptions resume from GraphRevision. Event delivery resumes from EventId/ingest sequence.
 Streaming APIs must expose backpressure and explicit cancellation; unbounded producer queues are
 forbidden.
+
+
+## 15. Canonical semantic registries
+
+Wire fields carrying kind/relation/event/capability names must use the first-party identifiers in
+`ONTOLOGY_V0.md`. Unknown third-party names are transported opaquely; a component must not invent a
+new `omnis.*` identifier during implementation.
+
+Domain state strings for Execution, Worker, Activity, Generation and Memory use the exact state
+machines from `ONTOLOGY_V0.md`.

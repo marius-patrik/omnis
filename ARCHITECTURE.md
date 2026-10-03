@@ -4,7 +4,10 @@
 expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
 [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and ADR-0024. All remaining v0 algorithms,
 constants, defaults and fallback behavior are frozen by
-[`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025.
+[`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025. Canonical first-party
+kind/relation/capability/event names and lifecycle states are frozen by
+[`docs/ONTOLOGY_V0.md`](docs/ONTOLOGY_V0.md); public NixOS configuration is frozen by
+[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md).
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.
@@ -955,3 +958,21 @@ For v0, implementation workers do not choose observable behavior. If `ARCHITECTU
 `docs/IMPLEMENTATION.md`, `docs/DECISION_COMPLETE_V0.md`, subsystem specs, protocol schemas and
 tests do not determine a behavior, the item is blocked as a specification defect. "Reasonable
 default", "equivalent library", and "temporary fallback" are not implementation authority.
+
+
+### 18.2 Canonical implementation source files
+
+The following are normative v0 implementation inputs, not examples:
+
+```text
+schema/graph.sql
+schema/worldline.sql
+schema/index.sql
+protocol/*.capnp
+prompts/*.md
+docs/ONTOLOGY_V0.md
+docs/NIX_OPTIONS_V0.md
+```
+
+An implementation worker copies/uses these contracts; it does not redesign their schema, prompt,
+identifier or option surfaces.

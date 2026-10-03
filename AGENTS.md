@@ -405,3 +405,16 @@ policy without updating the normative specification/ADR first.
 
 Private helper decomposition, variable names and semantics-preserving refactors remain ordinary
 implementation choices.
+
+
+### A24. Canonical source files
+
+Do not recreate these contracts inside component repositories:
+
+- database DDL: `schema/*.sql`;
+- cross-component wire schemas: `protocol/*.capnp`;
+- Agent prompts: `prompts/*.md`;
+- first-party ontology/event/state names: `docs/ONTOLOGY_V0.md`;
+- NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`.
+
+Component builds pin the umbrella revision and generate/consume these sources.
