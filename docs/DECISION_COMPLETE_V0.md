@@ -2228,3 +2228,208 @@ It validates:
    `CHOOSE WHICHEVER`, or `IMPLEMENTATION-SPECIFIC UNTIL`.
 
 Exit 0 only if all checks pass; otherwise exit 9.
+
+
+---
+
+## 62. Static and dynamic identity derivation
+
+Dynamic semantic identities use UUIDv7.
+
+Registry-defined immutable concept nodes use deterministic UUIDv5 so all hosts refer to the same
+concept NodeId without prior synchronization.
+
+UUIDv5 algorithm:
+
+```text
+namespace = UUID namespace URL = 6ba7b811-9dad-11d1-80b4-00c04fd430c8
+name = UTF-8 bytes of "urn:omnis:v0:" + canonical_identifier
+```
+
+Use this only for registry concepts that are materialized as nodes, including first-party Capability
+nodes. Example conceptual input:
+
+```text
+urn:omnis:v0:omnis.capability.model.embed
+```
+
+Kinds, relations, event type names and property keys remain canonical strings and do not need NodeIds
+unless explicitly materialized as graph resources.
+
+Dynamic objects—including hosts, processes, resources discovered from reality, bindings,
+executions, events, activities, workers, memories, workspaces and surfaces—use UUIDv7.
+
+### 62.1 Host identity
+
+On the first successful OmnisOS activation:
+
+1. if `/var/lib/omnis/host-id` exists, parse exactly one canonical UUIDv7;
+2. otherwise generate one UUIDv7 using kernel CSPRNG;
+3. write temp file, fsync, rename atomically, fsync directory;
+4. owner root:root, mode 0444.
+
+Reinstall preserving `/var/lib/omnis` preserves HostId.
+Restoring a full machine clone to become a distinct machine requires `omnis system rekey-host`,
+which generates a new HostId and host key before network participation.
+
+### 62.2 Agent identity
+
+Each enabled Omnis Agent user has:
+
+```text
+$XDG_STATE_HOME/omnis/agent/identity
+```
+
+containing one UUIDv7, mode 0600, created atomically on first Agent start. It survives Agent/provider
+replacement.
+
+### 62.3 Foreign identity reuse
+
+For a foreign object with stable foreign identity, Manager exact alias namespace is:
+
+```text
+foreign:<lowercase-provider-or-protocol-name>
+```
+
+alias bytes are the provider's canonical textual identifier.
+
+Rediscovery performs exact alias lookup first:
+- one match => reuse NodeId;
+- zero => allocate UUIDv7 and create alias;
+- multiple => Conflict and discovery stops for that object.
+
+No fuzzy match can merge semantic identities.
+
+---
+
+## 63. Component repository bootstrap
+
+The v0 implementation repositories are exactly:
+
+```text
+marius-patrik/omnis
+marius-patrik/omnis-os
+marius-patrik/omnis-manager
+marius-patrik/omnis-agent
+marius-patrik/omnis-control
+```
+
+All are private during v0 development.
+
+### 63.1 omnis-os
+
+Create by forking/importing the complete `NixOS/nixpkgs` history at the frozen baseline.
+
+Remotes:
+
+```text
+origin   git@github.com:marius-patrik/omnis-os.git
+upstream https://github.com/NixOS/nixpkgs.git
+```
+
+Default branch: `main`.
+`main` begins at the frozen nixpkgs commit with one Omnis bootstrap commit on top.
+
+Upstream MIT licensing remains intact. Omnis changes inside this fork are distributed under the same
+MIT license to avoid file-level license ambiguity.
+
+### 63.2 omnis-manager
+
+Create from the complete `NixOS/nix` history at the frozen baseline.
+
+Remotes:
+
+```text
+origin   git@github.com:marius-patrik/omnis-manager.git
+upstream https://github.com/NixOS/nix.git
+```
+
+Default branch: `main`.
+
+Existing Nix LGPL-2.1-or-later licensing remains intact; Omnis derivative changes inside the fork use
+LGPL-2.1-or-later. The Rust managerd code in the same repository also uses LGPL-2.1-or-later so the
+repository has one clear redistribution regime.
+
+### 63.3 omnis-agent / omnis-control / umbrella omnis
+
+Original Omnis code remains **not licensed for third-party reuse** in v0, matching the umbrella
+repository's existing `license.spdx = NONE` decision. No agent inserts an OSS license automatically.
+
+### 63.4 branch/release policy
+
+Every component:
+- default branch `main`;
+- implementation only through PRs;
+- branch names `<area>/<short-description>`;
+- conventional commits under existing Omnis governance;
+- Cargo.lock/flake.lock committed;
+- tags use `v0.MINOR.PATCH`;
+- first integrated release is `v0.1.0`.
+
+The umbrella `omnis` release tag is the system release identity. Its flake.lock pins exact component
+commits plus exact Nix/nixpkgs baselines. Component tags are convenience markers; the umbrella lock
+is authoritative for a complete OmnisOS release.
+
+No component independently selects an incompatible protocol major.
+
+---
+
+## 64. First boot and first login
+
+### 64.1 first boot
+
+Exact sequence after NixOS activation:
+
+1. initialize HostId if absent;
+2. initialize host Ed25519 identity credential if absent;
+3. create/upgrade graph schema;
+4. start graphd and publish Host node;
+5. start nix-daemon and Omnis Nix observer endpoint;
+6. start osd;
+7. perform full OS reconciliation;
+8. start managerd;
+9. materialize canonical Capability nodes from `spec/ontology.toml` using §62 UUIDv5;
+10. run deterministic Manager discovery for enabled built-in providers;
+11. enable login/session target.
+
+No Agent/model is called during this sequence.
+
+### 64.2 first login for an enabled user
+
+1. initialize Agent UUIDv7 identity if absent;
+2. initialize/upgrade worldline/index DB;
+3. start Agent outbox drain;
+4. create default Workspace if none exists;
+5. start Control compositor;
+6. materialize §57 default workspace;
+7. focus primary terminal/input view;
+8. publish user-session/control lifecycle events.
+
+Agent may still be catching up on queued events while Control becomes usable. Control does not wait
+for Agent catch-up.
+
+---
+
+## 65. System release provenance
+
+Every Omnis system closure embeds a generated read-only
+`/etc/omnis/release.json` containing:
+
+```json
+{
+  "version": "0.MINOR.PATCH",
+  "umbrella_commit": "<40 hex>",
+  "omnis_os_commit": "<40 hex>",
+  "omnis_manager_commit": "<40 hex>",
+  "omnis_agent_commit": "<40 hex>",
+  "omnis_control_commit": "<40 hex>",
+  "nixpkgs_commit": "<40 hex>",
+  "nix_commit": "<40 hex>",
+  "protocol_major": 1,
+  "protocol_minor": 0,
+  "spec_version": 1
+}
+```
+
+Keys are emitted in the exact order above, UTF-8, LF newline, two-space JSON indentation.
+The file is generated by Nix from pinned inputs; no runtime mutation is permitted.

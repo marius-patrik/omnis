@@ -274,3 +274,9 @@ minor = 0
 event_schema_major = 1
 event_schema_minor = 0
 artifact_chunk_bytes = 1048576
+
+
+[identity]
+static_namespace_uuid = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
+static_name_prefix = "urn:omnis:v0:"
+host_id_path = "/var/lib/omnis/host-id"
