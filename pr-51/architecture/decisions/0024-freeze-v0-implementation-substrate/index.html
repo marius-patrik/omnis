@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0013 — Subsystems run beside the core, never inside it · Omnis</title>
+    <title>ADR-0024 — Freeze the Omnis v0 implementation substrate · Omnis</title>
     <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -171,8 +171,8 @@
          href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0013 — Subsystems run beside the core, never inside it</a>
+      <a class="nav__link"
+         href="../0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -215,8 +215,8 @@
          href="../0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -269,90 +269,73 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0013-subsystems-run-beside-the-core-never-inside-it">ADR-0013 — Subsystems run beside the core, never inside it<a class="headerlink" href="#adr-0013-subsystems-run-beside-the-core-never-inside-it" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0024-freeze-the-omnis-v0-implementation-substrate">ADR-0024 — Freeze the Omnis v0 implementation substrate<a class="headerlink" href="#adr-0024-freeze-the-omnis-v0-implementation-substrate" title="Permanent link">&para;</a></h1>
 <ul>
-<li><strong>Status</strong>: Superseded by ADR-0023 · <strong>Date</strong>: 2026-09-06</li>
-<li><strong>Supersedes</strong>: the in-process subsystem model in <code>ARCHITECTURE.md</code> §2.2</li>
-<li><strong>Depends on</strong>: ADR-0011, ADR-0012</li>
+<li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-10-03</li>
+<li><strong>Depends on</strong>: ADR-0023</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p><code>ARCHITECTURE.md</code> §2.2 has <code>omnisd</code> initialising subsystems in-process from a <code>features</code> block, and
-states that "every subsystem must be independently omittable" as a rule contributors must honour.</p>
-<p>Rules honoured by discipline erode. With seventeen subsystems in one address space, the first
-deadline produces a direct call between two of them, and the property is quietly gone with nothing
-failing to signal it.</p>
+<p>ADR-0023 reset Omnis around OmnisOS, OmnisManager, OmnisAgent, OmnisControl, one shared graph and one
+Agent worldline. The architecture was semantically complete but still left foundational implementation
+choices open: database, protocol, IDs, process topology, renderer stack, event delivery, Nix patch
+boundary and first-party runtime language.</p>
+<p>Leaving those choices to independent implementation workers would recreate architecture by accident.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>Four layers. Nothing runs inside <code>omnisd</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SURFACES      gui · tui · cli · web · external harnesses
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                              ▲
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>NEXT TO       vcs · pty · lsp · dap · browser · cas · tasks · exthost · agent · environments
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>              supervised peers — separate processes, the bus is the only ABI
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                              ▲
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>CORE          omnisd — bus router, registry, capability broker, convergence and generations
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                              ▲
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>BELOW         host OS · container runtime · Nix store · systemd · Tailscale · OS keychain
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>              bound, never owned
-</code></pre></div>
-<ul>
-<li><strong>Below</strong> is infrastructure that pre-exists and the core binds (ADR-0011). The core never
-  reimplements it and never assumes exclusive ownership of it.</li>
-<li><strong>Next to</strong> are peers the core supervises but does not contain. Each is a separate process with
-  only the Substrate Bus between it and everything else.</li>
-<li><strong>The core is small</strong>: bus routing, the subsystem registry, capability brokering, and convergence.</li>
-</ul>
-<p><strong>Supervision, restart policy, resource limits, ordering, and socket activation are systemd's</strong>, not
-ours (ADR-0011). Socket activation matters specifically: a subsystem starts on its first bus message,
-which answers both the memory cost of many processes and the cold-start cost of starting them.</p>
-<p><strong>Subsystems are declared, not compiled in.</strong> Enabling one is an option in the declaration
-(ADR-0012), which replaces the <code>features</code> block and the conditional-initialisation code behind it.</p>
-<p><strong>Disabling one removes it completely — including its system integration.</strong> A subsystem is a declared
-unit together with its closure, so removing it from the declaration removes the processes, the
-packages, the installed files, <em>and</em> everything it contributed to the rest of the system: commands,
-keybindings, menu entries, file associations, protocol handlers, shell completions, credential
-helpers, settings surfaces. A user who does not want Git removes the Git backend and nothing of it
-remains anywhere. "Disabled" and "not installed" stop being different states.</p>
-<p><strong>This forces a constraint on subsystems.</strong> Integration points are <strong>declared and brokered by the
-core registry</strong>, never registered imperatively by the subsystem itself. A subsystem that could reach
-out and install a shim, a menu item, or a <code>PATH</code> entry on its own would be a subsystem whose removal
-could never be complete. Declaring integration is therefore not bureaucracy — it is the only way the
-guarantee above can hold.</p>
+<p>Freeze the v0 implementation profile defined in <code>docs/IMPLEMENTATION.md</code>.</p>
+<p>The mandatory substrate is Rust 2024/Tokio for new first-party services; narrow C++ patches inside the
+Nix fork; Cap'n Proto for cross-component schemas/RPC; Unix-domain sockets locally; QUIC/TLS for
+native remote RPC; UUIDv7 semantic/event identities; BLAKE3 artifacts; SQLite WAL for graph and
+worldline persistence; FTS5 plus rebuildable sqlite-vec indexes for retrieval; systemd supervision;
+and Smithay + wgpu for OmnisControl.</p>
+<p><code>omnis-graphd</code> is additionally the durable event outbox. Graph changes enqueue their events in the
+same SQLite transaction; other first-party components durably enqueue before treating an event as
+published. OmnisAgent drains the outbox into its append-only worldline with at-least-once delivery
+and EventId deduplication.</p>
+<p>Nix compatibility is preserved by keeping the normal Nix daemon/client protocol intact. OmnisManager
+adds a separate structured control/observer channel rather than placing cognition into Nix.</p>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>In-process subsystems with a plugin trait</strong> (the current model). Cheapest to write and it makes
-  the central property unenforceable. A crash in any subsystem takes the daemon with it, and nothing
-  prevents two subsystems from calling each other directly.</li>
-<li><strong>In-process by default, out-of-process for the risky ones.</strong> Two subsystem contracts to maintain,
-  and the boundary is drawn by guesswork about which code will misbehave — a prediction nobody makes
-  well.</li>
-<li><strong>A thread per subsystem with message passing.</strong> Gets the discipline without the isolation: shared
-  address space means a panic or a leak still crosses the boundary, and it forecloses subsystems
-  written in another language.</li>
-<li><strong>Our own supervisor.</strong> Restart backoff, health checks, ordering, and socket activation are solved
-  problems with a mature implementation already present below us.</li>
+<li><strong>Leave all mechanisms abstract until implementation.</strong> This delegates architectural decisions to
+  whichever worker happens to implement a subsystem first and makes integration failure likely.</li>
+<li><strong>Use a distributed graph database/message broker immediately.</strong> It adds deployment, recovery and
+  identity complexity before a single-machine implementation has demonstrated the need.</li>
+<li><strong>Use JSON/HTTP as the internal universal protocol.</strong> Easy to inspect, but weaker for typed
+  high-frequency cross-process contracts and C++/Rust code generation; JSON remains a debugging
+  representation, not the wire authority.</li>
+<li><strong>Put the worldline and current graph in one canonical database/model.</strong> Current interpreted state
+  and immutable causal experience have different mutability and ownership semantics; merging them
+  makes reinterpretation unsafe.</li>
+<li><strong>Write a compositor/browser/terminal stack from scratch.</strong> Smithay, Wayland clients, PTYs and
+  existing browsers already supply mature physical mechanisms that Omnis can bind.</li>
+<li><strong>Embed an LLM in Nix or the compositor.</strong> This violates deterministic realization and latency/
+  availability requirements.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>The property becomes structural.</strong> Two subsystems <em>cannot</em> couple, because the only path between
-  them is a versioned wire schema.</li>
-<li><strong>Binding becomes mechanical.</strong> A subsystem is a process that speaks the bus, so wrapping <code>git</code> is
-  a thin adapter process rather than a module inside the daemon — ADR-0011 made possible rather than
-  merely intended. Subsystems may be written in any language.</li>
-<li><strong>Every subsystem call is IPC.</strong> Control traffic is fine; the hot paths — PTY streams, language
-  server traffic, screencast frames — need measuring against the data socket rather than assuming.</li>
-<li><strong>Debugging becomes distributed.</strong> One stack trace becomes several processes and a correlation id.
-  This argues for tracing being part of the bus from the first message, not retrofitted later.</li>
-<li><strong>The bus schema must be complete</strong>, because there is no in-process escape hatch left. That
-  front-loads work into E1 and is a feature, not an accident.</li>
+<li>Coding agents can now implement the substrate without selecting foundational technologies.</li>
+<li>SQLite single-writer behavior becomes an explicit v0 scaling boundary; graph semantics remain
+  storage-independent so a later backend can replace it.</li>
+<li>Cap'n Proto schema discipline becomes a cross-repository compatibility requirement.</li>
+<li>The Nix and nixpkgs forks stay close enough to upstream that Omnis-specific changes can remain
+  reviewable patch stacks.</li>
+<li>Agent/Control remain independently restartable and replaceable; model failure cannot prevent boot
+  or deterministic machine operation.</li>
+<li><code>sqlite-vec</code> is accepted only as a pinned derived index because its pre-v1 API is not a canonical
+  storage contract.</li>
 </ul>
+<h2 id="scope-limit">Scope limit<a class="headerlink" href="#scope-limit" title="Permanent link">&para;</a></h2>
+<p>This ADR freezes the v0 substrate, not every future algorithm. Memory ranking, graph layout, learned
+judgement policy and provider choice may evolve behind the fixed contracts without another substrate
+ADR unless they change the authority/identity/protocol model.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">
+          <a class="pager__link pager__link--prev" href="../0023-graph-native-os-architecture-reset/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0012 — The system is one declarative configuration, applied as generations</span>
+            <span class="pager__title">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0014-guest-environments-are-host-level-siblings-of-the-core/">
+          <a class="pager__link pager__link--next" href="../process/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0014 — Guest environments are host-level siblings of the core</span>
+            <span class="pager__title">Process</span>
           </a>
         </nav>
 
@@ -371,6 +354,8 @@ guarantee above can hold.</p>
           <li><a href="#alternatives-rejected">Alternatives rejected</a>
           </li>
           <li><a href="#consequences">Consequences</a>
+          </li>
+          <li><a href="#scope-limit">Scope limit</a>
           </li>
         </ul>
       </aside>

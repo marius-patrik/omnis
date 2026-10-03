@@ -1,0 +1,1073 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Omnis v0 Implementation Blueprint · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-v0-implementation-blueprint">Omnis v0 Implementation Blueprint<a class="headerlink" href="#omnis-v0-implementation-blueprint" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE SUPPORTING SPECIFICATION.</strong> <code>ARCHITECTURE.md</code> defines semantic architecture;
+this document freezes the first implementation profile. Implementations may replace a mechanism later
+only while preserving the contracts defined here or through an explicit architecture/ADR change.</p>
+<h2 id="1-implementation-profile">1. Implementation profile<a class="headerlink" href="#1-implementation-profile" title="Permanent link">&para;</a></h2>
+<p>Omnis v0 is a Linux/NixOS system with four product authorities and one non-semantic shared substrate.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>v0 choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First-party runtime language</td>
+<td>Rust 2024 edition</td>
+</tr>
+<tr>
+<td>Async runtime</td>
+<td>Tokio</td>
+</tr>
+<tr>
+<td>Existing Nix code</td>
+<td>Keep upstream C++ and patch narrowly</td>
+</tr>
+<tr>
+<td>Typed protocol</td>
+<td>Cap'n Proto schemas and RPC</td>
+</tr>
+<tr>
+<td>Local transport</td>
+<td>Unix-domain <code>SOCK_STREAM</code> sockets</td>
+</tr>
+<tr>
+<td>Remote transport</td>
+<td>QUIC with TLS 1.3 mutual host authentication</td>
+</tr>
+<tr>
+<td>Semantic/event IDs</td>
+<td>UUIDv7, 128-bit binary on wire</td>
+</tr>
+<tr>
+<td>Immutable artifact IDs</td>
+<td>BLAKE3-256</td>
+</tr>
+<tr>
+<td>Graph store</td>
+<td>SQLite, WAL mode, single serialized writer</td>
+</tr>
+<tr>
+<td>Agent worldline</td>
+<td>SQLite, WAL mode, append-only event tables</td>
+</tr>
+<tr>
+<td>Lexical retrieval</td>
+<td>SQLite FTS5</td>
+</tr>
+<tr>
+<td>Vector retrieval</td>
+<td>pinned <code>sqlite-vec</code> index, derived/non-canonical</td>
+</tr>
+<tr>
+<td>Artifact storage</td>
+<td>filesystem BLAKE3 CAS</td>
+</tr>
+<tr>
+<td>Service supervision</td>
+<td>systemd</td>
+</tr>
+<tr>
+<td>Linux compositor</td>
+<td>Smithay</td>
+</tr>
+<tr>
+<td>GPU renderer</td>
+<td>wgpu</td>
+</tr>
+<tr>
+<td>Terminal parsing</td>
+<td><code>vte</code> + PTY through <code>rustix</code>/libc interfaces</td>
+</tr>
+<tr>
+<td>Structured logging</td>
+<td>Rust <code>tracing</code> to journald; trace IDs preserved in protocol</td>
+</tr>
+</tbody>
+</table>
+<p>All third-party dependencies are pinned by Nix inputs and language lockfiles. Architecture documents
+name dependencies but do not hard-code patch versions; dependency updates are ordinary maintenance
+unless they change a contract.</p>
+<h2 id="2-repository-topology">2. Repository topology<a class="headerlink" href="#2-repository-topology" title="Permanent link">&para;</a></h2>
+<p>The first implementation is split into these repositories:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>marius-patrik/omnis
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  architecture, protocol schemas, integration flake, cross-component tests, releases
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>marius-patrik/omnis-os
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  maintained fork of NixOS/nixpkgs
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  + Omnis NixOS modules
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  + omnis-graphd
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  + omnis-osd
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  + package definitions for the other Omnis components
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>marius-patrik/omnis-manager
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  maintained fork of NixOS/nix
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  + Nix evaluator/store/build observer patches
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  + dedicated Omnis control socket in nix-daemon
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  + Rust omnis-managerd service
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>marius-patrik/omnis-agent
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>  Rust workspace implementing worldline, memory/indexing, context, cognition and workers
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>marius-patrik/omnis-control
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  Rust workspace implementing compositor, graph desktop, shell, rendering and interaction
+</code></pre></div>
+<p><code>omnis</code> owns protocol schema versions so no component may silently redefine cross-component types.
+Generated Rust/C++ protocol bindings are build artifacts; the <code>.capnp</code> sources are canonical.</p>
+<h2 id="3-runtime-process-topology">3. Runtime process topology<a class="headerlink" href="#3-runtime-process-topology" title="Permanent link">&para;</a></h2>
+<h3 id="31-system-scope">3.1 System scope<a class="headerlink" href="#31-system-scope" title="Permanent link">&para;</a></h3>
+<p>OmnisOS starts these system services:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>systemd
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a> ├─ nix-daemon                 # OmnisManager Nix fork; normal Nix client compatibility
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> ├─ omnis-graphd              # shared graph, CAS, durable event outbox
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a> ├─ omnis-osd                 # physical/system observation + enforcement adapter
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a> └─ omnis-managerd            # capabilities, bindings, placement and execution broker
+</code></pre></div>
+<p><code>omnis-graphd</code> and <code>omnis-osd</code> are shipped from the OmnisOS fork. <code>omnis-managerd</code> belongs to the
+OmnisManager product even though its orchestration layer is Rust.</p>
+<h3 id="32-user-scope">3.2 User scope<a class="headerlink" href="#32-user-scope" title="Permanent link">&para;</a></h3>
+<p>Each interactive Omnis user gets:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>systemd --user
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a> ├─ omnis-agentd              # persistent personal cognitive subsystem
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a> └─ omnis-control             # Wayland compositor / graph desktop session
+</code></pre></div>
+<p>Agent and Control start independently after the user session exists. Neither is required for the
+other to display a deterministic shell or for the machine to boot. If Agent is unavailable, Control
+continues with exact shell, graph, Manager and OS operations.</p>
+<h3 id="33-socket-locations">3.3 Socket locations<a class="headerlink" href="#33-socket-locations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>/run/omnis/graph.sock
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>/run/omnis/os.sock
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>/run/omnis/manager.sock
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>/run/omnis/nix-control.sock
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>$XDG_RUNTIME_DIR/omnis/agent.sock
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>$XDG_RUNTIME_DIR/omnis/control.sock
+</code></pre></div>
+<p>System sockets authenticate callers with <code>SO_PEERCRED</code>; graph authority is derived from UID/GID,
+service identity and explicit grants. User sockets are mode 0600 by default.</p>
+<h2 id="4-stable-identity-and-naming">4. Stable identity and naming<a class="headerlink" href="#4-stable-identity-and-naming" title="Permanent link">&para;</a></h2>
+<p>All mutable semantic identities are UUIDv7 values represented as 16 bytes on the wire and canonical
+lowercase hyphenated text when rendered.</p>
+<p>Distinct Rust newtypes are mandatory even though the binary shape is identical:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>NodeId EdgeId EventId ActivityId ExecutionId WorkerId TransactionId TraceId GenerationId
+</code></pre></div>
+<p>IDs are never derived from PID, pathname, Nix store path, window ID, provider name or host address.</p>
+<p>Immutable artifacts use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>ArtifactId = BLAKE3(payload bytes)
+</code></pre></div>
+<p>Graph kinds, relations, capabilities and event types use dotted names. <code>omnis.*</code> is reserved for
+first-party semantics. Third parties use reverse-DNS namespaces, for example
+<code>com.example.capability.export</code>.</p>
+<h2 id="5-shared-graph-implementation">5. Shared graph implementation<a class="headerlink" href="#5-shared-graph-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="51-ownership">5.1 Ownership<a class="headerlink" href="#51-ownership" title="Permanent link">&para;</a></h3>
+<p><code>omnis-graphd</code> is infrastructure, not a fifth semantic authority. It validates namespace ownership
+but does not decide OS, Manager, Agent or Control policy.</p>
+<h3 id="52-database">5.2 Database<a class="headerlink" href="#52-database" title="Permanent link">&para;</a></h3>
+<p>The system graph lives at:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/var/lib/omnis/graph/graph.sqlite3
+</code></pre></div>
+<p>SQLite pragmas for v0:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">PRAGMA</span><span class="w"> </span><span class="n">journal_mode</span><span class="o">=</span><span class="n">WAL</span><span class="p">;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">PRAGMA</span><span class="w"> </span><span class="n">synchronous</span><span class="o">=</span><span class="k">FULL</span><span class="p">;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">PRAGMA</span><span class="w"> </span><span class="n">foreign_keys</span><span class="o">=</span><span class="k">ON</span><span class="p">;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">PRAGMA</span><span class="w"> </span><span class="n">busy_timeout</span><span class="o">=</span><span class="mi">5000</span><span class="p">;</span>
+</code></pre></div>
+<p>Graph writes are serialized through one writer task. Reads use independent read-only connections and
+WAL snapshots. Omnis does not depend on experimental multi-writer SQLite modes.</p>
+<h3 id="53-canonical-tables">5.3 Canonical tables<a class="headerlink" href="#53-canonical-tables" title="Permanent link">&para;</a></h3>
+<p>Logical schema:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>nodes(
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  id BLOB(16) PRIMARY KEY,
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  created_revision INTEGER NOT NULL,
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  deleted_revision INTEGER NULL
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>)
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>node_kinds(
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>  node_id BLOB(16), kind TEXT, authority TEXT,
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>  valid_from_revision INTEGER, valid_to_revision INTEGER NULL
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>)
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>node_properties(
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>  node_id BLOB(16), namespace TEXT, key TEXT, value_type INTEGER, value BLOB,
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>  authority TEXT, provenance_id BLOB(16),
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>  valid_from_revision INTEGER, valid_to_revision INTEGER NULL
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>)
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>edges(
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>  id BLOB(16) PRIMARY KEY, source BLOB(16), relation TEXT, target BLOB(16),
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>  dimension TEXT, authority TEXT, provenance_id BLOB(16),
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>  valid_from_revision INTEGER, valid_to_revision INTEGER NULL
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>)
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>edge_properties(...)
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>provenance(...)
+<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>transactions(...)
+<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>outbox_events(...)
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a>artifact_refs(...)
+<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>schema_migrations(...)
+</code></pre></div>
+<p>Current-state queries select rows whose <code>valid_to_revision IS NULL</code>. Historical revision reads use
+the validity interval. The graph is therefore revision-addressable without treating its internal
+transaction history as the Agent worldline.</p>
+<h3 id="54-transactions">5.4 Transactions<a class="headerlink" href="#54-transactions" title="Permanent link">&para;</a></h3>
+<p>Every write is a <code>GraphTransaction</code> containing actor, authority, expected revision, causal parents,
+preconditions and mutations. The writer uses <code>BEGIN IMMEDIATE</code>; all preconditions are evaluated
+inside the transaction. Success increments the global revision exactly once.</p>
+<p>Mutation operations are fixed in v0:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>CreateNode
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>DeleteNode
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>AddKind / EndKind
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>SetProperty / EndProperty
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>CreateEdge / EndEdge
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>SetEdgeProperty / EndEdgeProperty
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>PutProvenance
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>EnqueueEvent
+</code></pre></div>
+<p>There is no embedded Cypher/SPARQL language in v0. Queries use typed selectors, traversals and
+projections from the protocol schema.</p>
+<h3 id="55-event-outbox">5.5 Event outbox<a class="headerlink" href="#55-event-outbox" title="Permanent link">&para;</a></h3>
+<p>Every graph commit inserts its emitted Event envelopes into <code>outbox_events</code> in the same SQLite
+transaction. Non-graph first-party producers also call <code>EventOutbox.enqueue</code> on graphd before
+reporting a durable transition complete.</p>
+<p>Agent drains the outbox in order, writes each event to its worldline, then acknowledges EventId.
+Delivery is at-least-once. Agent deduplicates by EventId. An event is deleted from the outbox only
+after durable Agent acknowledgement.</p>
+<p>This mechanism is the reliability bridge for the requirement that Agent receives every meaningful
+first-party event even when Agent is temporarily down.</p>
+<h3 id="56-artifact-cas">5.6 Artifact CAS<a class="headerlink" href="#56-artifact-cas" title="Permanent link">&para;</a></h3>
+<p>Large immutable payloads are never copied into graph properties or RPC messages. Graphd exposes CAS
+<code>put/get/stat</code> and stores objects under:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>/var/lib/omnis/cas/blake3/&lt;first-two-hex&gt;/&lt;remaining-hex&gt;
+</code></pre></div>
+<p>Writes go to a temporary file, fsync, verify BLAKE3, then atomic rename. Metadata records media type,
+length, protection class and creator. Garbage collection traces references from graph/worldline
+roots before deleting an unreferenced object.</p>
+<h2 id="6-protocol-and-ipc">6. Protocol and IPC<a class="headerlink" href="#6-protocol-and-ipc" title="Permanent link">&para;</a></h2>
+<h3 id="61-schemas">6.1 Schemas<a class="headerlink" href="#61-schemas" title="Permanent link">&para;</a></h3>
+<p>Canonical schemas live in <code>protocol/*.capnp</code> in the umbrella repository:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>common.capnp     IDs, values, provenance, errors, traces
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>graph.capnp      graph query/transaction/subscription/outbox/CAS
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>os.capnp         hosts, system generations, enforcement, observation
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>manager.capnp    resource/capability/binding/resolution/execution
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>agent.capnp      event/worldline/memory/context/activity/worker
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>control.capnp    projections, tree mutations, focus/input/navigation
+</code></pre></div>
+<p>Schema field numbers are append-only. Removed fields stay reserved. Breaking semantic changes bump
+the protocol major version.</p>
+<h3 id="62-local-transport">6.2 Local transport<a class="headerlink" href="#62-local-transport" title="Permanent link">&para;</a></h3>
+<p>Cap'n Proto RPC runs over Unix-domain <code>SOCK_STREAM</code>. Each connection begins with a handshake carrying
+protocol major/minor, component identity, process build ID and requested interface set.</p>
+<p>Large data travels by ArtifactId. GPU/native-window/audio handles continue through native Linux
+mechanisms such as Wayland, DMA-BUF and PipeWire rather than being serialized into Cap'n Proto.</p>
+<h3 id="63-remote-transport">6.3 Remote transport<a class="headerlink" href="#63-remote-transport" title="Permanent link">&para;</a></h3>
+<p>Remote Omnis-to-Omnis RPC uses the same logical schemas framed over QUIC. TLS 1.3 authenticates both
+hosts. Each host has an Ed25519 identity key; pairing pins the peer key/certificate fingerprint in
+the authority graph. A VPN such as Tailscale may carry QUIC but is not part of semantic identity.</p>
+<h3 id="64-request-semantics">6.4 Request semantics<a class="headerlink" href="#64-request-semantics" title="Permanent link">&para;</a></h3>
+<p>Every effectful request carries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>request_id       UUIDv7
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>trace_id         UUIDv7
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>actor            graph NodeId
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>causal_parents[] EventId
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>idempotency_key  UUIDv7 where retry is legal
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>authority_scope
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>deadline
+</code></pre></div>
+<p>RPC transport retries only operations declared idempotent. Execution creation is idempotent on
+<code>ExecutionId</code>; repeated starts return the same execution record instead of spawning duplicates.</p>
+<h2 id="7-omnisos-implementation">7. OmnisOS implementation<a class="headerlink" href="#7-omnisos-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="71-nixos-fork">7.1 NixOS fork<a class="headerlink" href="#71-nixos-fork" title="Permanent link">&para;</a></h3>
+<p><code>omnis-os</code> tracks <code>NixOS/nixpkgs</code> and keeps an upstream remote. Omnis-specific changes live in a
+clearly delimited patch set plus an <code>nixos/modules/services/omnis/</code> module family.</p>
+<p>The v0 module exposes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>omnis.enable
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>omnis.graph.*
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>omnis.os.*
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>omnis.manager.*
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>omnis.agent.users.&lt;name&gt;.*
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>omnis.control.users.&lt;name&gt;.*
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>omnis.hosts.*
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>omnis.security.*
+</code></pre></div>
+<p>Normal nixpkgs packages remain normal packages. Omnis binaries are packaged in the fork and can also
+be built directly from their pinned component repositories.</p>
+<h3 id="72-machine-managed-nix-state">7.2 Machine-managed Nix state<a class="headerlink" href="#72-machine-managed-nix-state" title="Permanent link">&para;</a></h3>
+<p>Omnis does not invent a second configuration language. Persistent machine mutations target a
+dedicated NixOS module:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/etc/omnis/configuration.nix      # stable wrapper/import root
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>/etc/omnis/managed.nix            # machine-writable literal option definitions
+</code></pre></div>
+<p><code>configuration.nix</code> imports the user's normal NixOS configuration and <code>managed.nix</code>. Manager edits
+<code>managed.nix</code> through the Nix parser/AST from the fork, never regex or text substitution.</p>
+<p>Candidate mutations are built in <code>/var/lib/omnis/candidates/&lt;GenerationId&gt;/</code> first. The active
+<code>managed.nix</code> is changed only after candidate evaluation/build succeeds and activation is ready.</p>
+<h3 id="73-generation-transaction">7.3 Generation transaction<a class="headerlink" href="#73-generation-transaction" title="Permanent link">&para;</a></h3>
+<p>Persistent change sequence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>1. create GenerationId and candidate managed.nix AST
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>2. evaluate full NixOS module graph
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>3. export option/evaluation provenance
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>4. compute derivation + closure + service-impact diff
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>5. build candidate system
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>6. run pre-activation invariants
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>7. activate using NixOS switch-to-configuration
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>8. reconcile actual machine state
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>9. atomically promote managed.nix candidate
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>10. publish generation/result events and graph state
+</code></pre></div>
+<p>If activation fails, the previous generation remains selectable and the candidate is retained with
+failure evidence. External side effects that cannot roll back are explicitly recorded.</p>
+<h3 id="74-os-observation">7.4 OS observation<a class="headerlink" href="#74-os-observation" title="Permanent link">&para;</a></h3>
+<p><code>omnis-osd</code> uses exact Linux sources before inference:</p>
+<ul>
+<li>systemd D-Bus for unit lifecycle;</li>
+<li>udev for device lifecycle;</li>
+<li>rtnetlink for links, addresses and routes;</li>
+<li><code>/proc</code> reconciliation at startup/resume;</li>
+<li>eBPF process tracepoints for fork/exec/exit after startup reconciliation;</li>
+<li>fanotify/inotify for explicitly watched filesystem scopes;</li>
+<li>logind for sessions/seats;</li>
+<li>cgroup v2 for resource ownership and accounting.</li>
+</ul>
+<p>Raw high-rate signals are normalized before graph/event publication. The system does not forward
+every syscall to Agent.</p>
+<h3 id="75-recovery">7.5 Recovery<a class="headerlink" href="#75-recovery" title="Permanent link">&para;</a></h3>
+<p>Boot order is <code>graphd -&gt; {osd,nix-daemon,managerd} -&gt; user session -&gt; {agent,control}</code>.</p>
+<p>A failed Agent or Control never prevents boot. A failed graph database enters
+<code>omnis-recovery.target</code>, which provides a conventional TTY, Nix generation rollback, database backup
+and graph rebuild tooling.</p>
+<h2 id="8-omnismanager-implementation">8. OmnisManager implementation<a class="headerlink" href="#8-omnismanager-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="81-nix-fork-boundary">8.1 Nix fork boundary<a class="headerlink" href="#81-nix-fork-boundary" title="Permanent link">&para;</a></h3>
+<p><code>omnis-manager</code> tracks <code>NixOS/nix</code>. Existing Nix CLI/daemon/store protocols remain compatible.
+Omnis adds a separate <code>/run/omnis/nix-control.sock</code>; it does not overload the stable Nix daemon
+protocol.</p>
+<p>Minimal C++ patches add observer hooks at:</p>
+<ul>
+<li>evaluator value forcing and source positions;</li>
+<li>derivation creation;</li>
+<li>store path realization/substitution;</li>
+<li>build start/log/result;</li>
+<li>closure queries and garbage collection;</li>
+<li>daemon operation correlation.</li>
+</ul>
+<p>The observer interface emits structured events/query results to <code>omnis-managerd</code>. No model code is
+linked into Nix.</p>
+<h3 id="82-nixos-option-provenance">8.2 NixOS option provenance<a class="headerlink" href="#82-nixos-option-provenance" title="Permanent link">&para;</a></h3>
+<p>The OmnisOS fork instruments the NixOS module system so each final option can be related to its
+declaration, all contributing definitions, priority/merge operation, source span and evaluator
+trace. Manager joins these records with Nix derivations/store paths.</p>
+<p>This is what powers <code>why is this installed?</code>, <code>what will rebuild?</code>, <code>which definition enabled this
+service?</code>, and generation semantic diffs.</p>
+<h3 id="83-manager-core">8.3 Manager core<a class="headerlink" href="#83-manager-core" title="Permanent link">&para;</a></h3>
+<p><code>omnis-managerd</code> is a Rust/Tokio daemon with these modules:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>registry       Resource/Capability/Binding graph materialization
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>discovery      deterministic foreign discovery pipeline
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>resolver       constraints + deterministic candidate scoring
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>placement      host/device/runtime selection
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>executor       launch/cancel/wait/retry/reconcile
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>nix_bridge     dedicated Nix control-socket client
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>secrets        protected-handle broker
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>adapters       CLI/API/MCP/model/harness binding providers
+</code></pre></div>
+<h3 id="84-execution">8.4 Execution<a class="headerlink" href="#84-execution" title="Permanent link">&para;</a></h3>
+<p>Local processes launch through systemd transient scopes over D-Bus, not raw orphaned <code>fork</code> calls.
+Each scope name contains ExecutionId and is placed under an Omnis cgroup subtree. Manager applies
+CPU, memory, device, filesystem/network namespace and credential constraints before launch.</p>
+<p>Execution stdout/stderr are streamed as artifacts/events and optionally attached to a Control PTY.</p>
+<h3 id="85-resolution">8.5 Resolution<a class="headerlink" href="#85-resolution" title="Permanent link">&para;</a></h3>
+<p>Resolution is deterministic from the recorded candidate set and scoring inputs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>hard constraint filter
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a> -&gt; capability/effect compatibility
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a> -&gt; authority/credential availability
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a> -&gt; locality/privacy filter
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a> -&gt; runtime/hardware feasibility
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a> -&gt; explicit user/Agent preferences
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a> -&gt; cost/latency/quality score
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a> -&gt; stable tie-break by BindingId
+</code></pre></div>
+<p>A learned predictor may supply a score feature, but it never hides the candidate list or hard
+rejection reasons.</p>
+<h3 id="86-binding-provider-abi">8.6 Binding provider ABI<a class="headerlink" href="#86-binding-provider-abi" title="Permanent link">&para;</a></h3>
+<p>Built-in providers are Rust modules. Third-party providers are subprocesses speaking the Manager
+Cap'n Proto adapter interface. They are not loaded as arbitrary shared libraries into managerd.</p>
+<p>Initial providers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>nix package/store
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>executable/CLI
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>systemd service
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>HTTP/OpenAPI
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>MCP
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>OpenAI-compatible model API
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>Anthropic model API
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>llama.cpp server/local GGUF
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>ONNX Runtime classifier/embedding
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>Claude Code
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>Codex
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>OpenCode
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>generic PTY harness
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>container runtime
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>SSH/remote Omnis host
+</code></pre></div>
+<h2 id="9-omnisagent-implementation">9. OmnisAgent implementation<a class="headerlink" href="#9-omnisagent-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="91-state">9.1 State<a class="headerlink" href="#91-state" title="Permanent link">&para;</a></h3>
+<p>Per-user canonical/derived files live under <code>$XDG_STATE_HOME/omnis/agent/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>worldline.sqlite3     canonical immutable event history
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>index.sqlite3         rebuildable FTS/vector/retrieval indexes
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>checkpoints/          durable worker/activity continuation artifacts
+</code></pre></div>
+<p>Cognitive current-state objects such as assertions, goals, procedures and memories are canonical
+writes to the Agent-owned dimension of the shared graph. <code>index.sqlite3</code> is disposable.</p>
+<h3 id="92-worldline-schema">9.2 Worldline schema<a class="headerlink" href="#92-worldline-schema" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>events(
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  id BLOB(16) PRIMARY KEY,
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  ingest_seq INTEGER UNIQUE,
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>  type TEXT, schema_major INTEGER, schema_minor INTEGER,
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>  source BLOB(16), actor BLOB(16),
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>  observed_wall_ns INTEGER, observed_monotonic_ns INTEGER,
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>  graph_revision INTEGER NULL, trace_id BLOB(16),
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>  payload_artifact BLOB(32) NULL, inline_payload BLOB NULL
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>)
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>event_causes(event_id, parent_event_id)
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>event_entities(event_id, node_id, role)
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>event_artifacts(event_id, artifact_id, role)
+</code></pre></div>
+<p>Worldline tables are append-only except administrative migration metadata. Agent ACKs graphd outbox
+only after the event transaction is durably committed.</p>
+<h3 id="93-event-pipeline">9.3 Event pipeline<a class="headerlink" href="#93-event-pipeline" title="Permanent link">&para;</a></h3>
+<p>Every accepted event runs through:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>ingest/deduplicate
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a> -&gt; deterministic reducers
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a> -&gt; salience + domain classification
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a> -&gt; memory activation/retrieval
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a> -&gt; candidate intention generation (always includes null)
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a> -&gt; feasibility/Pareto filtering
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a> -&gt; budget allocation
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a> -&gt; zero or more worker activations
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a> -&gt; effects/observations
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a> -&gt; resulting events
+</code></pre></div>
+<p>No stage requires a generative model when an exact operation is sufficient.</p>
+<h3 id="94-model-capabilities">9.4 Model capabilities<a class="headerlink" href="#94-model-capabilities" title="Permanent link">&para;</a></h3>
+<p>Agent requests model semantics from Manager using:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>model.classify
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>model.embed
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>model.rerank
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>model.generate
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>model.reason
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>model.vision
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>model.audio.transcribe
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>agent.code
+</code></pre></div>
+<p>The registry records provider, model identity/version, context limits, modalities, latency, cost,
+privacy/locality and hardware requirements. Model outputs always record the binding that produced
+them.</p>
+<h3 id="95-memory-indexing">9.5 Memory indexing<a class="headerlink" href="#95-memory-indexing" title="Permanent link">&para;</a></h3>
+<p>FTS5 indexes normalized text from graph memories/events. Vector embeddings are stored in pinned
+<code>sqlite-vec</code> virtual tables keyed by NodeId/EventId and embedding-model identity. Because
+<code>sqlite-vec</code> is pre-v1 and vector indexes are inherently derived, all vector state is rebuildable
+from graph/worldline data.</p>
+<p>Changing embedding model creates a new index namespace rather than rewriting provenance.</p>
+<h3 id="96-context-compiler">9.6 Context compiler<a class="headerlink" href="#96-context-compiler" title="Permanent link">&para;</a></h3>
+<p>A worker receives a <code>ContextCapsule</code> with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>trigger event + causal ancestors
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>goal/activity state
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>selected graph neighborhood
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>retrieved episodic/semantic/procedural memory
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>relevant artifacts/code
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>previous attempts + negative evidence
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>tool/capability descriptors
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>authority/protection constraints
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>token/byte/time budget
+</code></pre></div>
+<p>Selection uses deterministic mandatory items first, then lexical/vector/rerank scores. Protected
+items are filtered before model serialization. The final capsule and source references are persisted
+for reproducibility.</p>
+<h3 id="97-workers">9.7 Workers<a class="headerlink" href="#97-workers" title="Permanent link">&para;</a></h3>
+<p>A worker is a durable Agent activation, not a provider session. State includes WorkerId, ActivityId,
+trigger events, context capsule, requested capabilities, budget, status and checkpoint ArtifactId.</p>
+<p>External coding-agent CLIs are Manager executions attached to a WorkerId. Native hooks are preferred;
+PTY/process output is the fallback. Every tool/model/harness result returns through the event
+outbox/worldline.</p>
+<h2 id="10-omniscontrol-implementation">10. OmnisControl implementation<a class="headerlink" href="#10-omniscontrol-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="101-threads-and-runtimes">10.1 Threads and runtimes<a class="headerlink" href="#101-threads-and-runtimes" title="Permanent link">&para;</a></h3>
+<p><code>omnis-control</code> is one process with three cooperating execution domains:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>main compositor thread   Smithay/calloop, Wayland objects, seats, input, surface lifecycle
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>render thread            wgpu Device/Queue, render graph, frame pacing
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>Tokio runtime            graph/Agent/Manager RPC, PTYs, browser protocols, background I/O
+</code></pre></div>
+<p>Domains communicate with bounded channels. The render loop never waits for Agent/model work.</p>
+<h3 id="102-control-tree-and-scene">10.2 Control tree and scene<a class="headerlink" href="#102-control-tree-and-scene" title="Permanent link">&para;</a></h3>
+<p>Pipeline:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>shared graph revision
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a> -&gt; ProjectionSpec + Lens
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a> -&gt; ControlTree
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a> -&gt; layout
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a> -&gt; RenderScene
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a> -&gt; wgpu render graph
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a> -&gt; DRM/KMS output
+</code></pre></div>
+<p>Persistent Control nodes have graph NodeIds in the presentation namespace. Frame-local GPU objects
+use private integer handles and never become semantic identity.</p>
+<p>Render primitives are fixed initially:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>Group Rect RoundedRect Path GlyphRun Image Mesh NativeSurface Clip Transform
+</code></pre></div>
+<h3 id="103-2d-and-3d-desktop">10.3 2D and 3D desktop<a class="headerlink" href="#103-2d-and-3d-desktop" title="Permanent link">&para;</a></h3>
+<p>Both modes consume the same selected graph subgraph and interaction state.</p>
+<p>2D provides focus+context node/edge editing, hierarchical and force layouts, ports/actions, inline
+inspectors and arbitrary panels. 3D maps the same nodes/edges into a camera-controlled spatial
+layout and may map selected graph dimensions to axes, depth, clustering and trails.</p>
+<p>Toggling mode changes only projection/layout state. Focus, selection, NodeIds, active lens and
+timeline frontier are preserved.</p>
+<h3 id="104-wayland-and-legacy-apps">10.4 Wayland and legacy apps<a class="headerlink" href="#104-wayland-and-legacy-apps" title="Permanent link">&para;</a></h3>
+<p>Smithay owns Wayland compositor protocol handling and DRM/input integration. XWayland is launched as
+a managed child for X11 compatibility.</p>
+<p>Each Wayland/XWayland toplevel gets a graph identity and a <code>NativeSurface</code> Control node. Control owns
+placement, clipping, z-order and graph relationships; the client owns its pixels. Direct scan-out is
+allowed when Smithay/DRM eligibility permits it.</p>
+<h3 id="105-shell">10.5 Shell<a class="headerlink" href="#105-shell" title="Permanent link">&para;</a></h3>
+<p>The shell uses a real PTY. Input first passes the deterministic resolver:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>shell grammar/executable -&gt; PTY/shell
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>known omnis:// URI/path  -&gt; navigate/open
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>known capability         -&gt; Manager resolve/execute
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>known graph query        -&gt; graph request
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>otherwise                -&gt; Agent event/intention
+</code></pre></div>
+<p>Terminal output is parsed with <code>vte</code> into a cell model then lowered to ordinary GlyphRun/Rect scene
+primitives. The terminal is not a second renderer.</p>
+<h3 id="106-browser-integration">10.6 Browser integration<a class="headerlink" href="#106-browser-integration" title="Permanent link">&para;</a></h3>
+<p>v0 does not build a browser engine. Chromium/Firefox run as ordinary Wayland clients. Manager binds
+structured browser interfaces when available (CDP, WebDriver BiDi, accessibility tree). Control
+materializes browser surfaces like any other NativeSurface while semantic browser state is published
+into the graph.</p>
+<h3 id="107-agent-structural-control">10.7 Agent structural control<a class="headerlink" href="#107-agent-structural-control" title="Permanent link">&para;</a></h3>
+<p>Agent calls typed Control operations directly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>materialize
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>create/remove/reparent view
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>bind graph identity
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>set lens
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>set mode
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>focus/select
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>set layout constraints
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>navigate
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>attach action
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>persist workspace
+</code></pre></div>
+<p>These mutate the same presentation graph the user manipulates and emit events. Synthetic input is
+reserved for opaque third-party surfaces/testing.</p>
+<h2 id="11-security-and-protected-values">11. Security and protected values<a class="headerlink" href="#11-security-and-protected-values" title="Permanent link">&para;</a></h2>
+<h3 id="111-service-privilege">11.1 Service privilege<a class="headerlink" href="#111-service-privilege" title="Permanent link">&para;</a></h3>
+<p><code>omnis-graphd</code>, <code>omnis-osd</code> and <code>omnis-managerd</code> run under dedicated system identities with only the
+Linux capabilities/filesystem access they require. Agent and Control run as the logged-in user.</p>
+<p>Manager creates more restricted execution scopes by default; workers do not inherit managerd/root
+authority.</p>
+<h3 id="112-credentials">11.2 Credentials<a class="headerlink" href="#112-credentials" title="Permanent link">&para;</a></h3>
+<p>Persistent secret bytes are stored as systemd encrypted credentials (<code>systemd-creds</code>), using TPM2
+sealing when configured. The graph stores only a protected HandleId and metadata.</p>
+<p>At execution time Manager materializes a secret into a private credential file/sealed memory handle
+or environment variable only when the target interface requires that form. Secret bytes are never
+placed in graph properties, worldline payloads, model context or logs.</p>
+<h3 id="113-authorization">11.3 Authorization<a class="headerlink" href="#113-authorization" title="Permanent link">&para;</a></h3>
+<p>Graphd checks write namespace on every transaction. Manager checks capability grant + requested
+execution envelope before effects. Privileged interactive user operations may additionally use
+polkit, but polkit is not the semantic policy engine.</p>
+<h2 id="12-backpressure-and-overload">12. Backpressure and overload<a class="headerlink" href="#12-backpressure-and-overload" title="Permanent link">&para;</a></h2>
+<p>Every subscription/RPC stream is bounded. Producers never drop durable semantic events silently.</p>
+<p>Rules:</p>
+<ul>
+<li>graph outbox is durable and may grow while Agent is unavailable;</li>
+<li>telemetry producers coalesce declared high-rate metric classes before enqueue;</li>
+<li>Control input/render queues drop obsolete intermediate frames, never input commits;</li>
+<li>worker/model concurrency is budgeted by Agent and executed under Manager resource limits;</li>
+<li>overload state itself is published as graph/event state.</li>
+</ul>
+<h2 id="13-crash-recovery">13. Crash recovery<a class="headerlink" href="#13-crash-recovery" title="Permanent link">&para;</a></h2>
+<h3 id="graphd">graphd<a class="headerlink" href="#graphd" title="Permanent link">&para;</a></h3>
+<p>SQLite WAL recovers atomic graph/outbox transactions. On integrity failure, boot recovery can restore
+the most recent backup and replay authoritative OS/Manager observations plus Agent worldline-derived
+cognitive state where appropriate.</p>
+<h3 id="manager">Manager<a class="headerlink" href="#manager" title="Permanent link">&para;</a></h3>
+<p>On restart, managerd enumerates systemd scopes tagged with ExecutionId and reconciles running,
+finished and orphaned executions into the graph.</p>
+<h3 id="agent">Agent<a class="headerlink" href="#agent" title="Permanent link">&para;</a></h3>
+<p>On restart, Agent resumes outbox drain after the last acknowledged EventId/sequence, rebuilds derived
+indexes as required, and resumes durable workers from checkpoints. Duplicate events are harmless.</p>
+<h3 id="control">Control<a class="headerlink" href="#control" title="Permanent link">&para;</a></h3>
+<p>Control reconstructs its tree from presentation graph state and current native surfaces. GPU caches
+and frame-local layout data are disposable.</p>
+<h2 id="14-schema-migration">14. Schema migration<a class="headerlink" href="#14-schema-migration" title="Permanent link">&para;</a></h2>
+<p>SQLite databases use monotonic integer schema versions. Migrations are forward-only code shipped with
+the owning component and run under an exclusive startup lock after an automatic snapshot/backup.</p>
+<p>Graph semantic relation/type migrations are explicit graph transactions with provenance. Protocol
+major incompatibility prevents connection; minor versions negotiate the common feature set.</p>
+<h2 id="15-observability">15. Observability<a class="headerlink" href="#15-observability" title="Permanent link">&para;</a></h2>
+<p>All components use one TraceId across graph, event, Manager, Nix, Agent and Control operations.
+Rust services use <code>tracing</code>; C++ Nix patches emit matching trace fields. Logs go to journald.</p>
+<p>Operational logs/metrics are not the semantic worldline. Any operational transition that matters to
+future cognition is separately emitted as an Event.</p>
+<h2 id="16-build-and-packaging">16. Build and packaging<a class="headerlink" href="#16-build-and-packaging" title="Permanent link">&para;</a></h2>
+<p>Every component is built through Nix. Rust uses Cargo lockfiles but Nix is the release composition
+authority. The umbrella integration flake pins exact component revisions and produces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>packages.&lt;system&gt;.omnis-graphd
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>packages.&lt;system&gt;.omnis-osd
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>packages.&lt;system&gt;.omnis-managerd
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>packages.&lt;system&gt;.omnis-agent
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>packages.&lt;system&gt;.omnis-control
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>nixosModules.omnis
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>nixosConfigurations.&lt;test machines&gt;
+</code></pre></div>
+<p>Release identity records the umbrella commit plus exact Nix/nixpkgs/component revisions.</p>
+<h2 id="17-test-architecture">17. Test architecture<a class="headerlink" href="#17-test-architecture" title="Permanent link">&para;</a></h2>
+<p>Required test layers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>unit/property        graph mutations, resolver, context selection, layouts
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>schema/golden        Cap'n Proto compatibility and canonical value encodings
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>fuzz                 protocol decoders, graph transactions, foreign adapter parsing
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>integration          real service processes over Unix sockets
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>NixOS VM             boot, generations, rollback, system observation, execution isolation
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>Wayland              compositor protocol + XWayland/native surface lifecycle
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>Agent replay         worldline replay produces stable deterministic reductions
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>end-to-end           user input -&gt; Agent/Manager/OS effect -&gt; graph/event -&gt; Control update
+</code></pre></div>
+<p>Foundational acceptance scenario:</p>
+<ol>
+<li>Boot an OmnisOS VM.</li>
+<li>Log into OmnisControl with Agent intentionally disabled; run a real shell command.</li>
+<li>Start Agent and verify it drains queued first-party events exactly once semantically.</li>
+<li>Ask to install/enable a package/service permanently.</li>
+<li>Manager produces candidate NixOS generation and semantic/closure diff.</li>
+<li>Activate it and observe process/service graph changes.</li>
+<li>Launch an unmodified Wayland application and see its NativeSurface graph node.</li>
+<li>Toggle the same workspace between 2D and 3D without losing selection/identity.</li>
+<li>Restart Agent, Manager and Control independently and recover state.</li>
+<li>Roll back the NixOS generation and observe the causal/resulting graph changes.</li>
+</ol>
+<h2 id="18-performance-invariants">18. Performance invariants<a class="headerlink" href="#18-performance-invariants" title="Permanent link">&para;</a></h2>
+<p>These are engineering constraints, not benchmark promises:</p>
+<ul>
+<li>Control frame production must never wait synchronously on Agent or a remote model.</li>
+<li>graph reads and subscriptions are usable while the serialized writer is busy;</li>
+<li>durable event enqueue must remain bounded by local storage, not model latency;</li>
+<li>no model call occurs in boot, Nix evaluation, Nix build scheduling, compositor frame or Linux
+  enforcement critical paths;</li>
+<li>bulk payloads above the protocol inline threshold use the CAS;</li>
+<li>high-rate telemetry is normalized/coalesced before entering cognitive event flow.</li>
+</ul>
+<h2 id="19-replaceability-boundaries">19. Replaceability boundaries<a class="headerlink" href="#19-replaceability-boundaries" title="Permanent link">&para;</a></h2>
+<p>The following v0 mechanisms are intentionally replaceable without changing semantics:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>SQLite graph storage
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>SQLite worldline storage
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>sqlite-vec derived vector index
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>QUIC remote transport
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>Smithay/wgpu renderer internals
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>specific model/harness providers
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>systemd transient-scope executor
+</code></pre></div>
+<p>The stable boundaries are IDs, graph semantics, worldline semantics, capability/binding/execution
+model, protocol schemas/versioning, authority boundaries and Control structural API.</p>
+<h2 id="20-definition-of-implementation-ready">20. Definition of implementation-ready<a class="headerlink" href="#20-definition-of-implementation-ready" title="Permanent link">&para;</a></h2>
+<p>The design is implementation-ready when a coding worker can choose a roadmap item and determine,
+without inventing architecture:</p>
+<ul>
+<li>which repository/product owns it;</li>
+<li>which process and privilege domain runs it;</li>
+<li>which graph namespace it may write;</li>
+<li>which RPC/schema it uses;</li>
+<li>where durable state lives;</li>
+<li>how IDs/provenance/events are formed;</li>
+<li>how the operation recovers after crash/retry;</li>
+<li>how it is packaged by Nix;</li>
+<li>which integration test proves the contract.</li>
+</ul>
+<p>This document supplies those answers for the v0 substrate. Future ADRs refine behavior; they must not
+silently create parallel identity, event, configuration, rendering or cognition systems.</p>
+        </article>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/IMPLEMENTATION.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-implementation-profile">1. Implementation profile</a>
+          </li>
+          <li><a href="#2-repository-topology">2. Repository topology</a>
+          </li>
+          <li><a href="#3-runtime-process-topology">3. Runtime process topology</a>
+            <ul>
+              <li><a href="#31-system-scope">3.1 System scope</a></li>
+              <li><a href="#32-user-scope">3.2 User scope</a></li>
+              <li><a href="#33-socket-locations">3.3 Socket locations</a></li>
+            </ul>
+          </li>
+          <li><a href="#4-stable-identity-and-naming">4. Stable identity and naming</a>
+          </li>
+          <li><a href="#5-shared-graph-implementation">5. Shared graph implementation</a>
+            <ul>
+              <li><a href="#51-ownership">5.1 Ownership</a></li>
+              <li><a href="#52-database">5.2 Database</a></li>
+              <li><a href="#53-canonical-tables">5.3 Canonical tables</a></li>
+              <li><a href="#54-transactions">5.4 Transactions</a></li>
+              <li><a href="#55-event-outbox">5.5 Event outbox</a></li>
+              <li><a href="#56-artifact-cas">5.6 Artifact CAS</a></li>
+            </ul>
+          </li>
+          <li><a href="#6-protocol-and-ipc">6. Protocol and IPC</a>
+            <ul>
+              <li><a href="#61-schemas">6.1 Schemas</a></li>
+              <li><a href="#62-local-transport">6.2 Local transport</a></li>
+              <li><a href="#63-remote-transport">6.3 Remote transport</a></li>
+              <li><a href="#64-request-semantics">6.4 Request semantics</a></li>
+            </ul>
+          </li>
+          <li><a href="#7-omnisos-implementation">7. OmnisOS implementation</a>
+            <ul>
+              <li><a href="#71-nixos-fork">7.1 NixOS fork</a></li>
+              <li><a href="#72-machine-managed-nix-state">7.2 Machine-managed Nix state</a></li>
+              <li><a href="#73-generation-transaction">7.3 Generation transaction</a></li>
+              <li><a href="#74-os-observation">7.4 OS observation</a></li>
+              <li><a href="#75-recovery">7.5 Recovery</a></li>
+            </ul>
+          </li>
+          <li><a href="#8-omnismanager-implementation">8. OmnisManager implementation</a>
+            <ul>
+              <li><a href="#81-nix-fork-boundary">8.1 Nix fork boundary</a></li>
+              <li><a href="#82-nixos-option-provenance">8.2 NixOS option provenance</a></li>
+              <li><a href="#83-manager-core">8.3 Manager core</a></li>
+              <li><a href="#84-execution">8.4 Execution</a></li>
+              <li><a href="#85-resolution">8.5 Resolution</a></li>
+              <li><a href="#86-binding-provider-abi">8.6 Binding provider ABI</a></li>
+            </ul>
+          </li>
+          <li><a href="#9-omnisagent-implementation">9. OmnisAgent implementation</a>
+            <ul>
+              <li><a href="#91-state">9.1 State</a></li>
+              <li><a href="#92-worldline-schema">9.2 Worldline schema</a></li>
+              <li><a href="#93-event-pipeline">9.3 Event pipeline</a></li>
+              <li><a href="#94-model-capabilities">9.4 Model capabilities</a></li>
+              <li><a href="#95-memory-indexing">9.5 Memory indexing</a></li>
+              <li><a href="#96-context-compiler">9.6 Context compiler</a></li>
+              <li><a href="#97-workers">9.7 Workers</a></li>
+            </ul>
+          </li>
+          <li><a href="#10-omniscontrol-implementation">10. OmnisControl implementation</a>
+            <ul>
+              <li><a href="#101-threads-and-runtimes">10.1 Threads and runtimes</a></li>
+              <li><a href="#102-control-tree-and-scene">10.2 Control tree and scene</a></li>
+              <li><a href="#103-2d-and-3d-desktop">10.3 2D and 3D desktop</a></li>
+              <li><a href="#104-wayland-and-legacy-apps">10.4 Wayland and legacy apps</a></li>
+              <li><a href="#105-shell">10.5 Shell</a></li>
+              <li><a href="#106-browser-integration">10.6 Browser integration</a></li>
+              <li><a href="#107-agent-structural-control">10.7 Agent structural control</a></li>
+            </ul>
+          </li>
+          <li><a href="#11-security-and-protected-values">11. Security and protected values</a>
+            <ul>
+              <li><a href="#111-service-privilege">11.1 Service privilege</a></li>
+              <li><a href="#112-credentials">11.2 Credentials</a></li>
+              <li><a href="#113-authorization">11.3 Authorization</a></li>
+            </ul>
+          </li>
+          <li><a href="#12-backpressure-and-overload">12. Backpressure and overload</a>
+          </li>
+          <li><a href="#13-crash-recovery">13. Crash recovery</a>
+            <ul>
+              <li><a href="#graphd">graphd</a></li>
+              <li><a href="#manager">Manager</a></li>
+              <li><a href="#agent">Agent</a></li>
+              <li><a href="#control">Control</a></li>
+            </ul>
+          </li>
+          <li><a href="#14-schema-migration">14. Schema migration</a>
+          </li>
+          <li><a href="#15-observability">15. Observability</a>
+          </li>
+          <li><a href="#16-build-and-packaging">16. Build and packaging</a>
+          </li>
+          <li><a href="#17-test-architecture">17. Test architecture</a>
+          </li>
+          <li><a href="#18-performance-invariants">18. Performance invariants</a>
+          </li>
+          <li><a href="#19-replaceability-boundaries">19. Replaceability boundaries</a>
+          </li>
+          <li><a href="#20-definition-of-implementation-ready">20. Definition of implementation-ready</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
