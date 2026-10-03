@@ -1,0 +1,536 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocols · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-protocols-and-cross-component-contracts">Omnis Protocols and Cross-Component Contracts<a class="headerlink" href="#omnis-protocols-and-cross-component-contracts" title="Permanent link">&para;</a></h1>
+<p><strong>Status: implementation contract draft.</strong></p>
+<p>This document freezes the minimum cross-component semantics required to implement Omnis without
+creating parallel subsystem-specific models.</p>
+<hr />
+<h2 id="1-transport-rule">1. Transport rule<a class="headerlink" href="#1-transport-rule" title="Permanent link">&para;</a></h2>
+<p>Protocol semantics are transport-independent. Initial local transport should use Unix domain sockets
+with a binary-capable framed protocol. JSON/CBOR/MessagePack/protobuf are implementation choices;
+the data model below is normative.</p>
+<p>Every request/event carries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>protocol_version
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>message_id
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>actor
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>trace_id
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>causal_parents[] where applicable
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>graph_revision where applicable
+</code></pre></div>
+<p>Large payloads are referenced as artifacts rather than copied through every message.</p>
+<hr />
+<h2 id="2-graph-api">2. Graph API<a class="headerlink" href="#2-graph-api" title="Permanent link">&para;</a></h2>
+<p>Minimum operations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>node.get(id)
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>node.resolve(alias)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>query.execute(query)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>query.subscribe(query)
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>transaction.commit(txn)
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>revision.get()
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>revision.read(revision, query)
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>provenance.expand(ref)
+</code></pre></div>
+<p><code>transaction.commit</code> is the only mutation path.</p>
+<p>A transaction response includes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>transaction_id
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>previous_revision
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>new_revision
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>changed_ids[]
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>event_payload_ref
+</code></pre></div>
+<hr />
+<h2 id="3-event-api">3. Event API<a class="headerlink" href="#3-event-api" title="Permanent link">&para;</a></h2>
+<p>Components publish events to OmnisAgent:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>event.publish(EventEnvelope)
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>event.publish_batch([...])
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>artifact.put(...)
+</code></pre></div>
+<p>Agent exposes durable subscriptions/query:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>worldline.tail(filter)
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>worldline.query(filter)
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>worldline.get(event_id)
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>worldline.causes(event_id)
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>worldline.effects(event_id)
+</code></pre></div>
+<p>Publishing success means Agent durably accepted the event or the configured local spool accepted it
+for lossless delivery. Silent event drop is not valid first-party behavior.</p>
+<hr />
+<h2 id="4-manager-api">4. Manager API<a class="headerlink" href="#4-manager-api" title="Permanent link">&para;</a></h2>
+<p>Minimum operations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>resource.get/list/search
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>capability.get/list/search
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>binding.get/list
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>binding.declare
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>resource.discover
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>capability.resolve
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>execution.start
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>execution.cancel
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>execution.get
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>placement.explain
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>protected.resolve_handle
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>nix.explain
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>nix.plan
+</code></pre></div>
+<h3 id="41-resolve-request">4.1 Resolve request<a class="headerlink" href="#41-resolve-request" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ResolveRequest
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  capability
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  inputs/schema refs
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  hard_constraints
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  soft_preferences
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  activity/actor
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  graph_revision
+</code></pre></div>
+<h3 id="42-resolve-result">4.2 Resolve result<a class="headerlink" href="#42-resolve-result" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>ResolveResult
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  candidate_bindings[]
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  selected_binding?
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  rejected_candidates + reasons
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  scoring/policy inputs
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  placement
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  required_authorities
+</code></pre></div>
+<p>No selected binding is acceptable when the caller requested discovery-only resolution.</p>
+<hr />
+<h2 id="5-omnisos-api">5. OmnisOS API<a class="headerlink" href="#5-omnisos-api" title="Permanent link">&para;</a></h2>
+<p>Minimum operations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>host.inventory
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>execution_envelope.create/destroy
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>system.evaluate(candidate)
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>system.build(candidate)
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>system.diff(active, candidate)
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>system.activate(generation)
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>system.rollback(generation)
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>system.generation.get/list
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>system.invariant.check
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>protected_handle.inject
+</code></pre></div>
+<p>Persistent mutation uses system candidate/generation APIs. Transient Manager executions use execution
+envelopes without changing system generation unless requested.</p>
+<hr />
+<h2 id="6-agent-api">6. Agent API<a class="headerlink" href="#6-agent-api" title="Permanent link">&para;</a></h2>
+<p>Agent is event-driven but exposes explicit operations for Control/CLI/Manager:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>agent.event
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>agent.ask / agent.intend
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>agent.memory.search
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>agent.memory.get
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>agent.memory.remember
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>agent.context.compile
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>agent.activity.get/list
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>agent.worker.get/list
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>agent.workflow.get/list
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>agent.worldline.query
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>agent.explain(identity/event/action)
+</code></pre></div>
+<p>Explicit calls become events and use the same worldline/memory semantics as spontaneous/external
+inputs.</p>
+<hr />
+<h2 id="7-control-api">7. Control API<a class="headerlink" href="#7-control-api" title="Permanent link">&para;</a></h2>
+<p>Control exposes structural operations, not simulated input, for first-party automation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>control.scene.get/list
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>control.materialize(graph_ids, intent)
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>control.focus(node)
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>control.select(nodes)
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>control.lens.set(lens)
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>control.mode.set(2d|3d)
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>control.layout.apply(...)
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>control.tree.transaction(...)
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>control.native_surface.attach(...)
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>control.navigate(address)
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>control.input.submit(...)
+</code></pre></div>
+<p>Every successful structural mutation emits a Control event to Agent.</p>
+<hr />
+<h2 id="8-artifact-references">8. Artifact references<a class="headerlink" href="#8-artifact-references" title="Permanent link">&para;</a></h2>
+<p>Large immutable data uses content-addressed artifact references:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>ArtifactRef
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  digest (BLAKE3)
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  length
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>  media_type
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>  protection metadata
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>  optional storage locator
+</code></pre></div>
+<p>Artifacts may include files, model output, logs, screenshots, patches, traces, large event payloads,
+and historical snapshots.</p>
+<p>Graph/event objects refer to artifacts; artifact storage does not become semantic authority.</p>
+<hr />
+<h2 id="9-protected-values">9. Protected values<a class="headerlink" href="#9-protected-values" title="Permanent link">&para;</a></h2>
+<p>Protocol values can be marked:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>public
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>local-only
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>agent-visible
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>model-local-only
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>model-external-denied
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>control-hidden
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>execution-handle-only
+</code></pre></div>
+<p>Protected values should normally travel as opaque handles. Serialization endpoints must enforce
+disclosure metadata rather than rely on callers to remember redaction.</p>
+<hr />
+<h2 id="10-versioning">10. Versioning<a class="headerlink" href="#10-versioning" title="Permanent link">&para;</a></h2>
+<p>Protocols use explicit semantic versioning.</p>
+<p>Rules:</p>
+<ul>
+<li>additive fields are backward compatible within a major version;</li>
+<li>unknown optional fields are ignored/preserved where forwarding is required;</li>
+<li>unknown required capability/field produces explicit incompatibility;</li>
+<li>identity formats cannot be silently reinterpreted;</li>
+<li>graph relation names are stable compatibility surface;</li>
+<li>migrations preserve semantic IDs and provenance.</li>
+</ul>
+<hr />
+<h2 id="11-tracing">11. Tracing<a class="headerlink" href="#11-tracing" title="Permanent link">&para;</a></h2>
+<p>One trace may cross all four components.</p>
+<p>Required correlation chain:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>user/control event
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  -&gt; Agent judgement/intention
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  -&gt; Manager resolution
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  -&gt; OS execution/generation
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>  -&gt; resulting graph changes
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  -&gt; Control update
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>  -&gt; Agent events
+</code></pre></div>
+<p>Tracing metadata is operational observability. Causal event IDs remain the semantic history.</p>
+<hr />
+<h2 id="12-failure-semantics">12. Failure semantics<a class="headerlink" href="#12-failure-semantics" title="Permanent link">&para;</a></h2>
+<p>Failures are explicit typed results/events.</p>
+<p>Required distinctions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>unresolved capability
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>ambiguous binding
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>constraint unsatisfied
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>placement unavailable
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>authority denied
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>protected-value denied
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>build failure
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>activation failure
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>execution failure
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>external effect ambiguous
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>protocol incompatible
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>graph conflict
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>Agent/model unavailable
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>Control unavailable
+</code></pre></div>
+<p>A model failure must not imply Manager/OS failure. The machine must retain deterministic operation
+without AI availability.</p>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="../OMNIS_CONTROL/">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">OmnisControl</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../architecture/decisions/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Overview</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/PROTOCOLS.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-transport-rule">1. Transport rule</a>
+          </li>
+          <li><a href="#2-graph-api">2. Graph API</a>
+          </li>
+          <li><a href="#3-event-api">3. Event API</a>
+          </li>
+          <li><a href="#4-manager-api">4. Manager API</a>
+            <ul>
+              <li><a href="#41-resolve-request">4.1 Resolve request</a></li>
+              <li><a href="#42-resolve-result">4.2 Resolve result</a></li>
+            </ul>
+          </li>
+          <li><a href="#5-omnisos-api">5. OmnisOS API</a>
+          </li>
+          <li><a href="#6-agent-api">6. Agent API</a>
+          </li>
+          <li><a href="#7-control-api">7. Control API</a>
+          </li>
+          <li><a href="#8-artifact-references">8. Artifact references</a>
+          </li>
+          <li><a href="#9-protected-values">9. Protected values</a>
+          </li>
+          <li><a href="#10-versioning">10. Versioning</a>
+          </li>
+          <li><a href="#11-tracing">11. Tracing</a>
+          </li>
+          <li><a href="#12-failure-semantics">12. Failure semantics</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>

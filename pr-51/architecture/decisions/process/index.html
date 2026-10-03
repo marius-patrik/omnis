@@ -1,0 +1,365 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Process · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../../../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="../../..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../..">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="architecture-decisions-process">Architecture decisions — process<a class="headerlink" href="#architecture-decisions-process" title="Permanent link">&para;</a></h1>
+<p><code>ARCHITECTURE.md</code> is the normative system architecture. Supporting specifications under <code>docs/</code>
+refine implementation contracts. ADRs record architectural choices, supersessions, and the reasoning
+behind them. Historical source material in <code>notes/transcript.md</code> is never normative on its own.</p>
+<p>ADR-0023 is the architecture reset that establishes OmnisOS, OmnisManager, OmnisAgent, OmnisControl,
+the shared multidimensional graph, and the Agent worldline. Earlier ADRs remain binding only where
+they do not conflict with ADR-0023 or the current normative architecture.</p>
+<h2 id="when-an-adr-is-required">When an ADR is required<a class="headerlink" href="#when-an-adr-is-required" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A change would alter a normative invariant in <code>ARCHITECTURE.md</code> or a supporting subsystem spec.</li>
+<li>A cross-component protocol or graph ownership rule changes.</li>
+<li>A previously accepted ADR must be superseded or narrowed.</li>
+<li>Historical/source material is intentionally promoted into normative architecture.</li>
+</ul>
+<p>Pure implementation choices that preserve the normative contracts do not need ADRs.</p>
+<h2 id="status-values">Status values<a class="headerlink" href="#status-values" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Proposed</code></td>
+<td>Written, awaiting maintainer approval; non-binding.</td>
+</tr>
+<tr>
+<td><code>Accepted</code></td>
+<td>Binding unless superseded by a later ADR or normative architecture reset.</td>
+</tr>
+<tr>
+<td><code>Superseded by ADR-NNNN</code></td>
+<td>Historical reasoning only; no longer binds implementation.</td>
+</tr>
+</tbody>
+</table>
+<p>Records remain append-only in substance: a changed decision gets a new ADR. Updating an older
+record's status to point at its superseding ADR is allowed and expected.</p>
+<h2 id="specification-sequence">Specification sequence<a class="headerlink" href="#specification-sequence" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ARCHITECTURE.md
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; supporting specs in docs/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; ADRs for unresolved architectural choices
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; ROADMAP.md
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; tracked implementation issues/plans
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; code
+</code></pre></div>
+<p>Issues should track settled implementation work, not become the place where the architecture is
+invented.</p>
+<h2 id="writing-an-adr">Writing an ADR<a class="headerlink" href="#writing-an-adr" title="Permanent link">&para;</a></h2>
+<p>Create <code>notes/adr/NNNN-kebab-case-title.md</code> with the next free number. Every ADR must contain:</p>
+<ul>
+<li>a parseable <code># ADR-NNNN — Title</code> heading;</li>
+<li>a <code>**Status**:</code> line;</li>
+<li><code>## Context</code>;</li>
+<li><code>## Decision</code>;</li>
+<li><code>## Alternatives rejected</code>;</li>
+<li><code>## Consequences</code>.</li>
+</ul>
+<p>The documentation site discovers ADRs automatically; do not maintain a second static index.</p>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="../0023-graph-native-os-architecture-reset/">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../../../declaration/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">The declaration</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#when-an-adr-is-required">When an ADR is required</a>
+          </li>
+          <li><a href="#status-values">Status values</a>
+          </li>
+          <li><a href="#specification-sequence">Specification sequence</a>
+          </li>
+          <li><a href="#writing-an-adr">Writing an ADR</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">"../../.."</script>
+    <script src="../../../assets/theme.js" defer></script>
+    <script src="../../../search/main.js" defer></script>
+  </body>
+</html>

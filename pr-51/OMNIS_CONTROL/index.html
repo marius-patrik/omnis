@@ -1,0 +1,599 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OmnisControl · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omniscontrol">OmnisControl<a class="headerlink" href="#omniscontrol" title="Permanent link">&para;</a></h1>
+<p><strong>Status: normative supporting specification.</strong></p>
+<p>OmnisControl is the interactive control environment of Omnis. It owns the graph desktop, Control
+tree, input/navigation, shell integration, native surface composition, and GPU rendering.</p>
+<p>It replaces the old <code>OmnisGUI</code> concept because rendering is only one part of its responsibility.</p>
+<hr />
+<h2 id="1-desktop-thesis">1. Desktop thesis<a class="headerlink" href="#1-desktop-thesis" title="Permanent link">&para;</a></h2>
+<p>Omnis has a desktop, but the desktop is not an application launcher plus windows. It is an
+interactive projection of the shared multidimensional graph.</p>
+<p>Everything visible should either:</p>
+<ul>
+<li>represent one or more shared graph identities; or</li>
+<li>be ephemeral Control structure required to arrange/interact with those identities.</li>
+</ul>
+<p>The primary desktop modes are <strong>2D</strong> and <strong>3D</strong>. They are different spatial projections of the same
+state, not separate applications or backends.</p>
+<hr />
+<h2 id="2-2d-mode">2. 2D mode<a class="headerlink" href="#2-2d-mode" title="Permanent link">&para;</a></h2>
+<p>2D is the precision/control mode, inspired by Airgraph-like focus navigation and Blueprint/node
+editors without exposing an unreadable wall of nodes.</p>
+<p>Required behaviors:</p>
+<ul>
+<li>focus+context neighborhoods;</li>
+<li>typed relations/ports where useful;</li>
+<li>semantic clustering/collapse;</li>
+<li>smooth re-centering on selected identity;</li>
+<li>inline inspectors;</li>
+<li>edge/lens filtering;</li>
+<li>DAG/workflow editing where the underlying object is executable structure;</li>
+<li>drag/drop operations mapped to semantic graph actions;</li>
+<li>pane/split representations when dense conventional layouts are superior;</li>
+<li>timeline integration.</li>
+</ul>
+<p>The complete graph is never the default view. Control queries the relevant neighborhood for current
+focus/lens/LOD.</p>
+<hr />
+<h2 id="3-3d-mode">3. 3D mode<a class="headerlink" href="#3-3d-mode" title="Permanent link">&para;</a></h2>
+<p>3D is the large-scale spatial exploration mode.</p>
+<p>The extra dimension must encode meaning, such as:</p>
+<ul>
+<li>causal depth;</li>
+<li>time;</li>
+<li>abstraction level;</li>
+<li>host/physical topology;</li>
+<li>semantic cluster separation;</li>
+<li>activity/workflow depth.</li>
+</ul>
+<p>3D may not add arbitrary depth merely for appearance.</p>
+<p>Navigation must preserve stable identity and allow seamless transition back to 2D at the same focus,
+selection, lens, and timeline frontier.</p>
+<hr />
+<h2 id="4-lenses">4. Lenses<a class="headerlink" href="#4-lenses" title="Permanent link">&para;</a></h2>
+<p>The same focus can be projected through lenses including:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>physical
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>system
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>resource
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>capability
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>binding
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>execution
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>causal
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>activity
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>authority
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>memory/cognitive
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>provenance
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>temporal
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>presentation
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>network
+</code></pre></div>
+<p>A lens changes which relations, annotations, clusters, and controls are emphasized. It does not
+change graph identity.</p>
+<p>Multiple compatible dimensions may be overlaid.</p>
+<hr />
+<h2 id="5-semantic-levels-of-detail">5. Semantic levels of detail<a class="headerlink" href="#5-semantic-levels-of-detail" title="Permanent link">&para;</a></h2>
+<p>Zoom/focus depth changes semantic granularity rather than only visual scale.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>far      -&gt; hosts, projects, major activities, memory regions
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>medium   -&gt; services, workflows, repositories, worker groups, capability clusters
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>near     -&gt; processes, executions, events, files, workers, resources
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>closer   -&gt; context, evidence, tool calls, graph mutations, AST/workflow nodes
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>inspect  -&gt; raw artifacts, source, model output, traces, exact properties
+</code></pre></div>
+<p>Collapsed clusters retain stable identity where they correspond to meaningful graph groups.</p>
+<hr />
+<h2 id="6-timelineworldline">6. Timeline/worldline<a class="headerlink" href="#6-timelineworldline" title="Permanent link">&para;</a></h2>
+<p>Control exposes OmnisAgent's causal worldline as a first-class navigation dimension.</p>
+<p>Timeline interaction must support:</p>
+<ul>
+<li>chronological browsing;</li>
+<li>causal branches;</li>
+<li>worker/activity lanes;</li>
+<li>speculative/self-evolution branches;</li>
+<li>selecting a historical event/frontier;</li>
+<li>reconstructing available graph/memory projections for that frontier where retained data permits;</li>
+<li>returning to live state.</li>
+</ul>
+<p>The timeline is not merely a log viewer.</p>
+<hr />
+<h2 id="7-control-tree">7. Control tree<a class="headerlink" href="#7-control-tree" title="Permanent link">&para;</a></h2>
+<p>Control builds <code>ControlTree</code> from graph projections.</p>
+<p>Conceptual node classes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Container/Layout
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>GraphProjection
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Text/Glyph content
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Terminal/PTYShell
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Document/Editor
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>Table
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>Chart/Plot
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>2DGraph
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>3DGraph
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>Media
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>Inspector
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>NativeSurface
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>InputSurface
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>Overlay
+</code></pre></div>
+<p>These are presentation constructs, not new domain identities.</p>
+<p>A control representing a graph object stores that <code>NodeId</code> directly.</p>
+<hr />
+<h2 id="8-render-scene">8. Render scene<a class="headerlink" href="#8-render-scene" title="Permanent link">&para;</a></h2>
+<p>Control lowers <code>ControlTree</code> to a GPU-oriented scene. Initial primitives may include:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>quad
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>text/glyph run
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>path/vector geometry
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>texture/render target
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>material/3D layer
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>native/delegated surface region
+</code></pre></div>
+<p>This scene is private render IR and can be aggressively optimized/rebuilt.</p>
+<p>It must never become the semantic source of truth.</p>
+<hr />
+<h2 id="9-renderer-implementation">9. Renderer implementation<a class="headerlink" href="#9-renderer-implementation" title="Permanent link">&para;</a></h2>
+<p>Initial Linux implementation should use:</p>
+<ul>
+<li>Wayland compositor foundations from Smithay or equivalent modular compositor tooling;</li>
+<li>wgpu or equivalent modern GPU abstraction;</li>
+<li>a mature text shaping/font stack;</li>
+<li>XWayland compatibility;</li>
+<li>platform accessibility publication;</li>
+<li>direct input handling.</li>
+</ul>
+<p>Omnis should not fork a full traditional desktop environment because that would import the wrong
+interaction ontology.</p>
+<p>A small compositor skeleton/fork is acceptable where it accelerates DRM/KMS/input/Wayland bootstrap.</p>
+<hr />
+<h2 id="10-native-applications">10. Native applications<a class="headerlink" href="#10-native-applications" title="Permanent link">&para;</a></h2>
+<p>Existing Wayland/XWayland applications run unmodified.</p>
+<p>A native application surface is represented in the graph and delegated to the compositor in a
+<code>NativeSurface</code> Control region.</p>
+<p>Control may know/process:</p>
+<ul>
+<li>surface identity;</li>
+<li>owning process/resource;</li>
+<li>geometry/z-order;</li>
+<li>focus/input routing;</li>
+<li>accessibility/protocol metadata;</li>
+<li>associated Manager capabilities.</li>
+</ul>
+<p>It does not need to re-render application pixels when native composition is more correct or required.</p>
+<hr />
+<h2 id="11-webbrowser-content">11. Web/browser content<a class="headerlink" href="#11-webbrowser-content" title="Permanent link">&para;</a></h2>
+<p>"Browser" is not a second Omnis renderer.</p>
+<p>Web content may be represented through several levels:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>semantic DOM/accessibility translation into Control primitives
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>browser engine surface/native surface
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>texture capture when appropriate
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>external browser application surface
+</code></pre></div>
+<p>Navigation state and web identities are graph-addressable. Exact URL input should bypass broad Agent
+reasoning.</p>
+<hr />
+<h2 id="12-shell">12. Shell<a class="headerlink" href="#12-shell" title="Permanent link">&para;</a></h2>
+<p>The shell is a first-class Control surface and may be the default focused view at boot.</p>
+<p>It must expose real Linux shell semantics rather than reimplementing them incompletely:</p>
+<ul>
+<li>pipes/redirection;</li>
+<li>job control;</li>
+<li>environment;</li>
+<li>TTY/PTY behavior;</li>
+<li>signals;</li>
+<li>interactive programs;</li>
+<li>completions.</li>
+</ul>
+<p>Control wraps/hosts a real shell execution backend while adding graph-aware resolution around it.</p>
+<hr />
+<h2 id="13-unified-input-resolver">13. Unified input resolver<a class="headerlink" href="#13-unified-input-resolver" title="Permanent link">&para;</a></h2>
+<p>One primary input surface can route:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>shell syntax/executable -&gt; shell
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>URI/path/address        -&gt; navigate/open
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Graph NodeId/alias      -&gt; focus/materialize
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>known capability        -&gt; Manager invoke
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>structured Control cmd  -&gt; Control mutation
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>otherwise               -&gt; Agent semantic event
+</code></pre></div>
+<p>The resolver should use deterministic parsing before classification/LLM reasoning.</p>
+<hr />
+<h2 id="14-user-and-agent-authority">14. User and Agent authority<a class="headerlink" href="#14-user-and-agent-authority" title="Permanent link">&para;</a></h2>
+<p>User and Agent interact with the same Control state but through different affordances.</p>
+<p>User:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>click/type/drag/scroll/select/focus/gesture/voice
+</code></pre></div>
+<p>Agent:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>query graph projection
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>create/remove/replace Control nodes
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>change lens
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>change focus/selection
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>bind identities/data/capabilities
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>restructure layout
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>materialize a resource
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>attach interactions
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>open native surfaces
+</code></pre></div>
+<p>Agent therefore has <strong>more structural access to Control than the user interface exposes directly</strong>.
+This is intentional. Machine authority for external effects remains governed by Manager/OS execution
+capabilities; Control structural access alone does not grant arbitrary filesystem/network/secret
+access.</p>
+<hr />
+<h2 id="15-events">15. Events<a class="headerlink" href="#15-events" title="Permanent link">&para;</a></h2>
+<p>Every meaningful Control transition emits an Agent event, including:</p>
+<ul>
+<li>input submissions;</li>
+<li>clicks/selections/focus;</li>
+<li>navigation;</li>
+<li>drag/drop semantic operations;</li>
+<li>scene/control mutations;</li>
+<li>2D/3D toggle;</li>
+<li>lens/timeline changes;</li>
+<li>native surface lifecycle;</li>
+<li>shell lifecycle/results;</li>
+<li>generated visualization interactions.</li>
+</ul>
+<p>Agent-originated Control mutations also emit events so their consequences are part of the same
+causal history.</p>
+<hr />
+<h2 id="16-accessibility">16. Accessibility<a class="headerlink" href="#16-accessibility" title="Permanent link">&para;</a></h2>
+<p>Because Control owns custom rendering, native accessibility trees are mandatory, not optional.</p>
+<p>Graph semantics should improve accessibility: a rendered identity already has role, label,
+relationships, actions, and provenance that can inform AT-SPI and other platform accessibility
+interfaces.</p>
+<p>Delegated native surfaces retain their platform accessibility semantics where available.</p>
+<hr />
+<h2 id="17-persistence">17. Persistence<a class="headerlink" href="#17-persistence" title="Permanent link">&para;</a></h2>
+<p>Presentation state may be transient or persistent.</p>
+<p>Persistent Control state includes only useful user/system intent such as:</p>
+<ul>
+<li>saved workspaces/scenes;</li>
+<li>pinned identities;</li>
+<li>preferred lenses/layouts;</li>
+<li>keymaps/themes;</li>
+<li>explicit materializations.</li>
+</ul>
+<p>Incidental render/layout cache state remains ephemeral.</p>
+<p>Agent may propose/persist useful workspace arrangements through the same Control state APIs.</p>
+<hr />
+<h2 id="18-hard-invariants">18. Hard invariants<a class="headerlink" href="#18-hard-invariants" title="Permanent link">&para;</a></h2>
+<ol>
+<li>One semantic object retains one shared graph identity in every view.</li>
+<li>2D and 3D are projections of the same Control/graph state.</li>
+<li>Switching mode preserves focus/selection/lens/frontier.</li>
+<li>Control does not maintain a competing semantic scene graph.</li>
+<li>Render scene is an implementation lowering.</li>
+<li>Every meaningful interaction emits an Agent event.</li>
+<li>Agent has direct structural Control access.</li>
+<li>Existing native apps remain runnable without Omnis rewrites.</li>
+<li>Shell is real Linux shell execution, not an imitation.</li>
+<li>Deterministic routing precedes model reasoning.</li>
+</ol>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="../OMNIS_AGENT/">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">OmnisAgent</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../PROTOCOLS/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Protocols</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/OMNIS_CONTROL.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-desktop-thesis">1. Desktop thesis</a>
+          </li>
+          <li><a href="#2-2d-mode">2. 2D mode</a>
+          </li>
+          <li><a href="#3-3d-mode">3. 3D mode</a>
+          </li>
+          <li><a href="#4-lenses">4. Lenses</a>
+          </li>
+          <li><a href="#5-semantic-levels-of-detail">5. Semantic levels of detail</a>
+          </li>
+          <li><a href="#6-timelineworldline">6. Timeline/worldline</a>
+          </li>
+          <li><a href="#7-control-tree">7. Control tree</a>
+          </li>
+          <li><a href="#8-render-scene">8. Render scene</a>
+          </li>
+          <li><a href="#9-renderer-implementation">9. Renderer implementation</a>
+          </li>
+          <li><a href="#10-native-applications">10. Native applications</a>
+          </li>
+          <li><a href="#11-webbrowser-content">11. Web/browser content</a>
+          </li>
+          <li><a href="#12-shell">12. Shell</a>
+          </li>
+          <li><a href="#13-unified-input-resolver">13. Unified input resolver</a>
+          </li>
+          <li><a href="#14-user-and-agent-authority">14. User and Agent authority</a>
+          </li>
+          <li><a href="#15-events">15. Events</a>
+          </li>
+          <li><a href="#16-accessibility">16. Accessibility</a>
+          </li>
+          <li><a href="#17-persistence">17. Persistence</a>
+          </li>
+          <li><a href="#18-hard-invariants">18. Hard invariants</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>

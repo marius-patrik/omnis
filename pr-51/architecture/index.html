@@ -1,0 +1,1121 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Overview · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section nav__section--active">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link nav__link--active"
+         href="./">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-architecture">Omnis — Architecture<a class="headerlink" href="#omnis-architecture" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> This document defines the system architecture. Supporting documents may
+expand implementation detail but must not contradict it.</p>
+<p>Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
+not a desktop application, an AI assistant, a shell wrapper, or a new programming language.</p>
+<p>The system has four first-class authorities:</p>
+<ol>
+<li><strong>OmnisOS</strong> — physical/system authority.</li>
+<li><strong>OmnisManager</strong> — resource/capability authority.</li>
+<li><strong>OmnisAgent</strong> — cognitive/event/memory authority.</li>
+<li><strong>OmnisControl</strong> — interaction/presentation authority.</li>
+</ol>
+<p>They share one multidimensional graph and one stable identity space. They do not maintain competing
+models of the same object.</p>
+<hr />
+<h2 id="1-architectural-thesis">1. Architectural thesis<a class="headerlink" href="#1-architectural-thesis" title="Permanent link">&para;</a></h2>
+<p>Omnis is built around five statements.</p>
+<h3 id="11-one-world-one-graph">1.1 One world, one graph<a class="headerlink" href="#11-one-world-one-graph" title="Permanent link">&para;</a></h3>
+<p>Every meaningful object in the machine has one stable identity in a shared multidimensional graph.
+A repository, process, model, package, host, GPU, capability, worker, memory, scene, surface, or Nix
+generation is not copied into four subsystem-specific databases and reconciled later.</p>
+<p>Different components contribute different dimensions and relations over the same identities.</p>
+<h3 id="12-one-worldline">1.2 One worldline<a class="headerlink" href="#12-one-worldline" title="Permanent link">&para;</a></h3>
+<p>OmnisAgent stores the immutable causal worldline of experience. The graph is current structured
+state; the worldline is what happened.</p>
+<p>The graph may be rebuilt, reinterpreted, reindexed, or projected differently. Historical events are
+not silently rewritten to match newer interpretations.</p>
+<h3 id="13-bind-reality-do-not-require-it-to-become-omnis">1.3 Bind reality; do not require it to become Omnis<a class="headerlink" href="#13-bind-reality-do-not-require-it-to-become-omnis" title="Permanent link">&para;</a></h3>
+<p>Existing applications, CLIs, services, libraries, models, agent harnesses, containers, VMs, package
+managers, protocols, and devices remain real external systems. Omnis discovers, binds, controls, and
+progressively understands them.</p>
+<p>Reimplementation requires a material reason. Integration is preferred to replacement.</p>
+<h3 id="14-ai-chooses-semantics-deterministic-systems-realize-physics">1.4 AI chooses semantics; deterministic systems realize physics<a class="headerlink" href="#14-ai-chooses-semantics-deterministic-systems-realize-physics" title="Permanent link">&para;</a></h3>
+<p>AI never becomes part of Nix evaluation or another deterministic build primitive.</p>
+<p>OmnisAgent may form an intention. OmnisManager resolves resources, capabilities, bindings, and
+placement. OmnisOS deterministically realizes persistent state and enforces physical constraints.</p>
+<h3 id="15-the-interface-is-the-graph-made-interactive">1.5 The interface is the graph made interactive<a class="headerlink" href="#15-the-interface-is-the-graph-made-interactive" title="Permanent link">&para;</a></h3>
+<p>OmnisControl does not maintain a separate semantic UI universe. It projects graph identities into a
+control tree, lowers that tree into render state, and emits interactions back as graph mutations and
+events.</p>
+<p>The Agent receives events directly and can structurally mutate Control state. It does not need to
+observe screenshots or simulate clicks for first-party surfaces.</p>
+<hr />
+<h2 id="2-system-topology">2. System topology<a class="headerlink" href="#2-system-topology" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                                    USER
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                      │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                                      ▼
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                               ┌──────────────┐
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                               │ OmnisControl │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                               └──────┬───────┘
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                                      │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                      ▼
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                        SHARED MULTIDIMENSIONAL GRAPH
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                      │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>            ┌─────────────────────────┼─────────────────────────┐
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>            │                         │                         │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            ▼                         ▼                         ▼
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>       ┌─────────┐              ┌──────────────┐           ┌────────────┐
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>       │ OmnisOS │              │ OmnisManager │           │ OmnisAgent │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>       └────┬────┘              └──────┬───────┘           └─────┬──────┘
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            │                          │                         │
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>            │ physical realization     │ capability execution    │ cognition
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>            └──────────────┬───────────┴───────────────┬─────────┘
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                           ▼                           ▼
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                        Linux                      external reality
+</code></pre></div>
+<p>Every meaningful transition produced by OS, Manager, Control, external integrations, or Agent
+workers enters OmnisAgent's event gateway.</p>
+<p>The graph substrate is <strong>not a fifth product or semantic authority</strong>. It is a shared system ABI and
+current-state substrate supplied by OmnisOS and used by all four components.</p>
+<hr />
+<h2 id="3-shared-multidimensional-graph">3. Shared multidimensional graph<a class="headerlink" href="#3-shared-multidimensional-graph" title="Permanent link">&para;</a></h2>
+<h3 id="31-purpose">3.1 Purpose<a class="headerlink" href="#31-purpose" title="Permanent link">&para;</a></h3>
+<p>The graph is the common current-state model of the machine and its cognitive/interactive extensions.
+It exists so every subsystem can refer to the same object without copying identity.</p>
+<p>A process may simultaneously participate in physical, resource, causal, activity, authority,
+temporal, cognitive, and presentation dimensions while remaining one process identity.</p>
+<h3 id="32-core-representation">3.2 Core representation<a class="headerlink" href="#32-core-representation" title="Permanent link">&para;</a></h3>
+<p>The graph is a dynamic property graph with stable opaque identities.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Node
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  id
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  kinds[]
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  properties{}
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  provenance[]
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>Edge
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  id
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  source
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  relation
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  target
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  dimensions[]
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  properties{}
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  validity
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  provenance[]
+</code></pre></div>
+<p>Semantic identities use stable opaque IDs independent of filesystem path, PID, Nix store path,
+host, model provider, UI location, or current implementation.</p>
+<p>Immutable artifacts may additionally use content identities.</p>
+<h3 id="33-dimensions">3.3 Dimensions<a class="headerlink" href="#33-dimensions" title="Permanent link">&para;</a></h3>
+<p>Dimensions are typed relation/property namespaces over shared identities. The initial required
+dimensions are:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>physical       hardware, process, filesystem, network, device, service
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>system         desired configuration, generation, invariant, realization
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>resource       package, executable, library, model, endpoint, runtime
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>capability     provides, requires, implements, declines
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>binding        semantic/resource identity -&gt; concrete realization
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>execution      invocation, placement, lifecycle, resource consumption
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>causal         caused_by, emitted, derived_from, observed
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>provenance     source, version, hash, discovery method, evidence
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>authority      may_access, may_invoke, protected_by, credential handle
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>temporal       valid_from, valid_until, created_at, active interval
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>activity       project, goal, task, worker, execution membership
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>cognitive      memory, belief, hypothesis, context, attention, procedure
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>presentation   scene, view, focus, selection, lens, layout, surface
+</code></pre></div>
+<p>The dimension set is extensible. New dimensions must reuse existing identities rather than minting
+parallel shadow objects for the same thing.</p>
+<h3 id="34-write-ownership">3.4 Write ownership<a class="headerlink" href="#34-write-ownership" title="Permanent link">&para;</a></h3>
+<p>Each authority owns canonical writes to particular dimensions:</p>
+<table>
+<thead>
+<tr>
+<th>Authority</th>
+<th>Canonical writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OmnisOS</td>
+<td>physical, system, enforcement facts, graph substrate state</td>
+</tr>
+<tr>
+<td>OmnisManager</td>
+<td>resource, capability, binding, placement, execution facts</td>
+</tr>
+<tr>
+<td>OmnisAgent</td>
+<td>cognitive, memory, goal, context, learned semantic relations</td>
+</tr>
+<tr>
+<td>OmnisControl</td>
+<td>presentation, focus, selection, interactive layout/control state</td>
+</tr>
+</tbody>
+</table>
+<p>Cross-authority references are normal. Cross-authority mutation must go through the owning API or a
+validated graph transaction.</p>
+<h3 id="35-graph-transactions">3.5 Graph transactions<a class="headerlink" href="#35-graph-transactions" title="Permanent link">&para;</a></h3>
+<p>Graph updates are atomic transactions containing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>actor
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>causal parents
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>preconditions
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>mutations
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>provenance
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>authority namespace
+</code></pre></div>
+<p>A committed transaction increments graph revision and emits one or more normalized events to
+OmnisAgent.</p>
+<p>The graph service may keep an implementation WAL for crash recovery. That WAL is not a replacement
+for OmnisAgent's causal worldline.</p>
+<h3 id="36-internal-graph-service">3.6 Internal graph service<a class="headerlink" href="#36-internal-graph-service" title="Permanent link">&para;</a></h3>
+<p>OmnisOS provides a minimal internal service, working name <code>omnis-graphd</code>, responsible only for:</p>
+<ul>
+<li>stable identity allocation;</li>
+<li>atomic graph transactions;</li>
+<li>current-state storage;</li>
+<li>subscriptions/change streams;</li>
+<li>indexed graph queries;</li>
+<li>authority/write validation;</li>
+<li>revisioning and local recovery.</li>
+</ul>
+<p>It contains no cognition, capability policy, UI logic, package semantics, or memory semantics.</p>
+<p>The first implementation may use SQLite/WAL plus purpose-built indexes. Storage is replaceable; the
+graph contract is not.</p>
+<hr />
+<h2 id="4-worldline-and-events">4. Worldline and events<a class="headerlink" href="#4-worldline-and-events" title="Permanent link">&para;</a></h2>
+<h3 id="41-ownership">4.1 Ownership<a class="headerlink" href="#41-ownership" title="Permanent link">&para;</a></h3>
+<p>OmnisAgent owns the canonical event worldline.</p>
+<p>Every meaningful transition from a first-party component must be represented as an event. Components
+do not require Agent polling to discover their state transitions.</p>
+<h3 id="42-event-shape">4.2 Event shape<a class="headerlink" href="#42-event-shape" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Event
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  id
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  type
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  schema
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  source
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  actor
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  timestamp
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  causal_parents[]
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  graph_revision
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>  entities[]
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>  artifact_refs[]
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>  payload_ref
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>  provenance
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>  correlation/trace
+</code></pre></div>
+<p>Events form an append sequence for replay and a causal DAG for meaning.</p>
+<h3 id="43-event-coverage">4.3 Event coverage<a class="headerlink" href="#43-event-coverage" title="Permanent link">&para;</a></h3>
+<p>Required event producers include:</p>
+<ul>
+<li>graph transactions;</li>
+<li>keyboard, pointer, focus, selection, navigation, and control interactions;</li>
+<li>scene/control-tree changes;</li>
+<li>process/service lifecycle;</li>
+<li>filesystem/repository changes;</li>
+<li>package/build/generation activity;</li>
+<li>device/network/resource changes;</li>
+<li>Manager discovery/resolution/execution;</li>
+<li>model and inference requests/results;</li>
+<li>external agent harness lifecycle/tool results;</li>
+<li>Agent worker lifecycle/results;</li>
+<li>memory/context/consolidation events;</li>
+<li>internally generated Agent events.</li>
+</ul>
+<p>High-frequency physical telemetry may be represented through lossless aggregation windows or
+referenced artifacts, but causal identity and provenance must not disappear merely because the Agent
+cannot process each raw sample synchronously.</p>
+<h3 id="44-graph-versus-worldline">4.4 Graph versus worldline<a class="headerlink" href="#44-graph-versus-worldline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>worldline = historical causal truth
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>shared graph = current structured state
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>indexes = derived query accelerators
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Control tree = interactive projection
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>render scene = GPU-oriented lowering
+</code></pre></div>
+<p>No derived layer becomes canonical merely because it is convenient to query.</p>
+<hr />
+<h2 id="5-omnisos">5. OmnisOS<a class="headerlink" href="#5-omnisos" title="Permanent link">&para;</a></h2>
+<p>OmnisOS is the operating-system substrate. It is initially a Linux distribution derived from a
+maintained fork of <code>nixpkgs</code>/NixOS. Linux remains the hardware kernel; OmnisOS is the system kernel in
+Omnis product architecture.</p>
+<h3 id="51-responsibilities">5.1 Responsibilities<a class="headerlink" href="#51-responsibilities" title="Permanent link">&para;</a></h3>
+<p>OmnisOS owns:</p>
+<ul>
+<li>boot and system activation;</li>
+<li>hardware and driver integration;</li>
+<li>users and sessions;</li>
+<li>filesystems and mounts;</li>
+<li>networking;</li>
+<li>service/process supervision integration;</li>
+<li>NixOS system configuration;</li>
+<li>system generations and rollback;</li>
+<li>physical resource enforcement;</li>
+<li>isolation and authority enforcement;</li>
+<li>host identity and remote-host participation;</li>
+<li>publication of authoritative physical/system facts into the graph;</li>
+<li>the shared graph substrate.</li>
+</ul>
+<h3 id="52-nixos-fork">5.2 NixOS fork<a class="headerlink" href="#52-nixos-fork" title="Permanent link">&para;</a></h3>
+<p>OmnisOS must remain compatible with nixpkgs packages and as much upstream NixOS module behavior as
+possible. The fork exists to add deep graph/event/control integration, not to gratuitously diverge
+from the package ecosystem.</p>
+<p>Upstream changes should be carried as a minimal reviewable patch stack until a permanent divergence
+is justified.</p>
+<h3 id="53-desired-and-actual-state">5.3 Desired and actual state<a class="headerlink" href="#53-desired-and-actual-state" title="Permanent link">&para;</a></h3>
+<p>OmnisOS maintains a distinction between:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>desired persistent system state
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>actual physical/runtime system state
+</code></pre></div>
+<p>Nix/NixOS realizes the first. Runtime observation publishes the second. Their relationship is visible
+in the graph.</p>
+<h3 id="54-invariants">5.4 Invariants<a class="headerlink" href="#54-invariants" title="Permanent link">&para;</a></h3>
+<p>IOE's invariant concept survives as system-level machine constraints rather than language syntax.
+Examples include:</p>
+<ul>
+<li>a required service is reachable;</li>
+<li>a protected model must remain local;</li>
+<li>a worker may consume at most a resource envelope;</li>
+<li>a credential must not be disclosed into model context;</li>
+<li>a host must provide a required capability before placement;</li>
+<li>a persistent package/service relationship remains satisfied.</li>
+</ul>
+<p>Pure configuration invariants should be checked before activation where possible. Runtime invariants
+may be continuously evaluated from current graph state and enforced by physical mechanisms.</p>
+<h3 id="55-physical-enforcement">5.5 Physical enforcement<a class="headerlink" href="#55-physical-enforcement" title="Permanent link">&para;</a></h3>
+<p>Semantic authority must compile into real physical authority. Depending on the operation, OmnisOS may
+use Linux mechanisms such as namespaces, cgroups, seccomp, LSM/Landlock/eBPF hooks, UID/GID
+boundaries, mount/network namespaces, device isolation, and credential brokers.</p>
+<p>The Agent may reason freely; execution receives only the capabilities physically granted to it.</p>
+<h3 id="56-reference-configurationnnthe-umbrella-repository-carries-an-illustrative-omnisos-configuration-at-examplesomnisnix-the-exact-option-paths-may-evolve-until-the-omnisos-module-schema-is-implemented-the-four-authority-split-and-persistenttransient-boundary-are-normativenn-57-persistent-transitions">5.6 Reference configuration\n\nThe umbrella repository carries an illustrative OmnisOS configuration at <a href="../declaration/"><code>examples/omnis.nix</code></a>. The exact option paths may evolve until the OmnisOS module schema is implemented; the four-authority split and persistent/transient boundary are normative.\n\n### 5.7 Persistent transitions<a class="headerlink" href="#56-reference-configurationnnthe-umbrella-repository-carries-an-illustrative-omnisos-configuration-at-examplesomnisnix-the-exact-option-paths-may-evolve-until-the-omnisos-module-schema-is-implemented-the-four-authority-split-and-persistenttransient-boundary-are-normativenn-57-persistent-transitions" title="Permanent link">&para;</a></h3>
+<p>Persistent structural changes use candidate system generations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Agent/user intention
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  -&gt; Manager resolves plan/resources
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  -&gt; candidate NixOS configuration
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  -&gt; evaluate
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  -&gt; build
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  -&gt; inspect graph/closure diff
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  -&gt; activate generation
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>  -&gt; publish resulting events/state
+</code></pre></div>
+<p>Transient actions such as opening an application, running a compiler, navigating a URL, or invoking
+a model do not create NixOS generations unless the desired persistent state changes.</p>
+<hr />
+<h2 id="6-omnismanager">6. OmnisManager<a class="headerlink" href="#6-omnismanager" title="Permanent link">&para;</a></h2>
+<p>OmnisManager is a maintained fork/extension of <code>NixOS/nix</code>. It preserves Nix's evaluator, store,
+derivations, package/environment semantics, and ecosystem compatibility while extending the manager
+into a universal resource/capability/binding layer.</p>
+<h3 id="61-canonical-concepts">6.1 Canonical concepts<a class="headerlink" href="#61-canonical-concepts" title="Permanent link">&para;</a></h3>
+<p>The Manager intentionally keeps its ontology small:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Resource     something available or realizable
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Capability   something that can be done
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>Binding      a resource/foreign identity can realize a capability
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>Execution    one concrete use of a binding
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>Constraint   a condition on resolution, placement, or execution
+</code></pre></div>
+<p>Packages, models, harnesses, GPUs, services, CLIs, APIs, libraries, devices, containers, VMs,
+credentials, and remote hosts are resources rather than separate architecture families.</p>
+<h3 id="62-nix-integration">6.2 Nix integration<a class="headerlink" href="#62-nix-integration" title="Permanent link">&para;</a></h3>
+<p>Nix remains the canonical mechanism for packages, derivations, store paths, environments, and builds.
+Manager adds graph identities and semantic metadata above physical realizations.</p>
+<p>A resource identity survives changes in:</p>
+<ul>
+<li>store path;</li>
+<li>version;</li>
+<li>host;</li>
+<li>provider;</li>
+<li>runtime;</li>
+<li>container/VM placement.</li>
+</ul>
+<h3 id="63-capability-resolution">6.3 Capability resolution<a class="headerlink" href="#63-capability-resolution" title="Permanent link">&para;</a></h3>
+<p>A request is resolved conceptually as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>semantic requirement
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  -&gt; capability
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  -&gt; constraints
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  -&gt; candidate bindings/resources
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  -&gt; placement/resource evaluation
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  -&gt; deterministic policy/ranking
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  -&gt; concrete execution
+</code></pre></div>
+<p>Selection policy must be inspectable and reproducible from its inputs. Learned recommendations may
+inform candidate scoring, but hidden nondeterministic "first match wins" behavior is forbidden.</p>
+<h3 id="64-required-resource-classes">6.4 Required resource classes<a class="headerlink" href="#64-required-resource-classes" title="Permanent link">&para;</a></h3>
+<p>The initial Manager must support resources for:</p>
+<ul>
+<li>Nix packages and derivations;</li>
+<li>executables and libraries;</li>
+<li>system/user services;</li>
+<li>local and remote hosts;</li>
+<li>containers and VMs;</li>
+<li>CPUs/GPUs/accelerators;</li>
+<li>devices;</li>
+<li>model artifacts;</li>
+<li>inference engines;</li>
+<li>model/API providers;</li>
+<li>external agent harnesses;</li>
+<li>MCP servers/clients;</li>
+<li>protocol/API endpoints;</li>
+<li>repositories/workspaces;</li>
+<li>credential/protected-value handles;</li>
+<li>arbitrary native/foreign handles.</li>
+</ul>
+<h3 id="65-agent-harnesses-and-inference">6.5 Agent harnesses and inference<a class="headerlink" href="#65-agent-harnesses-and-inference" title="Permanent link">&para;</a></h3>
+<p>External harnesses and inference engines belong in Manager, not Agent.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Capability: code.agent
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  bindings -&gt; Claude Code, Codex, OpenCode, future harnesses
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>Capability: model.embed
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  bindings -&gt; local embedding runtime, ONNX, remote endpoint
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>Capability: model.reason
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  bindings -&gt; local LLM, remote API, specialist service
+</code></pre></div>
+<p>OmnisAgent requests capabilities; it does not embed provider-specific integration into its cognitive
+core.</p>
+<h3 id="66-discovery">6.6 Discovery<a class="headerlink" href="#66-discovery" title="Permanent link">&para;</a></h3>
+<p>Discovery is deterministic-first:</p>
+<ol>
+<li>existing graph/package metadata;</li>
+<li>native descriptors/reflection;</li>
+<li>protocol schemas and APIs;</li>
+<li>compiler/runtime/LSP/index metadata;</li>
+<li>CLI completion/manifests/structured help/man pages;</li>
+<li>filesystem/source/debug symbols when available;</li>
+<li>deterministic probing;</li>
+<li>specialized learned interpretation;</li>
+<li>general reasoning only for unresolved meaning.</li>
+</ol>
+<p>Foreign provenance must record how each capability/relationship was learned.</p>
+<h3 id="67-protected-values">6.7 Protected values<a class="headerlink" href="#67-protected-values" title="Permanent link">&para;</a></h3>
+<p>Credentials and sensitive data are protected resources/handles.</p>
+<p>The Agent may know that a credential exists and what capabilities it can authorize without receiving
+its plaintext value. Manager resolves authorized handles at execution time; OmnisOS enforces the
+physical access boundary.</p>
+<h3 id="68-effect-metadata">6.8 Effect metadata<a class="headerlink" href="#68-effect-metadata" title="Permanent link">&para;</a></h3>
+<p>Bindings should declare or infer execution properties where known:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>pure/deterministic
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>read-only
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>idempotent
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>retriable
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>reversible
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>compensatable
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>persistent external effect
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>opaque foreign effect
+</code></pre></div>
+<p>Unknown foreign operations are treated conservatively. A completed opaque external effect cannot be
+pretended to roll back because a later internal operation failed.</p>
+<h3 id="69-placement-and-optimization">6.9 Placement and optimization<a class="headerlink" href="#69-placement-and-optimization" title="Permanent link">&para;</a></h3>
+<p>Manager resolves both implementation and placement across local/remote resources.</p>
+<p>Relevant constraints may include:</p>
+<ul>
+<li>CPU/GPU/RAM;</li>
+<li>latency;</li>
+<li>locality;</li>
+<li>privacy;</li>
+<li>credential availability;</li>
+<li>network reachability;</li>
+<li>model quality/context capacity;</li>
+<li>monetary/token cost;</li>
+<li>energy;</li>
+<li>warm caches/state;</li>
+<li>user/system policy.</li>
+</ul>
+<p>Agent asks for semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
+realization unless the caller requests a specific implementation.</p>
+<hr />
+<h2 id="7-omnisagent">7. OmnisAgent<a class="headerlink" href="#7-omnisagent" title="Permanent link">&para;</a></h2>
+<p>OmnisAgent is a core subsystem and the persistent cognitive identity of the machine. It is not a
+single model and has no privileged universal LLM loop.</p>
+<h3 id="71-responsibilities">7.1 Responsibilities<a class="headerlink" href="#71-responsibilities" title="Permanent link">&para;</a></h3>
+<p>OmnisAgent owns:</p>
+<ul>
+<li>event ingestion and causal worldline;</li>
+<li>episodic/semantic/procedural/project memory;</li>
+<li>entity and relation interpretation;</li>
+<li>judgement/routing;</li>
+<li>context compilation;</li>
+<li>working-memory activation;</li>
+<li>goals, commitments, hypotheses, expectations;</li>
+<li>worker/workflow orchestration;</li>
+<li>reflection and consolidation;</li>
+<li>learned procedures and routing;</li>
+<li>endogenous events/internal dynamics;</li>
+<li>self-model and candidate self-evolution.</li>
+</ul>
+<h3 id="72-event-driven-cognition">7.2 Event-driven cognition<a class="headerlink" href="#72-event-driven-cognition" title="Permanent link">&para;</a></h3>
+<p>The basic cognitive unit is an event:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>event
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  -&gt; judgement
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  -&gt; context compilation
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>  -&gt; worker/workflow dispatch or null action
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>  -&gt; observations/effects
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>  -&gt; new events
+</code></pre></div>
+<p>External user requests are one event source among many. There is no semantic <code>IDLE</code> state. A living
+Agent may be busy, waiting, consolidating, exploring, sleeping, or doing nothing.</p>
+<h3 id="73-memory">7.3 Memory<a class="headerlink" href="#73-memory" title="Permanent link">&para;</a></h3>
+<p>The event worldline is historical ground truth. Derived memory is revisable.</p>
+<p>Required memory forms include:</p>
+<ul>
+<li>events;</li>
+<li>episodes;</li>
+<li>assertions/facts with temporal validity;</li>
+<li>entities and relationships;</li>
+<li>decisions;</li>
+<li>goals and commitments;</li>
+<li>preferences with scope;</li>
+<li>project state;</li>
+<li>procedures/skills;</li>
+<li>expectations/predictive memory;</li>
+<li>artifacts and provenance.</li>
+</ul>
+<p>Embeddings, summaries, graphs, and indexes are representations, not canonical truth.</p>
+<h3 id="74-context">7.4 Context<a class="headerlink" href="#74-context" title="Permanent link">&para;</a></h3>
+<p>Context is compiled for a specific event, worker, and purpose. It is not an ever-growing transcript.</p>
+<p>The context compiler may combine causal ancestors, graph neighborhoods, activated memories, project
+state, code structure, artifacts, prior attempts, negative evidence, and protected-information
+constraints under token/latency/privacy budgets.</p>
+<h3 id="75-models-and-workers">7.5 Models and workers<a class="headerlink" href="#75-models-and-workers" title="Permanent link">&para;</a></h3>
+<p>Models are Manager resources. Workers are Agent cognitive roles/activations that may use one or more
+Manager capabilities.</p>
+<p>Initial worker families include judgement, retrieval, reasoning, research, code, verification,
+simulation, memory/reflection, learning, and evolution.</p>
+<p>Every worker result re-enters the event stream. No worker maintains a hidden alternate history.</p>
+<h3 id="76-external-agents">7.6 External agents<a class="headerlink" href="#76-external-agents" title="Permanent link">&para;</a></h3>
+<p>Claude Code, Codex, OpenCode, and future harnesses are Manager resources that OmnisAgent may invoke as
+workers. Native harness hooks should emit events. Inference interception may provide a universal
+fallback so model-bound contexts can still participate in Omnis memory even when a harness exposes
+little semantic lifecycle information.</p>
+<hr />
+<h2 id="8-omniscontrol">8. OmnisControl<a class="headerlink" href="#8-omniscontrol" title="Permanent link">&para;</a></h2>
+<p>OmnisControl is the universal machine control environment. It replaces the old <code>OmnisGUI</code> concept.
+Rendering is one responsibility among several.</p>
+<h3 id="81-responsibilities">8.1 Responsibilities<a class="headerlink" href="#81-responsibilities" title="Permanent link">&para;</a></h3>
+<p>OmnisControl owns:</p>
+<ul>
+<li>graph desktop;</li>
+<li>2D and 3D graph interaction;</li>
+<li>graph-to-control projection;</li>
+<li>control tree and layout;</li>
+<li>shell/PTY interaction;</li>
+<li>navigation/focus/selection/lenses;</li>
+<li>inspectors and arbitrary visualizations;</li>
+<li>native Wayland/XWayland application regions;</li>
+<li>input routing;</li>
+<li>GPU rendering/composition;</li>
+<li>presentation events and structural mutation APIs.</li>
+</ul>
+<h3 id="82-desktop-model">8.2 Desktop model<a class="headerlink" href="#82-desktop-model" title="Permanent link">&para;</a></h3>
+<p>Omnis has a desktop, but not a traditional app-grid desktop.</p>
+<p>The desktop is an interactive representation of the shared graph. It has two equivalent modes over
+the same identities:</p>
+<ul>
+<li><strong>2D</strong> — Airgraph/Blueprint-like focus+context graph optimized for editing, precise manipulation,
+  workflows, causal inspection, and dense information.</li>
+<li><strong>3D</strong> — spatial graph projection optimized for large neighborhoods, clusters, causal depth,
+  temporal exploration, and multidimensional relationships.</li>
+</ul>
+<p>Toggling mode preserves focus, selection, lens, graph identities, and timeline frontier.</p>
+<h3 id="83-control-tree">8.3 Control tree<a class="headerlink" href="#83-control-tree" title="Permanent link">&para;</a></h3>
+<p>Control derives an interactive tree from graph queries/projections:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>shared graph
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  -&gt; projection query/lens
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  -&gt; Control tree
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  -&gt; layout
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>  -&gt; render scene
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  -&gt; GPU/platform compositor
+</code></pre></div>
+<p>The Control tree may contain ephemeral layout nodes, but semantic leaves reference shared graph
+identities. The render scene is an optimized lowering, never a semantic source of truth.</p>
+<h3 id="84-agent-access">8.4 Agent access<a class="headerlink" href="#84-agent-access" title="Permanent link">&para;</a></h3>
+<p>User interaction and Agent structural control share the same underlying state.</p>
+<p>The user primarily manipulates materialized controls through pointer/keyboard/touch/voice. The Agent
+has direct structural access and may:</p>
+<ul>
+<li>create/remove/replace/move views;</li>
+<li>bind a view to another graph identity;</li>
+<li>change lens or representation;</li>
+<li>focus/select/navigate;</li>
+<li>split or reorganize the workspace;</li>
+<li>create live visualizations;</li>
+<li>attach actions/interactions;</li>
+<li>persist a useful control arrangement where appropriate.</li>
+</ul>
+<p>These mutations emit events like user interactions do.</p>
+<h3 id="85-one-renderer">8.5 One renderer<a class="headerlink" href="#85-one-renderer" title="Permanent link">&para;</a></h3>
+<p>Terminal, browser semantics, widgets, code, graphs, media, 2D, and 3D do not require independent
+renderer architectures.</p>
+<p>Control lowers them into one GPU-oriented render scene. The initial compositor implementation should
+be Wayland-native, built using Smithay-class compositor primitives and wgpu-class GPU rendering.</p>
+<p>Existing applications remain existing applications. Wayland/XWayland surfaces are delegated/native
+regions where direct semantic rendering is unavailable or undesirable.</p>
+<h3 id="86-shell-and-input">8.6 Shell and input<a class="headerlink" href="#86-shell-and-input" title="Permanent link">&para;</a></h3>
+<p>The default interaction may be visually terminal-centric, but the shell is a graph-native Control
+surface rather than a separate product.</p>
+<p>Submission resolution is deterministic-first:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>valid shell syntax / executable -&gt; real shell execution
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>known URI/path/graph identity    -&gt; navigate/open
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>known capability                -&gt; invoke
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>known structured query          -&gt; query graph
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>otherwise                       -&gt; OmnisAgent semantic interpretation
+</code></pre></div>
+<p>No explicit switch between "terminal" and "AI chat" is required.</p>
+<hr />
+<h2 id="9-addressing-and-identity">9. Addressing and identity<a class="headerlink" href="#9-addressing-and-identity" title="Permanent link">&para;</a></h2>
+<p>Every stable graph identity is addressable. Human-friendly names are aliases, not identity.</p>
+<p>An internal URI scheme may expose graph objects, for example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>omnis://node/&lt;id&gt;
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>omnis://event/&lt;id&gt;
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>omnis://resource/&lt;id&gt;
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>omnis://capability/&lt;id&gt;
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>omnis://scene/&lt;id&gt;
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>omnis://memory/&lt;id&gt;
+</code></pre></div>
+<p>Public URI details are implementation-specific until the protocol spec freezes them, but all first-
+party surfaces must be able to exchange stable references rather than copied descriptive text.</p>
+<hr />
+<h2 id="10-api-and-protocol-principles">10. API and protocol principles<a class="headerlink" href="#10-api-and-protocol-principles" title="Permanent link">&para;</a></h2>
+<h3 id="101-shared-semantics">10.1 Shared semantics<a class="headerlink" href="#101-shared-semantics" title="Permanent link">&para;</a></h3>
+<p>There must not be separate GUI, CLI, Agent, or MCP semantics for the same capability. Different
+surfaces may expose different representations of one operation.</p>
+<h3 id="102-event-first-integration">10.2 Event-first integration<a class="headerlink" href="#102-event-first-integration" title="Permanent link">&para;</a></h3>
+<p>First-party components publish events; Agent does not depend on scraping/polling them.</p>
+<h3 id="103-deterministic-first-operation">10.3 Deterministic-first operation<a class="headerlink" href="#103-deterministic-first-operation" title="Permanent link">&para;</a></h3>
+<p>Exact structured mechanisms are preferred to learned interpretation whenever they can satisfy the
+same requirement.</p>
+<h3 id="104-explicit-incompatibility">10.4 Explicit incompatibility<a class="headerlink" href="#104-explicit-incompatibility" title="Permanent link">&para;</a></h3>
+<p>If a target/control mode cannot preserve required semantics, it reports incompatibility rather than
+silently degrading behavior.</p>
+<h3 id="105-provenance">10.5 Provenance<a class="headerlink" href="#105-provenance" title="Permanent link">&para;</a></h3>
+<p>Resources, bindings, graph relations, memories, and generated views retain enough provenance to
+explain where they came from and how strongly they are known.</p>
+<hr />
+<h2 id="11-security-model">11. Security model<a class="headerlink" href="#11-security-model" title="Permanent link">&para;</a></h2>
+<p>Security belongs at the physical boundary rather than as a semantic censor of cognition.</p>
+<p>The cognitive plane may formulate arbitrary hypotheses/plans within model capability. The effect
+plane grants only the physical handles and authorities available to that execution.</p>
+<p>Required principles:</p>
+<ul>
+<li>secrets are handles, not prompt text;</li>
+<li>no worker inherits broad user authority by default;</li>
+<li>host/graph visibility follows granted authority;</li>
+<li>protected data carries disclosure constraints into model/Control projections;</li>
+<li>external effects retain causal and actor identity;</li>
+<li>candidate self-modification is isolated from the active system until realization/promotion;</li>
+<li>persistent system changes remain representable as generations and reversible where the underlying
+  physical operation permits it.</li>
+</ul>
+<hr />
+<h2 id="12-self-modification-and-optimization">12. Self-modification and optimization<a class="headerlink" href="#12-self-modification-and-optimization" title="Permanent link">&para;</a></h2>
+<p>Omnis may optimize itself at several levels.</p>
+<h3 id="121-runtime-optimization">12.1 Runtime optimization<a class="headerlink" href="#121-runtime-optimization" title="Permanent link">&para;</a></h3>
+<p>Manager may change placement, runtime implementation, batching, caching, model routing, or resource
+allocation when semantics permit it.</p>
+<h3 id="122-cognitive-adaptation">12.2 Cognitive adaptation<a class="headerlink" href="#122-cognitive-adaptation" title="Permanent link">&para;</a></h3>
+<p>Agent may learn memories, procedures, retrieval policies, routing preferences, competence estimates,
+and worker strategies.</p>
+<h3 id="123-structural-evolution">12.3 Structural evolution<a class="headerlink" href="#123-structural-evolution" title="Permanent link">&para;</a></h3>
+<p>Changes to Omnis components themselves are candidate implementations/generations. They are built and
+evaluated outside the currently active implementation before promotion.</p>
+<p>For OmnisOS and Manager, Nix derivations/generations provide the natural realization boundary.
+Agent/Control variants should use similarly reproducible candidate artifacts and explicit lineage.</p>
+<hr />
+<h2 id="13-host-independence">13. Host independence<a class="headerlink" href="#13-host-independence" title="Permanent link">&para;</a></h2>
+<p>A semantic resource or activity is not identified by the machine currently executing it.</p>
+<p>Manager may place execution on:</p>
+<ul>
+<li>local host;</li>
+<li>another Omnis machine;</li>
+<li>container;</li>
+<li>VM;</li>
+<li>remote server;</li>
+<li>cloud resource;</li>
+<li>GPU/accelerator host.</li>
+</ul>
+<p>Placement preserves graph/resource/activity identity and emits causal events describing the physical
+realization.</p>
+<p>The long-term system may span laptop, workstation, phone, and server without treating one device as
+the conceptual owner of all computation.</p>
+<hr />
+<h2 id="14-existing-software-compatibility">14. Existing software compatibility<a class="headerlink" href="#14-existing-software-compatibility" title="Permanent link">&para;</a></h2>
+<p>Unmodified Linux software must work from the beginning.</p>
+<p>Existing software progresses through understanding levels rather than requiring a port:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>opaque executable/surface
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  -&gt; OS-observable
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>  -&gt; metadata/CLI-discoverable
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>  -&gt; accessibility/protocol discoverable
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>  -&gt; API/source/tooling discoverable
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>  -&gt; semantically rich Manager binding
+</code></pre></div>
+<p>The Agent may initially interact through weak interfaces and later compile repeated successful
+behavior into stronger deterministic capabilities.</p>
+<p>Vision + synthetic mouse/keyboard is a compatibility fallback, not the preferred first-party
+interaction mechanism.</p>
+<hr />
+<h2 id="15-repositoryproduct-topology">15. Repository/product topology<a class="headerlink" href="#15-repositoryproduct-topology" title="Permanent link">&para;</a></h2>
+<p>The intended project split is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>omnis/             umbrella architecture, integration, compatibility tests
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>omnis-os/          NixOS/nixpkgs-derived operating system
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>omnis-manager/     Nix-derived manager
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>omnis-agent/       event/memory/cognition subsystem
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>omnis-control/     graph desktop/compositor/control subsystem
+</code></pre></div>
+<p>A future organization may host maintained upstream forks separately, but the product boundaries above
+remain.</p>
+<p>The umbrella repository owns cross-component protocol versions, architecture, end-to-end tests,
+reference configuration, release composition, and compatibility matrices.</p>
+<hr />
+<h2 id="16-implementation-invariants">16. Implementation invariants<a class="headerlink" href="#16-implementation-invariants" title="Permanent link">&para;</a></h2>
+<p>The following are hard architectural constraints:</p>
+<ol>
+<li><strong>One stable identity space across OS, Manager, Agent, and Control.</strong></li>
+<li><strong>One shared multidimensional current-state graph.</strong></li>
+<li><strong>OmnisAgent owns the immutable causal worldline and memory.</strong></li>
+<li><strong>Every meaningful first-party transition reaches Agent as an event; Agent does not poll the UI.</strong></li>
+<li><strong>Graph dimensions have explicit write ownership.</strong></li>
+<li><strong>Control tree is derived from/shared with graph state; render scene is only a lowering.</strong></li>
+<li><strong>2D and 3D Control modes represent the same identities and interaction state.</strong></li>
+<li><strong>Agent may structurally mutate Control state directly.</strong></li>
+<li><strong>Models, inference engines, and external agent harnesses are Manager resources.</strong></li>
+<li><strong>Nix evaluation/build remains deterministic and model-free.</strong></li>
+<li><strong>Persistent structural system changes are realized as inspectable generations.</strong></li>
+<li><strong>Transient execution does not require rewriting persistent Nix configuration.</strong></li>
+<li><strong>Capabilities describe meaning; bindings describe concrete realizations.</strong></li>
+<li><strong>Existing mature tools are bound before equivalent functionality is reimplemented.</strong></li>
+<li><strong>Discovery is deterministic-first and preserves foreign provenance.</strong></li>
+<li><strong>Protected values remain handles unless explicit authorized disclosure is required.</strong></li>
+<li><strong>Semantic identity survives version, host, path, process, and provider changes.</strong></li>
+<li><strong>External effects are accounted for honestly; opaque effects are not falsely rolled back.</strong></li>
+<li><strong>Agent context is compiled per event/worker, never a global ever-growing transcript.</strong></li>
+<li><strong>No LLM or provider is the identity of OmnisAgent.</strong></li>
+<li><strong>There is no semantic idle state; null/no work is valid.</strong></li>
+<li><strong>No component creates a parallel authoritative world model for objects already in the shared graph.</strong></li>
+</ol>
+<hr />
+<h2 id="17-non-goals">17. Non-goals<a class="headerlink" href="#17-non-goals" title="Permanent link">&para;</a></h2>
+<p>The initial architecture explicitly does not require:</p>
+<ul>
+<li>a custom programming language;</li>
+<li>a custom Linux kernel;</li>
+<li>replacement of nixpkgs packages;</li>
+<li>replacement of existing applications;</li>
+<li>a new model-provider API standard;</li>
+<li>a traditional desktop shell/dock/application launcher model;</li>
+<li>a monolithic executive LLM;</li>
+<li>forcing all software into Omnis-native UI;</li>
+<li>representing every kernel interrupt/syscall as a high-level cognitive event.</li>
+</ul>
+<p>A custom kernel may be explored later only if Linux becomes a demonstrated blocker to required
+semantics, security, or performance.</p>
+<hr />
+<h2 id="18-completion-criterion">18. Completion criterion<a class="headerlink" href="#18-completion-criterion" title="Permanent link">&para;</a></h2>
+<p>A first complete Omnis implementation exists when one machine can:</p>
+<ol>
+<li>boot OmnisOS from its NixOS-derived configuration;</li>
+<li>expose authoritative physical/system state into the shared graph;</li>
+<li>use OmnisManager to install/discover/resolve arbitrary packages and resource bindings;</li>
+<li>run local/remote inference engines and external agent harnesses as Manager resources;</li>
+<li>maintain OmnisAgent's causal event worldline and structured memory;</li>
+<li>compile task-specific context and dispatch heterogeneous workers;</li>
+<li>boot OmnisControl as the primary environment;</li>
+<li>present the same graph desktop in interactive 2D and 3D modes;</li>
+<li>execute real Linux shell commands and unmodified Wayland/XWayland applications;</li>
+<li>allow Agent and user actions to operate on the same graph identities;</li>
+<li>allow Agent direct structural mutation of Control projections;</li>
+<li>apply persistent system changes through candidate Nix generations and roll them back;</li>
+<li>preserve events/provenance across restart;</li>
+<li>continue functioning when any particular model/provider/harness is replaced or unavailable.</li>
+</ol>
+<p>At that point Omnis is not merely an AI-enabled Linux distribution. It is a machine whose operating
+state, available actions, cognition, and interface are all different projections of one persistent,
+addressable system.</p>
+        </article>
+        <nav class="pager" aria-label="Page navigation">
+          <a class="pager__link pager__link--prev" href="..">
+            <span class="pager__label">Previous</span>
+            <span class="pager__title">Overview</span>
+          </a>
+          <a class="pager__link pager__link--next" href="../GRAPH/">
+            <span class="pager__label">Next</span>
+            <span class="pager__title">Shared graph</span>
+          </a>
+        </nav>
+
+        <footer class="footer">
+          <span>Omnis</span>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-architectural-thesis">1. Architectural thesis</a>
+            <ul>
+              <li><a href="#11-one-world-one-graph">1.1 One world, one graph</a></li>
+              <li><a href="#12-one-worldline">1.2 One worldline</a></li>
+              <li><a href="#13-bind-reality-do-not-require-it-to-become-omnis">1.3 Bind reality; do not require it to become Omnis</a></li>
+              <li><a href="#14-ai-chooses-semantics-deterministic-systems-realize-physics">1.4 AI chooses semantics; deterministic systems realize physics</a></li>
+              <li><a href="#15-the-interface-is-the-graph-made-interactive">1.5 The interface is the graph made interactive</a></li>
+            </ul>
+          </li>
+          <li><a href="#2-system-topology">2. System topology</a>
+          </li>
+          <li><a href="#3-shared-multidimensional-graph">3. Shared multidimensional graph</a>
+            <ul>
+              <li><a href="#31-purpose">3.1 Purpose</a></li>
+              <li><a href="#32-core-representation">3.2 Core representation</a></li>
+              <li><a href="#33-dimensions">3.3 Dimensions</a></li>
+              <li><a href="#34-write-ownership">3.4 Write ownership</a></li>
+              <li><a href="#35-graph-transactions">3.5 Graph transactions</a></li>
+              <li><a href="#36-internal-graph-service">3.6 Internal graph service</a></li>
+            </ul>
+          </li>
+          <li><a href="#4-worldline-and-events">4. Worldline and events</a>
+            <ul>
+              <li><a href="#41-ownership">4.1 Ownership</a></li>
+              <li><a href="#42-event-shape">4.2 Event shape</a></li>
+              <li><a href="#43-event-coverage">4.3 Event coverage</a></li>
+              <li><a href="#44-graph-versus-worldline">4.4 Graph versus worldline</a></li>
+            </ul>
+          </li>
+          <li><a href="#5-omnisos">5. OmnisOS</a>
+            <ul>
+              <li><a href="#51-responsibilities">5.1 Responsibilities</a></li>
+              <li><a href="#52-nixos-fork">5.2 NixOS fork</a></li>
+              <li><a href="#53-desired-and-actual-state">5.3 Desired and actual state</a></li>
+              <li><a href="#54-invariants">5.4 Invariants</a></li>
+              <li><a href="#55-physical-enforcement">5.5 Physical enforcement</a></li>
+              <li><a href="#56-reference-configurationnnthe-umbrella-repository-carries-an-illustrative-omnisos-configuration-at-examplesomnisnix-the-exact-option-paths-may-evolve-until-the-omnisos-module-schema-is-implemented-the-four-authority-split-and-persistenttransient-boundary-are-normativenn-57-persistent-transitions">5.6 Reference configuration\n\nThe umbrella repository carries an illustrative OmnisOS configuration at examples/omnis.nix. The exact option paths may evolve until the OmnisOS module schema is implemented; the four-authority split and persistent/transient boundary are normative.\n\n### 5.7 Persistent transitions</a></li>
+            </ul>
+          </li>
+          <li><a href="#6-omnismanager">6. OmnisManager</a>
+            <ul>
+              <li><a href="#61-canonical-concepts">6.1 Canonical concepts</a></li>
+              <li><a href="#62-nix-integration">6.2 Nix integration</a></li>
+              <li><a href="#63-capability-resolution">6.3 Capability resolution</a></li>
+              <li><a href="#64-required-resource-classes">6.4 Required resource classes</a></li>
+              <li><a href="#65-agent-harnesses-and-inference">6.5 Agent harnesses and inference</a></li>
+              <li><a href="#66-discovery">6.6 Discovery</a></li>
+              <li><a href="#67-protected-values">6.7 Protected values</a></li>
+              <li><a href="#68-effect-metadata">6.8 Effect metadata</a></li>
+              <li><a href="#69-placement-and-optimization">6.9 Placement and optimization</a></li>
+            </ul>
+          </li>
+          <li><a href="#7-omnisagent">7. OmnisAgent</a>
+            <ul>
+              <li><a href="#71-responsibilities">7.1 Responsibilities</a></li>
+              <li><a href="#72-event-driven-cognition">7.2 Event-driven cognition</a></li>
+              <li><a href="#73-memory">7.3 Memory</a></li>
+              <li><a href="#74-context">7.4 Context</a></li>
+              <li><a href="#75-models-and-workers">7.5 Models and workers</a></li>
+              <li><a href="#76-external-agents">7.6 External agents</a></li>
+            </ul>
+          </li>
+          <li><a href="#8-omniscontrol">8. OmnisControl</a>
+            <ul>
+              <li><a href="#81-responsibilities">8.1 Responsibilities</a></li>
+              <li><a href="#82-desktop-model">8.2 Desktop model</a></li>
+              <li><a href="#83-control-tree">8.3 Control tree</a></li>
+              <li><a href="#84-agent-access">8.4 Agent access</a></li>
+              <li><a href="#85-one-renderer">8.5 One renderer</a></li>
+              <li><a href="#86-shell-and-input">8.6 Shell and input</a></li>
+            </ul>
+          </li>
+          <li><a href="#9-addressing-and-identity">9. Addressing and identity</a>
+          </li>
+          <li><a href="#10-api-and-protocol-principles">10. API and protocol principles</a>
+            <ul>
+              <li><a href="#101-shared-semantics">10.1 Shared semantics</a></li>
+              <li><a href="#102-event-first-integration">10.2 Event-first integration</a></li>
+              <li><a href="#103-deterministic-first-operation">10.3 Deterministic-first operation</a></li>
+              <li><a href="#104-explicit-incompatibility">10.4 Explicit incompatibility</a></li>
+              <li><a href="#105-provenance">10.5 Provenance</a></li>
+            </ul>
+          </li>
+          <li><a href="#11-security-model">11. Security model</a>
+          </li>
+          <li><a href="#12-self-modification-and-optimization">12. Self-modification and optimization</a>
+            <ul>
+              <li><a href="#121-runtime-optimization">12.1 Runtime optimization</a></li>
+              <li><a href="#122-cognitive-adaptation">12.2 Cognitive adaptation</a></li>
+              <li><a href="#123-structural-evolution">12.3 Structural evolution</a></li>
+            </ul>
+          </li>
+          <li><a href="#13-host-independence">13. Host independence</a>
+          </li>
+          <li><a href="#14-existing-software-compatibility">14. Existing software compatibility</a>
+          </li>
+          <li><a href="#15-repositoryproduct-topology">15. Repository/product topology</a>
+          </li>
+          <li><a href="#16-implementation-invariants">16. Implementation invariants</a>
+          </li>
+          <li><a href="#17-non-goals">17. Non-goals</a>
+          </li>
+          <li><a href="#18-completion-criterion">18. Completion criterion</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
