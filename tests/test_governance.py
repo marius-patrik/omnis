@@ -370,7 +370,10 @@ def test_agent_prompt_registry_is_versioned_and_structured():
 
 def test_machine_readable_v0_manifests_parse_and_are_unique():
     """Scalar and ontology manifests must be valid TOML with unique canonical identifiers."""
-    import tomllib
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
 
     with open(os.path.join(REPO_ROOT, "spec", "v0.toml"), "rb") as handle:
         v0 = tomllib.load(handle)
@@ -392,7 +395,10 @@ def test_machine_readable_v0_manifests_parse_and_are_unique():
 
 def test_v0_registries_cross_check():
     """Machine-readable ontology/event/capability/property/state registries must agree."""
-    import tomllib
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
 
     def load(name):
         with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
