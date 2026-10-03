@@ -1,123 +1,135 @@
 # Omnis
 
-**An AI operating system. Talk to your machine, and it does the thing.**
+**A graph-native, agentic operating system built on Linux and Nix.**
 
-"Install Rust, give me a Windows VM with Photoshop, put the daemon on my workstation and the
-interface here, and make it look like Zed" is a sentence, not an afternoon. Omnis takes it, writes
-the change into one declaration, shows you exactly what it will do, and applies it. If you don't like
-the result, you roll it back — one command, every time, whatever changed.
+Omnis is not an assistant application running on top of a conventional desktop. It is an operating
+system in which the machine, its software, its resources, its agent, and its interface share one
+addressable model of reality.
 
-It is very smart because it can see the whole machine: your repositories, terminals, packages,
-containers, guest operating systems, browser, and secrets are one system with one API, and the agent
-is a first-class operator of it rather than a chat box bolted onto an editor.
+The system is organized around four first-class products:
 
-Underneath, Omnis is a **kernel**. It owns nothing you could get elsewhere — `git`, `sl`, Nix,
-podman, libvirt, Chromium, Tailscale, and the coding-agent CLIs are all **bound, not built** — and
-everything that makes them compose: one bus, one scene tree, one declaration, one modification
-surface, one audit trail.
-
-> **Status: specification.** The governance rules and the autonomous delivery pipeline are in place
-> and running. The product tree is not: it is specified in [ARCHITECTURE.md](ARCHITECTURE.md),
-> decided in [decision records](notes/adr/), and sequenced in [ROADMAP.md](ROADMAP.md).
-
-## The whole machine, in one file
-
-Subsystems, guest operating systems, where each process runs, and how it looks are one declaration.
-Applying it produces a **generation** — a parent, a diff, an author — so rollback is one operation
-and an agent reconfiguring your machine leaves a reviewable change rather than a mutation.
-
-```nix
-{
-  omnis = {
-    hosts.core.backend = "docker";        # native · docker · wsl · podman · nspawn · remote
-    placement = { daemon = "core"; gui = "workstation"; };
-
-    subsystems.vcs = {
-      enable   = true;
-      backends = [ "git" "sapling" ];     # drop one and it leaves entirely — binary,
-      default  = "git";                   # completions, credential helper, menu entries, all
-    };
-
-    environments.windows = {
-      kind = "vm";                        # container · vm · compat (Wine/Proton)
-      apps.integration = "remoteapp";     # Windows apps as ordinary windows
-    };
-
-    presentation = { profile = "zed"; theme = "catppuccin-mocha"; };
-    remote = { enable = true; via = "tailscale"; };
-  };
-}
-```
-
-The full reference is [`examples/omnis.nix`](examples/omnis.nix).
-
-Removing something removes it **completely** — the processes, the packages, the files, and
-everything it contributed to the rest of the system. "Disabled" and "not installed" are not
-different states.
-
-## What makes it AI-first
-
-Not a chat panel. An agent is a **first-class operator**: it calls the same API as you, reads the
-same option schema the settings UI is generated from, addresses the same objects by the same URIs,
-and is bound by the same approval gate and audit trail.
-
-That is only safe because every change is a generation — gated before it takes effect, reversible
-after. The accountability machinery is not a constraint on the goal; it is what makes the goal
-achievable.
-
-The documentation is generated from that same option schema and lives **inside** the product, so you
-read about the system in the window you are declaring it in — and so does the agent proposing the
-change.
-
-## Start here
-
-| Document | What it is |
+| Component | Role |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **The only normative document.** What Omnis is, why, and how it is built. |
-| [Decision records](notes/adr/) | Every decision that binds the implementation, with the alternatives it rejected. |
-| [ROADMAP.md](ROADMAP.md) | Epics, entry gates, sequencing. |
-| [AGENTS.md](AGENTS.md) | Binding rules for every contributor, human or agent. Also `CONTRIBUTING.md`. |
-| [notes/pipeline.md](notes/pipeline.md) | How the delivery pipeline works, and how it fails. |
-| [notes/transcript.md](notes/transcript.md) | Source material only. Specifies nothing. |
+| **OmnisOS** | Linux/NixOS-derived system substrate. Owns physical machine state, system invariants, generations, enforcement, and the shared graph substrate. |
+| **OmnisManager** | Nix-derived universal resource manager. Owns packages, resources, capabilities, bindings, placement, inference engines, external agent harnesses, and arbitrary foreign integrations. |
+| **OmnisAgent** | Persistent cognitive subsystem. Owns the causal event worldline, memory, context compilation, judgement, workers, internal dynamics, and learning. |
+| **OmnisControl** | Universal control surface. Projects the shared graph into an interactive 2D/3D graph desktop, shell, native application regions, inspectors, and arbitrary visualizations. |
 
-## How work happens here
+The unifying substrate is a **shared multidimensional graph**. OmnisOS contributes physical and
+system state; OmnisManager contributes resources, capabilities, bindings, and executions;
+OmnisAgent contributes cognitive and memory state; OmnisControl contributes presentation and
+interaction state. Every object keeps one stable identity across those dimensions.
 
-```
-user request  ──▶  Request issue      ──▶  interpretation  ──▶  you comment `approve`
-                   (verbatim wording)      (agent)
-                                                    │
-                                                    ▼
-                   Plan issue (sub-issue) ──▶  you comment `approve`
-                                                    │
-                                                    ▼
-                   branch ─▶ Draft PR (bot-authored) ─▶ self-review loop ─▶ plan alignment
-                                                    │
-                                                    ▼
-                   you Approve  ──▶  auto-merge  ──▶  issues closed, board set to Done
-```
+A separate immutable **worldline** in OmnisAgent records causal experience. The graph describes the
+current structured world; the worldline records how that world changed.
 
-Two human gates before anything is written, one before anything merges. Specification runs
-**architecture → decision records → roadmap → issues**, and an issue is only filed for work that is
-already settled.
+```text
+                              USER
+                                │
+                                ▼
+                         ┌──────────────┐
+                         │ OmnisControl │
+                         │ graph desktop│
+                         └──────┬───────┘
+                                │
+                                ▼
+                SHARED MULTIDIMENSIONAL GRAPH
+                                │
+          ┌─────────────────────┼─────────────────────┐
+          │                     │                     │
+          ▼                     ▼                     ▼
+      OmnisOS              OmnisManager           OmnisAgent
+  physical reality       possibility/action    meaning/cognition
+          │                     │                     │
+          └─────────────────────┼─────────────────────┘
+                                │
+                                ▼
+                              Linux
 
-Full rules in [AGENTS.md](AGENTS.md); mechanics in [notes/pipeline.md](notes/pipeline.md).
-
-## Local development
-
-```bash
-pip install -r requirements-dev.txt
-pytest -v                    # repository automation tests
-black --check .              # formatting
-properdocs serve             # documentation site
-```
-
-Reproduce the GitHub-side configuration — labels, board, protection, permissions — at any time:
-
-```bash
-python .github/scripts/repo_settings.py --plan     # show drift
-python .github/scripts/repo_settings.py --apply    # reconcile
+Every meaningful transition ───────────────────────▶ Agent worldline
 ```
 
-## License
+## The core idea
 
-GPL-3.0. See [LICENSE](https://github.com/marius-patrik/omnis/blob/main/LICENSE).
+Omnis deliberately separates four questions:
+
+- **What physically is?** — OmnisOS.
+- **What can be done, and what can realize it?** — OmnisManager.
+- **What does it mean, and what should happen next?** — OmnisAgent.
+- **How is that reality exposed and manipulated interactively?** — OmnisControl.
+
+The graph connects the answers without collapsing them into one implementation.
+
+This design takes several ideas from Invariant-Oriented Engineering while dropping the custom
+language: stable semantic identity, capability/binding separation, deterministic-first discovery,
+host-independent placement, protected values, causal history, graph projections, and replacement of
+physical realizations without changing meaning. Linux, Nix, existing applications, model runtimes,
+and external agent harnesses remain real software; Omnis binds and composes them rather than
+requiring them to be rewritten.
+
+## Nix foundation
+
+Omnis intentionally forks both major Nix layers:
+
+- **OmnisOS** tracks a fork of `nixpkgs`/NixOS for complete system-level integration while retaining
+  compatibility with the nixpkgs package ecosystem.
+- **OmnisManager** tracks a fork of `NixOS/nix` and extends the evaluator/store/package-manager layer
+  into a universal resource, binding, capability, execution, and placement manager.
+
+Nix remains deterministic machinery. AI does not run inside Nix evaluation. OmnisAgent may decide
+*what* should change; OmnisManager resolves *how*; OmnisOS/Nix deterministically builds and realizes
+persistent system state.
+
+## Interface
+
+OmnisControl provides a desktop, but not a traditional desktop environment. The desktop is an
+interactive projection of the shared graph.
+
+It has two equivalent spatial modes:
+
+- **2D** — Airgraph/Blueprint-like graph interaction optimized for precision, editing, inspection,
+  workflow manipulation, and dense information.
+- **3D** — spatial graph interaction optimized for large-scale navigation, clusters, causal depth,
+  temporal structure, and multidimensional relationships.
+
+Switching modes preserves identity, focus, selection, lens, and timeline position. A terminal,
+browser, editor, system monitor, memory explorer, or application window is not a separate UI
+architecture; each is a projection or delegated region inside the same control environment.
+
+The shell remains a first-class default interaction surface. Exact shell syntax and known commands
+execute directly. URLs, graph identities, capabilities, and semantic requests resolve through the
+same input surface without requiring a mode switch into an "AI chat".
+
+## Agent
+
+OmnisAgent is not a single LLM loop. It is a persistent event-driven cognitive system.
+
+Every meaningful system event reaches it directly. Its worldline, memory, world model, context
+compiler, judgement mechanisms, and workers persist independently of any one model or process.
+LLMs, classifiers, embedding models, rerankers, vision/audio models, coding agents, and deterministic
+algorithms are resources resolved through OmnisManager.
+
+The Agent never needs to periodically inspect the UI to learn what happened. OmnisControl, OmnisOS,
+and OmnisManager emit their events directly. The Agent also has direct structural access to the
+Control graph and can create, replace, rebind, reorganize, or remove interactive projections without
+simulating user clicks.
+
+## Status
+
+This repository is the **umbrella architecture and integration specification** for the Omnis system.
+The previous daemon/workspace architecture is superseded by the graph-native four-component
+architecture defined in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+Implementation specifications:
+
+- [Shared graph](docs/GRAPH.md)
+- [OmnisOS](docs/OMNIS_OS.md)
+- [OmnisManager](docs/OMNIS_MANAGER.md)
+- [OmnisAgent](docs/OMNIS_AGENT.md)
+- [OmnisControl](docs/OMNIS_CONTROL.md)
+- [Protocols and contracts](docs/PROTOCOLS.md)
+- [Implementation roadmap](ROADMAP.md)
+- [Contributor/agent rules](AGENTS.md)
+
+Historical ADRs remain useful source material but are non-normative where they conflict with the
+architecture reset in `notes/adr/0023-graph-native-os-architecture-reset.md`.

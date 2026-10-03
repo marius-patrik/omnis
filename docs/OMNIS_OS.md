@@ -1,0 +1,291 @@
+# OmnisOS
+
+**Status: normative supporting specification.**
+
+OmnisOS is the physical and persistent-system authority of Omnis. It is initially implemented as a
+maintained NixOS/nixpkgs-derived Linux distribution. Linux remains the hardware kernel; OmnisOS owns
+the system composition, graph integration, enforcement, and persistent generation semantics above
+it.
+
+---
+
+## 1. Upstream relationship
+
+OmnisOS should begin as a fork/patch stack over `NixOS/nixpkgs`, preserving nixpkgs package
+compatibility and upstream mergeability.
+
+The fork exists for changes that require system-wide integration which cannot cleanly live as an
+ordinary downstream NixOS module, especially:
+
+- graph-native service/process/device publication;
+- generation metadata and semantic diffs;
+- Omnis boot/session integration;
+- capability/authority enforcement hooks;
+- Manager/Control/Agent core subsystem composition;
+- event-producing lifecycle integration.
+
+Ordinary packages should remain upstream nixpkgs packages wherever possible.
+
+---
+
+## 2. Boot target
+
+The initial boot chain is conceptually:
+
+```text
+UEFI/firmware
+  -> Linux kernel + initrd
+  -> NixOS activation
+  -> omnis-graphd
+  -> OmnisManager
+  -> OmnisAgent
+  -> OmnisControl/compositor session
+```
+
+OmnisControl is the default local interactive environment. A headless target may omit Control while
+retaining OS, Manager, Agent, graph, and remote-control capability.
+
+Systemd may be retained initially as the service supervisor where useful. It is physical mechanism,
+not a second semantic system model; desired service semantics remain represented in NixOS + graph.
+
+---
+
+## 3. Graph publication
+
+OmnisOS adapters publish authoritative physical facts to the shared graph.
+
+Initial producers:
+
+- host identity and hardware inventory;
+- CPUs, memory, GPUs, storage, network devices;
+- mounts/filesystems;
+- active processes and process ancestry;
+- services/units;
+- users/session identities;
+- network interfaces/routes/listeners;
+- devices/hotplug;
+- active Nix generation;
+- store-path realization links;
+- cgroups/resource envelopes;
+- isolation/authority metadata.
+
+OS facts should reference Manager resource identities whenever those identities are known.
+
+Example:
+
+```text
+Resource:Firefox
+  --system.realized_as--> StorePath:/nix/store/...
+  --execution.spawned--> Process:812
+  --presentation.surface--> WaylandSurface:41
+```
+
+---
+
+## 4. Generation model
+
+An OmnisOS generation extends ordinary NixOS generation identity with graph-visible metadata:
+
+```text
+Generation
+  parent
+  configuration source revision
+  Nix derivation/system closure
+  closure diff
+  semantic graph diff
+  actor
+  causal event/intention
+  build result
+  activation result
+  observed post-activation effects
+```
+
+Generation metadata must not require embedding model output into Nix derivations. Model reasoning is
+stored as external Agent/graph provenance; Nix receives deterministic configuration inputs.
+
+---
+
+## 5. Candidate generation workflow
+
+Persistent mutation path:
+
+```text
+1. caller proposes persistent intent
+2. Manager resolves package/resource/binding implications
+3. produce candidate Nix configuration revision
+4. evaluate configuration
+5. compute dependency/closure/system graph diff
+6. build candidate
+7. validate machine invariants possible before switch
+8. activate atomically using NixOS mechanisms
+9. observe actual runtime state
+10. publish graph changes + Agent events
+```
+
+Failures before activation do not alter active persistent state. Failures after external/activation
+effects must be reported honestly and reconciled rather than described as impossible rollback.
+
+---
+
+## 6. Invariants
+
+OmnisOS supports two invariant classes.
+
+### 6.1 Evaluation invariants
+
+Pure assertions over desired system/configuration graph state that can be checked before activation.
+
+Examples:
+
+- selected host provides required GPU capability;
+- persistent service dependency resolves;
+- protected local-only model is not placed remotely;
+- conflicting implementation bindings are rejected.
+
+### 6.2 Runtime physical invariants
+
+Assertions over current physical state which may require ongoing enforcement/monitoring.
+
+Examples:
+
+- execution remains inside cgroup resource limits;
+- worker cannot access filesystem outside mounts;
+- network scope remains restricted;
+- credential handle remains unavailable outside execution scope.
+
+Runtime invariant violation emits a high-salience Agent event and invokes the declared physical
+enforcement response without requiring an LLM decision in the critical path.
+
+---
+
+## 7. Authority and isolation
+
+OmnisOS exposes an execution-envelope primitive sufficient for Manager to instantiate scoped work.
+
+An envelope can constrain:
+
+```text
+filesystem/mount visibility
+network namespace/reachability
+process namespace
+user/group identity
+CPU quota/affinity
+memory limit
+GPU/device access
+secret handle availability
+IPC endpoints
+lifetime/cancellation relationship
+```
+
+Linux implementation should compose existing primitives instead of inventing parallel isolation:
+
+- cgroup v2;
+- namespaces;
+- seccomp;
+- LSM/Landlock/eBPF where appropriate;
+- Unix credentials/capabilities;
+- container/VM runtimes when stronger isolation is required.
+
+---
+
+## 8. Hosts
+
+Every Omnis installation has a stable Host graph identity.
+
+Remote hosts can participate through Manager placement. A host advertises authoritative physical
+capabilities and availability into the graph.
+
+The first implementation may use SSH/Tailscale or another bound transport, but transport identity is
+not host semantic identity.
+
+Remote execution must preserve:
+
+- activity/execution ID;
+- graph resource IDs;
+- Agent causal parents;
+- provenance;
+- authority envelope.
+
+---
+
+## 9. Files and paths
+
+Linux filesystems remain real and fully supported. Omnis does not replace POSIX paths.
+
+Paths are locators for resources/artifacts and may change without changing graph semantic identity.
+
+OS publishes file metadata/events sufficient for Agent/Manager to connect files to:
+
+- packages/derivations;
+- repositories/projects;
+- processes;
+- open handles;
+- artifacts;
+- Control views.
+
+High-volume filesystem observation should be normalized/coalesced at suitable boundaries while
+retaining enough causal evidence for Agent reconstruction.
+
+---
+
+## 10. Services and processes
+
+Processes are physical executions, not the highest-level unit of work.
+
+Manager/Agent activities may own multiple processes. OS publishes process facts and enforcement; it
+does not infer high-level activity meaning.
+
+Service supervisors remain bound mechanisms. Their state must be reflected into the graph rather
+than becoming invisible side configuration.
+
+---
+
+## 11. Recovery
+
+OmnisOS must recover independently of model availability.
+
+On reboot:
+
+1. restore graph service current-state database/recover its WAL;
+2. identify active Nix generation;
+3. republish/reconcile physical state;
+4. start Manager;
+5. start Agent and replay/restore Agent worldline state;
+6. start Control;
+7. emit reconciliation events for differences between expected and observed state.
+
+The machine must remain bootable with no model credentials and no network access.
+
+---
+
+## 12. Required implementation interfaces
+
+OmnisOS must expose to Manager/Agent/Control:
+
+```text
+Graph API
+Host inventory API
+Execution envelope API
+Generation evaluate/build/switch/rollback API
+Physical observation/event API
+Protected-handle broker API
+Native surface/compositor prerequisites
+```
+
+The exact wire protocol is defined in `PROTOCOLS.md`.
+
+---
+
+## 13. Non-goals
+
+Initial OmnisOS does not:
+
+- replace the Linux kernel;
+- replace system drivers;
+- replace all systemd functionality immediately;
+- create an alternate package universe;
+- implement cognition;
+- own model-provider semantics;
+- own Control layout/presentation.
+
+A future custom kernel is only justified by measured limitations of Linux against Omnis requirements.

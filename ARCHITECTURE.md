@@ -1,693 +1,936 @@
 # Omnis — Architecture
 
-**Status: NORMATIVE, and the only normative document.** Vision and architecture are one file: what
-Omnis is, why, and how it is built. The scoping transcript that started it is kept as source material
-in [`notes/transcript.md`](notes/transcript.md) and specifies nothing.
+**Status: NORMATIVE.** This document defines the system architecture. Supporting documents may
+expand implementation detail but must not contradict it.
 
-Changes require a decision record in [`notes/adr/`](notes/adr/).
+Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
+not a desktop application, an AI assistant, a shell wrapper, or a new programming language.
 
----
+The system has four first-class authorities:
 
-## 1. What Omnis is
+1. **OmnisOS** — physical/system authority.
+2. **OmnisManager** — resource/capability authority.
+3. **OmnisAgent** — cognitive/event/memory authority.
+4. **OmnisControl** — interaction/presentation authority.
 
-**An AI-first operating system for a power user's machine.**
-
-*AI-first* here is a structural claim, not a description of a feature. An agent is a **first-class
-operator** of this system: it calls the same API as the user (P5), reads the same option schema the
-settings UI is generated from (P9), addresses the same objects by the same URIs (§10.3), and is bound
-by the same approval gate and audit trail (§7.1). It is not a panel bolted into an editor.
-
-That is only safe because of what §4.1 and §7.1 provide: every change an agent makes is a generation
-with an author and a diff, gated before it takes effect and reversible after. Giving an agent real
-power over a machine is defensible exactly to the degree that its actions are reviewable and
-undoable — so the accountability machinery is not a constraint on the AI-first goal, it is the thing
-that makes it achievable.
-
-Omnis is a headless daemon that owns nothing you could get elsewhere, and everything that makes those
-things compose. Version control, packages, tasks, terminals, containers, language servers,
-debuggers, a browser, agents, secrets, and storage are all **bound, not built** — `git`, `sl`, Nix,
-podman, libvirt, Chromium, Tailscale, the coding-agent CLIs. What Omnis owns is the seams: one bus,
-one scene tree, one declaration, one modification surface, one audit trail.
-
-Four properties follow, and they are the whole design:
-
-**The system is declared, not configured.** One file describes the machine — subsystems, packages,
-guest operating systems, where each process runs, how it looks. Applying it produces a *generation*
-with a parent, a diff, and an author. Rollback is one operation. Removing something removes it
-entirely: the processes, the packages, the files, and everything it contributed to the rest of the
-system.
-
-**Everything is modifiable, by anyone authorised.** The user, the built-in agent, and an external
-agent all change the system through the same API, pass the same approval gate, and land in the same
-audit trail. There is no privileged surface and no trusted caller.
-
-**The documentation is part of the product.** The option schema that defines the declaration also
-generates the documentation, so you read about the system in the same window you are declaring it in
-— and so does the agent proposing the change.
-
-**The interface is a configuration state, not an implementation.** Renderer output, layout, input
-routing, keymap, and chrome are orthogonal axes. A *profile* is a named point in that space; a
-*theme* is colours in the VS Code format, so the existing ecosystem loads unmodified.
-
-**We do not enumerate workflows.** The subsystems compose: a task graph that reads a Cargo manifest,
-a terminal whose secrets came from the vault, a browser page harvested into a context fragment, an
-agent whose every action lands in the audit stream and whose risky ones wait in escrow. The
-capability surface is the specification; workflows are what a user assembles from it.
-
-**Non-goals.** Reimplementing anything on the bound list. Reproducing another product's feature set.
-Cloud accounts, multi-user collaboration, or anything that requires a network service to start.
+They share one multidimensional graph and one stable identity space. They do not maintain competing
+models of the same object.
 
 ---
 
-## 2. Principles
+## 1. Architectural thesis
 
-Each is enforced somewhere — a lint, a test, a type, or a process boundary. A principle that is only
-a paragraph erodes on the first deadline.
+Omnis is built around five statements.
 
-| | Principle | Enforced by |
-|---|---|---|
-| P1 | **Bind, don't reimplement.** If it exists, bind it. If binding exposes it raw, write the adapter — not the tool. | Review against ADR-0011's list of owned abstractions |
-| P2 | **An abstraction exists to make its backend swappable and removable**, never to replace it. | Two backends before an abstraction is called done |
-| P3 | **Declared, not imperative.** State goes in the declaration; changes converge. | Runtime mutations write the declaration (§4.2) |
-| P4 | **Removal is complete**, including system integration. | Integration is brokered, never self-registered (§5.3) |
-| P5 | **No privileged caller.** The GUI has no capability the CLI or an external agent lacks. | One API, one validation path, one escrow (§7) |
-| P6 | **No branching on a profile or theme name.** Features branch on axis values or capability queries. | Lint |
-| P7 | **Delegate as little as possible.** A native surface is a region we no longer control; if content can be a texture, it should be. | Review — every delegated region is argued (§9.4) |
-| P8 | **Subsystems cannot couple.** The bus is the only ABI. | Separate processes (§5.1) |
-| P9 | **One schema, three consumers.** Option definitions drive the settings UI, the documentation, and the agent's vocabulary. | Generated, never hand-written (§6) |
-| P10 | **Adding a thing is declaring a thing.** Panes, sources, subsystems, environments, profiles, and themes are instances of shared abstractions, never bespoke implementations. | A new instance touches data and declaration, not core code |
+### 1.1 One world, one graph
+
+Every meaningful object in the machine has one stable identity in a shared multidimensional graph.
+A repository, process, model, package, host, GPU, capability, worker, memory, scene, surface, or Nix
+generation is not copied into four subsystem-specific databases and reconciled later.
+
+Different components contribute different dimensions and relations over the same identities.
+
+### 1.2 One worldline
+
+OmnisAgent stores the immutable causal worldline of experience. The graph is current structured
+state; the worldline is what happened.
+
+The graph may be rebuilt, reinterpreted, reindexed, or projected differently. Historical events are
+not silently rewritten to match newer interpretations.
+
+### 1.3 Bind reality; do not require it to become Omnis
+
+Existing applications, CLIs, services, libraries, models, agent harnesses, containers, VMs, package
+managers, protocols, and devices remain real external systems. Omnis discovers, binds, controls, and
+progressively understands them.
+
+Reimplementation requires a material reason. Integration is preferred to replacement.
+
+### 1.4 AI chooses semantics; deterministic systems realize physics
+
+AI never becomes part of Nix evaluation or another deterministic build primitive.
+
+OmnisAgent may form an intention. OmnisManager resolves resources, capabilities, bindings, and
+placement. OmnisOS deterministically realizes persistent state and enforces physical constraints.
+
+### 1.5 The interface is the graph made interactive
+
+OmnisControl does not maintain a separate semantic UI universe. It projects graph identities into a
+control tree, lowers that tree into render state, and emits interactions back as graph mutations and
+events.
+
+The Agent receives events directly and can structurally mutate Control state. It does not need to
+observe screenshots or simulate clicks for first-party surfaces.
 
 ---
 
-## 3. Topology
+## 2. System topology
 
-Four layers. Nothing runs inside the core.
-
-```
-SURFACES      gui · cli · web (over Tailscale) · external harnesses
-                                    ▲
-NEXT TO       vcs · terminals · lsp · dap · browser · cas · tasks · agent · docs · automation · exthost
-              environments: containers · VMs · compat
-              supervised peers — separate processes, the bus is the only ABI
-                                    ▲
-CORE          omnisd — bus router · registry · capability broker · convergence & generations
-                                    ▲
-BELOW         host OS · container runtime · Nix store · systemd · Tailscale · OS keychain
-              bound, never owned
+```text
+                                    USER
+                                      │
+                                      ▼
+                               ┌──────────────┐
+                               │ OmnisControl │
+                               └──────┬───────┘
+                                      │
+                                      ▼
+                        SHARED MULTIDIMENSIONAL GRAPH
+                                      │
+            ┌─────────────────────────┼─────────────────────────┐
+            │                         │                         │
+            ▼                         ▼                         ▼
+       ┌─────────┐              ┌──────────────┐           ┌────────────┐
+       │ OmnisOS │              │ OmnisManager │           │ OmnisAgent │
+       └────┬────┘              └──────┬───────┘           └─────┬──────┘
+            │                          │                         │
+            │ physical realization     │ capability execution    │ cognition
+            └──────────────┬───────────┴───────────────┬─────────┘
+                           ▼                           ▼
+                        Linux                      external reality
 ```
 
-**Below** is infrastructure that pre-exists. The core binds it and never assumes exclusive ownership.
-**Next to** are peers the core supervises but does not contain. **The core is small** — routing,
-registry, brokering, convergence.
+Every meaningful transition produced by OS, Manager, Control, external integrations, or Agent
+workers enters OmnisAgent's event gateway.
 
-### 3.1 Responsibilities
-
-| Process | Owns | Never does |
-|---|---|---|
-| `omnisd` | Bus routing, subsystem registry, capability brokering, convergence, generations | Render; contain a subsystem; depend on a surface being attached |
-| Subsystems | One domain each, behind an adapter | Talk to each other except over the bus; self-register integration |
-| `omnis-gui` | Window, renderer, input capture | Own durable state; block on I/O |
-| `omnis` (CLI) | Scriptable surface, `--json` on every command | Reimplement daemon logic |
-| Environments | A guest userland or machine | Nest inside the core |
-
-### 3.2 The Substrate Bus
-
-**Control** (`omnis-control.sock`, `\\.\pipe\omnis-control`) — JSON-RPC 2.0. Capability checks,
-declaration reads and writes, generation transitions, escrow tickets, registry and schema queries.
-
-**Data** (`omnis-data.sock`, `\\.\pipe\omnis-data`) — binary multiplexer, uniform 9-byte header:
-
-```
-[StreamID: u32][Opcode: u8][PayloadLength: u32]
-
-0x01 PTY_STREAM   raw terminal stdout/stdin
-0x02 PTY_RESIZE   [Cols: u16][Rows: u16]
-0x03 DOCKER_LOG   demultiplexed container logs
-0x04 CAS_CHUNK    decrypted content-addressed payloads
-0x05 CDP_BINARY   browser screencast frames, guest window frames
-```
-
-Contract rules:
-
-- The wire schema is **versioned and additive**. A surface built against version *N* runs against
-  daemon version *N+k*. New opcodes are appended, never renumbered.
-- Every control message is expressible as JSON, whatever the encoding on the wire.
-- Surfaces are **stateless with respect to the daemon**. Any surface may attach, detach, or crash at
-  any point without data loss — which is why a surface on another machine is legal (§8).
-- **Tracing is part of the bus from the first message.** With every subsystem out of process, one
-  stack trace becomes several processes and a correlation id. Retrofitting that is far more expensive
-  than carrying it from the start.
+The graph substrate is **not a fifth product or semantic authority**. It is a shared system ABI and
+current-state substrate supplied by OmnisOS and used by all four components.
 
 ---
 
-## 4. The declaration
+## 3. Shared multidimensional graph
 
-**One file defines the system.** Not settings the daemon reads — the definition it converges toward.
-See [`examples/omnis.nix`](examples/omnis.nix) for the reference declaration.
+### 3.1 Purpose
 
-It is a **Nix module**. Not a format of our own that compiles to Nix: that means owning a language, a
-parser, a type system, an error-reporting story, and a compiler, to arrive where the Nix module
-system already is. We get typed options, merge semantics, `mkDefault`/`mkForce`, imports, and
-nixpkgs for nothing (P1).
+The graph is the common current-state model of the machine and its cognitive/interactive extensions.
+It exists so every subsystem can refer to the same object without copying identity.
 
-It declares hosts and placement, subsystems and their backends, guest environments, presentation,
-remote access, and secret *references* — never secret values.
+A process may simultaneously participate in physical, resource, causal, activity, authority,
+temporal, cognitive, and presentation dimensions while remaining one process identity.
 
-### 4.1 Generations
+### 3.2 Core representation
 
-Applying a declaration produces a **generation**: a parent, a diff, an author, and a resulting system.
-Generations are listable, diffable, and roll back.
+The graph is a dynamic property graph with stable opaque identities.
 
-This is the mechanism behind two guarantees that would otherwise be aspirations:
+```text
+Node
+  id
+  kinds[]
+  properties{}
+  provenance[]
 
-- **Reversibility.** "Any change an agent makes can be rolled back" becomes one operation, identical
-  for a typo, a bad profile, and a misbehaving agent.
-- **Attribution.** A generation has an author. An agent reconfiguring your machine produces a
-  reviewable change with a parent, not an untraceable mutation.
-
-Audit answers *what happened*; generations answer *what the system now is, and who made it so*.
-
-### 4.2 Runtime changes write the declaration
-
-A change made through the modification surface is **staged into the declaration** and applied by
-convergence. It is not an overlay and not a side channel. Overlays guarantee drift: the running
-system stops matching the declaration exactly when you need the declaration to be true.
-
-Resolution layers, later winning:
-
-```
-defaults → profile → user → workspace → runtime
+Edge
+  id
+  source
+  relation
+  target
+  dimensions[]
+  properties{}
+  validity
+  provenance[]
 ```
 
-Every layer is inspectable: the settings surface can name which layer set any value.
+Semantic identities use stable opaque IDs independent of filesystem path, PID, Nix store path,
+host, model provider, UI location, or current implementation.
 
-### 4.3 What this costs
+Immutable artifacts may additionally use content identities.
 
-Nix is a hard dependency with a real learning curve. Users who never open the file are served by the
-GUI writing typed options for them; users who do open it meet Nix. Convergence is also not instant —
-some changes apply live, others need a subsystem restart, and the option schema must say which, or
-the interface will lie about when a change took effect.
+### 3.3 Dimensions
 
----
+Dimensions are typed relation/property namespaces over shared identities. The initial required
+dimensions are:
 
-## 5. Subsystems
+```text
+physical       hardware, process, filesystem, network, device, service
+system         desired configuration, generation, invariant, realization
+resource       package, executable, library, model, endpoint, runtime
+capability     provides, requires, implements, declines
+binding        semantic/resource identity -> concrete realization
+execution      invocation, placement, lifecycle, resource consumption
+causal         caused_by, emitted, derived_from, observed
+provenance     source, version, hash, discovery method, evidence
+authority      may_access, may_invoke, protected_by, credential handle
+temporal       valid_from, valid_until, created_at, active interval
+activity       project, goal, task, worker, execution membership
+cognitive      memory, belief, hypothesis, context, attention, procedure
+presentation   scene, view, focus, selection, lens, layout, surface
+```
 
-A subsystem is **a separate process that speaks the bus**. That is the whole contract.
+The dimension set is extensible. New dimensions must reuse existing identities rather than minting
+parallel shadow objects for the same thing.
 
-### 5.1 Why out of process
+### 3.4 Write ownership
 
-"Every subsystem must be independently omittable" as a *rule* erodes: with seventeen subsystems in
-one address space, the first deadline produces a direct call between two of them and nothing fails to
-signal it. With separate processes and only a versioned wire schema between them, two subsystems
-**cannot** couple. The property becomes structural (P8).
+Each authority owns canonical writes to particular dimensions:
 
-It also makes P1 mechanical: binding `git` is a thin adapter process, not a module inside the daemon,
-and a subsystem may be written in any language.
-
-### 5.2 Supervision is not ours
-
-Restart policy, resource limits, ordering, health checks, and **socket activation** are systemd's.
-Socket activation matters specifically: a subsystem starts on its first bus message, which answers
-both the memory cost of many processes and the cold-start cost of starting them.
-
-### 5.3 Removal is complete
-
-Disabling a subsystem removes the processes, the packages, the installed files, **and everything it
-contributed to the rest of the system** — commands, keybindings, menu entries, file associations,
-protocol handlers, shell completions, credential helpers, settings surfaces. Remove the Git backend
-and nothing of Git remains anywhere. "Disabled" and "not installed" are not different states.
-
-**This forces a constraint.** Integration points are **declared and brokered by the core registry**,
-never registered imperatively by a subsystem. A subsystem that could install a shim, a menu entry, or
-a `PATH` entry on its own would be one whose removal could never be complete. Declaring integration
-is the only way the guarantee holds (P4).
-
-### 5.4 Backends are swappable
-
-Where a subsystem fronts more than one implementation — `git` and `sl`, several task runners, several
-agent CLIs — the abstraction exists so they are **interchangeable and removable** (P2), not so either
-is reimplemented. Omnis owns the operation log, the cross-repository graph, and the harness registry.
-The tools stay the tools.
-
----
-
-## 6. Documentation is part of the system
-
-A declaration is only usable if you can discover what you may declare. So documentation is not a
-website beside the product — it is a **surface inside it**.
-
-### 6.1 One schema, three consumers
-
-Every option carries a type, a default, a description, and an example. That single schema drives:
-
-1. **The settings UI** — forms generated from types, not hand-built per option.
-2. **The documentation** — in-product and published, generated from the same definitions.
-3. **The agent's vocabulary** — what an agent may set, with what values, and what each means.
-
-There is no second place to update, and therefore no way for the three to disagree (P9). An option
-without a description is an incomplete option, and CI can say so.
-
-### 6.2 Live while you declare
-
-In the GUI, editing the declaration shows the documentation for the option under the
-cursor: what it does, its type, its default, what it interacts with, and whether changing it applies
-live or needs a restart. **Declaring the system and reading about it are one activity**, not a
-context switch to a browser.
-
-The same pane carries the architecture and decision records, so "why is it like this" is answerable
-without leaving the workspace.
-
-### 6.3 The agent reads what you read
-
-When an agent proposes a change to the declaration it is working from the option schema, and its
-proposal cites the options it sets. An agent that must guess at option names produces
-plausible-looking configuration that does not evaluate — the failure mode this design removes.
-
-Combined with §7, the sequence is: the agent proposes a declaration change, the documentation for
-every option it touched is shown beside the diff, and you approve or reject with the reasoning in
-front of you.
-
----
-
-## 7. The modification surface
-
-**Everything configurable is modifiable at runtime — by the user, the built-in agent, and external
-agents — through one API.**
-
-- **No privileged surface.** The GUI is a control-socket client like any other. If a setting can be
-  changed by clicking, it can be changed by `omnis` and by an agent over MCP, using the same
-  operation (P5).
-- **Introspectable, not guessable.** Clients enumerate the option schema, the axes and their legal
-  values, installed profiles, themes, keymaps, environments, and subsystems (§6.1).
-- **One validation path, one approval path.** Side-effectful mutations pass the same escrow whoever
-  sent them. There is no trusted-caller shortcut: identity is not a security boundary when both the
-  built-in and external agents run arbitrary model output. The gate is on the *action*.
-- **Attributed.** Every mutation records who made it. An unattributable change is indistinguishable
-  from a compromise.
-- **Reversible**, via generations (§4.1).
-
-### 7.1 Agent accountability
-
-Every side-effectful agent action is **recorded before it takes effect** in an append-only audit
-stream — actor, action category, parameters, outcome — and **gated by an escrow ticket** that
-expires. An expired ticket is a denial, never a silent grant. A killswitch revokes in-flight
-execution, not merely future execution. Actions that cannot be recorded cannot be executed.
-
-Audit without escrow is a perfect record of damage already done. Escrow without audit is approvals
-with no history. They are one invariant.
-
-### 7.2 Self-optimisation
-
-The system observes itself — which subsystems are used, latency and memory per process, cache hit
-rates, which placements are slow — and **proposes changes to its own declaration**: disable a
-subsystem nothing has called in a month, resize a cache, move a process to a host that is not
-saturated, prefetch what is always fetched.
-
-**Self-optimisation is not a new mechanism.** It is the system acting as an agent against itself, and
-it goes through exactly the path in §7 and §7.1: a proposed generation, with a diff, an author, and
-the measurements that motivated it, passing the same escrow. Approving it is the same action as
-approving anything else, and rolling it back is the same operation.
-
-**It is never silent.** A system that reconfigures itself without a reviewable generation is
-precisely the unattributable change §7 rejects, and "the computer decided" is not an acceptable
-answer to "why is my machine different today". Whether a class of optimisation may be auto-approved
-is a policy in the declaration — off by default, and never for anything that removes or relocates.
-
-The honest limit: this is only as good as the telemetry, and telemetry that answers "is this
-subsystem worth keeping" is a design problem in its own right, not a side effect of logging.
-
-### 7.3 Automation
-
-Goal loops, workflow graphs, one-shot tasks, and scheduled jobs are **one abstraction**, not four
-features (P10).
-
-An **automation** is a declared graph of steps with:
-
-| Part | What it is |
+| Authority | Canonical writes |
 |---|---|
-| **Trigger** | Manual, a schedule, a bus event, or a goal becoming unsatisfied |
-| **Steps** | A graph — sequential, parallel, or conditional — of actions, each addressable (§10.3) |
-| **Gates** | Escrow points where a human approves before the graph continues (§7.1) |
-| **Checkpoints** | Durable progress, so an interrupted run resumes rather than restarts |
-| **Termination** | An explicit stop condition. A goal loop without one is not a loop, it is a leak |
-
-Every automation is declared (P3), every step is attributed and audited (§7.1), and a failed or
-blocked run checkpoints and reports rather than dying silently.
-
-**A goal loop is a graph with a satisfaction condition** rather than a distinct mechanism: it runs,
-checks whether the goal holds, and either stops or re-enters. Self-optimisation (§7.2) is a goal loop
-whose action is proposing a generation. Scheduled jobs are graphs with a time trigger. The task graph
-(§11) is the execution engine underneath, not a parallel system.
-
-**The proof this abstraction is right is that it already exists.** The pipeline that builds Omnis —
-request, interpretation gate, plan, approval gate, implement, self-review loop, merge gate, with
-checkpoint-and-resume on quota exhaustion — *is* a goal loop with human gates and durable
-checkpoints. It is currently GitHub Actions and Python because the product does not exist yet. When
-it does, that pipeline should be an Omnis automation, and the fact that it was built by hand first
-means the abstraction is validated against a real workload rather than an imagined one.
-
-**Not built yet.** This section specifies the shape; no automation engine exists. Its position in the
-roadmap is deliberate — an automation abstraction is only worth building once the bus, the
-declaration, and the escrow it depends on are real.
-
----
-
-## 8. Hosts and placement
-
-A **host** is a named execution target backed by a runtime: `native`, `docker`, `wsl`, `podman`,
-`nspawn`, or `remote` (another personal machine over the tailnet). The container runtime is itself an
-abstraction — pinning one would exclude users to save a thin dispatch.
-
-Each core process — **daemon, CLI, GUI, web** — is **placed on a host** in the declaration.
-Placement is a property of the system, not an installation detail: daemon on the workstation,
-interface on the laptop, is a configuration rather than a special build.
-
-Processes carry constraints, checked at evaluation time:
-
-| Process | Requires |
-|---|---|
-| `daemon` | The workspace filesystem; durable storage |
-| `gui` | A display, a GPU, the platform window system — effectively `native` |
-| `cli` | Nothing; attaches to a daemon wherever it is |
-| `web` | Reachability on the tailnet |
-
-**Resolution failure is a configuration error with a reason**, reported when the generation is
-evaluated — not a runtime crash. The GUI constraint is load-bearing: a GPU compositor in a container
-without passthrough is crippled, and passthrough on macOS and Windows ranges from fragile to
-unavailable. **The GUI runs natively; the daemon is what gets containerised.**
-
-### 8.1 Remote access
-
-Remote access is a **web surface served over Tailscale** at the device's HTTPS name
-(`https://<device>.<tailnet>.ts.net`). Transport, naming, and certificates are Tailscale's; caller
-identity comes from the tailnet, which is what makes attribution satisfiable for a remote caller.
-
-It is **optional**. The daemon starts, runs, and is fully usable with no network at all.
-
-The web surface is a surface, not a renderer backend: the compositor is wgpu-based and wgpu targets
-WebGPU, so a browser hosts the *same* backend in a canvas.
-
-### 8.2 What splitting costs
-
-A remote daemon means remote filesystem access, so the VFS and content-addressed store stop being
-optimisations and become load-bearing for correctness and latency. Input-to-frame latency crosses a
-network in split configurations. And the tested combinations must be named explicitly, or "it works
-on my placement" becomes the standard bug report.
-
----
-
-## 9. Rendering
-
-**Sources are not renderers.** Cell-grid layout, widget layout, web content, guest windows, and 3D
-all emit primitives into one scene tree. Two **backends** consume it.
-
-There is **one backend**: the GPU compositor (`omnis-render`), targeting a desktop window natively
-and a browser canvas over WebGPU (§8.1).
-
-`cell-grid` presentation remains — the terminal *look*, fixed advance, ANSI palettes, pane-grid
-keyboard navigation, command-palette-first interaction — drawn by the compositor in a window. Looking
-like a terminal and running in one were always separate things; ADR-0017 dropped the second, and the
-aesthetic is untouched.
-
-**One backend does not make the scene tree optional.** It is what keeps sources out of rendering: a
-source emits primitives and knows nothing about how they are drawn, which is what lets a browser
-page, a guest window, and a shader field coexist in one frame.
-
-### 9.1 Why one scene tree
-
-A terminal cell is a glyph run with fixed advance; a UI label is a glyph run with shaped advance —
-same atlas, same pipeline. A browser is a content source, not a rendering engine. And compositing a
-terminal pane, a video, a guest application window, and a particle field in one frame is a scheduling
-problem with one answer.
-
-The scene tree is also what makes a service presentable at all (§12): a source translates whatever it
-is fronting into primitives, and everything downstream — theming, layout, accessibility, the agent's
-view of the screen — works without knowing what produced them.
-
-### 9.2 Primitives
-
-| Primitive | Used by |
-|---|---|
-| Quad — solid, gradient, rounded, bordered, shadowed | backgrounds, panels, cell backgrounds, chrome |
-| Glyph run — shared atlas, fixed or shaped advance | terminal cells, labels, code, semantic web text |
-| Texture | screencast rasters, guest windows, icons, render targets |
-| Path — SDF or tessellated | vector icons, graphs, DAG edges |
-| Material layer — custom shader with declared inputs | 3D scenes, particle fields, backdrops, transitions |
-| **Native surface** — a delegated region we do not draw | DRM playback, guest windows, hardware-decoded video, third-party webviews |
-
-**Adding a source must not add a primitive class.** If it would, that is a design conversation, not a
-patch. The native surface is the one case that has earned it (ADR-0019), because no combination of
-the other five can express *content we are not permitted to look at*.
-
-### 9.3 3D, shaders, particles
-
-The material layer is a first-class primitive, not an effects add-on, available in every presentation
-mode — including behind and between glyph runs in the cell grid. Two uses, deliberately not
-conflated: **chrome** (backdrops, transitions, agent-activity fields) authored by Omnis and profiles,
-and **content** (shader playgrounds, model preview, GPU-accelerated visualisation) supplied by a user
-or extension. The engine supports both; exposing authoring demands sandboxing, resource limits, and
-GPU-hang recovery, and is gated on D14.
-
-### 9.4 Native surfaces, and the rule for them
-
-Some content cannot be drawn by us. DRM-protected playback requires a protected output path, so
-capturing it — in a browser canvas or from a guest window — yields black frames by design. Capture is
-the wrong verb.
-
-A **native surface** is delegated instead: Omnis declares the geometry, the clip, and the z-order, and
-the platform composites the content there through its own path. **We never receive the pixels**, which
-is exactly why it is permitted (Wayland subsurfaces, `CALayer`/`AVSampleBufferDisplayLayer`,
-DirectComposition visuals).
-
-**The rule: delegate as little as possible.** Every delegated region is a piece of the interface we no
-longer control (P7). If content can be a texture, it should be.
-
-What a delegated region costs:
-
-| | |
-|---|---|
-| **No styling** | A profile does not reach inside it. It is someone else's rectangle. |
-| **No capture** | We cannot screenshot or record it — so our own capture features must say so rather than emit black. |
-| **Constrained z-order** | On several platforms an overlay sits above or below the scene, not freely interleaved. Modals over one may be impossible, not merely awkward. |
-| **Does not cross the network** | It cannot be delegated through the web surface's canvas, so remote access to DRM playback does not work and must say so. |
-| **Four implementations** | One per platform, in a project that otherwise confines platform differences to how the core is hosted. |
-
-Its contents are opaque to us, so its accessibility is the platform's and the content's. The region
-must still be **described** in our tree, or a screen reader meets an unexplained gap.
-
-### 9.5 What owning the renderer costs
-
-Text shaping, hit-testing, IME, and **accessibility**. A custom-rendered UI publishes no native
-accessibility tree unless built to, so UIA/AX/AT-SPI belongs in the compositor's acceptance criteria
-rather than a later epic.
-
-Dropping the TUI (ADR-0017) makes this **non-negotiable rather than merely important**: a text
-backend was one path to text-addressable output, and with it gone the published accessibility tree is
-the only one. The web surface sharpens it further — a browser is where users most expect assistive
-technology to work.
-
----
-
-## 10. Presentation
-
-### 10.1 Themes and profiles
-
-**A theme is colours**, in the **VS Code colour-theme format** — `colors`, `tokenColors`,
-`semanticTokenColors`, `type`. Existing themes load unmodified, and the format already carries
-`terminal.ansi*`, so the sixteen ANSI colours the cell-grid presentation needs come free. Icon
-themes use the VS Code icon-theme format for the same reason.
-
-**A profile bundles** a theme, an icon theme, the axis values below, window chrome, the app icon and
-its state animations, typography and density, an audio pack, material-layer backdrops, and settings
-overrides.
-
-**Agent persona is not part of a profile.** A profile may *suggest* one; it never sets a provider,
-model, or reasoning effort behind the user's back.
-
-### 10.2 The capability matrix
-
-| Axis | Option | Values |
-|---|---|---|
-| Presentation mode | `presentation` | `cell-grid` · `widget` · `hybrid` |
-| Layout topology | `layout` | `chat-centric` · `ide-split` · `terminal-grid` · `vcs-dag` |
-| Input routing | `inputBar` | `global-hud` · `per-pane` · `hybrid` |
-| Keymap | `keybindings` | `default` · `vscode` · `zed` · `cursor-claude` · `vim` · `emacs` |
-| Chrome & tokens | `window.*`, `theme` | §10.1 |
-
-Which *backend* runs is not an axis and not a preference: it follows from the surface. `hybrid` mixes
-presentation modes per pane, so a cell-grid editor beside a widget settings panel is legal rather
-than a special case.
-
-Themes and profiles are **data files** and nothing else. Adding either requires zero code changes (P6).
-
-### 10.3 One input bar, one navigation model
-
-**There is one input bar.** Not a chat box, a search field, a terminal prompt, a command palette, and
-a browser address bar — one input, bound to whatever has focus. A chat, a quick search, a terminal, a
-web page, a settings filter, and a documentation query all reach the user through the same control.
-
-Panes do not ship their own input widgets. A pane declares an **input contract** — what it accepts,
-where completions come from, what history it draws on, and what submitting means — and the input bar
-renders and routes accordingly. That is P10 applied to the most duplicated widget in every
-comparable product.
-
-This clarifies the `inputBar` axis (§10.2): `global-hud` and `per-pane` are not two implementations,
-they are two *placements* of the same bar — floating and centred, or anchored into the focused pane.
-`hybrid` mixes them.
-
-**Everything is addressable.** Panes, files, settings pages, documentation, chats, repositories,
-tasks, context fragments, and guest environments all have an `omnis://` address. Addressability is
-what makes the rest of this work: it is what the input bar navigates to, what the CLI takes as an
-argument, what an agent cites in a proposal, and what a link in the documentation points at.
-
-**Navigation is global.** Because everything is addressed, **back, forward, and reload** are system
-controls rather than browser controls, over one history stack across every surface. Reload means
-*re-materialise this view from its source* — re-read the file, re-query the schema, re-fetch the page
-— and never *re-execute*: reloading a task view must not run the task. Confusing those two is how a
-navigation control becomes destructive.
-
----
-
-## 11. Data
-
-**Configuration lives in files; user data lives in PGlite** — embedded Postgres, not a server.
-
-The test: *would a user want this in version control, or be alarmed to find it there?* Themes,
-profiles, keymaps, layouts, feature flags, placement, and environments are the first. Workspaces,
-tabs, chat threads, audit entries, CAS metadata, VCS state, context fragments, and escrow tickets are
-the second.
-
-- **Content-addressed storage** — content-defined chunking, BLAKE3 keys, convergent encryption keyed
-  by a per-user master secret, reflink deduplication. Convergent encryption leaks equality *within*
-  one user's store: an attacker with store access who can guess a plaintext can confirm its presence.
-  A bounded, accepted property, not an oversight.
-- **Context fragments** — everything captured normalises to one envelope regardless of origin (code
-  selection, terminal buffer, browser page, container log), addressable as `omnis://context/<id>`,
-  payload in the CAS. Per-origin formats would mean an adapter per origin per consumer.
-- **The VCS operation log** — every mutating operation appends an entry carrying enough state to
-  invert it. Undo is a first-class operation over that log, not reconstruction from git internals,
-  and it holds identically for Git and Sapling because the log is Omnis's. Operations that are not
-  losslessly invertible must capture the discarded state into the CAS first, or refuse.
-- **Task identity is the hash of its inputs** — source content, dependency output hashes, the command
-  line, the declared environment. Not a timestamp: `mtime` changes on checkout and fails to change on
-  same-second writes, and is meaningless across machines or a sync mesh. Undeclared inputs produce
-  wrong cache hits, so detecting them is part of the work, not an extra.
-
----
-
-## 12. Services
-
-A **service** — ChatGPT, DeepSeek, Google, YouTube, Netflix — is a **backend of a domain subsystem**.
-YouTube is to `streaming` what `git` is to `vcs`: the same swappability (P2), the same declaration,
-the same complete removal (§5.3).
-
-Three concerns, only one of them new:
-
-| Concern | Mechanism |
-|---|---|
-| **Presentation** | A source emitting scene-tree primitives (§9) |
-| **Action** | A capability over the bus, brokered and escrow-gated (§7) |
-| **Aggregation** | A **domain schema** every backend maps onto — the new part |
-
-**The universal translator already exists.** `omnis-web-source`'s semantic mode — AXTree to layout to
-primitives — renders any service with a web interface *today*, as real primitives rather than a
-rectangle of pixels: keyboard-navigable, themeable, and legible to an agent.
-
-Four tiers, progressive, with no cliff:
-
-| Tier | What | Cost |
-|---|---|---|
-| 0 | Raster — screencast into a texture | Nothing; always works |
-| 1 | Semantic translation — AXTree to primitives | Nothing; the default |
-| 2 | Declared adapter — a mapping to the domain schema | Data, not code (P10) |
-| 3 | API adapter — the service's own API | An adapter subsystem, and credentials |
-
-Everything is usable at tier 1 and upgraded in place. A service that changes its markup is fixed by
-editing data, not by shipping a release.
-
-**A domain schema names which capabilities a backend may decline.** Not every provider supports every
-action, and a schema that assumes otherwise produces an interface full of controls that silently
-fail. DRM playback is the sharpest case: a backend supplies search, metadata, and queue, and declines
-playback, which is then delegated to a native surface (§9.4).
-
-**Terms of service is a decision, not a technical question.** Re-presenting some services through our
-own interface is contractually restricted regardless of feasibility, and which adapters ship needs
-the same treatment as trade dress (D3).
-
----
-
-## 13. Security
-
-- **The vault.** Master key via Argon2id; the key-encryption key in a zeroising buffer with `mlock`,
-  never serialised. Device secrets bridge to the OS keychain.
-- **Secrets reach child processes by injection at spawn time** — never written to disk, never to a
-  file the child reads.
-- **Secrets never enter agent context.** An agent may reference a secret by name and cause it to be
-  injected; it may not read the value. Otherwise every secret reaches a model provider's logs and any
-  transcript the user later shares.
-- **Git, forge, and SSH authentication** go through a local agent socket, so private keys are
-  decrypted on demand and never handed out.
-
-The structure is fixed; the **threat model is D10** and may constrain it.
-
----
-
-## 14. Crate and package layout
-
-```
-crates/
-  omnis-core/          bus contracts, option schema, scene tree types, capability matrix
-  omnisd/              the core: routing, registry, brokering, convergence, generations
-  omnis-cli/           `omnis`, `--json` on every command
-  omnis-gui/           desktop host and window manager
-  omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
-  omnis-layout/        cell-grid and widget layout modes
-  omnis-browser/       Chromium supervisor and CDP bridge
-  omnis-web-source/    AXTree→layout and screencast→texture bridges; the default service backend
-  omnis-cas/           chunking, convergent encryption, VFS
-  omnis-agent/         harness registry, session supervision, MCP bridge
-  omnis-docs/          option schema → documentation, search index, in-product docs surface
-subsystems/            one adapter binary per bound tool — vcs, terminals, lsp, dap, tasks, …
-packages/
-  frontend/            web surface shell
-  profiles/            profiles and themes — data only, no code
-nix/                   modules defining the declaration's option schema
-examples/
-  omnis.nix            the reference declaration
+| OmnisOS | physical, system, enforcement facts, graph substrate state |
+| OmnisManager | resource, capability, binding, placement, execution facts |
+| OmnisAgent | cognitive, memory, goal, context, learned semantic relations |
+| OmnisControl | presentation, focus, selection, interactive layout/control state |
+
+Cross-authority references are normal. Cross-authority mutation must go through the owning API or a
+validated graph transaction.
+
+### 3.5 Graph transactions
+
+Graph updates are atomic transactions containing:
+
+```text
+actor
+causal parents
+preconditions
+mutations
+provenance
+authority namespace
 ```
 
-Nothing here exists yet. It is the target shape, and the reason `ci.yml` already carries guarded Rust
-and web jobs.
+A committed transaction increments graph revision and emits one or more normalized events to
+OmnisAgent.
+
+The graph service may keep an implementation WAL for crash recovery. That WAL is not a replacement
+for OmnisAgent's causal worldline.
+
+### 3.6 Internal graph service
+
+OmnisOS provides a minimal internal service, working name `omnis-graphd`, responsible only for:
+
+- stable identity allocation;
+- atomic graph transactions;
+- current-state storage;
+- subscriptions/change streams;
+- indexed graph queries;
+- authority/write validation;
+- revisioning and local recovery.
+
+It contains no cognition, capability policy, UI logic, package semantics, or memory semantics.
+
+The first implementation may use SQLite/WAL plus purpose-built indexes. Storage is replaceable; the
+graph contract is not.
 
 ---
 
-## 15. Open decisions
+## 4. Worldline and events
 
-Resolved decisions link to their record; see [the decision log](notes/adr/).
+### 4.1 Ownership
 
-| # | Decision | Blocks |
-|---|---|---|
-| D1 | **First vertical slice** — which single path through the substrate is built first, end to end. A sequencing choice, not a product thesis. | E1, and the ordering of everything after |
-| ~~D2~~ | Config/data boundary — resolved by [ADR-0005](notes/adr/0005-configuration-lives-in-files-data-lives-in-pglite.md) and [ADR-0012](notes/adr/0012-the-system-is-one-declarative-configuration-applied-as-generations.md) | ~~E6~~ |
-| D3 | **Trade-dress policy** — which third-party names, marks, and icons may ship, and under what attribution | E4 |
-| D4 | **Host backends and tested placements per platform** — reshaped by [ADR-0016](notes/adr/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them.md) from "which platforms" to "which backends, and which placements do we test" | E2, E3, E11 |
-| D5 | **Extension host compatibility target** — VS Code API emulation, or native-first with shims | E8 |
-| D6 | **Agent provider adapter contract** | E5 |
-| D7 | **Performance budgets** — frame time, redraw latency, cold start, memory ceiling, and input-to-frame across a network | E3, E7 |
-| ~~D8~~ | Renderer hot-swap — dissolved by [ADR-0001](notes/adr/0001-one-scene-tree-two-renderer-backends.md); what remains is graphics device loss and adapter switching | E3 |
-| D9 | **Subsystem admission criteria** — what a subsystem must satisfy to enter the "next to" layer | Every subsystem |
-| D10 | **Vault threat model** — what `mlock`, the Argon2id parameters, and spawn-time injection actually defend against | E11, E19 |
-| D11 | **Graphics baseline** — API, minimum GPU capability, and what happens below it | E3, E21 |
-| D12 | **Text stack** — shaping, atlas strategy, subpixel policy, bidi, IME | E3 |
-| ~~D13~~ | Webview compositing — answered by [ADR-0019](notes/adr/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own.md): a native subsurface, not readback | ~~E3, E7, E8~~ |
-| D14 | **Shader and 3D exposure** — Omnis and profiles only, or users and extensions | E21 |
-| ~~D15~~ | Terminal capability floor — moot, the TUI is dropped by [ADR-0017](notes/adr/0017-the-tui-is-dropped-as-a-surface.md) | ~~E22~~ |
+OmnisAgent owns the canonical event worldline.
+
+Every meaningful transition from a first-party component must be represented as an event. Components
+do not require Agent polling to discover their state transitions.
+
+### 4.2 Event shape
+
+```text
+Event
+  id
+  type
+  schema
+  source
+  actor
+  timestamp
+  causal_parents[]
+  graph_revision
+  entities[]
+  artifact_refs[]
+  payload_ref
+  provenance
+  correlation/trace
+```
+
+Events form an append sequence for replay and a causal DAG for meaning.
+
+### 4.3 Event coverage
+
+Required event producers include:
+
+- graph transactions;
+- keyboard, pointer, focus, selection, navigation, and control interactions;
+- scene/control-tree changes;
+- process/service lifecycle;
+- filesystem/repository changes;
+- package/build/generation activity;
+- device/network/resource changes;
+- Manager discovery/resolution/execution;
+- model and inference requests/results;
+- external agent harness lifecycle/tool results;
+- Agent worker lifecycle/results;
+- memory/context/consolidation events;
+- internally generated Agent events.
+
+High-frequency physical telemetry may be represented through lossless aggregation windows or
+referenced artifacts, but causal identity and provenance must not disappear merely because the Agent
+cannot process each raw sample synchronously.
+
+### 4.4 Graph versus worldline
+
+```text
+worldline = historical causal truth
+shared graph = current structured state
+indexes = derived query accelerators
+Control tree = interactive projection
+render scene = GPU-oriented lowering
+```
+
+No derived layer becomes canonical merely because it is convenient to query.
 
 ---
 
-## 16. Repository automation
+## 5. OmnisOS
 
-The development pipeline is part of the architecture: [`AGENTS.md`](AGENTS.md) states the rules,
-[`notes/pipeline.md`](notes/pipeline.md) explains how it works and how releases are cut,
-`.github/workflows/` enforces it, and `.github/scripts/` implements it. The pipeline is Python; that
-is deliberate and independent of the product stack.
+OmnisOS is the operating-system substrate. It is initially a Linux distribution derived from a
+maintained fork of `nixpkgs`/NixOS. Linux remains the hardware kernel; OmnisOS is the system kernel in
+Omnis product architecture.
+
+### 5.1 Responsibilities
+
+OmnisOS owns:
+
+- boot and system activation;
+- hardware and driver integration;
+- users and sessions;
+- filesystems and mounts;
+- networking;
+- service/process supervision integration;
+- NixOS system configuration;
+- system generations and rollback;
+- physical resource enforcement;
+- isolation and authority enforcement;
+- host identity and remote-host participation;
+- publication of authoritative physical/system facts into the graph;
+- the shared graph substrate.
+
+### 5.2 NixOS fork
+
+OmnisOS must remain compatible with nixpkgs packages and as much upstream NixOS module behavior as
+possible. The fork exists to add deep graph/event/control integration, not to gratuitously diverge
+from the package ecosystem.
+
+Upstream changes should be carried as a minimal reviewable patch stack until a permanent divergence
+is justified.
+
+### 5.3 Desired and actual state
+
+OmnisOS maintains a distinction between:
+
+```text
+desired persistent system state
+actual physical/runtime system state
+```
+
+Nix/NixOS realizes the first. Runtime observation publishes the second. Their relationship is visible
+in the graph.
+
+### 5.4 Invariants
+
+IOE's invariant concept survives as system-level machine constraints rather than language syntax.
+Examples include:
+
+- a required service is reachable;
+- a protected model must remain local;
+- a worker may consume at most a resource envelope;
+- a credential must not be disclosed into model context;
+- a host must provide a required capability before placement;
+- a persistent package/service relationship remains satisfied.
+
+Pure configuration invariants should be checked before activation where possible. Runtime invariants
+may be continuously evaluated from current graph state and enforced by physical mechanisms.
+
+### 5.5 Physical enforcement
+
+Semantic authority must compile into real physical authority. Depending on the operation, OmnisOS may
+use Linux mechanisms such as namespaces, cgroups, seccomp, LSM/Landlock/eBPF hooks, UID/GID
+boundaries, mount/network namespaces, device isolation, and credential brokers.
+
+The Agent may reason freely; execution receives only the capabilities physically granted to it.
+
+### 5.6 Persistent transitions
+
+Persistent structural changes use candidate system generations:
+
+```text
+Agent/user intention
+  -> Manager resolves plan/resources
+  -> candidate NixOS configuration
+  -> evaluate
+  -> build
+  -> inspect graph/closure diff
+  -> activate generation
+  -> publish resulting events/state
+```
+
+Transient actions such as opening an application, running a compiler, navigating a URL, or invoking
+a model do not create NixOS generations unless the desired persistent state changes.
+
+---
+
+## 6. OmnisManager
+
+OmnisManager is a maintained fork/extension of `NixOS/nix`. It preserves Nix's evaluator, store,
+derivations, package/environment semantics, and ecosystem compatibility while extending the manager
+into a universal resource/capability/binding layer.
+
+### 6.1 Canonical concepts
+
+The Manager intentionally keeps its ontology small:
+
+```text
+Resource     something available or realizable
+Capability   something that can be done
+Binding      a resource/foreign identity can realize a capability
+Execution    one concrete use of a binding
+Constraint   a condition on resolution, placement, or execution
+```
+
+Packages, models, harnesses, GPUs, services, CLIs, APIs, libraries, devices, containers, VMs,
+credentials, and remote hosts are resources rather than separate architecture families.
+
+### 6.2 Nix integration
+
+Nix remains the canonical mechanism for packages, derivations, store paths, environments, and builds.
+Manager adds graph identities and semantic metadata above physical realizations.
+
+A resource identity survives changes in:
+
+- store path;
+- version;
+- host;
+- provider;
+- runtime;
+- container/VM placement.
+
+### 6.3 Capability resolution
+
+A request is resolved conceptually as:
+
+```text
+semantic requirement
+  -> capability
+  -> constraints
+  -> candidate bindings/resources
+  -> placement/resource evaluation
+  -> deterministic policy/ranking
+  -> concrete execution
+```
+
+Selection policy must be inspectable and reproducible from its inputs. Learned recommendations may
+inform candidate scoring, but hidden nondeterministic "first match wins" behavior is forbidden.
+
+### 6.4 Required resource classes
+
+The initial Manager must support resources for:
+
+- Nix packages and derivations;
+- executables and libraries;
+- system/user services;
+- local and remote hosts;
+- containers and VMs;
+- CPUs/GPUs/accelerators;
+- devices;
+- model artifacts;
+- inference engines;
+- model/API providers;
+- external agent harnesses;
+- MCP servers/clients;
+- protocol/API endpoints;
+- repositories/workspaces;
+- credential/protected-value handles;
+- arbitrary native/foreign handles.
+
+### 6.5 Agent harnesses and inference
+
+External harnesses and inference engines belong in Manager, not Agent.
+
+Examples:
+
+```text
+Capability: code.agent
+  bindings -> Claude Code, Codex, OpenCode, future harnesses
+
+Capability: model.embed
+  bindings -> local embedding runtime, ONNX, remote endpoint
+
+Capability: model.reason
+  bindings -> local LLM, remote API, specialist service
+```
+
+OmnisAgent requests capabilities; it does not embed provider-specific integration into its cognitive
+core.
+
+### 6.6 Discovery
+
+Discovery is deterministic-first:
+
+1. existing graph/package metadata;
+2. native descriptors/reflection;
+3. protocol schemas and APIs;
+4. compiler/runtime/LSP/index metadata;
+5. CLI completion/manifests/structured help/man pages;
+6. filesystem/source/debug symbols when available;
+7. deterministic probing;
+8. specialized learned interpretation;
+9. general reasoning only for unresolved meaning.
+
+Foreign provenance must record how each capability/relationship was learned.
+
+### 6.7 Protected values
+
+Credentials and sensitive data are protected resources/handles.
+
+The Agent may know that a credential exists and what capabilities it can authorize without receiving
+its plaintext value. Manager resolves authorized handles at execution time; OmnisOS enforces the
+physical access boundary.
+
+### 6.8 Effect metadata
+
+Bindings should declare or infer execution properties where known:
+
+```text
+pure/deterministic
+read-only
+idempotent
+retriable
+reversible
+compensatable
+persistent external effect
+opaque foreign effect
+```
+
+Unknown foreign operations are treated conservatively. A completed opaque external effect cannot be
+pretended to roll back because a later internal operation failed.
+
+### 6.9 Placement and optimization
+
+Manager resolves both implementation and placement across local/remote resources.
+
+Relevant constraints may include:
+
+- CPU/GPU/RAM;
+- latency;
+- locality;
+- privacy;
+- credential availability;
+- network reachability;
+- model quality/context capacity;
+- monetary/token cost;
+- energy;
+- warm caches/state;
+- user/system policy.
+
+Agent asks for semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
+realization unless the caller requests a specific implementation.
+
+---
+
+## 7. OmnisAgent
+
+OmnisAgent is a core subsystem and the persistent cognitive identity of the machine. It is not a
+single model and has no privileged universal LLM loop.
+
+### 7.1 Responsibilities
+
+OmnisAgent owns:
+
+- event ingestion and causal worldline;
+- episodic/semantic/procedural/project memory;
+- entity and relation interpretation;
+- judgement/routing;
+- context compilation;
+- working-memory activation;
+- goals, commitments, hypotheses, expectations;
+- worker/workflow orchestration;
+- reflection and consolidation;
+- learned procedures and routing;
+- endogenous events/internal dynamics;
+- self-model and candidate self-evolution.
+
+### 7.2 Event-driven cognition
+
+The basic cognitive unit is an event:
+
+```text
+event
+  -> judgement
+  -> context compilation
+  -> worker/workflow dispatch or null action
+  -> observations/effects
+  -> new events
+```
+
+External user requests are one event source among many. There is no semantic `IDLE` state. A living
+Agent may be busy, waiting, consolidating, exploring, sleeping, or doing nothing.
+
+### 7.3 Memory
+
+The event worldline is historical ground truth. Derived memory is revisable.
+
+Required memory forms include:
+
+- events;
+- episodes;
+- assertions/facts with temporal validity;
+- entities and relationships;
+- decisions;
+- goals and commitments;
+- preferences with scope;
+- project state;
+- procedures/skills;
+- expectations/predictive memory;
+- artifacts and provenance.
+
+Embeddings, summaries, graphs, and indexes are representations, not canonical truth.
+
+### 7.4 Context
+
+Context is compiled for a specific event, worker, and purpose. It is not an ever-growing transcript.
+
+The context compiler may combine causal ancestors, graph neighborhoods, activated memories, project
+state, code structure, artifacts, prior attempts, negative evidence, and protected-information
+constraints under token/latency/privacy budgets.
+
+### 7.5 Models and workers
+
+Models are Manager resources. Workers are Agent cognitive roles/activations that may use one or more
+Manager capabilities.
+
+Initial worker families include judgement, retrieval, reasoning, research, code, verification,
+simulation, memory/reflection, learning, and evolution.
+
+Every worker result re-enters the event stream. No worker maintains a hidden alternate history.
+
+### 7.6 External agents
+
+Claude Code, Codex, OpenCode, and future harnesses are Manager resources that OmnisAgent may invoke as
+workers. Native harness hooks should emit events. Inference interception may provide a universal
+fallback so model-bound contexts can still participate in Omnis memory even when a harness exposes
+little semantic lifecycle information.
+
+---
+
+## 8. OmnisControl
+
+OmnisControl is the universal machine control environment. It replaces the old `OmnisGUI` concept.
+Rendering is one responsibility among several.
+
+### 8.1 Responsibilities
+
+OmnisControl owns:
+
+- graph desktop;
+- 2D and 3D graph interaction;
+- graph-to-control projection;
+- control tree and layout;
+- shell/PTY interaction;
+- navigation/focus/selection/lenses;
+- inspectors and arbitrary visualizations;
+- native Wayland/XWayland application regions;
+- input routing;
+- GPU rendering/composition;
+- presentation events and structural mutation APIs.
+
+### 8.2 Desktop model
+
+Omnis has a desktop, but not a traditional app-grid desktop.
+
+The desktop is an interactive representation of the shared graph. It has two equivalent modes over
+the same identities:
+
+- **2D** — Airgraph/Blueprint-like focus+context graph optimized for editing, precise manipulation,
+  workflows, causal inspection, and dense information.
+- **3D** — spatial graph projection optimized for large neighborhoods, clusters, causal depth,
+  temporal exploration, and multidimensional relationships.
+
+Toggling mode preserves focus, selection, lens, graph identities, and timeline frontier.
+
+### 8.3 Control tree
+
+Control derives an interactive tree from graph queries/projections:
+
+```text
+shared graph
+  -> projection query/lens
+  -> Control tree
+  -> layout
+  -> render scene
+  -> GPU/platform compositor
+```
+
+The Control tree may contain ephemeral layout nodes, but semantic leaves reference shared graph
+identities. The render scene is an optimized lowering, never a semantic source of truth.
+
+### 8.4 Agent access
+
+User interaction and Agent structural control share the same underlying state.
+
+The user primarily manipulates materialized controls through pointer/keyboard/touch/voice. The Agent
+has direct structural access and may:
+
+- create/remove/replace/move views;
+- bind a view to another graph identity;
+- change lens or representation;
+- focus/select/navigate;
+- split or reorganize the workspace;
+- create live visualizations;
+- attach actions/interactions;
+- persist a useful control arrangement where appropriate.
+
+These mutations emit events like user interactions do.
+
+### 8.5 One renderer
+
+Terminal, browser semantics, widgets, code, graphs, media, 2D, and 3D do not require independent
+renderer architectures.
+
+Control lowers them into one GPU-oriented render scene. The initial compositor implementation should
+be Wayland-native, built using Smithay-class compositor primitives and wgpu-class GPU rendering.
+
+Existing applications remain existing applications. Wayland/XWayland surfaces are delegated/native
+regions where direct semantic rendering is unavailable or undesirable.
+
+### 8.6 Shell and input
+
+The default interaction may be visually terminal-centric, but the shell is a graph-native Control
+surface rather than a separate product.
+
+Submission resolution is deterministic-first:
+
+```text
+valid shell syntax / executable -> real shell execution
+known URI/path/graph identity    -> navigate/open
+known capability                -> invoke
+known structured query          -> query graph
+otherwise                       -> OmnisAgent semantic interpretation
+```
+
+No explicit switch between "terminal" and "AI chat" is required.
+
+---
+
+## 9. Addressing and identity
+
+Every stable graph identity is addressable. Human-friendly names are aliases, not identity.
+
+An internal URI scheme may expose graph objects, for example:
+
+```text
+omnis://node/<id>
+omnis://event/<id>
+omnis://resource/<id>
+omnis://capability/<id>
+omnis://scene/<id>
+omnis://memory/<id>
+```
+
+Public URI details are implementation-specific until the protocol spec freezes them, but all first-
+party surfaces must be able to exchange stable references rather than copied descriptive text.
+
+---
+
+## 10. API and protocol principles
+
+### 10.1 Shared semantics
+
+There must not be separate GUI, CLI, Agent, or MCP semantics for the same capability. Different
+surfaces may expose different representations of one operation.
+
+### 10.2 Event-first integration
+
+First-party components publish events; Agent does not depend on scraping/polling them.
+
+### 10.3 Deterministic-first operation
+
+Exact structured mechanisms are preferred to learned interpretation whenever they can satisfy the
+same requirement.
+
+### 10.4 Explicit incompatibility
+
+If a target/control mode cannot preserve required semantics, it reports incompatibility rather than
+silently degrading behavior.
+
+### 10.5 Provenance
+
+Resources, bindings, graph relations, memories, and generated views retain enough provenance to
+explain where they came from and how strongly they are known.
+
+---
+
+## 11. Security model
+
+Security belongs at the physical boundary rather than as a semantic censor of cognition.
+
+The cognitive plane may formulate arbitrary hypotheses/plans within model capability. The effect
+plane grants only the physical handles and authorities available to that execution.
+
+Required principles:
+
+- secrets are handles, not prompt text;
+- no worker inherits broad user authority by default;
+- host/graph visibility follows granted authority;
+- protected data carries disclosure constraints into model/Control projections;
+- external effects retain causal and actor identity;
+- candidate self-modification is isolated from the active system until realization/promotion;
+- persistent system changes remain representable as generations and reversible where the underlying
+  physical operation permits it.
+
+---
+
+## 12. Self-modification and optimization
+
+Omnis may optimize itself at several levels.
+
+### 12.1 Runtime optimization
+
+Manager may change placement, runtime implementation, batching, caching, model routing, or resource
+allocation when semantics permit it.
+
+### 12.2 Cognitive adaptation
+
+Agent may learn memories, procedures, retrieval policies, routing preferences, competence estimates,
+and worker strategies.
+
+### 12.3 Structural evolution
+
+Changes to Omnis components themselves are candidate implementations/generations. They are built and
+evaluated outside the currently active implementation before promotion.
+
+For OmnisOS and Manager, Nix derivations/generations provide the natural realization boundary.
+Agent/Control variants should use similarly reproducible candidate artifacts and explicit lineage.
+
+---
+
+## 13. Host independence
+
+A semantic resource or activity is not identified by the machine currently executing it.
+
+Manager may place execution on:
+
+- local host;
+- another Omnis machine;
+- container;
+- VM;
+- remote server;
+- cloud resource;
+- GPU/accelerator host.
+
+Placement preserves graph/resource/activity identity and emits causal events describing the physical
+realization.
+
+The long-term system may span laptop, workstation, phone, and server without treating one device as
+the conceptual owner of all computation.
+
+---
+
+## 14. Existing software compatibility
+
+Unmodified Linux software must work from the beginning.
+
+Existing software progresses through understanding levels rather than requiring a port:
+
+```text
+opaque executable/surface
+  -> OS-observable
+  -> metadata/CLI-discoverable
+  -> accessibility/protocol discoverable
+  -> API/source/tooling discoverable
+  -> semantically rich Manager binding
+```
+
+The Agent may initially interact through weak interfaces and later compile repeated successful
+behavior into stronger deterministic capabilities.
+
+Vision + synthetic mouse/keyboard is a compatibility fallback, not the preferred first-party
+interaction mechanism.
+
+---
+
+## 15. Repository/product topology
+
+The intended project split is:
+
+```text
+omnis/             umbrella architecture, integration, compatibility tests
+omnis-os/          NixOS/nixpkgs-derived operating system
+omnis-manager/     Nix-derived manager
+omnis-agent/       event/memory/cognition subsystem
+omnis-control/     graph desktop/compositor/control subsystem
+```
+
+A future organization may host maintained upstream forks separately, but the product boundaries above
+remain.
+
+The umbrella repository owns cross-component protocol versions, architecture, end-to-end tests,
+reference configuration, release composition, and compatibility matrices.
+
+---
+
+## 16. Implementation invariants
+
+The following are hard architectural constraints:
+
+1. **One stable identity space across OS, Manager, Agent, and Control.**
+2. **One shared multidimensional current-state graph.**
+3. **OmnisAgent owns the immutable causal worldline and memory.**
+4. **Every meaningful first-party transition reaches Agent as an event; Agent does not poll the UI.**
+5. **Graph dimensions have explicit write ownership.**
+6. **Control tree is derived from/shared with graph state; render scene is only a lowering.**
+7. **2D and 3D Control modes represent the same identities and interaction state.**
+8. **Agent may structurally mutate Control state directly.**
+9. **Models, inference engines, and external agent harnesses are Manager resources.**
+10. **Nix evaluation/build remains deterministic and model-free.**
+11. **Persistent structural system changes are realized as inspectable generations.**
+12. **Transient execution does not require rewriting persistent Nix configuration.**
+13. **Capabilities describe meaning; bindings describe concrete realizations.**
+14. **Existing mature tools are bound before equivalent functionality is reimplemented.**
+15. **Discovery is deterministic-first and preserves foreign provenance.**
+16. **Protected values remain handles unless explicit authorized disclosure is required.**
+17. **Semantic identity survives version, host, path, process, and provider changes.**
+18. **External effects are accounted for honestly; opaque effects are not falsely rolled back.**
+19. **Agent context is compiled per event/worker, never a global ever-growing transcript.**
+20. **No LLM or provider is the identity of OmnisAgent.**
+21. **There is no semantic idle state; null/no work is valid.**
+22. **No component creates a parallel authoritative world model for objects already in the shared graph.**
+
+---
+
+## 17. Non-goals
+
+The initial architecture explicitly does not require:
+
+- a custom programming language;
+- a custom Linux kernel;
+- replacement of nixpkgs packages;
+- replacement of existing applications;
+- a new model-provider API standard;
+- a traditional desktop shell/dock/application launcher model;
+- a monolithic executive LLM;
+- forcing all software into Omnis-native UI;
+- representing every kernel interrupt/syscall as a high-level cognitive event.
+
+A custom kernel may be explored later only if Linux becomes a demonstrated blocker to required
+semantics, security, or performance.
+
+---
+
+## 18. Completion criterion
+
+A first complete Omnis implementation exists when one machine can:
+
+1. boot OmnisOS from its NixOS-derived configuration;
+2. expose authoritative physical/system state into the shared graph;
+3. use OmnisManager to install/discover/resolve arbitrary packages and resource bindings;
+4. run local/remote inference engines and external agent harnesses as Manager resources;
+5. maintain OmnisAgent's causal event worldline and structured memory;
+6. compile task-specific context and dispatch heterogeneous workers;
+7. boot OmnisControl as the primary environment;
+8. present the same graph desktop in interactive 2D and 3D modes;
+9. execute real Linux shell commands and unmodified Wayland/XWayland applications;
+10. allow Agent and user actions to operate on the same graph identities;
+11. allow Agent direct structural mutation of Control projections;
+12. apply persistent system changes through candidate Nix generations and roll them back;
+13. preserve events/provenance across restart;
+14. continue functioning when any particular model/provider/harness is replaced or unavailable.
+
+At that point Omnis is not merely an AI-enabled Linux distribution. It is a machine whose operating
+state, available actions, cognition, and interface are all different projections of one persistent,
+addressable system.
