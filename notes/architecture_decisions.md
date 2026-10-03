@@ -1,61 +1,56 @@
-# Architecture Decisions — process
+# Architecture decisions — process
 
-How decisions are made and recorded. The decisions themselves live one per file in
-[`notes/adr/`](adr/), and the published index is generated from those files — never hand-maintained
-(`AGENTS.md` rule 2).
+`ARCHITECTURE.md` is the normative system architecture. Supporting specifications under `docs/`
+refine implementation contracts. ADRs record architectural choices, supersessions, and the reasoning
+behind them. Historical source material in `notes/transcript.md` is never normative on its own.
+
+ADR-0023 is the architecture reset that establishes OmnisOS, OmnisManager, OmnisAgent, OmnisControl,
+the shared multidimensional graph, and the Agent worldline. Earlier ADRs remain binding only where
+they do not conflict with ADR-0023 or the current normative architecture.
 
 ## When an ADR is required
 
-- An open decision from `ARCHITECTURE.md` §8 is resolved.
-- Any deviation from `ARCHITECTURE.md` is approved (`AGENTS.md` rule 3).
-- Anything in `notes/transcript.md` is promoted into the normative architecture. The vision is non-normative
-  source material; it never binds the implementation by being written down, only by being promoted
-  through a record here.
+- A change would alter a normative invariant in `ARCHITECTURE.md` or a supporting subsystem spec.
+- A cross-component protocol or graph ownership rule changes.
+- A previously accepted ADR must be superseded or narrowed.
+- Historical/source material is intentionally promoted into normative architecture.
+
+Pure implementation choices that preserve the normative contracts do not need ADRs.
 
 ## Status values
 
 | Status | Meaning |
 |---|---|
-| `Proposed` | Written, awaiting the maintainer's approval. Does **not** bind the implementation. |
-| `Accepted` | Binding. Code is checked against it; a contradiction is a defect in the code or a new ADR. |
-| `Superseded by ADR-NNNN` | Historical. Kept for the reasoning, never deleted. |
+| `Proposed` | Written, awaiting maintainer approval; non-binding. |
+| `Accepted` | Binding unless superseded by a later ADR or normative architecture reset. |
+| `Superseded by ADR-NNNN` | Historical reasoning only; no longer binds implementation. |
 
-Records are **append-only**. A decision that turns out wrong gets a new ADR that supersedes it, with
-the reason. Editing history erases the argument, which is the part worth keeping.
+Records remain append-only in substance: a changed decision gets a new ADR. Updating an older
+record's status to point at its superseding ADR is allowed and expected.
 
-## Writing one
+## Specification sequence
 
-Create `notes/adr/NNNN-kebab-case-title.md` with the next free number. The docs site picks it up with
-no further wiring: `.github/scripts/docs_hooks.py` discovers the directory, generates the index
-table from each file's title and status line, and injects the navigation entries.
-
-```markdown
-# ADR-NNNN — <title>
-
-- **Status**: Proposed · **Date**: YYYY-MM-DD · **Resolves**: D<n>
-- **Supersedes**: ADR-MMMM  ·  **Promotes**: `notes/transcript.md` §<n>
-
-## Context
-What forced the decision. Constraints, measurements, what broke.
-
-## Decision
-The choice, stated so that code can be checked against it.
-
-## Alternatives rejected
-Each with the reason it lost, not just its name. An ADR whose alternatives are strawmen is
-worthless — the real ones are the plausible options someone will propose again in six months.
-
-## Consequences
-What this makes easy, what it makes hard, what it costs. State the costs plainly; an ADR that reads
-as advocacy is a decision nobody can revisit honestly.
-
-## What this forecloses
-Optional. The doors this closes permanently.
+```text
+ARCHITECTURE.md
+  -> supporting specs in docs/
+  -> ADRs for unresolved architectural choices
+  -> ROADMAP.md
+  -> tracked implementation issues/plans
+  -> code
 ```
 
-## Scope limits
+Issues should track settled implementation work, not become the place where the architecture is
+invented.
 
-An ADR may fix a *structure* while explicitly declining to assert something adjacent — ADR-0009 and
-ADR-0010 fix storage and secret-handling shapes while leaving the threat model to D10. Say so in a
-**Scope limit** section rather than implying coverage the record does not have. A later decision may
-then constrain an ADR without superseding it.
+## Writing an ADR
+
+Create `notes/adr/NNNN-kebab-case-title.md` with the next free number. Every ADR must contain:
+
+- a parseable `# ADR-NNNN — Title` heading;
+- a `**Status**:` line;
+- `## Context`;
+- `## Decision`;
+- `## Alternatives rejected`;
+- `## Consequences`.
+
+The documentation site discovers ADRs automatically; do not maintain a second static index.

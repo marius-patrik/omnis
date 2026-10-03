@@ -1,7 +1,6 @@
 # ADR-0023 — Reset Omnis around a graph-native four-authority operating system
 
-- **Status:** Accepted
-- **Date:** 2026-10-03
+- **Status**: Accepted · **Date**: 2026-10-03
 - **Supersedes:** the previous `omnisd`-centred product topology and every earlier ADR where it
   conflicts with this record or the rewritten `ARCHITECTURE.md`.
 
@@ -73,6 +72,17 @@ The following are no longer architectural truths:
 
 Historical ADRs remain useful design provenance but do not override `ARCHITECTURE.md` after this
 reset.
+
+## Alternatives rejected
+
+- **Keep the `omnisd`-centred workspace architecture and add the new Agent beside it.** This would
+  preserve two competing semantic centres: the daemon model and the shared graph.
+- **Make the graph a fifth product authority.** The graph is common state/identity infrastructure;
+  giving it domain semantics would duplicate OS, Manager, Agent, and Control ownership.
+- **Put cognition into Nix evaluation.** This would make deterministic system realization depend on
+  probabilistic/model availability and destroy the clean desired-state boundary.
+- **Keep a standalone semantic scene graph in Control.** It would require continuous synchronization
+  with the machine graph and recreate the duplicate-authority problem the reset is intended to remove.
 
 ## Consequences
 
