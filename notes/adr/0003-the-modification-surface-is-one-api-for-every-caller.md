@@ -1,6 +1,6 @@
 # ADR-0003 — The modification surface is one API for every caller
 
-- **Status**: Accepted · **Date**: 2026-09-06
+- **Status**: Superseded by ADR-0023 · **Date**: 2026-09-06
 
 ## Context
 

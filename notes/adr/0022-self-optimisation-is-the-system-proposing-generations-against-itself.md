@@ -1,6 +1,6 @@
 # ADR-0022 — Self-optimisation is the system proposing generations against itself
 
-- **Status**: Accepted · **Date**: 2026-09-06
+- **Status**: Superseded by ADR-0023 · **Date**: 2026-09-06
 - **Depends on**: ADR-0003, ADR-0006, ADR-0012
 
 ## Context

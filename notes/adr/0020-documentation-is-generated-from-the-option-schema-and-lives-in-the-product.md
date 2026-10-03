@@ -1,6 +1,6 @@
 # ADR-0020 — Documentation is generated from the option schema and lives in the product
 
-- **Status**: Accepted · **Date**: 2026-09-06
+- **Status**: Superseded by ADR-0023 · **Date**: 2026-09-06
 - **Depends on**: ADR-0012 · **Establishes**: P9
 
 ## Context

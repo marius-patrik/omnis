@@ -204,7 +204,7 @@ def _render_declaration_page(body: str) -> str:
             f"[`{DECLARATION_SOURCE}`]({source_url}) at build time — this page and the file cannot",
             "disagree.",
             "",
-            "See [Architecture](architecture/index.md) and [OmnisOS](../OMNIS_OS.md) for persistent",
+            "See [Architecture](architecture/index.md) and [OmnisOS](OMNIS_OS.md) for persistent",
             "generation semantics. This declaration is illustrative until the OmnisOS module schema is implemented.",
             "",
             "```nix",

@@ -1,6 +1,6 @@
 # ADR-0001 — One scene tree, two renderer backends
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Narrows**: D8
+- **Status**: Superseded by ADR-0023 · **Date**: 2026-09-06 · **Narrows**: D8
 - **Partly superseded by**: [ADR-0017](0017-the-tui-is-dropped-as-a-surface.md) — the TUI
   backend is dropped. The scene tree, the source/renderer separation, and the primitive
   vocabulary below all stand; only the second backend is gone.

@@ -1,6 +1,6 @@
 # ADR-0005 — Configuration lives in files, data lives in PGlite
 
-- **Status**: Accepted · **Date**: 2026-09-06 · **Resolves**: D2
+- **Status**: Superseded by ADR-0023 · **Date**: 2026-09-06 · **Resolves**: D2
 
 ## Context
 
