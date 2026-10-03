@@ -1,0 +1,1121 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Omnis v0 Ontology and Event Registry · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-v0-ontology-and-event-registry">Omnis v0 Ontology and Event Registry<a class="headerlink" href="#omnis-v0-ontology-and-event-registry" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> This file freezes first-party graph names, capability names, event names and
+core lifecycle states for v0. Implementers do not invent synonyms.</p>
+<p>All identifiers below are lowercase ASCII dotted names. New first-party identifiers require a spec
+change before implementation.</p>
+<hr />
+<h2 id="1-kind-registry">1. Kind registry<a class="headerlink" href="#1-kind-registry" title="Permanent link">&para;</a></h2>
+<h3 id="11-omnisos">1.1 OmnisOS<a class="headerlink" href="#11-omnisos" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>omnis.kind.host
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>omnis.kind.cpu
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>omnis.kind.gpu
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>omnis.kind.memory_device
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>omnis.kind.storage_device
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>omnis.kind.network_device
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>omnis.kind.input_device
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>omnis.kind.output_device
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>omnis.kind.process
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>omnis.kind.service
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>omnis.kind.user
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>omnis.kind.session
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>omnis.kind.filesystem
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>omnis.kind.mount
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>omnis.kind.network_interface
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>omnis.kind.network_route
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>omnis.kind.network_listener
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>omnis.kind.cgroup
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>omnis.kind.nix_generation
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>omnis.kind.nix_store_path
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>omnis.kind.system_invariant
+</code></pre></div>
+<h3 id="12-omnismanager">1.2 OmnisManager<a class="headerlink" href="#12-omnismanager" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>omnis.kind.resource
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>omnis.kind.package
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>omnis.kind.derivation
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>omnis.kind.executable
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>omnis.kind.library
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>omnis.kind.endpoint
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>omnis.kind.container
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>omnis.kind.vm
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>omnis.kind.model
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>omnis.kind.inference_runtime
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>omnis.kind.agent_harness
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>omnis.kind.mcp_server
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>omnis.kind.repository
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>omnis.kind.worktree
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>omnis.kind.capability
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>omnis.kind.binding
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>omnis.kind.execution
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>omnis.kind.credential_handle
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>omnis.kind.credential_lease
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>omnis.kind.remote_host_binding
+</code></pre></div>
+<h3 id="13-omnisagent">1.3 OmnisAgent<a class="headerlink" href="#13-omnisagent" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>omnis.kind.activity
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>omnis.kind.goal
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>omnis.kind.commitment
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>omnis.kind.worker
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>omnis.kind.context_capsule
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>omnis.kind.hypothesis
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>omnis.kind.memory.episode
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>omnis.kind.memory.assertion
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>omnis.kind.memory.procedure
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>omnis.kind.memory.preference
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>omnis.kind.memory.expectation
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>omnis.kind.memory.decision
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>omnis.kind.memory.project_state
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>omnis.kind.memory.summary
+</code></pre></div>
+<h3 id="14-omniscontrol">1.4 OmnisControl<a class="headerlink" href="#14-omniscontrol" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>omnis.kind.workspace
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>omnis.kind.view
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>omnis.kind.projection
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>omnis.kind.lens
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>omnis.kind.control_node
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>omnis.kind.native_surface
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>omnis.kind.terminal
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>omnis.kind.notification
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>omnis.kind.input_surface
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>omnis.kind.chart
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>omnis.kind.table
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>omnis.kind.document
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>omnis.kind.editor
+</code></pre></div>
+<p>A node can have multiple kinds. <code>omnis.kind.resource</code> is added to concrete Manager resource kinds.</p>
+<hr />
+<h2 id="2-relation-registry">2. Relation registry<a class="headerlink" href="#2-relation-registry" title="Permanent link">&para;</a></h2>
+<h3 id="21-physicalsystem">2.1 physical/system<a class="headerlink" href="#21-physicalsystem" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>omnis.relation.physical.attached_to
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>omnis.relation.physical.runs_on
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>omnis.relation.physical.parent_process
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>omnis.relation.physical.member_of_cgroup
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>omnis.relation.physical.mounts
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>omnis.relation.physical.listens_on
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>omnis.relation.system.active_generation
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>omnis.relation.system.parent_generation
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>omnis.relation.system.realized_as
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>omnis.relation.system.declares
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>omnis.relation.system.satisfies
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>omnis.relation.system.violates
+</code></pre></div>
+<h3 id="22-manager">2.2 Manager<a class="headerlink" href="#22-manager" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>omnis.relation.resource.installed_on
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>omnis.relation.resource.realized_as
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>omnis.relation.resource.depends_on
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>omnis.relation.resource.contains
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>omnis.relation.capability.provides
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>omnis.relation.capability.requires
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>omnis.relation.binding.resource
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>omnis.relation.binding.capability
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>omnis.relation.binding.requires
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>omnis.relation.execution.binding
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>omnis.relation.execution.placed_on
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>omnis.relation.execution.uses
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>omnis.relation.execution.produced
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>omnis.relation.execution.consumed
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>omnis.relation.execution.spawned
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>omnis.relation.execution.authorized_by
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>omnis.relation.foreign.identity
+</code></pre></div>
+<h3 id="23-agent">2.3 Agent<a class="headerlink" href="#23-agent" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>omnis.relation.activity.goal
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>omnis.relation.activity.worker
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>omnis.relation.activity.execution
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>omnis.relation.activity.repository
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>omnis.relation.worker.context
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>omnis.relation.worker.parent
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>omnis.relation.cognitive.about
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>omnis.relation.cognitive.evidence
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>omnis.relation.cognitive.derived_from
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>omnis.relation.cognitive.supersedes
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>omnis.relation.cognitive.contradicts
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>omnis.relation.cognitive.supports
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>omnis.relation.cognitive.refutes
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>omnis.relation.cognitive.procedure_for
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>omnis.relation.cognitive.expectation_about
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>omnis.relation.context.includes
+</code></pre></div>
+<h3 id="24-control">2.4 Control<a class="headerlink" href="#24-control" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>omnis.relation.presentation.contains
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>omnis.relation.presentation.represents
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>omnis.relation.presentation.focus
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>omnis.relation.presentation.selection
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>omnis.relation.presentation.lens
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>omnis.relation.presentation.native_surface
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>omnis.relation.presentation.terminal_execution
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>omnis.relation.presentation.notification_source
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>omnis.relation.navigation.previous
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>omnis.relation.navigation.next
+</code></pre></div>
+<h3 id="25-provenancecausalauthority">2.5 provenance/causal/authority<a class="headerlink" href="#25-provenancecausalauthority" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>omnis.relation.provenance.source
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>omnis.relation.provenance.derived_from
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>omnis.relation.causal.parent
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>omnis.relation.authority.may_read
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>omnis.relation.authority.may_write
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>omnis.relation.authority.may_invoke
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>omnis.relation.authority.protected_by
+</code></pre></div>
+<hr />
+<h2 id="3-required-property-keys">3. Required property keys<a class="headerlink" href="#3-required-property-keys" title="Permanent link">&para;</a></h2>
+<p>Common:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>omnis.identity.display_name        text
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>omnis.identity.owner_uid           u64
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>omnis.identity.created_at          i64 nanoseconds UTC
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>omnis.state.status                 text enum per state machine
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>omnis.state.valid_from             i64 nanoseconds UTC
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>omnis.state.valid_until            i64 nanoseconds UTC or absent
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>omnis.provenance.confidence        f64 [0,1]
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>omnis.provenance.method            text
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>omnis.provenance.foreign_system    text
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>omnis.provenance.foreign_id        text
+</code></pre></div>
+<p>Physical:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>omnis.physical.pid                 u64
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>omnis.physical.uid                 u64
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>omnis.physical.gid                 u64
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>omnis.physical.cpu_percent         f64
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>omnis.physical.memory_bytes        u64
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>omnis.physical.device_path         text
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>omnis.physical.address             text
+</code></pre></div>
+<p>Manager:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>omnis.resource.version             text
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>omnis.resource.locator             text
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>omnis.capability.name              text
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>omnis.binding.effect_class         text
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>omnis.binding.memory_coverage      text
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>omnis.execution.exit_code          i64
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>omnis.execution.started_at         i64
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>omnis.execution.finished_at        i64
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>omnis.placement.locality           text
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>omnis.credential.purpose           text
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>omnis.credential.expires_at        i64
+</code></pre></div>
+<p>Agent:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>omnis.cognitive.confidence         f64 [0,1]
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>omnis.cognitive.salience           f64 [0,1]
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>omnis.cognitive.valid_from         i64
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>omnis.cognitive.valid_until        i64 or absent
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>omnis.cognitive.text               text
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>omnis.cognitive.status             text
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>omnis.goal.priority                f64 [0,1]
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>omnis.goal.deadline                i64 or absent
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>omnis.worker.priority              f64
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>omnis.worker.checkpoint            ArtifactRef or absent
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>omnis.context.token_budget         u64
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>omnis.context.model_binding        NodeId or absent
+</code></pre></div>
+<p>Control:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>omnis.presentation.mode            "2d"|"3d"
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>omnis.presentation.visible         bool
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>omnis.presentation.pinned          bool
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>omnis.presentation.position2       list[f64,f64]
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>omnis.presentation.position3       list[f64,f64,f64]
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>omnis.presentation.size2           list[f64,f64]
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>omnis.presentation.zoom            f64
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>omnis.presentation.theme           text
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>omnis.presentation.timeline_event  EventId or absent
+</code></pre></div>
+<hr />
+<h2 id="4-capability-registry">4. Capability registry<a class="headerlink" href="#4-capability-registry" title="Permanent link">&para;</a></h2>
+<p>Core capability names:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>omnis.capability.shell.execute
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>omnis.capability.process.execute
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>omnis.capability.package.realize
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>omnis.capability.package.install.user
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>omnis.capability.package.install.system
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>omnis.capability.system.generation.plan
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>omnis.capability.system.generation.build
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>omnis.capability.system.generation.activate
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>omnis.capability.system.generation.rollback
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>omnis.capability.vcs.status
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>omnis.capability.vcs.diff
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>omnis.capability.vcs.commit
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>omnis.capability.vcs.push
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>omnis.capability.code.format
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>omnis.capability.code.test
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>omnis.capability.code.agent
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>omnis.capability.model.classify
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>omnis.capability.model.embed
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>omnis.capability.model.rerank
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>omnis.capability.model.generate
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>omnis.capability.model.reason
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>omnis.capability.model.vision
+<a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>omnis.capability.model.audio.transcribe
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>omnis.capability.browser.navigate
+<a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>omnis.capability.browser.inspect
+<a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a>omnis.capability.browser.interact
+<a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>omnis.capability.http.request
+<a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a>omnis.capability.mcp.invoke
+<a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a>omnis.capability.container.run
+<a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a>omnis.capability.vm.run
+<a id="__codelineno-14-31" name="__codelineno-14-31" href="#__codelineno-14-31"></a>omnis.capability.graph.query
+<a id="__codelineno-14-32" name="__codelineno-14-32" href="#__codelineno-14-32"></a>omnis.capability.control.materialize
+<a id="__codelineno-14-33" name="__codelineno-14-33" href="#__codelineno-14-33"></a>omnis.capability.control.mutate
+<a id="__codelineno-14-34" name="__codelineno-14-34" href="#__codelineno-14-34"></a>omnis.capability.ingest
+</code></pre></div>
+<p>A provider-specific capability does not replace these semantic names; it binds to them.</p>
+<hr />
+<h2 id="5-event-registry">5. Event registry<a class="headerlink" href="#5-event-registry" title="Permanent link">&para;</a></h2>
+<p>Every event uses <code>EventEnvelope</code> plus the payload fields listed here.</p>
+<h3 id="51-graph">5.1 graph<a class="headerlink" href="#51-graph" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>omnis.event.graph.committed
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  transaction_id, previous_revision, new_revision, changed_ids
+</code></pre></div>
+<h3 id="52-os">5.2 OS<a class="headerlink" href="#52-os" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>omnis.event.os.reconciled
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  source, revision
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>omnis.event.os.observation_gap
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>  source, lost_count, recovery_revision
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>omnis.event.os.process.started
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>  process, parent_process?, executable?, pid
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>omnis.event.os.process.exec
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>  process, executable, argv_artifact?
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>omnis.event.os.process.exited
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>  process, exit_code?, signal?
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>omnis.event.os.service.changed
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>  service, old_state, new_state
+<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>
+<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>omnis.event.os.device.added
+<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>omnis.event.os.device.removed
+<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>  device
+<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a>
+<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a>omnis.event.os.network.changed
+<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a>  identity, change_kind
+<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a>
+<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a>omnis.event.os.invariant.violated
+<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a>  invariant, identity, enforcement_action
+<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a>
+<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a>omnis.event.os.generation.proposed
+<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a>omnis.event.os.generation.evaluated
+<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a>omnis.event.os.generation.built
+<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a>omnis.event.os.generation.activating
+<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a>omnis.event.os.generation.activated
+<a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a>omnis.event.os.generation.failed
+<a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a>omnis.event.os.generation.rolled_back
+<a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a>  generation, parent, evidence[]
+</code></pre></div>
+<h3 id="53-manager">5.3 Manager<a class="headerlink" href="#53-manager" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>omnis.event.manager.resource.discovered
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  resource, provenance
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>omnis.event.manager.binding.discovered
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>  binding, resource, capability, provenance
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>omnis.event.manager.resolution.completed
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>  capability, selected_binding?, candidates_artifact
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>omnis.event.manager.execution.created
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>omnis.event.manager.execution.started
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>omnis.event.manager.execution.waiting
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>omnis.event.manager.execution.succeeded
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>omnis.event.manager.execution.failed
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>omnis.event.manager.execution.cancelled
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>omnis.event.manager.execution.lost
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>  execution, binding, placement, status, evidence[]
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>omnis.event.inference.request
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>  invocation, execution, model_role, request_artifact
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>omnis.event.inference.response
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>  invocation, binding, response_artifact, input_tokens?, output_tokens?, latency_ns?, cost?
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>
+<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>omnis.event.inference.failed
+<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>  invocation, binding?, error
+<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a>
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>omnis.event.manager.credential.lease.created
+<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>omnis.event.manager.credential.lease.expired
+<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>  handle, lease, execution
+</code></pre></div>
+<h3 id="54-agent">5.4 Agent<a class="headerlink" href="#54-agent" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>omnis.event.agent.activity.created
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>omnis.event.agent.activity.completed
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>omnis.event.agent.activity.failed
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  activity, goal?
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>omnis.event.agent.worker.created
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>omnis.event.agent.worker.started
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>omnis.event.agent.worker.waiting
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>omnis.event.agent.worker.succeeded
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>omnis.event.agent.worker.failed
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>omnis.event.agent.worker.cancelled
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>  worker, activity, context?, checkpoint?, evidence[]
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>omnis.event.agent.memory.created
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>omnis.event.agent.memory.updated
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>omnis.event.agent.memory.superseded
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>omnis.event.agent.memory.retracted
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>omnis.event.agent.memory.erased
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>  memory, evidence[]
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a>omnis.event.agent.context.compiled
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>  context, trigger, source_count, token_budget
+<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a>
+<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>omnis.event.agent.procedure.promoted
+<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>  procedure, evidence[]
+<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a>
+<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a>omnis.event.agent.candidate.proposed
+<a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a>omnis.event.agent.candidate.evaluated
+<a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a>omnis.event.agent.candidate.promoted
+<a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a>omnis.event.agent.candidate.rejected
+<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a>  candidate, target, evidence[]
+</code></pre></div>
+<h3 id="55-control">5.5 Control<a class="headerlink" href="#55-control" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>omnis.event.control.input.submitted
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  workspace, input_surface, text_artifact
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>omnis.event.control.focus.changed
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>  workspace, old?, new?
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>omnis.event.control.selection.changed
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>  workspace, selected[]
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>omnis.event.control.mode.changed
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>  workspace, old_mode, new_mode
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>omnis.event.control.lens.changed
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>  workspace, lens[]
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>omnis.event.control.tree.mutated
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>  workspace, transaction
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a>omnis.event.control.native_surface.created
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a>omnis.event.control.native_surface.closed
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a>  surface, process?
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a>omnis.event.control.terminal.created
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a>omnis.event.control.terminal.closed
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a>  terminal, execution?
+<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a>
+<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a>omnis.event.control.navigation
+<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a>  workspace, address, resolved_identity?
+<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a>
+<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a>omnis.event.control.notification.created
+<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a>omnis.event.control.notification.dismissed
+<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a>  notification, source?
+</code></pre></div>
+<h3 id="56-timers">5.6 timers<a class="headerlink" href="#56-timers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>omnis.event.timer.minute
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>omnis.event.timer.hour
+</code></pre></div>
+<p>The one-second timer is an internal reducer tick and is not durably enqueued unless a registered
+commitment requires durable second resolution.</p>
+<hr />
+<h2 id="6-execution-state-machine">6. Execution state machine<a class="headerlink" href="#6-execution-state-machine" title="Permanent link">&para;</a></h2>
+<p>States:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>created -&gt; starting -&gt; running
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>running -&gt; waiting -&gt; running
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>running|waiting -&gt; succeeded
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>running|waiting|starting -&gt; failed
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>created|starting|running|waiting -&gt; cancelling -&gt; cancelled
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>running|waiting -&gt; lost
+</code></pre></div>
+<p>Terminal states: succeeded, failed, cancelled, lost.</p>
+<p>Illegal transition =&gt; Conflict error + <code>omnis.event.os.invariant.violated</code> for the Execution node.</p>
+<p>Exit-code mapping:</p>
+<ul>
+<li>process exit 0 =&gt; succeeded unless binding postcondition says otherwise;</li>
+<li>non-zero =&gt; failed;</li>
+<li>SIGTERM/SIGKILL after requested cancel =&gt; cancelled;</li>
+<li>process disappears without authoritative exit observation after reconciliation =&gt; lost.</li>
+</ul>
+<hr />
+<h2 id="7-worker-state-machine">7. Worker state machine<a class="headerlink" href="#7-worker-state-machine" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>created -&gt; ready -&gt; running
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>running -&gt; waiting -&gt; ready
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>running -&gt; succeeded
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>running -&gt; failed
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>created|ready|running|waiting -&gt; cancelling -&gt; cancelled
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>running|waiting -&gt; suspended
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>suspended -&gt; ready
+</code></pre></div>
+<p>Terminal: succeeded, failed, cancelled.</p>
+<p>A Worker can have multiple Manager Executions over its life but one current ContextCapsule per
+activation attempt.</p>
+<hr />
+<h2 id="8-activity-state-machine">8. Activity state machine<a class="headerlink" href="#8-activity-state-machine" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>active -&gt; waiting
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>waiting -&gt; active
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>active|waiting -&gt; completed
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>active|waiting -&gt; failed
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>active|waiting -&gt; cancelled
+</code></pre></div>
+<p>No <code>idle</code> state exists.</p>
+<p>An Activity remains active while any nonterminal Worker, Commitment or required Execution belongs to
+it.</p>
+<hr />
+<h2 id="9-generation-state-machine">9. Generation state machine<a class="headerlink" href="#9-generation-state-machine" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>proposed -&gt; evaluated -&gt; building -&gt; built -&gt; activating -&gt; active
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>proposed|evaluated|building -&gt; failed
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>built|activating -&gt; failed
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>active -&gt; rolling_back -&gt; rolled_back
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>failed activation -&gt; rolling_back -&gt; rolled_back
+</code></pre></div>
+<p>Only one Generation can be active per Host at a time.</p>
+<hr />
+<h2 id="10-memory-ontology">10. Memory ontology<a class="headerlink" href="#10-memory-ontology" title="Permanent link">&para;</a></h2>
+<h3 id="101-episode">10.1 episode<a class="headerlink" href="#101-episode" title="Permanent link">&para;</a></h3>
+<p>Represents a bounded experienced sequence.</p>
+<p>Required:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>kind: omnis.kind.memory.episode
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>omnis.cognitive.text
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>omnis.cognitive.salience
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>omnis.cognitive.valid_from
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>omnis.cognitive.valid_until
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>cognitive.evidence -&gt; EventIds
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>cognitive.about -&gt; relevant NodeIds
+</code></pre></div>
+<p>Episode boundary rule:</p>
+<ul>
+<li>explicit Activity completion/failure closes its Activity episode;</li>
+<li>otherwise gap &gt;=30 minutes between related salient events closes an episode;</li>
+<li>a new explicit user request on a different Project/Repository closes the previous conversational
+  episode.</li>
+</ul>
+<h3 id="102-assertion">10.2 assertion<a class="headerlink" href="#102-assertion" title="Permanent link">&para;</a></h3>
+<p>Required:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>kind: omnis.kind.memory.assertion
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>subject NodeId
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>predicate dotted text
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>object typed Value or NodeId
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>confidence [0,1]
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>valid_from
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>valid_until?
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>evidence EventIds/ArtifactIds
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>status current|superseded|retracted|erased
+</code></pre></div>
+<p>Do not overwrite contradictory assertions. Create both and connect with
+<code>omnis.relation.cognitive.contradicts</code>.</p>
+<p>A newer assertion supersedes an older assertion only when:
+- same subject+predicate semantic slot; and
+- evidence establishes temporal replacement rather than unresolved disagreement.</p>
+<h3 id="103-procedure">10.3 procedure<a class="headerlink" href="#103-procedure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>kind: omnis.kind.memory.procedure
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>procedure_for -&gt; Capability
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>preconditions artifact/schema
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>ordered steps artifact
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>postconditions artifact/schema
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>success_count
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>failure_count
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>mean_cost
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>status candidate|active|retired
+</code></pre></div>
+<h3 id="104-preference">10.4 preference<a class="headerlink" href="#104-preference" title="Permanent link">&para;</a></h3>
+<p>Always scope preference to user + domain/context. No global preference is inferred from one isolated
+choice.</p>
+<p>Required fields: value, scope NodeIds, confidence, evidence.</p>
+<h3 id="105-expectation">10.5 expectation<a class="headerlink" href="#105-expectation" title="Permanent link">&para;</a></h3>
+<p>Required: subject, predicted predicate/value, deadline?, confidence, evidence.
+Resolution produces support/refute relation and prediction-error event when appropriate.</p>
+<h3 id="106-project-state">10.6 project state<a class="headerlink" href="#106-project-state" title="Permanent link">&para;</a></h3>
+<p>Represents durable active facts/commitments about one Project/Repository and links directly to its
+shared graph identity.</p>
+<h3 id="107-decision">10.7 decision<a class="headerlink" href="#107-decision" title="Permanent link">&para;</a></h3>
+<p>Stores selected option, alternatives artifact, reasons artifact, actor and evidence.</p>
+<hr />
+<h2 id="11-memory-extractionupdate-rule">11. Memory extraction/update rule<a class="headerlink" href="#11-memory-extractionupdate-rule" title="Permanent link">&para;</a></h2>
+<p>For each event after deterministic reducers:</p>
+<ol>
+<li>update exact current operational facts in owning graph namespace;</li>
+<li>if event closes/changes a durable user/project fact, create/update Agent assertion;</li>
+<li>if event belongs to an active Activity, attach to its episode;</li>
+<li>if event contains explicit user preference, create scoped preference at confidence 0.9;</li>
+<li>if preference is inferred from behavior, initial confidence 0.6;</li>
+<li>if a model extracts a semantic assertion, initial confidence is
+   <code>model_confidence * provenance_quality</code>, capped 0.9;</li>
+<li>user explicit correction creates assertion confidence 1.0 and contradicts/supersedes the prior
+   interpretation as temporally appropriate;</li>
+<li>no derived memory can exist without evidence relation(s).</li>
+</ol>
+<p>Provenance quality multipliers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>native-authoritative  1.00
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>user-declared         1.00
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>nix-evaluation        0.99
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>kernel-observation    0.99
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>protocol-descriptor   0.95
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>structured-tooling    0.95
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>foreign-api           0.90
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>source-analysis       0.90
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>deterministic-probe   0.85
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>agent-derived         0.80
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>learned-inference     0.70
+</code></pre></div>
+<hr />
+<h2 id="12-procedure-induction">12. Procedure induction<a class="headerlink" href="#12-procedure-induction" title="Permanent link">&para;</a></h2>
+<p>Normalize successful execution traces into capability-name sequences with semantic input/output
+schema IDs, ignoring concrete ExecutionIds and timing.</p>
+<p>Create a candidate procedure when the same normalized sequence reaches the same postcondition in at
+least 3 independent episodes.</p>
+<p>Candidate evaluation:</p>
+<ol>
+<li>replay against all matching historical episodes;</li>
+<li>require 100% postcondition success on at least 3 episodes;</li>
+<li>run 5 sandbox executions on fixture/test inputs where the capability provides fixtures;</li>
+<li>require 5/5 success;</li>
+<li>require mean normalized cost &lt;= 0.8 of the original model-mediated path.</li>
+</ol>
+<p>Then promote automatically to active procedure and emit
+<code>omnis.event.agent.procedure.promoted</code>.</p>
+<p>Any later 2 failures within the last 10 uses retires the procedure and falls back to the original
+capability resolution path.</p>
+<hr />
+<h2 id="13-self-evolution-state-machine">13. Self-evolution state machine<a class="headerlink" href="#13-self-evolution-state-machine" title="Permanent link">&para;</a></h2>
+<p>Self-evolution always produces a candidate artifact/branch first.</p>
+<p>Targets:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>Agent procedure/config
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>Agent code
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>Control code/config
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>Manager code/config
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>OmnisOS code/config
+</code></pre></div>
+<p>Evaluation gates for code/config candidates:</p>
+<ol>
+<li>build succeeds;</li>
+<li>owning repo full tests pass;</li>
+<li>umbrella protocol/integration tests pass;</li>
+<li>replay corpus has no regression &gt;1% in required success metrics;</li>
+<li>resource-cost regression &lt;=10% unless success metric improves &gt;=5%;</li>
+<li>no new authority/protection violation;</li>
+<li>candidate Nix artifact is reproducible twice with identical output hash when expected deterministic.</li>
+</ol>
+<p>Automatic promotion defaults:</p>
+<ul>
+<li>learned Agent procedure: yes after §12;</li>
+<li>Agent user-level configuration: yes if all gates pass and rollback exists;</li>
+<li>Agent code: no;</li>
+<li>Control code: no;</li>
+<li>Manager code: no;</li>
+<li>OmnisOS code/config: no.</li>
+</ul>
+<p>Non-automatic candidates remain graph-visible and can be activated by an actor holding the relevant
+promotion capability. This is a physical authority rule, not a semantic approval workflow.</p>
+<hr />
+<h2 id="14-direct-ingest-capability">14. Direct ingest capability<a class="headerlink" href="#14-direct-ingest-capability" title="Permanent link">&para;</a></h2>
+<p><code>omnis.capability.ingest</code> provides deterministic bootstrap of arbitrary user data without models.</p>
+<p>CLI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>omnis ingest &lt;path&gt; [&lt;path&gt;...]
+</code></pre></div>
+<p>Algorithm:</p>
+<ol>
+<li>lstat without following symlink;</li>
+<li>allocate Resource NodeId per filesystem object;</li>
+<li>record path, file type, size, mode, mtime, owner and symlink target;</li>
+<li>regular file bytes -&gt; BLAKE3 CAS ArtifactId;</li>
+<li>recursively enumerate directories in raw filename-byte lexical order;</li>
+<li>never execute ingested files;</li>
+<li>detect Git repository from <code>.git</code> metadata and bind Repository identity;</li>
+<li>parse deterministic formats only when a registered parser exists;</li>
+<li>attach provenance <code>user-declared + deterministic-probe</code>;</li>
+<li>enqueue ingest event;</li>
+<li>Agent semantic reinterpretation can happen later and never rewrites original artifact/provenance.</li>
+</ol>
+<p>Default recursion:
+- recurse directories;
+- stay on same filesystem;
+- skip <code>.git/objects</code> content bodies but retain Git object identity through Git plumbing;
+- maximum individual file 10 GiB;
+- larger files create metadata node but are not copied to CAS unless explicitly requested.</p>
+<hr />
+<h2 id="15-multi-user-graph-access">15. Multi-user graph access<a class="headerlink" href="#15-multi-user-graph-access" title="Permanent link">&para;</a></h2>
+<p>System graph is shared, but user-private cognitive/presentation state is owner-scoped.</p>
+<p>Read rules:</p>
+<ul>
+<li>root/system services read all except secret bytes, which are never graph values;</li>
+<li>a user reads public/system/Manager state plus nodes whose <code>omnis.identity.owner_uid</code> equals their
+  UID;</li>
+<li>one ordinary user cannot read another user's Agent cognitive or Control presentation nodes;</li>
+<li>remote host peers read only namespaces granted during pairing.</li>
+</ul>
+<p>Write rules:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>omnis-os UID       physical.*, system.*, enforcement.*
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>omnis-manager UID  resource.*, capability.*, binding.*, execution.*, placement.*, foreign.*
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>user Agent          cognitive.*, memory.*, goal.*, context.*, judgement.*, worker.*, learning.*
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>user Control        presentation.*, interaction.*, scene.*, navigation.*
+</code></pre></div>
+<p>System services authenticate by dedicated UID + socket peer credentials.
+Agent and Control share user UID; graphd additionally requires their per-unit 256-bit random service
+token delivered as a systemd credential. Token rotates on unit restart. This prevents accidental
+cross-component writes; the owning user remains a trust boundary and can ultimately impersonate
+their own services.</p>
+<p>Cross-namespace mutation goes through owning RPC, never direct graph commit.</p>
+<hr />
+<h2 id="16-memory-erasure">16. Memory erasure<a class="headerlink" href="#16-memory-erasure" title="Permanent link">&para;</a></h2>
+<p>Worldline causal envelopes are immutable, but user-requested erasure can remove payload content.</p>
+<p>Erasure algorithm:</p>
+<ol>
+<li>create <code>omnis.event.agent.memory.erased</code>;</li>
+<li>end validity of derived memory graph nodes;</li>
+<li>delete/revoke protected ArtifactRef roots requested for erasure;</li>
+<li>keep original EventId/type/time/causal edges and ArtifactId hash as an <code>erased</code> placeholder;</li>
+<li>CAS GC physically deletes unreferenced payload after the normal tombstone interval;</li>
+<li>rebuild retrieval indexes excluding erased content.</li>
+</ol>
+<p>Do not fabricate or rewrite earlier event metadata.</p>
+<hr />
+<h2 id="17-control-semantic-source-components">17. Control semantic source components<a class="headerlink" href="#17-control-semantic-source-components" title="Permanent link">&para;</a></h2>
+<h3 id="171-textdocumenteditor">17.1 text/document/editor<a class="headerlink" href="#171-textdocumenteditor" title="Permanent link">&para;</a></h3>
+<p>Plain text storage uses UTF-8 and a rope data structure through <code>ropey</code>.
+Syntax trees use Tree-sitter when a language grammar binding exists.
+LSP actions/completions/diagnostics come through Manager LSP bindings.</p>
+<p>Editor defaults:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>tab width              4 display columns
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>insert spaces          inherit project editorconfig; otherwise 4 spaces
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>line endings           preserve existing; new files LF
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>encoding               UTF-8
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>undo history           10000 operations per document
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>autosave               off
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>syntax highlighting    Tree-sitter query when present
+</code></pre></div>
+<p>User/Agent save is an explicit filesystem effect event.</p>
+<h3 id="172-markdown">17.2 Markdown<a class="headerlink" href="#172-markdown" title="Permanent link">&para;</a></h3>
+<p>Markdown parses with <code>pulldown-cmark</code> CommonMark + tables + task lists + strikethrough.
+It lowers to ordinary Control text/image/link primitives.</p>
+<h3 id="173-table">17.3 table<a class="headerlink" href="#173-table" title="Permanent link">&para;</a></h3>
+<p>Virtualize rows when row count &gt;200.
+Default visible overscan: 20 rows above and below.
+Sort is stable; missing/null sorts last ascending and first descending.
+Column width defaults to min(max(content estimate, 80px), 400px).</p>
+<h3 id="174-charts">17.4 charts<a class="headerlink" href="#174-charts" title="Permanent link">&para;</a></h3>
+<p>Charts are custom Control scene projections, not a second renderer.</p>
+<p>v0 chart types:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>line
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>scatter
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>bar
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>histogram
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>heatmap
+</code></pre></div>
+<p>Default numeric axis scale is linear.
+Time data uses UTC internally and local timezone labels.
+Downsample &gt;10000 visible points per series using Largest-Triangle-Three-Buckets to 5000 points.
+Raw source identity remains attached so selection resolves to original data.</p>
+<h3 id="175-imagesmedia">17.5 images/media<a class="headerlink" href="#175-imagesmedia" title="Permanent link">&para;</a></h3>
+<p>Static image decoding uses <code>image</code> crate formats enabled by the pinned build.
+Video/audio playback binds GStreamer/PipeWire as Manager resources; Control receives texture/audio
+stream handles rather than implementing codecs.</p>
+<hr />
+<h2 id="18-error-presentation">18. Error presentation<a class="headerlink" href="#18-error-presentation" title="Permanent link">&para;</a></h2>
+<p>Errors are graph/event identities, not modal-string-only failures.</p>
+<p>Control behavior:</p>
+<ul>
+<li>effect/query error tied to focused action -&gt; inline error on originating view;</li>
+<li>security/credential denial -&gt; inline explanation + available remediation capability;</li>
+<li>system invariant violation -&gt; persistent critical notification;</li>
+<li>background worker failure -&gt; Activity indicator + event, no focus theft;</li>
+<li>protocol incompatibility of core local service -&gt; persistent system banner and recovery action.</li>
+</ul>
+<p>Error details include TraceId and a copyable <code>omnis://trace/&lt;TraceId&gt;</code> URI.</p>
+<hr />
+<h2 id="19-uri-registry">19. URI registry<a class="headerlink" href="#19-uri-registry" title="Permanent link">&para;</a></h2>
+<p>Canonical URIs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>omnis://node/&lt;uuid&gt;
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>omnis://event/&lt;uuid&gt;
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>omnis://activity/&lt;uuid&gt;
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>omnis://worker/&lt;uuid&gt;
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>omnis://execution/&lt;uuid&gt;
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>omnis://generation/&lt;uuid&gt;
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>omnis://artifact/&lt;64-hex-blake3&gt;
+<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>omnis://trace/&lt;uuid&gt;
+<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a>omnis://capability/&lt;percent-encoded-dotted-name&gt;
+<a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>omnis://host/&lt;uuid&gt;
+</code></pre></div>
+<p>Parsing is strict. Unknown authority/path returns NotFound; it does not become a web search.</p>
+<hr />
+<h2 id="20-state-machine-enforcement">20. State-machine enforcement<a class="headerlink" href="#20-state-machine-enforcement" title="Permanent link">&para;</a></h2>
+<p>Execution, Worker, Activity, Generation and Memory status transitions in this document are enforced by
+typed transition functions. Direct string/property writes to <code>omnis.state.status</code> for these kinds
+are rejected by the owning authority.</p>
+<p>Every rejected illegal transition produces a typed Conflict response and a diagnostic event.</p>
+<hr />
+<h2 id="21-ontology-extension-rule">21. Ontology extension rule<a class="headerlink" href="#21-ontology-extension-rule" title="Permanent link">&para;</a></h2>
+<p>Implementation code may consume unknown third-party kinds/relations/properties as opaque namespaced
+data.</p>
+<p>It may <strong>not create a new <code>omnis.*</code> identifier</strong> unless that identifier is first added to this
+registry or another active normative spec in the same change.</p>
+        </article>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/ONTOLOGY_V0.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-kind-registry">1. Kind registry</a>
+            <ul>
+              <li><a href="#11-omnisos">1.1 OmnisOS</a></li>
+              <li><a href="#12-omnismanager">1.2 OmnisManager</a></li>
+              <li><a href="#13-omnisagent">1.3 OmnisAgent</a></li>
+              <li><a href="#14-omniscontrol">1.4 OmnisControl</a></li>
+            </ul>
+          </li>
+          <li><a href="#2-relation-registry">2. Relation registry</a>
+            <ul>
+              <li><a href="#21-physicalsystem">2.1 physical/system</a></li>
+              <li><a href="#22-manager">2.2 Manager</a></li>
+              <li><a href="#23-agent">2.3 Agent</a></li>
+              <li><a href="#24-control">2.4 Control</a></li>
+              <li><a href="#25-provenancecausalauthority">2.5 provenance/causal/authority</a></li>
+            </ul>
+          </li>
+          <li><a href="#3-required-property-keys">3. Required property keys</a>
+          </li>
+          <li><a href="#4-capability-registry">4. Capability registry</a>
+          </li>
+          <li><a href="#5-event-registry">5. Event registry</a>
+            <ul>
+              <li><a href="#51-graph">5.1 graph</a></li>
+              <li><a href="#52-os">5.2 OS</a></li>
+              <li><a href="#53-manager">5.3 Manager</a></li>
+              <li><a href="#54-agent">5.4 Agent</a></li>
+              <li><a href="#55-control">5.5 Control</a></li>
+              <li><a href="#56-timers">5.6 timers</a></li>
+            </ul>
+          </li>
+          <li><a href="#6-execution-state-machine">6. Execution state machine</a>
+          </li>
+          <li><a href="#7-worker-state-machine">7. Worker state machine</a>
+          </li>
+          <li><a href="#8-activity-state-machine">8. Activity state machine</a>
+          </li>
+          <li><a href="#9-generation-state-machine">9. Generation state machine</a>
+          </li>
+          <li><a href="#10-memory-ontology">10. Memory ontology</a>
+            <ul>
+              <li><a href="#101-episode">10.1 episode</a></li>
+              <li><a href="#102-assertion">10.2 assertion</a></li>
+              <li><a href="#103-procedure">10.3 procedure</a></li>
+              <li><a href="#104-preference">10.4 preference</a></li>
+              <li><a href="#105-expectation">10.5 expectation</a></li>
+              <li><a href="#106-project-state">10.6 project state</a></li>
+              <li><a href="#107-decision">10.7 decision</a></li>
+            </ul>
+          </li>
+          <li><a href="#11-memory-extractionupdate-rule">11. Memory extraction/update rule</a>
+          </li>
+          <li><a href="#12-procedure-induction">12. Procedure induction</a>
+          </li>
+          <li><a href="#13-self-evolution-state-machine">13. Self-evolution state machine</a>
+          </li>
+          <li><a href="#14-direct-ingest-capability">14. Direct ingest capability</a>
+          </li>
+          <li><a href="#15-multi-user-graph-access">15. Multi-user graph access</a>
+          </li>
+          <li><a href="#16-memory-erasure">16. Memory erasure</a>
+          </li>
+          <li><a href="#17-control-semantic-source-components">17. Control semantic source components</a>
+            <ul>
+              <li><a href="#171-textdocumenteditor">17.1 text/document/editor</a></li>
+              <li><a href="#172-markdown">17.2 Markdown</a></li>
+              <li><a href="#173-table">17.3 table</a></li>
+              <li><a href="#174-charts">17.4 charts</a></li>
+              <li><a href="#175-imagesmedia">17.5 images/media</a></li>
+            </ul>
+          </li>
+          <li><a href="#18-error-presentation">18. Error presentation</a>
+          </li>
+          <li><a href="#19-uri-registry">19. URI registry</a>
+          </li>
+          <li><a href="#20-state-machine-enforcement">20. State-machine enforcement</a>
+          </li>
+          <li><a href="#21-ontology-extension-rule">21. Ontology extension rule</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
