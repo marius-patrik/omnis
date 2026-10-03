@@ -1704,6 +1704,247 @@ contract exists.</p>
 choice.</p>
 <p>The umbrella CLI command <code>omnis spec check</code> will eventually automate this mapping, but its absence
 does not weaken the rule.</p>
+<hr />
+<h2 id="53-privileged-execution-launch-path">53. Privileged execution launch path<a class="headerlink" href="#53-privileged-execution-launch-path" title="Permanent link">&para;</a></h2>
+<p>OmnisManager owns the semantic Execution. OmnisOS owns physical process creation and sandbox
+enforcement.</p>
+<p><code>omnis-managerd</code> <strong>does not</strong> call systemd <code>StartTransientUnit</code> directly.</p>
+<p>Exact path:</p>
+<ol>
+<li>Manager resolves Binding, placement and ExecutionId;</li>
+<li>Manager asks OmnisOS for validated ExecutionEnvelope;</li>
+<li>Manager sends <code>PhysicalLaunchRequest</code> to <code>omnis-osd</code>;</li>
+<li>osd validates peer is managerd, envelope ownership and executable/store-path identity;</li>
+<li>osd creates <code>omnis-exec-&lt;uuidhex&gt;.service</code> with systemd <code>StartTransientUnit</code>;</li>
+<li>systemd starts the target under requested UID/GID;</li>
+<li>osd publishes process/cgroup facts;</li>
+<li>Manager tracks semantic Execution state from OS events;</li>
+<li>cancellation/signals go Manager -&gt; osd -&gt; systemd;</li>
+<li>outputs are streamed back through the typed OS process-stream capability and persisted by Manager.</li>
+</ol>
+<p><code>omnis-osd</code> runs as root because it is the physical enforcement authority. Its service unit uses
+<code>NoNewPrivileges=false</code> only because it must create lower-privilege units; it exposes no generic
+shell/exec method outside the typed Manager-only launch API.</p>
+<p>Graphd and managerd remain unprivileged dedicated users.</p>
+<hr />
+<h2 id="54-execution-sandbox-systemd-properties">54. Execution sandbox systemd properties<a class="headerlink" href="#54-execution-sandbox-systemd-properties" title="Permanent link">&para;</a></h2>
+<p>Every non-interactive restricted Execution transient service starts from these properties:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>Type=exec
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>UMask=0077
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>NoNewPrivileges=yes
+<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a>PrivateTmp=yes
+<a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>ProtectSystem=strict
+<a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a>ProtectHome=tmpfs
+<a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a>ProtectKernelTunables=yes
+<a id="__codelineno-59-8" name="__codelineno-59-8" href="#__codelineno-59-8"></a>ProtectKernelModules=yes
+<a id="__codelineno-59-9" name="__codelineno-59-9" href="#__codelineno-59-9"></a>ProtectKernelLogs=yes
+<a id="__codelineno-59-10" name="__codelineno-59-10" href="#__codelineno-59-10"></a>ProtectControlGroups=yes
+<a id="__codelineno-59-11" name="__codelineno-59-11" href="#__codelineno-59-11"></a>ProtectClock=yes
+<a id="__codelineno-59-12" name="__codelineno-59-12" href="#__codelineno-59-12"></a>RestrictRealtime=yes
+<a id="__codelineno-59-13" name="__codelineno-59-13" href="#__codelineno-59-13"></a>LockPersonality=yes
+<a id="__codelineno-59-14" name="__codelineno-59-14" href="#__codelineno-59-14"></a>RestrictSUIDSGID=yes
+<a id="__codelineno-59-15" name="__codelineno-59-15" href="#__codelineno-59-15"></a>RemoveIPC=yes
+<a id="__codelineno-59-16" name="__codelineno-59-16" href="#__codelineno-59-16"></a>CapabilityBoundingSet=
+<a id="__codelineno-59-17" name="__codelineno-59-17" href="#__codelineno-59-17"></a>AmbientCapabilities=
+<a id="__codelineno-59-18" name="__codelineno-59-18" href="#__codelineno-59-18"></a>KillMode=control-group
+<a id="__codelineno-59-19" name="__codelineno-59-19" href="#__codelineno-59-19"></a>TimeoutStopSec=5s
+<a id="__codelineno-59-20" name="__codelineno-59-20" href="#__codelineno-59-20"></a>TasksMax=512
+<a id="__codelineno-59-21" name="__codelineno-59-21" href="#__codelineno-59-21"></a>MemoryMax=2G
+<a id="__codelineno-59-22" name="__codelineno-59-22" href="#__codelineno-59-22"></a>CPUQuota=100%
+</code></pre></div>
+<p>Filesystem grants are translated to:</p>
+<ul>
+<li>read-only roots -&gt; <code>BindReadOnlyPaths=</code>;</li>
+<li>writable roots -&gt; <code>BindPaths=</code>;</li>
+<li>workdir -&gt; explicit writable bind;</li>
+<li>no implicit HOME visibility.</li>
+</ul>
+<p>Network:</p>
+<ul>
+<li>deny =&gt; <code>PrivateNetwork=yes</code>, <code>RestrictAddressFamilies=AF_UNIX</code>;</li>
+<li>allowed internet/user network =&gt; <code>PrivateNetwork=no</code>;</li>
+<li>hostname/port constrained binding =&gt; <code>PrivateNetwork=no</code>,
+  <code>IPAddressDeny=any</code>, <code>IPAddressAllow=&lt;resolved IPs&gt;</code>, plus the binding port enforced by the
+  Omnis cgroup-connect eBPF filter.</li>
+</ul>
+<p>Hostname allowlists resolve immediately before launch; DNS answers are frozen for that Execution.
+Long-running bindings that declare DNS refresh update the allow map every 60 seconds.</p>
+<p>Devices:</p>
+<ul>
+<li><code>DevicePolicy=closed</code>;</li>
+<li>add <code>DeviceAllow=</code> for each explicitly granted device;</li>
+<li>GPU binding adds only the selected DRM/render or accelerator device nodes.</li>
+</ul>
+<p>System calls:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>SystemCallFilter=~@mount @reboot @raw-io @swap
+</code></pre></div>
+<p>A Binding requiring a syscall in those denied groups must declare it as a hard execution requirement;
+OmnisOS then records the exact exception in the envelope and event provenance.</p>
+<p><code>MemoryDenyWriteExecute=no</code> in v0 because JIT runtimes/agent harnesses are legitimate resources.
+No binding can gain Linux capabilities unless an explicit privileged capability is added to the
+ontology by a spec change.</p>
+<hr />
+<h2 id="55-physical-process-io">55. Physical process I/O<a class="headerlink" href="#55-physical-process-io" title="Permanent link">&para;</a></h2>
+<p>OmnisOS creates pipes or a PTY before launching the transient service.</p>
+<p>Typed OS stream interfaces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>ByteSource.read(max &lt;= 65536)
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>ByteSink.write(chunk &lt;= 65536)
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>PtyStream.read/write/resize/close
+</code></pre></div>
+<p>PTY resize uses rows/columns + pixel width/height.</p>
+<p>Backpressure:
+- per stream buffer = 1 MiB;
+- when full, producer process blocks through normal pipe/PTY backpressure;
+- semantic output is never dropped by Omnis.</p>
+<p>Manager simultaneously chunks stdout/stderr/PTY recording into CAS-backed artifacts using the
+64 KiB / 100 ms rule.</p>
+<hr />
+<h2 id="56-graph-clustering-above-direct-layout-limit">56. Graph clustering above direct-layout limit<a class="headerlink" href="#56-graph-clustering-above-direct-layout-limit" title="Permanent link">&para;</a></h2>
+<p>When a projection contains &gt;5000 visible semantic nodes, clustering is deterministic.</p>
+<p>Order:</p>
+<ol>
+<li>apply lens-specific mandatory grouping:</li>
+<li>physical: HostId;</li>
+<li>activity: ActivityId;</li>
+<li>execution: Execution placement HostId then ActivityId;</li>
+<li>presentation: WorkspaceId;</li>
+<li>if any resulting group still has &gt;5000 nodes, apply deterministic Louvain modularity clustering;</li>
+<li>relation edge weight = 1.0 unless ontology marks an explicit weight later;</li>
+<li>Louvain resolution = 1.0;</li>
+<li>process nodes in NodeId byte order;</li>
+<li>move a node only for strictly positive modularity gain &gt;1e-9;</li>
+<li>equal gains choose cluster whose smallest member NodeId is lexicographically smallest;</li>
+<li>repeat passes until total modularity gain &lt;1e-6;</li>
+<li>recursively cluster oversized communities.</li>
+</ol>
+<p>Cluster render identity is the derived BLAKE3 identity defined in §26 and is never written as a
+semantic graph NodeId.</p>
+<hr />
+<h2 id="57-default-boot-workspace">57. Default boot workspace<a class="headerlink" href="#57-default-boot-workspace" title="Permanent link">&para;</a></h2>
+<p>First interactive login creates exactly one persistent Workspace when none exists.</p>
+<p>Initial workspace:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>mode = 2d
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>lens = ["physical","activity","presentation"]
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>focus = local Host NodeId
+<a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>central view = Terminal/InputSurface
+<a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>terminal = user's configured login shell
+<a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>graph context = local Host + Omnis core services + active Agent/Activity nodes, depth 1
+<a id="__codelineno-62-7" name="__codelineno-62-7" href="#__codelineno-62-7"></a>timeline frontier = live
+</code></pre></div>
+<p>The Terminal view occupies 70% width and full height initially.
+The graph context occupies the remaining 30% on the right.
+Below 900 logical px output width, graph context starts collapsed and Terminal occupies full width.</p>
+<p>No dock, taskbar, app launcher or wallpaper surface is created by default.</p>
+<p>Opening an application inserts its NativeSurface beside the currently focused view using the same
+split algorithm:</p>
+<ul>
+<li>landscape workspace: split horizontally 50/50;</li>
+<li>portrait workspace: split vertically 50/50.</li>
+</ul>
+<p>User/Agent rearrangement persists as Control graph state.</p>
+<hr />
+<h2 id="58-cli-grammar">58. CLI grammar<a class="headerlink" href="#58-cli-grammar" title="Permanent link">&para;</a></h2>
+<p>The <code>omnis</code> CLI is exact:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>omnis graph get &lt;omnis-uri&gt;
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>omnis graph query --root &lt;uri&gt; [--relation &lt;name&gt;] [--depth N] [--limit N]
+<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>omnis graph watch [--root &lt;uri&gt;]
+<a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>
+<a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a>omnis system status
+<a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a>omnis system diff &lt;generation&gt;
+<a id="__codelineno-63-7" name="__codelineno-63-7" href="#__codelineno-63-7"></a>omnis system plan &lt;nix-option-assignment&gt;...
+<a id="__codelineno-63-8" name="__codelineno-63-8" href="#__codelineno-63-8"></a>omnis system build &lt;generation&gt;
+<a id="__codelineno-63-9" name="__codelineno-63-9" href="#__codelineno-63-9"></a>omnis system activate &lt;generation&gt;
+<a id="__codelineno-63-10" name="__codelineno-63-10" href="#__codelineno-63-10"></a>omnis system rollback &lt;generation&gt;
+<a id="__codelineno-63-11" name="__codelineno-63-11" href="#__codelineno-63-11"></a>omnis system update
+<a id="__codelineno-63-12" name="__codelineno-63-12" href="#__codelineno-63-12"></a>
+<a id="__codelineno-63-13" name="__codelineno-63-13" href="#__codelineno-63-13"></a>omnis manager resources [query]
+<a id="__codelineno-63-14" name="__codelineno-63-14" href="#__codelineno-63-14"></a>omnis manager capabilities [query]
+<a id="__codelineno-63-15" name="__codelineno-63-15" href="#__codelineno-63-15"></a>omnis manager discover &lt;uri&gt;
+<a id="__codelineno-63-16" name="__codelineno-63-16" href="#__codelineno-63-16"></a>omnis manager resolve &lt;capability&gt; [--constraint key=value]...
+<a id="__codelineno-63-17" name="__codelineno-63-17" href="#__codelineno-63-17"></a>omnis manager run &lt;capability&gt; [--input &lt;path-or-json&gt;]
+<a id="__codelineno-63-18" name="__codelineno-63-18" href="#__codelineno-63-18"></a>omnis manager executions [--active]
+<a id="__codelineno-63-19" name="__codelineno-63-19" href="#__codelineno-63-19"></a>omnis manager models
+<a id="__codelineno-63-20" name="__codelineno-63-20" href="#__codelineno-63-20"></a>omnis manager harnesses
+<a id="__codelineno-63-21" name="__codelineno-63-21" href="#__codelineno-63-21"></a>
+<a id="__codelineno-63-22" name="__codelineno-63-22" href="#__codelineno-63-22"></a>omnis agent ask &lt;text...&gt;
+<a id="__codelineno-63-23" name="__codelineno-63-23" href="#__codelineno-63-23"></a>omnis agent memory search &lt;text...&gt;
+<a id="__codelineno-63-24" name="__codelineno-63-24" href="#__codelineno-63-24"></a>omnis agent events [--after &lt;event-uri&gt;]
+<a id="__codelineno-63-25" name="__codelineno-63-25" href="#__codelineno-63-25"></a>omnis agent activities
+<a id="__codelineno-63-26" name="__codelineno-63-26" href="#__codelineno-63-26"></a>omnis agent workers
+<a id="__codelineno-63-27" name="__codelineno-63-27" href="#__codelineno-63-27"></a>omnis agent explain &lt;omnis-uri&gt;
+<a id="__codelineno-63-28" name="__codelineno-63-28" href="#__codelineno-63-28"></a>
+<a id="__codelineno-63-29" name="__codelineno-63-29" href="#__codelineno-63-29"></a>omnis control open &lt;address-or-uri&gt;
+<a id="__codelineno-63-30" name="__codelineno-63-30" href="#__codelineno-63-30"></a>omnis control focus &lt;omnis-uri&gt;
+<a id="__codelineno-63-31" name="__codelineno-63-31" href="#__codelineno-63-31"></a>omnis control mode &lt;2d|3d&gt;
+<a id="__codelineno-63-32" name="__codelineno-63-32" href="#__codelineno-63-32"></a>omnis control lens &lt;name&gt;...
+<a id="__codelineno-63-33" name="__codelineno-63-33" href="#__codelineno-63-33"></a>omnis control workspace
+<a id="__codelineno-63-34" name="__codelineno-63-34" href="#__codelineno-63-34"></a>
+<a id="__codelineno-63-35" name="__codelineno-63-35" href="#__codelineno-63-35"></a>omnis ingest &lt;path&gt;...
+<a id="__codelineno-63-36" name="__codelineno-63-36" href="#__codelineno-63-36"></a>omnis trace &lt;trace-uri&gt;
+<a id="__codelineno-63-37" name="__codelineno-63-37" href="#__codelineno-63-37"></a>omnis spec check
+</code></pre></div>
+<p>Global flags:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>--json        canonical JSON debug/export form
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>--timeout     override finite query timeout only
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>--socket      explicit endpoint for debugging; not persisted
+</code></pre></div>
+<p>Human output is concise tables/text. <code>--json</code> emits UTF-8 JSON with stable snake_case field names
+derived from protocol fields. Exit status: 0 success, 2 invalid input, 3 not found, 4 conflict,
+5 unauthorized, 6 unavailable, 7 execution/build failure, 8 protocol incompatibility,
+9 specification defect.</p>
+<p>CLI never reads/writes SQLite directly.</p>
+<hr />
+<h2 id="59-additional-controleditormedia-dependency-families">59. Additional Control/editor/media dependency families<a class="headerlink" href="#59-additional-controleditormedia-dependency-families" title="Permanent link">&para;</a></h2>
+<p>Add to the frozen dependency policy where used:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>ropey                 text rope
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>tree-sitter           syntax trees
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>pulldown-cmark        Markdown
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>gstreamer             video/audio playback bindings
+<a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a>mime_guess            deterministic MIME hinting before libmagic binding
+</code></pre></div>
+<p>System libraries come from the pinned nixpkgs revision.</p>
+<p>For MIME detection, order is:
+1. explicit protocol/content type;
+2. Nix/package metadata;
+3. filename extension via mime_guess;
+4. libmagic Manager binding;
+5. application/octet-stream.</p>
+<hr />
+<h2 id="60-external-harness-versionpackage-policy">60. External harness version/package policy<a class="headerlink" href="#60-external-harness-versionpackage-policy" title="Permanent link">&para;</a></h2>
+<p>Omnis does not vendor or silently download proprietary/external coding harnesses.</p>
+<p>Built-in harness adapters bind an executable resource discovered from:</p>
+<ol>
+<li>an existing Nix store/profile resource;</li>
+<li>PATH;</li>
+<li>an explicitly declared executable path.</li>
+</ol>
+<p>The adapter records <code>--version</code> output and refuses unsupported major versions with
+<code>incompatible</code>, rather than guessing flags.</p>
+<p>Installing a harness is a normal package/resource operation under §40. If pinned nixpkgs contains the
+requested package, use it. Otherwise a package definition with exact source version/hash must be added
+to OmnisManager/OmnisOS in a reviewed change before installation; runtime curl-to-shell installers are
+forbidden.</p>
+<p>Adapters are tested against explicit supported version fixtures. A new harness major version requires
+updating the adapter compatibility fixture before it can claim full/hook/gateway coverage.</p>
+<hr />
+<h2 id="61-omnis-spec-check">61. <code>omnis spec check</code><a class="headerlink" href="#61-omnis-spec-check" title="Permanent link">&para;</a></h2>
+<p><code>omnis spec check</code> is required in the first umbrella CLI implementation.</p>
+<p>It validates:</p>
+<ol>
+<li><code>spec/v0.toml</code> parses and has the expected schema version;</li>
+<li><code>spec/ontology.toml</code> contains no duplicate first-party identifier;</li>
+<li>every <code>omnis.*</code> identifier referenced by protocol/schema/prompt source is registered or is a
+   documented property prefix;</li>
+<li>all six Cap'n Proto schema files exist and compile;</li>
+<li>all three SQL v1 schemas execute on an empty SQLite database;</li>
+<li>every prompt listed in the prompt registry exists and contains its exact version header;</li>
+<li>Nix option documentation and example paths exist in the option contract;</li>
+<li>scalar constants duplicated in generated language outputs match <code>spec/v0.toml</code>;</li>
+<li>no active normative document contains <code>TBD</code>, <code>TO BE DECIDED</code>,
+   <code>IMPLEMENTER MAY CHOOSE</code>, <code>IMPLEMENTATION AGENT MAY CHOOSE</code>,
+   <code>CHOOSE WHICHEVER</code>, or <code>IMPLEMENTATION-SPECIFIC UNTIL</code>.</li>
+</ol>
+<p>Exit 0 only if all checks pass; otherwise exit 9.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../IMPLEMENTATION/">
@@ -1907,6 +2148,24 @@ does not weaken the rule.</p>
           <li><a href="#51-shutdown-and-suspend">51. Shutdown and suspend</a>
           </li>
           <li><a href="#52-specification-completeness-invariant">52. Specification completeness invariant</a>
+          </li>
+          <li><a href="#53-privileged-execution-launch-path">53. Privileged execution launch path</a>
+          </li>
+          <li><a href="#54-execution-sandbox-systemd-properties">54. Execution sandbox systemd properties</a>
+          </li>
+          <li><a href="#55-physical-process-io">55. Physical process I/O</a>
+          </li>
+          <li><a href="#56-graph-clustering-above-direct-layout-limit">56. Graph clustering above direct-layout limit</a>
+          </li>
+          <li><a href="#57-default-boot-workspace">57. Default boot workspace</a>
+          </li>
+          <li><a href="#58-cli-grammar">58. CLI grammar</a>
+          </li>
+          <li><a href="#59-additional-controleditormedia-dependency-families">59. Additional Control/editor/media dependency families</a>
+          </li>
+          <li><a href="#60-external-harness-versionpackage-policy">60. External harness version/package policy</a>
+          </li>
+          <li><a href="#61-omnis-spec-check">61. omnis spec check</a>
           </li>
         </ul>
       </aside>
