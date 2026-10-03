@@ -1408,6 +1408,298 @@ fallback" and "we can decide later" are not valid implementation authority.</p>
 </ol>
 <p>An implementation agent does not resolve a real contradiction itself. It reports the conflicting
 clauses and waits for a documentation fix.</p>
+<hr />
+<h2 id="40-package-persistence-scopes">40. Package persistence scopes<a class="headerlink" href="#40-package-persistence-scopes" title="Permanent link">&para;</a></h2>
+<p>Package realization has exactly three scopes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>execution   ephemeral realization for one Execution/Activity
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>user        persistent package for one user
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>system      persistent package/service/configuration for the machine
+</code></pre></div>
+<p>Default interpretation:</p>
+<ul>
+<li>"run/use X" =&gt; execution;</li>
+<li>"install X" with no scope =&gt; user;</li>
+<li>"install X system-wide", service enablement, driver/kernel/network/security changes =&gt; system.</li>
+</ul>
+<p>User profile path:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>/nix/var/nix/profiles/per-user/&lt;user&gt;/omnis
+</code></pre></div>
+<p>Manager operates it through Nix profile APIs and records profile generation/resource relations in the
+graph. It does not mutate the user's unrelated default Nix profile.</p>
+<p>System package persistence is emitted through <code>environment.systemPackages</code> in generated
+<code>/etc/omnis/managed.nix</code>.</p>
+<p>Execution scope creates/realizes the closure and supplies it to the Execution environment without
+adding a persistent profile root after the Activity finishes unless another graph root references it.</p>
+<hr />
+<h2 id="41-nix-update-generation-and-gc-policy">41. Nix update, generation and GC policy<a class="headerlink" href="#41-nix-update-generation-and-gc-policy" title="Permanent link">&para;</a></h2>
+<p>No automatic upstream update exists in v0.</p>
+<p><code>omnis system update</code> performs an explicit candidate update of the pinned OmnisOS/nixpkgs inputs,
+shows source/closure/semantic diff, builds, validates and activates using the normal generation path.</p>
+<p>Successful system generations retained as GC roots: newest 10 plus current, even if older.
+Failed candidate generations/artifacts retained 7 days.</p>
+<p>Nix GC timer: Sunday 05:17 local time.</p>
+<p>Before GC:</p>
+<ol>
+<li>collect active system generation roots;</li>
+<li>newest 10 successful rollback roots;</li>
+<li>all Omnis-managed user profile roots;</li>
+<li>active/candidate execution roots;</li>
+<li>model/artifact store paths referenced by current Manager graph state;</li>
+<li>call Nix GC.</li>
+</ol>
+<p>Manager emits planned deletion set before GC and resulting deletion event after GC.</p>
+<hr />
+<h2 id="42-inference-gateway-and-universal-model-event-interception">42. Inference gateway and universal model-event interception<a class="headerlink" href="#42-inference-gateway-and-universal-model-event-interception" title="Permanent link">&para;</a></h2>
+<p><code>omnis-managerd</code> exposes a loopback-only inference gateway:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>127.0.0.1:7331
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>[::1]:7331
+</code></pre></div>
+<p>It serves:</p>
+<ul>
+<li>OpenAI-compatible HTTP endpoints under <code>/v1/*</code>;</li>
+<li>Anthropic-compatible endpoints under <code>/anthropic/v1/*</code>.</li>
+</ul>
+<p>It never listens externally in v0.</p>
+<p>Every gateway request is processed in this order:</p>
+<ol>
+<li>authenticate local execution identity/HandleId;</li>
+<li>parse provider-compatible request;</li>
+<li>create <code>omnis.event.inference.request</code> with metadata + protected ArtifactRef for request body;</li>
+<li>ask Agent context service for injection material when the calling Execution is attached to an
+   Omnis Worker/Activity and injection is enabled;</li>
+<li>inject context using §43;</li>
+<li>resolve concrete model/provider binding through Manager;</li>
+<li>execute upstream request using protected provider credential;</li>
+<li>stream response to caller while recording protected response artifact;</li>
+<li>enqueue <code>omnis.event.inference.response</code> or failure event;</li>
+<li>update invocation cost/token/latency facts.</li>
+</ol>
+<p>Provider request bodies and responses are never written inline to ordinary logs.</p>
+<p>External harness adapters set their supported provider base URL/environment to this gateway. A
+built-in harness binding that can route through this gateway must do so; direct provider access is
+not allowed for that binding.</p>
+<p>If a harness cannot be routed or hooked, its binding is marked
+<code>memory_coverage = process_only</code>, not <code>full</code>.</p>
+<hr />
+<h2 id="43-context-injection-into-external-harnesses">43. Context injection into external harnesses<a class="headerlink" href="#43-context-injection-into-external-harnesses" title="Permanent link">&para;</a></h2>
+<p>Coverage tiers are exact:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>full          native pre-model hook + inference gateway
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>gateway       inference gateway only
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>hook          native harness hook only
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>process_only  process/PTY/tool events only
+</code></pre></div>
+<p>Manager exposes this tier in Binding metadata.</p>
+<p>Injection precedence:</p>
+<ol>
+<li>harness-native context/pre-prompt hook when the pinned harness version supports one;</li>
+<li>otherwise inference-gateway injection.</li>
+</ol>
+<p>Gateway injection rules:</p>
+<ul>
+<li>OpenAI chat-compatible request: prepend one system/developer message named logically
+  <code>omnis_context</code> after provider-required system messages and before user conversation;</li>
+<li>Anthropic-compatible request: append an <code>&lt;omnis-context&gt;...&lt;/omnis-context&gt;</code> block to the system
+  field;</li>
+<li>never rewrite tool results or user content;</li>
+<li>inject one context capsule per model request;</li>
+<li>max injected text = min(25% input budget, 16384 tokens);</li>
+<li>include stable NodeId/EventId citations inside the capsule serialization;</li>
+<li>omit protected material disallowed for the resolved provider.</li>
+</ul>
+<p>The Agent context service returns an empty capsule when no relevant memory is activated; Manager does
+not manufacture filler context.</p>
+<p>Built-in Claude Code, Codex and OpenCode adapters must implement the highest coverage tier supported
+by their pinned versions. Their adapter tests assert the tier; implementers do not choose a weaker
+tier for convenience.</p>
+<hr />
+<h2 id="44-desktop-compatibility-services">44. Desktop compatibility services<a class="headerlink" href="#44-desktop-compatibility-services" title="Permanent link">&para;</a></h2>
+<p>OmnisControl owns compatibility bridges required by ordinary Linux desktop applications rather than
+requiring a second desktop shell.</p>
+<h3 id="441-xdg-portals">44.1 XDG portals<a class="headerlink" href="#441-xdg-portals" title="Permanent link">&para;</a></h3>
+<p>OmnisOS runs <code>xdg-desktop-portal</code>.
+OmnisControl ships <code>xdg-desktop-portal-omnis</code>.</p>
+<p>v0 portal interfaces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>OpenURI
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>FileChooser
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>Screenshot
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>ScreenCast
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>Settings
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>Inhibit
+<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>GlobalShortcuts
+</code></pre></div>
+<p>Behavior:</p>
+<ul>
+<li>OpenURI -&gt; Manager/Control unified resolver;</li>
+<li>FileChooser -&gt; Control resource/file picker backed by filesystem + graph;</li>
+<li>Screenshot -&gt; Control compositor render capture;</li>
+<li>ScreenCast -&gt; Control compositor DMA-BUF/PipeWire stream;</li>
+<li>Settings -&gt; Control theme/appearance values;</li>
+<li>Inhibit -&gt; graph-visible inhibition resource;</li>
+<li>GlobalShortcuts -&gt; Control input binding service.</li>
+</ul>
+<p>Unsupported portal interfaces return the standard NotImplemented/Unavailable response; do not launch
+another desktop portal backend automatically.</p>
+<h3 id="442-clipboarddrag-drop">44.2 clipboard/drag-drop<a class="headerlink" href="#442-clipboarddrag-drop" title="Permanent link">&para;</a></h3>
+<p>Implement Wayland data-device and primary-selection protocols.</p>
+<p>Clipboard history is <strong>off by default</strong>.
+Clipboard contents are events only when the user/Agent performs a semantic paste/copy operation inside
+first-party Control; passive clipboard bytes are not persisted to worldline.</p>
+<p>Protected values with <code>control-hidden</code> or <code>execution-handle-only</code> cannot be put on clipboard.</p>
+<h3 id="443-notifications">44.3 notifications<a class="headerlink" href="#443-notifications" title="Permanent link">&para;</a></h3>
+<p>Control provides <code>org.freedesktop.Notifications</code> on the user D-Bus.</p>
+<p>A notification becomes a presentation graph node + Agent event with app/resource identity, summary,
+body, actions and lifecycle. It is shown in the current workspace as a non-modal overlay for 5
+seconds unless urgency=critical, which remains until dismissed/actioned.</p>
+<p>Maximum visible simultaneous notifications: 3; additional notifications queue FIFO.
+Notification history persists as events, not as a separate notification database.</p>
+<h3 id="444-statustray">44.4 status/tray<a class="headerlink" href="#444-statustray" title="Permanent link">&para;</a></h3>
+<p>Implement StatusNotifierWatcher/StatusNotifierItem bridge.
+Tray items are graph resources materialized in a compact Control region only when at least one item
+exists. There is no permanent taskbar solely for tray hosting.</p>
+<hr />
+<h2 id="45-audio-media-and-screen-streams">45. Audio, media and screen streams<a class="headerlink" href="#45-audio-media-and-screen-streams" title="Permanent link">&para;</a></h2>
+<p>PipeWire is the v0 audio/video stream substrate.</p>
+<p>OmnisControl/Manager bind:</p>
+<ul>
+<li>default audio sink/source;</li>
+<li>application streams;</li>
+<li>ScreenCast portal streams;</li>
+<li>camera/microphone resources.</li>
+</ul>
+<p>Wire audio/media bytes do not travel through Cap'n Proto; graph stores stream/resource identity and
+PipeWire node identifiers as realizations.</p>
+<p>Agent receives lifecycle/semantic stream events, not every PCM/video frame by default.
+If a Worker explicitly requests raw media cognition, Manager binds the stream to the selected
+vision/audio model capability and resulting observations enter the normal event path.</p>
+<hr />
+<h2 id="46-inputgesture-contract">46. Input/gesture contract<a class="headerlink" href="#46-inputgesture-contract" title="Permanent link">&para;</a></h2>
+<h3 id="461-2d">46.1 2D<a class="headerlink" href="#461-2d" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>left click             select/focus
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>shift+left click       toggle selection membership
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>left drag node         pin/move selected semantic/control node
+<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>left drag background   pan
+<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>wheel/trackpad scroll  pan
+<a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>ctrl+wheel/pinch       zoom around pointer
+<a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>double click node      focus + semantic inspect level
+<a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>right click            context actions from graph capabilities
+<a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a>Esc                    back one focus/navigation level
+<a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a>Alt+Left/Right         global back/forward
+<a id="__codelineno-56-11" name="__codelineno-56-11" href="#__codelineno-56-11"></a>Ctrl+L                 focus primary input/address surface
+<a id="__codelineno-56-12" name="__codelineno-56-12" href="#__codelineno-56-12"></a>Ctrl+Space             focus primary input/semantic command surface
+</code></pre></div>
+<h3 id="462-3d">46.2 3D<a class="headerlink" href="#462-3d" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>left click             select/focus
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>left drag selected     move/pin in current layout plane/constraint
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>right drag             orbit camera
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>middle drag            pan camera
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>wheel/pinch            dolly/zoom
+<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>double click node      fly/focus on node
+<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a>F                      frame current selection
+<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a>2                      switch same workspace to 2D
+<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>3                      switch same workspace to 3D
+</code></pre></div>
+<p>Touch maps one-finger to select/pan contextually, two-finger to pan/zoom, and three-finger horizontal
+swipe to back/forward.</p>
+<p>All semantic gestures emit Control events.</p>
+<hr />
+<h2 id="47-appearance-and-theme">47. Appearance and theme<a class="headerlink" href="#47-appearance-and-theme" title="Permanent link">&para;</a></h2>
+<p>Theme format is VS Code color-theme JSON, preserving the accepted historical decision where compatible
+with the reset.</p>
+<p>Built-in default theme name: <code>Omnis Dark</code>.</p>
+<p>Default appearance:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>dark background
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>font UI: system sans through fontconfig/cosmic-text
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>font monospace: system monospace through fontconfig/cosmic-text
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>base UI scale: compositor output scale
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>animation duration: 180 ms
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>reduced-motion: follows portal/system setting; when true durations = 0
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>corner radius: 8 logical px
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>spacing unit: 4 logical px
+</code></pre></div>
+<p>Do not hard-code font family names; fontconfig result is deterministic for installed system
+configuration.</p>
+<p>Theme changes are presentation graph state and apply live to terminal/graph/Control chrome, not to
+native client-rendered surfaces.</p>
+<hr />
+<h2 id="48-native-surface-policy">48. Native surface policy<a class="headerlink" href="#48-native-surface-policy" title="Permanent link">&para;</a></h2>
+<p>Wayland/XWayland clients run unmodified.</p>
+<p>Toplevel behavior:</p>
+<ul>
+<li>client-side decorations are preserved;</li>
+<li>if client supplies no decorations and xdg-decoration negotiates server-side, Control draws a
+  minimal title/control region;</li>
+<li>native surface gets one stable graph semantic identity for its lifetime;</li>
+<li>closing the toplevel ends its active validity but does not delete historical worldline identity;</li>
+<li>focus follows explicit user/Agent Control focus, never pointer-enter alone;</li>
+<li>new application surface is inserted beside the currently focused view in 2D and into the focused
+  workspace cluster in 3D;</li>
+<li>fullscreen maps to the current output but remains graph-addressable;</li>
+<li>popups/subsurfaces remain owned by the parent NativeSurface.</li>
+</ul>
+<p>Direct scan-out is enabled only when Smithay reports eligibility and no Control overlay/interception
+requires composition.</p>
+<hr />
+<h2 id="49-browser-resource-behavior">49. Browser resource behavior<a class="headerlink" href="#49-browser-resource-behavior" title="Permanent link">&para;</a></h2>
+<p>Default browser resource is the user's <code>xdg-settings get default-web-browser</code> resolution if that
+desktop entry exists; otherwise the first Manager binding for <code>browser.navigate</code> by normal §14
+resolution.</p>
+<p>URL-like input from §22 opens in the currently focused browser resource if one exists; otherwise
+Manager launches the default browser binding.</p>
+<p>Structured browser control preference is fixed:</p>
+<ol>
+<li>CDP when the selected browser advertises it;</li>
+<li>WebDriver BiDi;</li>
+<li>accessibility tree;</li>
+<li>delegated native surface + synthetic input only for operations with no structured binding.</li>
+</ol>
+<p>Synthetic input against browser content must record that lower-confidence binding in provenance.</p>
+<hr />
+<h2 id="50-configurationsettings-mutation">50. Configuration/settings mutation<a class="headerlink" href="#50-configurationsettings-mutation" title="Permanent link">&para;</a></h2>
+<p>There is no separate privileged Settings application.</p>
+<p>All settings are one of:</p>
+<ul>
+<li>persistent NixOS options -&gt; OmnisOS generation path;</li>
+<li>Manager resource/binding preferences -&gt; Manager-owned graph/config;</li>
+<li>Agent cognitive/user preference memory -&gt; Agent-owned graph;</li>
+<li>Control presentation preference -&gt; Control-owned graph.</li>
+</ul>
+<p>Control can materialize a settings view from those graph schemas.
+CLI uses the same owning RPC.</p>
+<p>A settings mutation is never written directly to a component's private file when an owning graph/Nix
+contract exists.</p>
+<hr />
+<h2 id="51-shutdown-and-suspend">51. Shutdown and suspend<a class="headerlink" href="#51-shutdown-and-suspend" title="Permanent link">&para;</a></h2>
+<p>System shutdown:</p>
+<ol>
+<li>systemd stops user Control;</li>
+<li>Control commits pending presentation mutations and closes native surfaces;</li>
+<li>Agent checkpoints active durable workers and worldline transaction;</li>
+<li>Manager marks/cancels non-persistent local executions according to binding lifecycle;</li>
+<li>osd stops incremental observers;</li>
+<li>graphd drains writer queue and checkpoints WAL;</li>
+<li>systemd continues shutdown.</li>
+</ol>
+<p>Maximum graceful stop timeout per Omnis service: 15 seconds; then systemd kill policy applies.</p>
+<p>Suspend:</p>
+<ul>
+<li>Control stops rendering and records suspend event;</li>
+<li>Agent receives suspend event and stops starting new local work;</li>
+<li>Manager pauses/cancels executions only if their binding declares suspend-sensitive;</li>
+<li>on resume OS performs process/device/network reconciliation before publishing resume-complete event.</li>
+</ul>
+<hr />
+<h2 id="52-specification-completeness-invariant">52. Specification completeness invariant<a class="headerlink" href="#52-specification-completeness-invariant" title="Permanent link">&para;</a></h2>
+<p>For every observable v0 behavior, one of these must exist before implementation:</p>
+<ul>
+<li>an exact clause in active normative docs;</li>
+<li>an exact protocol schema;</li>
+<li>an exact configuration default;</li>
+<li>an exact acceptance test.</li>
+</ul>
+<p>If none exists, the correct implementation action is <strong>SpecificationDefect</strong>, not an implementation
+choice.</p>
+<p>The umbrella CLI command <code>omnis spec check</code> will eventually automate this mapping, but its absence
+does not weaken the rule.</p>
         </article>
 
         <footer class="footer">
@@ -1565,6 +1857,42 @@ clauses and waits for a documentation fix.</p>
           <li><a href="#38-implementation-task-rule">38. Implementation task rule</a>
           </li>
           <li><a href="#39-precedence">39. Precedence</a>
+          </li>
+          <li><a href="#40-package-persistence-scopes">40. Package persistence scopes</a>
+          </li>
+          <li><a href="#41-nix-update-generation-and-gc-policy">41. Nix update, generation and GC policy</a>
+          </li>
+          <li><a href="#42-inference-gateway-and-universal-model-event-interception">42. Inference gateway and universal model-event interception</a>
+          </li>
+          <li><a href="#43-context-injection-into-external-harnesses">43. Context injection into external harnesses</a>
+          </li>
+          <li><a href="#44-desktop-compatibility-services">44. Desktop compatibility services</a>
+            <ul>
+              <li><a href="#441-xdg-portals">44.1 XDG portals</a></li>
+              <li><a href="#442-clipboarddrag-drop">44.2 clipboard/drag-drop</a></li>
+              <li><a href="#443-notifications">44.3 notifications</a></li>
+              <li><a href="#444-statustray">44.4 status/tray</a></li>
+            </ul>
+          </li>
+          <li><a href="#45-audio-media-and-screen-streams">45. Audio, media and screen streams</a>
+          </li>
+          <li><a href="#46-inputgesture-contract">46. Input/gesture contract</a>
+            <ul>
+              <li><a href="#461-2d">46.1 2D</a></li>
+              <li><a href="#462-3d">46.2 3D</a></li>
+            </ul>
+          </li>
+          <li><a href="#47-appearance-and-theme">47. Appearance and theme</a>
+          </li>
+          <li><a href="#48-native-surface-policy">48. Native surface policy</a>
+          </li>
+          <li><a href="#49-browser-resource-behavior">49. Browser resource behavior</a>
+          </li>
+          <li><a href="#50-configurationsettings-mutation">50. Configuration/settings mutation</a>
+          </li>
+          <li><a href="#51-shutdown-and-suspend">51. Shutdown and suspend</a>
+          </li>
+          <li><a href="#52-specification-completeness-invariant">52. Specification completeness invariant</a>
           </li>
         </ul>
       </aside>
