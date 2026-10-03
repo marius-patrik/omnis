@@ -2205,6 +2205,87 @@ Only one active pairing token exists per host.</p>
 </code></pre></div>
 <p>removes authority grants/cache roots and marks peer binding unavailable; it does not delete historical
 Host identity/worldline events.</p>
+<hr />
+<h2 id="69-graph-value-and-query-semantics">69. Graph value and query semantics<a class="headerlink" href="#69-graph-value-and-query-semantics" title="Permanent link">&para;</a></h2>
+<h3 id="691-property-storage-encoding">69.1 property storage encoding<a class="headerlink" href="#691-property-storage-encoding" title="Permanent link">&para;</a></h3>
+<p><code>spec/value_types.toml</code> is canonical.</p>
+<p>For every node/edge property, SQLite <code>value_type</code> is the corresponding numeric union code and
+<code>value</code> stores the standard <strong>unpacked Cap'n Proto message serialization</strong> of
+<code>common.capnp::Value</code>.</p>
+<p>Graphd decodes values for semantic comparison; SQLite BLOB byte equality is never used as semantic
+value equality.</p>
+<p>Rules:</p>
+<ul>
+<li>float values must be finite; reject NaN and +/-Infinity;</li>
+<li>text must be valid UTF-8 and is normalized to NFC before storage;</li>
+<li>UUID is exactly 16 bytes;</li>
+<li>maps have unique keys sorted by UTF-8 byte lexical order before storage;</li>
+<li>lists preserve order;</li>
+<li>nested maps/lists recursively obey the same rules.</li>
+</ul>
+<h3 id="692-selectors">69.2 selectors<a class="headerlink" href="#692-selectors" title="Permanent link">&para;</a></h3>
+<p><code>NodeSelector</code> semantics:</p>
+<ul>
+<li>empty <code>ids</code> means no ID restriction; otherwise node ID must be in the list;</li>
+<li>empty <code>kinds</code> means no kind restriction; otherwise node must have at least one listed kind;</li>
+<li>all propertyFilters are ANDed;</li>
+<li>equals/notEquals compare decoded typed values;</li>
+<li>exists/notExists ignore the supplied value field;</li>
+<li>selector groups (ID/kind/properties) are ANDed;</li>
+<li>an entirely empty selector selects all visible nodes subject to query limit.</li>
+</ul>
+<h3 id="693-traversal">69.3 traversal<a class="headerlink" href="#693-traversal" title="Permanent link">&para;</a></h3>
+<ul>
+<li>depth 0 returns roots only;</li>
+<li>relation list empty =&gt; all visible relations;</li>
+<li>dimension list empty =&gt; all visible dimensions;</li>
+<li>traversal is breadth-first;</li>
+<li>a node appears once at its shallowest discovered depth;</li>
+<li>edges are ordered by relation UTF-8 bytes, opposite NodeId bytes, then EdgeId bytes;</li>
+<li>output nodes are ordered by discovery depth then NodeId bytes;</li>
+<li><code>both</code> explores outgoing before incoming for the same ordered relation/peer tuple.</li>
+</ul>
+<h3 id="694-paths">69.4 paths<a class="headerlink" href="#694-paths" title="Permanent link">&para;</a></h3>
+<p>Path query uses breadth-first search and returns shortest paths only until <code>maxPaths</code>.
+Default <code>maxPaths=16</code> when caller supplies 0; hard max 256.
+Maximum path depth is graph configured hard depth (8).</p>
+<p>Path ordering:
+1. edge count ascending;
+2. node-ID byte sequence lexicographic;
+3. edge-ID byte sequence lexicographic.</p>
+<h3 id="695-aliases">69.5 aliases<a class="headerlink" href="#695-aliases" title="Permanent link">&para;</a></h3>
+<p>Alias namespace and alias are exact, case-sensitive UTF-8 NFC strings.</p>
+<p><code>resolveAlias</code> returns candidate NodeIds sorted by bytes.
+Callers interpret 0 as NotFound, 1 as resolved, &gt;1 as Conflict unless they explicitly requested all
+candidates.</p>
+<h3 id="696-transaction-events">69.6 transaction events<a class="headerlink" href="#696-transaction-events" title="Permanent link">&para;</a></h3>
+<p>Every successful GraphTransaction:</p>
+<ol>
+<li>validates expectedRevision equals current revision exactly;</li>
+<li>rejects zero mutations;</li>
+<li>evaluates all preconditions inside <code>BEGIN IMMEDIATE</code>;</li>
+<li>applies mutations in listed order;</li>
+<li>sets supplied transaction-event <code>graphRevision</code> to new revision;</li>
+<li>enqueues supplied events in listed order;</li>
+<li>graphd creates and enqueues exactly one <code>omnis.event.graph.committed</code> event last;</li>
+<li>commits graph rows, transaction row and all outbox rows atomically.</li>
+</ol>
+<p>The synthesized graph-committed EventId is returned in CommitResult.</p>
+<p>For non-transaction <code>enqueueEvent</code>, graphRevision stays whatever valid revision the producer
+observed, including 0 only when genuinely unrelated to graph state.</p>
+<p>All events carry producer wall and monotonic timestamps. Graphd never replaces producer timestamps
+with ingest time; outbox <code>created_at_ns</code> separately records graphd receipt time.</p>
+<h3 id="697-preconditions">69.7 preconditions<a class="headerlink" href="#697-preconditions" title="Permanent link">&para;</a></h3>
+<ul>
+<li>propertyEquals compares canonical decoded Value semantics;</li>
+<li>propertyAbsent means no current row for exact node/namespace/key;</li>
+<li>relationExists/Absent match exact source/relation/target;</li>
+<li>cardinality counts current matching edges in requested direction;</li>
+<li><code>max = 4294967295</code> means unbounded maximum;</li>
+<li>authority namespace ownership is always checked independently and cannot be bypassed by
+  preconditions.</li>
+</ul>
+<p>A precondition failure returns Conflict and performs no writes.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../IMPLEMENTATION/">
@@ -2462,6 +2543,17 @@ Host identity/worldline events.</p>
             </ul>
           </li>
           <li><a href="#68-native-remote-host-pairing">68. Native remote-host pairing</a>
+          </li>
+          <li><a href="#69-graph-value-and-query-semantics">69. Graph value and query semantics</a>
+            <ul>
+              <li><a href="#691-property-storage-encoding">69.1 property storage encoding</a></li>
+              <li><a href="#692-selectors">69.2 selectors</a></li>
+              <li><a href="#693-traversal">69.3 traversal</a></li>
+              <li><a href="#694-paths">69.4 paths</a></li>
+              <li><a href="#695-aliases">69.5 aliases</a></li>
+              <li><a href="#696-transaction-events">69.6 transaction events</a></li>
+              <li><a href="#697-preconditions">69.7 preconditions</a></li>
+            </ul>
           </li>
         </ul>
       </aside>

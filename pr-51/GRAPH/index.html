@@ -574,13 +574,14 @@ default.</p>
 <p>The first implementation requires deterministic predicates for:</p>
 <ul>
 <li>node exists/does not exist;</li>
-<li>property equals/does not equal;</li>
-<li>relation exists/does not exist;</li>
-<li>revision matches;</li>
-<li>authority owns namespace;</li>
-<li>target identity still refers to expected foreign realization;</li>
-<li>optional cardinality constraints.</li>
+<li>property equals / property absent;</li>
+<li>edge exists / edge absent;</li>
+<li>exact relation exists / absent;</li>
+<li>revision equals;</li>
+<li>relation cardinality bounds.</li>
 </ul>
+<p>Authority ownership is an unconditional graphd check, not a caller-selectable predicate. A foreign
+realization guard is expressed by propertyEquals against its exact foreign identity/locator.</p>
 <p>Graph predicates are operational consistency checks, not a replacement for OmnisOS system
 invariants or OmnisAgent reasoning.</p>
 <hr />
@@ -598,8 +599,8 @@ invariants or OmnisAgent reasoning.</p>
 <a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>dimension/lens projection
 <a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>subscription to node/relation/query changes
 </code></pre></div>
-<p>The graph protocol should support query plans rich enough for Control to maintain live projections
-without polling entire subgraphs.</p>
+<p><code>protocol/graph.capnp</code> freezes selector, property-filter, BFS traversal, shortest-path, alias and
+provenance APIs. Detailed ordering/limit semantics are in <code>DECISION_COMPLETE_V0.md §69</code>.</p>
 <hr />
 <h2 id="12-subscriptions">12. Subscriptions<a class="headerlink" href="#12-subscriptions" title="Permanent link">&para;</a></h2>
 <p>A client can subscribe to:</p>
