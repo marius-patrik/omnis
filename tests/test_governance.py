@@ -418,8 +418,15 @@ def test_v0_registries_cross_check():
             assert target in states
 
     valid_effects = {
-        "pure", "readOnly", "idempotent", "retrySafe", "reversible",
-        "compensatable", "transactional", "persistentExternal", "opaque",
+        "pure",
+        "readOnly",
+        "idempotent",
+        "retrySafe",
+        "reversible",
+        "compensatable",
+        "transactional",
+        "persistentExternal",
+        "opaque",
     }
     for schema in capabilities.values():
         assert schema["effect"] in valid_effects
