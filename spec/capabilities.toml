@@ -1,0 +1,171 @@
+version = 1
+
+[capabilities."omnis.capability.shell.execute"]
+input = "ShellExecuteInput"
+output = "ExecutionOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.process.execute"]
+input = "ProcessExecuteInput"
+output = "ExecutionOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.package.realize"]
+input = "PackageInput"
+output = "PackageOutput"
+effect = "idempotent"
+
+[capabilities."omnis.capability.package.install.user"]
+input = "PackageInput"
+output = "PackageOutput"
+effect = "persistentExternal"
+
+[capabilities."omnis.capability.package.install.system"]
+input = "PackageInput"
+output = "GenerationOutput"
+effect = "transactional"
+
+[capabilities."omnis.capability.system.generation.plan"]
+input = "GenerationInput"
+output = "GenerationOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.system.generation.build"]
+input = "GenerationRefInput"
+output = "GenerationOutput"
+effect = "idempotent"
+
+[capabilities."omnis.capability.system.generation.activate"]
+input = "GenerationRefInput"
+output = "Empty"
+effect = "transactional"
+
+[capabilities."omnis.capability.system.generation.rollback"]
+input = "GenerationRefInput"
+output = "Empty"
+effect = "transactional"
+
+[capabilities."omnis.capability.vcs.status"]
+input = "RepositoryInput"
+output = "TextArtifactOutput"
+effect = "readOnly"
+
+[capabilities."omnis.capability.vcs.diff"]
+input = "RepositoryInput"
+output = "TextArtifactOutput"
+effect = "readOnly"
+
+[capabilities."omnis.capability.vcs.commit"]
+input = "VcsCommitInput"
+output = "TextArtifactOutput"
+effect = "persistentExternal"
+
+[capabilities."omnis.capability.vcs.push"]
+input = "VcsPushInput"
+output = "TextArtifactOutput"
+effect = "persistentExternal"
+
+[capabilities."omnis.capability.code.format"]
+input = "CodeToolInput"
+output = "TextArtifactOutput"
+effect = "idempotent"
+
+[capabilities."omnis.capability.code.test"]
+input = "CodeToolInput"
+output = "TextArtifactOutput"
+effect = "readOnly"
+
+[capabilities."omnis.capability.code.agent"]
+input = "CodeAgentInput"
+output = "CodeAgentOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.model.classify"]
+input = "ModelTextInput"
+output = "ClassifyOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.model.embed"]
+input = "ModelTextInput"
+output = "EmbedOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.model.rerank"]
+input = "RerankInput"
+output = "RerankOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.model.generate"]
+input = "ModelTextInput"
+output = "GenerateOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.model.reason"]
+input = "ModelTextInput"
+output = "GenerateOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.model.vision"]
+input = "VisionInput"
+output = "GenerateOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.model.audio.transcribe"]
+input = "AudioInput"
+output = "GenerateOutput"
+effect = "pure"
+
+[capabilities."omnis.capability.browser.navigate"]
+input = "BrowserNavigateInput"
+output = "BrowserNavigateOutput"
+effect = "persistentExternal"
+
+[capabilities."omnis.capability.browser.inspect"]
+input = "BrowserInspectInput"
+output = "TextArtifactOutput"
+effect = "readOnly"
+
+[capabilities."omnis.capability.browser.interact"]
+input = "BrowserInteractInput"
+output = "TextArtifactOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.http.request"]
+input = "HttpRequestInput"
+output = "HttpResponseOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.mcp.invoke"]
+input = "McpInvokeInput"
+output = "TextArtifactOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.container.run"]
+input = "ContainerRunInput"
+output = "ExecutionOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.vm.run"]
+input = "VmRunInput"
+output = "ExecutionOutput"
+effect = "opaque"
+
+[capabilities."omnis.capability.graph.query"]
+input = "GraphQueryInput"
+output = "GraphQueryOutput"
+effect = "readOnly"
+
+[capabilities."omnis.capability.control.materialize"]
+input = "ControlMaterializeInput"
+output = "ControlMaterializeOutput"
+effect = "idempotent"
+
+[capabilities."omnis.capability.control.mutate"]
+input = "ControlMutateInput"
+output = "Empty"
+effect = "idempotent"
+
+[capabilities."omnis.capability.ingest"]
+input = "IngestInput"
+output = "IngestOutput"
+effect = "idempotent"
