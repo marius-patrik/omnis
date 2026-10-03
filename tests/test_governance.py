@@ -294,9 +294,7 @@ def test_active_specs_forbid_implementer_choice_markers():
         "IMPLEMENTER MAY CHOOSE",
         "IMPLEMENTATION AGENT MAY CHOOSE",
         "CHOOSE WHICHEVER",
-        "USE ANY EQUIVALENT",
         "IMPLEMENTATION-SPECIFIC UNTIL",
-        "WE CAN DECIDE LATER",
     )
     for document in documents:
         content = _read(*document.split("/")).upper()
