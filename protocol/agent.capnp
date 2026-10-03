@@ -6,7 +6,7 @@ using G = import "graph.capnp";
 struct ContextCapsule {
   id @0 :C.Uuid;
   trigger @1 :C.Uuid;
-  activity @2 :C.Uuid;
+  activity @2 :C.MaybeUuid;
   sources @3 :List(C.Uuid);
   artifacts @4 :List(C.ArtifactRef);
   capabilities @5 :List(Text);
@@ -18,14 +18,14 @@ struct WorkerState {
   activity @1 :C.Uuid;
   status @2 :Text;
   context @3 :C.Uuid;
-  checkpoint @4 :C.ArtifactRef;
+  checkpoint @4 :C.MaybeArtifactRef;
 }
 
 struct MemoryQuery {
   text @0 :Text;
   kinds @1 :List(Text);
   limit @2 :UInt32;
-  atEvent @3 :C.Uuid;
+  atEvent @3 :C.MaybeUuid;
 }
 
 struct MemoryHit {
@@ -41,12 +41,15 @@ struct IntentionRequest {
 }
 
 interface AgentService {
-  handshake @0 (request :C.HandshakeRequest) -> (response :C.HandshakeResponse);
-  submitEvent @1 (event :G.EventEnvelope) -> ();
-  intend @2 (request :IntentionRequest) -> (activity :C.Uuid);
-  searchMemory @3 (query :MemoryQuery) -> (hits :List(MemoryHit));
-  compileContext @4 (trigger :C.Uuid, activity :C.Uuid, budgetTokens :UInt32) -> (context :ContextCapsule);
-  getWorker @5 (id :C.Uuid) -> (worker :WorkerState);
-  explain @6 (identity :C.Uuid) -> (evidence :C.ArtifactRef);
-  worldlineGet @7 (eventId :C.Uuid) -> (event :G.EventEnvelope);
+  handshake @0 (request :C.HandshakeRequest) -> (status :C.RpcStatus, response :C.HandshakeResponse);
+  intend @1 (request :IntentionRequest) -> (status :C.RpcStatus, activity :C.Uuid);
+  searchMemory @2 (query :MemoryQuery) -> (status :C.RpcStatus, hits :List(MemoryHit));
+  compileContext @3 (
+    trigger :C.Uuid,
+    activity :C.MaybeUuid,
+    budgetTokens :UInt32
+  ) -> (status :C.RpcStatus, context :ContextCapsule);
+  getWorker @4 (id :C.Uuid) -> (status :C.RpcStatus, worker :WorkerState);
+  explain @5 (identity :C.Uuid) -> (status :C.RpcStatus, evidence :C.ArtifactRef);
+  worldlineGet @6 (eventId :C.Uuid) -> (status :C.RpcStatus, event :G.EventEnvelope);
 }

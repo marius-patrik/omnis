@@ -7,7 +7,7 @@ struct Property {
   key @1 :Text;
   value @2 :C.Value;
   authority @3 :Text;
-  provenance @4 :C.Uuid;
+  provenance @4 :C.MaybeUuid;
   validFromRevision @5 :UInt64;
   validToRevision @6 :UInt64; # 0 means current
 }
@@ -28,7 +28,7 @@ struct Edge {
   dimension @4 :Text;
   properties @5 :List(Property);
   authority @6 :Text;
-  provenance @7 :C.Uuid;
+  provenance @7 :C.MaybeUuid;
   validFromRevision @8 :UInt64;
   validToRevision @9 :UInt64;
 }
@@ -80,7 +80,7 @@ struct Mutation {
   struct PropertyKey { node @0 :C.Uuid; namespace @1 :Text; key @2 :Text; }
   struct CreateEdge {
     id @0 :C.Uuid; source @1 :C.Uuid; relation @2 :Text; target @3 :C.Uuid;
-    dimension @4 :Text; authority @5 :Text; provenance @6 :C.Uuid;
+    dimension @4 :Text; authority @5 :Text; provenance @6 :C.MaybeUuid;
   }
   struct EdgeProperty { edge @0 :C.Uuid; property @1 :Property; }
   struct EdgePropertyKey { edge @0 :C.Uuid; namespace @1 :Text; key @2 :Text; }
@@ -102,7 +102,7 @@ struct EventEnvelope {
   schemaMinor @3 :UInt16;
   source @4 :C.Uuid;
   trace @5 :C.TraceContext;
-  graphRevision @6 :UInt64;
+  graphRevision @6 :UInt64; # 0 when event is not tied to a graph revision
   entities @7 :List(C.Uuid);
   artifacts @8 :List(C.ArtifactRef);
   inlinePayload @9 :Data;
@@ -132,25 +132,41 @@ struct GraphDelta {
 }
 
 interface GraphSubscription {
-  next @0 () -> (delta :GraphDelta);
-  cancel @1 ();
+  next @0 () -> (status :C.RpcStatus, delta :GraphDelta);
+  cancel @1 () -> (status :C.RpcStatus);
 }
 
 interface OutboxSubscription {
-  next @0 () -> (event :EventEnvelope, ingestSeq :UInt64);
-  ack @1 (eventId :C.Uuid, ingestSeq :UInt64);
-  cancel @2 ();
+  next @0 () -> (status :C.RpcStatus, event :EventEnvelope, ingestSeq :UInt64);
+  ack @1 (eventId :C.Uuid, ingestSeq :UInt64) -> (status :C.RpcStatus);
+  cancel @2 () -> (status :C.RpcStatus);
+}
+
+interface ArtifactUpload {
+  write @0 (chunk :Data) -> (status :C.RpcStatus); # chunk <= 1 MiB
+  finish @1 () -> (status :C.RpcStatus, artifact :C.ArtifactRef);
+  abort @2 () -> (status :C.RpcStatus);
+}
+
+interface ArtifactDownload {
+  next @0 () -> (status :C.RpcStatus, chunk :Data, done :Bool); # chunk <= 1 MiB
+  cancel @1 () -> (status :C.RpcStatus);
 }
 
 interface GraphService {
-  handshake @0 (request :C.HandshakeRequest) -> (response :C.HandshakeResponse);
-  revision @1 () -> (revision :UInt64);
-  getNode @2 (id :C.Uuid, atRevision :UInt64) -> (node :Node);
-  query @3 (query :GraphQuery) -> (result :QueryResult);
-  commit @4 (transaction :GraphTransaction) -> (result :CommitResult);
-  subscribe @5 (query :GraphQuery, afterRevision :UInt64) -> (subscription :GraphSubscription);
-  outbox @6 (afterIngestSeq :UInt64) -> (subscription :OutboxSubscription);
-  enqueueEvent @7 (event :EventEnvelope) -> (ingestSeq :UInt64);
-  putArtifact @8 (mediaType :Text, protection :C.ProtectionClass, payload :Data) -> (artifact :C.ArtifactRef);
-  getArtifact @9 (id :C.ArtifactId) -> (artifact :C.ArtifactRef, payload :Data);
+  handshake @0 (request :C.HandshakeRequest) -> (status :C.RpcStatus, response :C.HandshakeResponse);
+  revision @1 () -> (status :C.RpcStatus, revision :UInt64);
+  getNode @2 (id :C.Uuid, atRevision :UInt64) -> (status :C.RpcStatus, node :Node);
+  query @3 (query :GraphQuery) -> (status :C.RpcStatus, result :QueryResult);
+  commit @4 (transaction :GraphTransaction) -> (status :C.RpcStatus, result :CommitResult);
+  subscribe @5 (query :GraphQuery, afterRevision :UInt64) -> (status :C.RpcStatus, subscription :GraphSubscription);
+  outbox @6 (afterIngestSeq :UInt64) -> (status :C.RpcStatus, subscription :OutboxSubscription);
+  enqueueEvent @7 (event :EventEnvelope) -> (status :C.RpcStatus, ingestSeq :UInt64);
+  beginArtifactUpload @8 (
+    mediaType :Text,
+    protection :C.ProtectionClass,
+    expectedLength :UInt64,
+    expectedId :C.MaybeArtifactId
+  ) -> (status :C.RpcStatus, upload :ArtifactUpload);
+  openArtifact @9 (id :C.ArtifactId) -> (status :C.RpcStatus, artifact :C.ArtifactRef, download :ArtifactDownload);
 }

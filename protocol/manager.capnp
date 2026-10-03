@@ -11,16 +11,16 @@ struct CapabilityRef {
   outputSchema @3 :C.ArtifactRef;
 }
 
+enum EffectClass {
+  pure @0; readOnly @1; idempotent @2; retrySafe @3; reversible @4;
+  compensatable @5; transactional @6; persistentExternal @7; opaque @8;
+}
+
 struct BindingRef {
   id @0 :C.Uuid;
   resource @1 :C.Uuid;
   capability @2 :C.Uuid;
   effect @3 :EffectClass;
-}
-
-enum EffectClass {
-  pure @0; readOnly @1; idempotent @2; retrySafe @3; reversible @4;
-  compensatable @5; transactional @6; persistentExternal @7; opaque @8;
 }
 
 struct Constraint { key @0 :Text; value @1 :C.Value; hard @2 :Bool; }
@@ -38,12 +38,12 @@ struct CandidateBinding {
   accepted @1 :Bool;
   reasons @2 :List(Text);
   score @3 :Float64;
-  placement @4 :C.Uuid;
+  placement @4 :C.MaybeUuid;
 }
 
 struct ResolveResult {
   candidates @0 :List(CandidateBinding);
-  selected @1 :C.Uuid;
+  selected @1 :C.MaybeUuid;
   requiredAuthorities @2 :List(Text);
 }
 
@@ -59,27 +59,32 @@ struct ExecutionRequest {
 struct ExecutionState {
   id @0 :C.Uuid;
   status @1 :Text;
-  output @2 :C.ArtifactRef;
-  startedUnixNs @3 :UInt64;
-  finishedUnixNs @4 :UInt64;
+  output @2 :C.MaybeArtifactRef;
+  startedUnixNs @3 :UInt64;  # 0 until started
+  finishedUnixNs @4 :UInt64; # 0 until terminal
 }
 
 interface Adapter {
-  describe @0 () -> (resources :List(ResourceRef), capabilities :List(CapabilityRef), bindings :List(BindingRef));
-  execute @1 (request :ExecutionRequest) -> (state :ExecutionState);
-  cancel @2 (execution :C.Uuid) -> ();
+  describe @0 () -> (
+    status :C.RpcStatus,
+    resources :List(ResourceRef),
+    capabilities :List(CapabilityRef),
+    bindings :List(BindingRef)
+  );
+  execute @1 (request :ExecutionRequest) -> (status :C.RpcStatus, state :ExecutionState);
+  cancel @2 (execution :C.Uuid) -> (status :C.RpcStatus);
 }
 
 interface ManagerService {
-  handshake @0 (request :C.HandshakeRequest) -> (response :C.HandshakeResponse);
-  searchResources @1 (text :Text, limit :UInt32) -> (resources :List(ResourceRef));
-  searchCapabilities @2 (text :Text, limit :UInt32) -> (capabilities :List(CapabilityRef));
-  resolve @3 (request :ResolveRequest) -> (result :ResolveResult);
-  start @4 (request :ExecutionRequest) -> (state :ExecutionState);
-  cancel @5 (execution :C.Uuid, trace :C.TraceContext) -> ();
-  getExecution @6 (execution :C.Uuid) -> (state :ExecutionState);
-  discover @7 (resource :C.Uuid, trace :C.TraceContext) -> ();
-  explainPlacement @8 (binding :C.Uuid, placement :C.Uuid) -> (evidence :C.ArtifactRef);
-  resolveProtected @9 (handle :C.Uuid, execution :C.Uuid) -> (lease :C.Uuid);
-  nixExplain @10 (identity :C.Uuid) -> (evidence :C.ArtifactRef);
+  handshake @0 (request :C.HandshakeRequest) -> (status :C.RpcStatus, response :C.HandshakeResponse);
+  searchResources @1 (text :Text, limit :UInt32) -> (status :C.RpcStatus, resources :List(ResourceRef));
+  searchCapabilities @2 (text :Text, limit :UInt32) -> (status :C.RpcStatus, capabilities :List(CapabilityRef));
+  resolve @3 (request :ResolveRequest) -> (status :C.RpcStatus, result :ResolveResult);
+  start @4 (request :ExecutionRequest) -> (status :C.RpcStatus, state :ExecutionState);
+  cancel @5 (execution :C.Uuid, trace :C.TraceContext) -> (status :C.RpcStatus);
+  getExecution @6 (execution :C.Uuid) -> (status :C.RpcStatus, state :ExecutionState);
+  discover @7 (resource :C.Uuid, trace :C.TraceContext) -> (status :C.RpcStatus);
+  explainPlacement @8 (binding :C.Uuid, placement :C.Uuid) -> (status :C.RpcStatus, evidence :C.ArtifactRef);
+  resolveProtected @9 (handle :C.Uuid, execution :C.Uuid) -> (status :C.RpcStatus, lease :C.Uuid);
+  nixExplain @10 (identity :C.Uuid) -> (status :C.RpcStatus, evidence :C.ArtifactRef);
 }

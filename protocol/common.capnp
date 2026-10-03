@@ -1,14 +1,16 @@
 @0xd8b5c0f15c62a901;
 
-# Canonical Omnis protocol primitives. UUID fields contain exactly 16 bytes.
-# Artifact digests contain exactly 32 BLAKE3 bytes. Services must reject wrong lengths.
+# Canonical Omnis protocol primitives.
+# Uuid.bytes = exactly 16 bytes. ArtifactId.blake3 = exactly 32 bytes.
 
-struct Uuid {
-  bytes @0 :Data;
-}
+struct Uuid { bytes @0 :Data; }
+struct ArtifactId { blake3 @0 :Data; }
 
-struct ArtifactId {
-  blake3 @0 :Data;
+struct MaybeUuid {
+  union {
+    none @0 :Void;
+    some @1 :Uuid;
+  }
 }
 
 struct ProtocolVersion {
@@ -21,7 +23,7 @@ struct TraceContext {
   traceId @1 :Uuid;
   actor @2 :Uuid;
   causalParents @3 :List(Uuid);
-  deadlineUnixNs @4 :UInt64;
+  deadlineUnixNs @4 :UInt64; # 0 means no deadline
 }
 
 enum ProtectionClass {
@@ -39,6 +41,20 @@ struct ArtifactRef {
   length @1 :UInt64;
   mediaType @2 :Text;
   protection @3 :ProtectionClass;
+}
+
+struct MaybeArtifactRef {
+  union {
+    none @0 :Void;
+    some @1 :ArtifactRef;
+  }
+}
+
+struct MaybeArtifactId {
+  union {
+    none @0 :Void;
+    some @1 :ArtifactId;
+  }
 }
 
 struct Value {
@@ -89,6 +105,7 @@ enum ErrorCode {
   activationFailure @14;
   executionFailure @15;
   externalEffectAmbiguous @16;
+  specificationDefect @17;
 }
 
 struct RpcError {
@@ -96,6 +113,13 @@ struct RpcError {
   message @1 :Text;
   details @2 :Data;
   retryable @3 :Bool;
+}
+
+struct RpcStatus {
+  union {
+    ok @0 :Void;
+    error @1 :RpcError;
+  }
 }
 
 struct HandshakeRequest {

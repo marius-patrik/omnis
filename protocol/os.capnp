@@ -10,7 +10,7 @@ struct HostInventory {
 
 struct GenerationCandidate {
   id @0 :C.Uuid;
-  parent @1 :C.Uuid;
+  parent @1 :C.MaybeUuid;
   managedModule @2 :C.ArtifactRef;
   trace @3 :C.TraceContext;
 }
@@ -24,9 +24,8 @@ struct GenerationDiff {
 
 struct BuildResult {
   generation @0 :C.Uuid;
-  success @1 :Bool;
-  systemPath @2 :Text;
-  evidence @3 :List(C.ArtifactRef);
+  systemPath @1 :Text;
+  evidence @2 :List(C.ArtifactRef);
 }
 
 struct ExecutionEnvelope {
@@ -42,13 +41,13 @@ struct ExecutionEnvelope {
 }
 
 interface OsService {
-  handshake @0 (request :C.HandshakeRequest) -> (response :C.HandshakeResponse);
-  inventory @1 () -> (inventory :HostInventory);
-  createEnvelope @2 (envelope :ExecutionEnvelope) -> ();
-  destroyEnvelope @3 (id :C.Uuid) -> ();
-  evaluate @4 (candidate :GenerationCandidate) -> (diff :GenerationDiff);
-  build @5 (candidate :GenerationCandidate) -> (result :BuildResult);
-  activate @6 (generation :C.Uuid, trace :C.TraceContext) -> ();
-  rollback @7 (generation :C.Uuid, trace :C.TraceContext) -> ();
-  checkInvariants @8 (candidate :C.Uuid) -> (report :C.ArtifactRef);
+  handshake @0 (request :C.HandshakeRequest) -> (status :C.RpcStatus, response :C.HandshakeResponse);
+  inventory @1 () -> (status :C.RpcStatus, inventory :HostInventory);
+  createEnvelope @2 (envelope :ExecutionEnvelope) -> (status :C.RpcStatus);
+  destroyEnvelope @3 (id :C.Uuid) -> (status :C.RpcStatus);
+  evaluate @4 (candidate :GenerationCandidate) -> (status :C.RpcStatus, diff :GenerationDiff);
+  build @5 (candidate :GenerationCandidate) -> (status :C.RpcStatus, result :BuildResult);
+  activate @6 (generation :C.Uuid, trace :C.TraceContext) -> (status :C.RpcStatus);
+  rollback @7 (generation :C.Uuid, trace :C.TraceContext) -> (status :C.RpcStatus);
+  checkInvariants @8 (candidate :C.Uuid) -> (status :C.RpcStatus, report :C.ArtifactRef);
 }
