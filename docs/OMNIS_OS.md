@@ -45,7 +45,9 @@ UEFI/firmware
 OmnisControl is the default local interactive environment. A headless target may omit Control while
 retaining OS, Manager, Agent, graph, and remote-control capability.
 
-systemd is the v0 service supervisor and transient-scope executor. It is a physical mechanism, not a
+systemd is the v0 service supervisor and transient-service execution mechanism. `omnis-osd` is the
+only Omnis component allowed to create restricted `omnis-exec-*.service` units. It is a physical
+mechanism, not a
 second semantic system model; desired service semantics remain represented in NixOS + graph.
 
 ---
@@ -316,3 +318,25 @@ incremental event handling.
 On graph corruption or unrecoverable startup failure, OmnisOS enters `omnis-recovery.target` with a
 conventional TTY, Nix generation rollback and graph restore/rebuild tools. No model is required for
 boot, recovery or enforcement.
+
+
+---
+
+## 15. Physical launch API
+
+Manager owns semantic Execution resolution. OmnisOS owns the physical launch.
+
+`omnis-osd` exposes:
+
+```text
+execution_envelope.create/destroy
+physical_process.launch
+physical_process.get
+physical_process.signal
+physical_process.stop
+```
+
+Launch creates one `omnis-exec-<ExecutionId>.service` through systemd with the exact sandbox
+properties in `DECISION_COMPLETE_V0.md §§53-55`. osd creates pipes/PTY before unit start and returns
+typed stream capabilities. No arbitrary string shell command is accepted: executable, argv,
+environment and working directory are separate typed fields.

@@ -158,6 +158,7 @@ Minimum operations:
 ```text
 host.inventory
 execution_envelope.create/destroy
+physical_process.launch/get/signal/stop
 system.evaluate(candidate)
 system.build(candidate)
 system.diff(active, candidate)
@@ -172,6 +173,12 @@ Persistent mutation uses system candidate/generation APIs. Transient Manager exe
 envelopes without changing system generation unless requested.
 
 ---
+
+### 5.1 Physical launch ownership
+
+`omnis-managerd` never launches a restricted process itself. It sends `PhysicalLaunchRequest` to
+`omnis-osd`. osd validates the envelope, starts the transient systemd service and returns either
+pipe or PTY stream capabilities. ExecutionId is preserved across Manager/OS/process graph state.
 
 ## 6. Agent API
 

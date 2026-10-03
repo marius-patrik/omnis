@@ -501,11 +501,14 @@ adapters       CLI/API/MCP/model/harness binding providers
 
 ### 8.4 Execution
 
-Local processes launch through systemd transient scopes over D-Bus, not raw orphaned `fork` calls.
-Each scope name contains ExecutionId and is placed under an Omnis cgroup subtree. Manager applies
-CPU, memory, device, filesystem/network namespace and credential constraints before launch.
+Local process launch is split by authority. Manager resolves the Execution and obtains an
+ExecutionEnvelope; it then calls OmnisOS `PhysicalLaunch`. `omnis-osd` is the only first-party
+component that invokes systemd `StartTransientUnit` for restricted work and creates
+`omnis-exec-<ExecutionId>.service`. It applies the exact sandbox properties from
+`DECISION_COMPLETE_V0.md`.
 
-Execution stdout/stderr are streamed as artifacts/events and optionally attached to a Control PTY.
+Process pipes/PTY are exposed back through the typed OS stream capabilities. Manager records and
+publishes semantic Execution lifecycle/output without owning physical sandbox creation.
 
 ### 8.5 Resolution
 
@@ -805,8 +808,9 @@ the most recent backup and replay authoritative OS/Manager observations plus Age
 cognitive state where appropriate.
 
 ### Manager
-On restart, managerd enumerates systemd scopes tagged with ExecutionId and reconciles running,
-finished and orphaned executions into the graph.
+On restart, osd enumerates `omnis-exec-*.service` units and physical processes, republishes their
+state, and managerd reconciles semantic Executions by ExecutionId. Manager never reconstructs
+physical truth directly from systemd.
 
 ### Agent
 On restart, Agent resumes outbox drain after the last acknowledged EventId/sequence, rebuilds derived
@@ -900,7 +904,7 @@ sqlite-vec derived vector index
 QUIC remote transport
 Smithay/wgpu renderer internals
 specific model/harness providers
-systemd transient-scope executor
+OmnisOS transient-service executor
 ```
 
 The stable boundaries are IDs, graph semantics, worldline semantics, capability/binding/execution

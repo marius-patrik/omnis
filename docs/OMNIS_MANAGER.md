@@ -430,15 +430,16 @@ registry      graph-backed resources/capabilities/bindings
 discovery     deterministic enrichment and provenance
 resolver      hard filtering + inspectable stable scoring
 placement     host/runtime/device choice
-executor      systemd transient-scope lifecycle
+executor      semantic lifecycle; delegates physical launch to OmnisOS
 nix_bridge    Nix control/observer client
 secrets       protected HandleId broker
 adapters      subprocess/native binding providers
 ```
 
-Local executions launch as systemd transient scopes under the Omnis cgroup hierarchy. ExecutionId is
-the idempotency key and is embedded in the unit/scope metadata so restart reconciliation can discover
-already-running work instead of duplicating it.
+Local executions are physically launched by OmnisOS through the typed PhysicalLaunch API.
+ExecutionId is the idempotency key and is embedded in the transient service metadata so restart
+reconciliation discovers already-running work instead of duplicating it. Manager never calls
+systemd's unit-management API directly.
 
 Third-party Manager adapters are subprocesses speaking the typed Cap'n Proto adapter protocol. They
 are not arbitrary shared libraries loaded into the privileged daemon.
