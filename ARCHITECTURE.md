@@ -600,7 +600,7 @@ constraints under token/latency/privacy budgets.
 
 ### 7.5 Models and workers
 
-Models are Manager resources. Workers are Agent cognitive roles/activations that may use one or more
+Models are Manager resources. Workers are Agent cognitive roles/activations that can use one or more
 Manager capabilities.
 
 Initial worker families include judgement, retrieval, reasoning, research, code, verification,
@@ -846,7 +846,7 @@ opaque executable/surface
   -> semantically rich Manager binding
 ```
 
-The Agent may initially interact through weak interfaces and later compile repeated successful
+The Agent can initially interact through weak interfaces and later compile repeated successful
 behavior into stronger deterministic capabilities.
 
 Vision + synthetic mouse/keyboard is a compatibility fallback, not the preferred first-party

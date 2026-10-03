@@ -193,7 +193,8 @@ OmnisControl v0 uses:
 Omnis should not fork a full traditional desktop environment because that would import the wrong
 interaction ontology.
 
-A small compositor skeleton/fork is acceptable where it accelerates DRM/KMS/input/Wayland bootstrap.
+`omnis-control` is implemented directly on Smithay; it does not fork a traditional desktop or a
+second compositor framework.
 
 ---
 
@@ -320,6 +321,16 @@ Agent-originated Control mutations also emit events so their consequences are pa
 causal history.
 
 ---
+
+### 15.1 Raw event delivery
+
+Control never requires Agent to inspect the rendered scene to discover first-party interaction.
+Keyboard, button, touch, scroll, focus, selection, navigation, tree mutation and native-surface
+lifecycle events are emitted directly with stable ordering metadata.
+
+Pointer-motion and other dense streams may be grouped into short lossless batches before durable
+enqueue. Each original item retains producer sequence and monotonic timestamp inside the batch;
+Agent can expand/replay it exactly.
 
 ## 16. Accessibility
 

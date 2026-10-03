@@ -370,27 +370,17 @@ and event stream.
 
 ## 15. Persistence
 
-Omnis v0 persists per-user Agent state under `$XDG_STATE_HOME/omnis/agent/`. The canonical
+Omnis v0 persists per-user Agent state under `$XDG_STATE_HOME/omnis/agent/`:
 
 ```text
-worldline events
-causal edges
-memories
-entities/relations
-sessions/activities
-worker/workflow state
-context activations
-model invocations
-procedures/skills
-expectations
-lineage
+worldline.sqlite3   immutable events, causal edges, entity/artifact references
+index.sqlite3       rebuildable FTS5/sqlite-vec retrieval indexes
+checkpoints/        worker/activity checkpoint references and metadata
 ```
 
-SQLite/WAL is acceptable initially. Large immutable artifacts belong in content-addressed storage and
-are referenced from events/memory.
-
-The persistence implementation must support snapshot + replay/reconciliation and must not make model
-availability a recovery dependency.
+Current cognitive memory, goals, procedures, expectations and worker/activity identities are Agent-
+owned graph state linked back to worldline evidence. Large immutable bodies live in graphd's BLAKE3
+CAS. Recovery is worldline/graph/checkpoint based and never depends on model availability.
 
 ---
 

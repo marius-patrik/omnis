@@ -456,8 +456,9 @@ mutation summary
 payload/artifact references where needed
 ```
 
-Subsystem-specific lifecycle events that do not correspond to graph mutation are also sent directly
-to Agent.
+Subsystem-specific lifecycle/input events that do not correspond to graph mutation are durably
+enqueued through graphd's outbox. Dense event classes may use lossless batch artifacts, but Agent can
+recover every original ordered item without observing the scene.
 
 No first-party component silently mutates durable state without producing an event.
 
@@ -465,16 +466,17 @@ No first-party component silently mutates durable state without producing an eve
 
 ## 14. Storage
 
-Initial implementation:
+Omnis v0 storage is fixed:
 
 ```text
-SQLite WAL
-+ normalized node/edge tables
-+ property tables or efficient encoded blobs
-+ relation indexes
-+ alias index
-+ revision table
-+ transaction journal
+SQLite WAL + synchronous=FULL
++ one serialized writer
++ normalized node/kind/property/edge/provenance tables
++ revision validity intervals
++ relation/alias indexes
++ graph transaction metadata
++ durable event outbox
++ filesystem BLAKE3 CAS for large payloads
 ```
 
 Rationale:

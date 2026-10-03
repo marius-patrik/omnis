@@ -87,6 +87,15 @@ at-least-once and Agent deduplicates EventId. Silent event drop is not valid fir
 
 ---
 
+### 3.1 Dense event batches
+
+High-rate producers may enqueue an EventEnvelope whose payload is a BLAKE3 artifact containing an
+ordered batch of original events. The batch header carries producer identity, first/last sequence
+and monotonic time range. Each item retains sequence, monotonic timestamp, type and payload.
+
+Lossless batching is permitted; semantic sampling/drop is not permitted for first-party event
+classes declared lossless.
+
 ## 4. Manager API
 
 Minimum operations:
