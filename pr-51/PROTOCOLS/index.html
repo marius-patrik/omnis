@@ -287,7 +287,7 @@
 creating parallel subsystem-specific models.</p>
 <hr />
 <h2 id="1-wire-protocol-and-transport">1. Wire protocol and transport<a class="headerlink" href="#1-wire-protocol-and-transport" title="Permanent link">&para;</a></h2>
-<p>Canonical v0 schemas are Cap'n Proto. Rust and C++ bindings are generated from the same <code>.capnp</code>
+<p>Canonical v0 schemas are Cap'n Proto protocol version 1.0. Rust and C++ bindings are generated from the same <code>.capnp</code>
 sources owned by the umbrella <code>omnis</code> repository. Local RPC runs over Unix-domain <code>SOCK_STREAM</code>;
 native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.</p>
 <p>JSON is allowed only as a diagnostic/export representation; it is not a second RPC contract.</p>
@@ -351,6 +351,16 @@ ordered batch of original events. The batch header carries producer identity, fi
 and monotonic time range. Each item retains sequence, monotonic timestamp, type and payload.</p>
 <p>Lossless batching is permitted; semantic sampling/drop is not permitted for first-party event
 classes declared lossless.</p>
+<h3 id="32-event-payload-encoding">3.2 Event payload encoding<a class="headerlink" href="#32-event-payload-encoding" title="Permanent link">&para;</a></h3>
+<p>Every first-party event type in <code>spec/events.toml</code> maps to exactly one union variant in
+<code>protocol/events.capnp::Payload</code>. <code>EventEnvelope.payload</code> is that typed union; arbitrary JSON or
+component-private binary payloads are not valid first-party event encoding.</p>
+<p>Persistent/event-outbox bytes use standard <strong>unpacked Cap'n Proto message serialization</strong> of the full
+EventEnvelope with deterministic field/list ordering supplied by the producer. Worldline stores those
+exact envelope bytes in <code>events.envelope</code> while indexing the identity/type/source/time/revision
+columns separately.</p>
+<p>Dense-batch item <code>payload</code> contains the same unpacked Cap'n Proto serialization of the mapped
+<code>events.capnp::Payload</code> variant for that item's event type.</p>
 <h2 id="4-manager-api">4. Manager API<a class="headerlink" href="#4-manager-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>resource.get/list/search
@@ -387,6 +397,13 @@ classes declared lossless.</p>
 </code></pre></div>
 <p>No selected binding is acceptable when the caller requested discovery-only resolution.</p>
 <hr />
+<h3 id="43-capability-payload-encoding">4.3 Capability payload encoding<a class="headerlink" href="#43-capability-payload-encoding" title="Permanent link">&para;</a></h3>
+<p>Every first-party capability in <code>spec/capabilities.toml</code> maps to exact input/output structs in
+<code>protocol/capabilities.capnp</code> and one fixed effect class. Execution input/output artifacts contain
+the <strong>unpacked Cap'n Proto message bytes</strong> for those mapped structs. An adapter must reject a payload
+whose declared capability does not match the mapped type.</p>
+<p>Provider-specific adapters translate only at the foreign boundary; they do not redefine the Omnis
+capability schema.</p>
 <h2 id="5-omnisos-api">5. OmnisOS API<a class="headerlink" href="#5-omnisos-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>host.inventory
@@ -583,12 +600,14 @@ machines from <code>ONTOLOGY_V0.md</code>.</p>
           <li><a href="#3-event-api">3. Event API</a>
             <ul>
               <li><a href="#31-dense-event-batches">3.1 Dense event batches</a></li>
+              <li><a href="#32-event-payload-encoding">3.2 Event payload encoding</a></li>
             </ul>
           </li>
           <li><a href="#4-manager-api">4. Manager API</a>
             <ul>
               <li><a href="#41-resolve-request">4.1 Resolve request</a></li>
               <li><a href="#42-resolve-result">4.2 Resolve result</a></li>
+              <li><a href="#43-capability-payload-encoding">4.3 Capability payload encoding</a></li>
             </ul>
           </li>
           <li><a href="#5-omnisos-api">5. OmnisOS API</a>
