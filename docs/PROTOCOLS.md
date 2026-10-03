@@ -9,7 +9,7 @@ creating parallel subsystem-specific models.
 
 ## 1. Wire protocol and transport
 
-Canonical v0 schemas are Cap'n Proto. Rust and C++ bindings are generated from the same `.capnp`
+Canonical v0 schemas are Cap'n Proto protocol version 1.0. Rust and C++ bindings are generated from the same `.capnp`
 sources owned by the umbrella `omnis` repository. Local RPC runs over Unix-domain `SOCK_STREAM`;
 native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.
 
@@ -103,6 +103,20 @@ and monotonic time range. Each item retains sequence, monotonic timestamp, type 
 Lossless batching is permitted; semantic sampling/drop is not permitted for first-party event
 classes declared lossless.
 
+### 3.2 Event payload encoding
+
+Every first-party event type in `spec/events.toml` maps to exactly one union variant in
+`protocol/events.capnp::Payload`. `EventEnvelope.payload` is that typed union; arbitrary JSON or
+component-private binary payloads are not valid first-party event encoding.
+
+Persistent/event-outbox bytes use standard **unpacked Cap'n Proto message serialization** of the full
+EventEnvelope with deterministic field/list ordering supplied by the producer. Worldline stores those
+exact envelope bytes in `events.envelope` while indexing the identity/type/source/time/revision
+columns separately.
+
+Dense-batch item `payload` contains the same unpacked Cap'n Proto serialization of the mapped
+`events.capnp::Payload` variant for that item's event type.
+
 ## 4. Manager API
 
 Minimum operations:
@@ -150,6 +164,16 @@ ResolveResult
 No selected binding is acceptable when the caller requested discovery-only resolution.
 
 ---
+
+### 4.3 Capability payload encoding
+
+Every first-party capability in `spec/capabilities.toml` maps to exact input/output structs in
+`protocol/capabilities.capnp` and one fixed effect class. Execution input/output artifacts contain
+the **unpacked Cap'n Proto message bytes** for those mapped structs. An adapter must reject a payload
+whose declared capability does not match the mapped type.
+
+Provider-specific adapters translate only at the foreign boundary; they do not redefine the Omnis
+capability schema.
 
 ## 5. OmnisOS API
 

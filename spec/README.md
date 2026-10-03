@@ -4,6 +4,10 @@ These files are canonical inputs for generated constants/registries.
 
 - `v0.toml` — scalar baselines, paths, ports, limits, weights, schedules and defaults.
 - `ontology.toml` — first-party kind/relation/capability/event/state names.
+- `events.toml` — event name -> `events.capnp::Payload` union variant.
+- `capabilities.toml` — capability name -> input/output Cap'n Proto types + effect class.
+- `properties.toml` — first-party property key types/constraints.
+- `state_machines.toml` — legal lifecycle transitions.
 
 Component repositories pin an umbrella commit and generate language-specific constants from these
 files during Nix builds. They must not copy values into independent handwritten registries.

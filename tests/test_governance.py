@@ -233,7 +233,7 @@ def test_v0_implementation_profile_is_concrete():
 
 def test_protocol_schema_sources_exist():
     """The frozen wire contract must exist as schema source, not prose only."""
-    for name in ("common", "graph", "os", "manager", "agent", "control"):
+    for name in ("common", "events", "capabilities", "graph", "os", "manager", "agent", "control"):
         path = os.path.join(REPO_ROOT, "protocol", f"{name}.capnp")
         assert os.path.isfile(path), f"missing canonical protocol schema {name}.capnp"
         content = _read("protocol", f"{name}.capnp")
@@ -388,3 +388,47 @@ def test_machine_readable_v0_manifests_parse_and_are_unique():
         values = ontology[field]
         assert len(values) == len(set(values)), f"duplicate identifier in {field}"
         assert all(value.startswith("omnis.") for value in values)
+
+
+def test_v0_registries_cross_check():
+    """Machine-readable ontology/event/capability/property/state registries must agree."""
+    import tomllib
+
+    def load(name):
+        with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
+            return tomllib.load(handle)
+
+    ontology = load("ontology.toml")
+    events = load("events.toml")["events"]
+    capabilities = load("capabilities.toml")["capabilities"]
+    properties = load("properties.toml")["properties"]
+    machines = load("state_machines.toml")["state_machines"]
+
+    assert set(events) == set(ontology["events"])
+    assert set(capabilities) == set(ontology["capabilities"])
+    assert all(name.startswith("omnis.") for name in properties)
+
+    for name, machine in machines.items():
+        states = set(ontology["states"][name])
+        assert machine["initial"] in states
+        assert set(machine["terminal"]) <= states
+        for transition in machine["transitions"]:
+            source, target = transition.split("->", 1)
+            assert source in states
+            assert target in states
+
+    valid_effects = {
+        "pure", "readOnly", "idempotent", "retrySafe", "reversible",
+        "compensatable", "transactional", "persistentExternal", "opaque",
+    }
+    for schema in capabilities.values():
+        assert schema["effect"] in valid_effects
+        assert schema["input"]
+        assert schema["output"]
+
+
+def test_worldline_stores_exact_event_envelope_bytes():
+    worldline = _read("schema", "worldline.sql")
+    assert "envelope BLOB NOT NULL" in worldline
+    assert "inline_payload" not in worldline
+    assert "payload_artifact" not in worldline

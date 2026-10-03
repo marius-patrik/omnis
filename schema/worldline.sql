@@ -24,10 +24,8 @@ CREATE TABLE events (
   observed_monotonic_ns INTEGER NOT NULL,
   graph_revision INTEGER NULL,
   trace_id BLOB NOT NULL CHECK(length(trace_id)=16),
-  payload_artifact BLOB NULL CHECK(payload_artifact IS NULL OR length(payload_artifact)=32),
-  inline_payload BLOB NULL,
-  erased INTEGER NOT NULL DEFAULT 0 CHECK(erased IN (0,1)),
-  CHECK((payload_artifact IS NULL) OR (inline_payload IS NULL))
+  envelope BLOB NOT NULL,
+  erased INTEGER NOT NULL DEFAULT 0 CHECK(erased IN (0,1))
 );
 
 CREATE TABLE event_causes (
