@@ -299,9 +299,8 @@ def test_active_specs_forbid_implementer_choice_markers():
     for document in documents:
         content = _read(*document.split("/")).upper()
         for marker in forbidden:
-            assert marker not in content, (
-                f"{document} contains delegated-choice marker {marker!r}"
-            )
+            assert marker not in content, f"{document} contains delegated-choice marker {marker!r}"
+
 
 def test_canonical_v0_source_contracts():
     """Decision-complete implementation inputs must be checked in and addressable."""
