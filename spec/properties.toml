@@ -1,0 +1,134 @@
+version = 1
+
+[properties."omnis.identity.display_name"]
+type = "text"
+[properties."omnis.identity.owner_uid"]
+type = "u64"
+[properties."omnis.identity.created_at"]
+type = "i64"
+unit = "unix_ns"
+[properties."omnis.state.status"]
+type = "text"
+[properties."omnis.state.valid_from"]
+type = "i64"
+unit = "unix_ns"
+[properties."omnis.state.valid_until"]
+type = "i64"
+unit = "unix_ns"
+optional = true
+[properties."omnis.provenance.confidence"]
+type = "f64"
+min = 0.0
+max = 1.0
+[properties."omnis.provenance.method"]
+type = "text"
+[properties."omnis.provenance.foreign_system"]
+type = "text"
+[properties."omnis.provenance.foreign_id"]
+type = "text"
+
+[properties."omnis.physical.pid"]
+type = "u64"
+[properties."omnis.physical.uid"]
+type = "u64"
+[properties."omnis.physical.gid"]
+type = "u64"
+[properties."omnis.physical.cpu_percent"]
+type = "f64"
+[properties."omnis.physical.memory_bytes"]
+type = "u64"
+[properties."omnis.physical.device_path"]
+type = "text"
+[properties."omnis.physical.address"]
+type = "text"
+
+[properties."omnis.resource.version"]
+type = "text"
+[properties."omnis.resource.locator"]
+type = "text"
+[properties."omnis.capability.name"]
+type = "text"
+[properties."omnis.binding.effect_class"]
+type = "text"
+[properties."omnis.binding.memory_coverage"]
+type = "text"
+[properties."omnis.execution.exit_code"]
+type = "i64"
+optional = true
+[properties."omnis.execution.started_at"]
+type = "i64"
+unit = "unix_ns"
+[properties."omnis.execution.finished_at"]
+type = "i64"
+unit = "unix_ns"
+optional = true
+[properties."omnis.placement.locality"]
+type = "text"
+[properties."omnis.credential.purpose"]
+type = "text"
+[properties."omnis.credential.expires_at"]
+type = "i64"
+unit = "unix_ns"
+
+[properties."omnis.cognitive.confidence"]
+type = "f64"
+min = 0.0
+max = 1.0
+[properties."omnis.cognitive.salience"]
+type = "f64"
+min = 0.0
+max = 1.0
+[properties."omnis.cognitive.valid_from"]
+type = "i64"
+unit = "unix_ns"
+[properties."omnis.cognitive.valid_until"]
+type = "i64"
+unit = "unix_ns"
+optional = true
+[properties."omnis.cognitive.text"]
+type = "text"
+[properties."omnis.cognitive.status"]
+type = "text"
+[properties."omnis.goal.priority"]
+type = "f64"
+min = 0.0
+max = 1.0
+[properties."omnis.goal.deadline"]
+type = "i64"
+unit = "unix_ns"
+optional = true
+[properties."omnis.worker.priority"]
+type = "f64"
+[properties."omnis.worker.checkpoint"]
+type = "artifact_ref"
+optional = true
+[properties."omnis.context.token_budget"]
+type = "u64"
+[properties."omnis.context.model_binding"]
+type = "node_ref"
+optional = true
+
+[properties."omnis.presentation.mode"]
+type = "enum"
+values = ["2d","3d"]
+[properties."omnis.presentation.visible"]
+type = "bool"
+[properties."omnis.presentation.pinned"]
+type = "bool"
+[properties."omnis.presentation.position2"]
+type = "f64_list"
+length = 2
+[properties."omnis.presentation.position3"]
+type = "f64_list"
+length = 3
+[properties."omnis.presentation.size2"]
+type = "f64_list"
+length = 2
+[properties."omnis.presentation.zoom"]
+type = "f64"
+min_exclusive = 0.0
+[properties."omnis.presentation.theme"]
+type = "text"
+[properties."omnis.presentation.timeline_event"]
+type = "event_ref"
+optional = true

@@ -1,6 +1,7 @@
 @0xa93ec2d4ad73b6c1;
 
 using C = import "common.capnp";
+using E = import "events.capnp";
 
 struct Property {
   namespace @0 :Text;
@@ -105,7 +106,7 @@ struct EventEnvelope {
   graphRevision @6 :UInt64; # 0 when event is not tied to a graph revision
   entities @7 :List(C.Uuid);
   artifacts @8 :List(C.ArtifactRef);
-  inlinePayload @9 :Data;
+  payload @9 :E.Payload;
 }
 
 struct GraphTransaction {

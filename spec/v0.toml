@@ -267,3 +267,10 @@ sigterm_grace_seconds = 5
 
 [harness]
 inference_gateway_port = 7331
+
+[protocol]
+major = 1
+minor = 0
+event_schema_major = 1
+event_schema_minor = 0
+artifact_chunk_bytes = 1048576
