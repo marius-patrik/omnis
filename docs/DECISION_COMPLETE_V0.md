@@ -1920,3 +1920,311 @@ choice.
 
 The umbrella CLI command `omnis spec check` will eventually automate this mapping, but its absence
 does not weaken the rule.
+
+
+---
+
+## 53. Privileged execution launch path
+
+OmnisManager owns the semantic Execution. OmnisOS owns physical process creation and sandbox
+enforcement.
+
+`omnis-managerd` **does not** call systemd `StartTransientUnit` directly.
+
+Exact path:
+
+1. Manager resolves Binding, placement and ExecutionId;
+2. Manager asks OmnisOS for validated ExecutionEnvelope;
+3. Manager sends `PhysicalLaunchRequest` to `omnis-osd`;
+4. osd validates peer is managerd, envelope ownership and executable/store-path identity;
+5. osd creates `omnis-exec-<uuidhex>.service` with systemd `StartTransientUnit`;
+6. systemd starts the target under requested UID/GID;
+7. osd publishes process/cgroup facts;
+8. Manager tracks semantic Execution state from OS events;
+9. cancellation/signals go Manager -> osd -> systemd;
+10. outputs are streamed back through the typed OS process-stream capability and persisted by Manager.
+
+`omnis-osd` runs as root because it is the physical enforcement authority. Its service unit uses
+`NoNewPrivileges=false` only because it must create lower-privilege units; it exposes no generic
+shell/exec method outside the typed Manager-only launch API.
+
+Graphd and managerd remain unprivileged dedicated users.
+
+---
+
+## 54. Execution sandbox systemd properties
+
+Every non-interactive restricted Execution transient service starts from these properties:
+
+```text
+Type=exec
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=tmpfs
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictSUIDSGID=yes
+RemoveIPC=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+KillMode=control-group
+TimeoutStopSec=5s
+TasksMax=512
+MemoryMax=2G
+CPUQuota=100%
+```
+
+Filesystem grants are translated to:
+
+- read-only roots -> `BindReadOnlyPaths=`;
+- writable roots -> `BindPaths=`;
+- workdir -> explicit writable bind;
+- no implicit HOME visibility.
+
+Network:
+
+- deny => `PrivateNetwork=yes`, `RestrictAddressFamilies=AF_UNIX`;
+- allowed internet/user network => `PrivateNetwork=no`;
+- hostname/port constrained binding => `PrivateNetwork=no`,
+  `IPAddressDeny=any`, `IPAddressAllow=<resolved IPs>`, plus the binding port enforced by the
+  Omnis cgroup-connect eBPF filter.
+
+Hostname allowlists resolve immediately before launch; DNS answers are frozen for that Execution.
+Long-running bindings that declare DNS refresh update the allow map every 60 seconds.
+
+Devices:
+
+- `DevicePolicy=closed`;
+- add `DeviceAllow=` for each explicitly granted device;
+- GPU binding adds only the selected DRM/render or accelerator device nodes.
+
+System calls:
+
+```text
+SystemCallFilter=~@mount @reboot @raw-io @swap
+```
+
+A Binding requiring a syscall in those denied groups must declare it as a hard execution requirement;
+OmnisOS then records the exact exception in the envelope and event provenance.
+
+`MemoryDenyWriteExecute=no` in v0 because JIT runtimes/agent harnesses are legitimate resources.
+No binding can gain Linux capabilities unless an explicit privileged capability is added to the
+ontology by a spec change.
+
+---
+
+## 55. Physical process I/O
+
+OmnisOS creates pipes or a PTY before launching the transient service.
+
+Typed OS stream interfaces:
+
+```text
+ByteSource.read(max <= 65536)
+ByteSink.write(chunk <= 65536)
+PtyStream.read/write/resize/close
+```
+
+PTY resize uses rows/columns + pixel width/height.
+
+Backpressure:
+- per stream buffer = 1 MiB;
+- when full, producer process blocks through normal pipe/PTY backpressure;
+- semantic output is never dropped by Omnis.
+
+Manager simultaneously chunks stdout/stderr/PTY recording into CAS-backed artifacts using the
+64 KiB / 100 ms rule.
+
+---
+
+## 56. Graph clustering above direct-layout limit
+
+When a projection contains >5000 visible semantic nodes, clustering is deterministic.
+
+Order:
+
+1. apply lens-specific mandatory grouping:
+   - physical: HostId;
+   - activity: ActivityId;
+   - execution: Execution placement HostId then ActivityId;
+   - presentation: WorkspaceId;
+2. if any resulting group still has >5000 nodes, apply deterministic Louvain modularity clustering;
+3. relation edge weight = 1.0 unless ontology marks an explicit weight later;
+4. Louvain resolution = 1.0;
+5. process nodes in NodeId byte order;
+6. move a node only for strictly positive modularity gain >1e-9;
+7. equal gains choose cluster whose smallest member NodeId is lexicographically smallest;
+8. repeat passes until total modularity gain <1e-6;
+9. recursively cluster oversized communities.
+
+Cluster render identity is the derived BLAKE3 identity defined in §26 and is never written as a
+semantic graph NodeId.
+
+---
+
+## 57. Default boot workspace
+
+First interactive login creates exactly one persistent Workspace when none exists.
+
+Initial workspace:
+
+```text
+mode = 2d
+lens = ["physical","activity","presentation"]
+focus = local Host NodeId
+central view = Terminal/InputSurface
+terminal = user's configured login shell
+graph context = local Host + Omnis core services + active Agent/Activity nodes, depth 1
+timeline frontier = live
+```
+
+The Terminal view occupies 70% width and full height initially.
+The graph context occupies the remaining 30% on the right.
+Below 900 logical px output width, graph context starts collapsed and Terminal occupies full width.
+
+No dock, taskbar, app launcher or wallpaper surface is created by default.
+
+Opening an application inserts its NativeSurface beside the currently focused view using the same
+split algorithm:
+
+- landscape workspace: split horizontally 50/50;
+- portrait workspace: split vertically 50/50.
+
+User/Agent rearrangement persists as Control graph state.
+
+---
+
+## 58. CLI grammar
+
+The `omnis` CLI is exact:
+
+```text
+omnis graph get <omnis-uri>
+omnis graph query --root <uri> [--relation <name>] [--depth N] [--limit N]
+omnis graph watch [--root <uri>]
+
+omnis system status
+omnis system diff <generation>
+omnis system plan <nix-option-assignment>...
+omnis system build <generation>
+omnis system activate <generation>
+omnis system rollback <generation>
+omnis system update
+
+omnis manager resources [query]
+omnis manager capabilities [query]
+omnis manager discover <uri>
+omnis manager resolve <capability> [--constraint key=value]...
+omnis manager run <capability> [--input <path-or-json>]
+omnis manager executions [--active]
+omnis manager models
+omnis manager harnesses
+
+omnis agent ask <text...>
+omnis agent memory search <text...>
+omnis agent events [--after <event-uri>]
+omnis agent activities
+omnis agent workers
+omnis agent explain <omnis-uri>
+
+omnis control open <address-or-uri>
+omnis control focus <omnis-uri>
+omnis control mode <2d|3d>
+omnis control lens <name>...
+omnis control workspace
+
+omnis ingest <path>...
+omnis trace <trace-uri>
+omnis spec check
+```
+
+Global flags:
+
+```text
+--json        canonical JSON debug/export form
+--timeout     override finite query timeout only
+--socket      explicit endpoint for debugging; not persisted
+```
+
+Human output is concise tables/text. `--json` emits UTF-8 JSON with stable snake_case field names
+derived from protocol fields. Exit status: 0 success, 2 invalid input, 3 not found, 4 conflict,
+5 unauthorized, 6 unavailable, 7 execution/build failure, 8 protocol incompatibility,
+9 specification defect.
+
+CLI never reads/writes SQLite directly.
+
+---
+
+## 59. Additional Control/editor/media dependency families
+
+Add to the frozen dependency policy where used:
+
+```text
+ropey                 text rope
+tree-sitter           syntax trees
+pulldown-cmark        Markdown
+gstreamer             video/audio playback bindings
+mime_guess            deterministic MIME hinting before libmagic binding
+```
+
+System libraries come from the pinned nixpkgs revision.
+
+For MIME detection, order is:
+1. explicit protocol/content type;
+2. Nix/package metadata;
+3. filename extension via mime_guess;
+4. libmagic Manager binding;
+5. application/octet-stream.
+
+---
+
+## 60. External harness version/package policy
+
+Omnis does not vendor or silently download proprietary/external coding harnesses.
+
+Built-in harness adapters bind an executable resource discovered from:
+
+1. an existing Nix store/profile resource;
+2. PATH;
+3. an explicitly declared executable path.
+
+The adapter records `--version` output and refuses unsupported major versions with
+`incompatible`, rather than guessing flags.
+
+Installing a harness is a normal package/resource operation under §40. If pinned nixpkgs contains the
+requested package, use it. Otherwise a package definition with exact source version/hash must be added
+to OmnisManager/OmnisOS in a reviewed change before installation; runtime curl-to-shell installers are
+forbidden.
+
+Adapters are tested against explicit supported version fixtures. A new harness major version requires
+updating the adapter compatibility fixture before it can claim full/hook/gateway coverage.
+
+---
+
+## 61. `omnis spec check`
+
+`omnis spec check` is required in the first umbrella CLI implementation.
+
+It validates:
+
+1. `spec/v0.toml` parses and has the expected schema version;
+2. `spec/ontology.toml` contains no duplicate first-party identifier;
+3. every `omnis.*` identifier referenced by protocol/schema/prompt source is registered or is a
+   documented property prefix;
+4. all six Cap'n Proto schema files exist and compile;
+5. all three SQL v1 schemas execute on an empty SQLite database;
+6. every prompt listed in the prompt registry exists and contains its exact version header;
+7. Nix option documentation and example paths exist in the option contract;
+8. scalar constants duplicated in generated language outputs match `spec/v0.toml`;
+9. no active normative document contains `TBD`, `TO BE DECIDED`,
+   `IMPLEMENTER MAY CHOOSE`, `IMPLEMENTATION AGENT MAY CHOOSE`,
+   `CHOOSE WHICHEVER`, or `IMPLEMENTATION-SPECIFIC UNTIL`.
+
+Exit 0 only if all checks pass; otherwise exit 9.

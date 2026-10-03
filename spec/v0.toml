@@ -244,3 +244,26 @@ graph_backup = "03:17"
 worldline_backup = "03:47"
 artifact_retention = "04:47"
 nix_gc = "Sunday 05:17"
+
+
+[control.cluster]
+direct_node_limit = 5000
+louvain_resolution = 1.0
+move_gain_epsilon = 1e-9
+stop_modularity_gain = 1e-6
+
+[control.boot]
+terminal_width_fraction = 0.70
+graph_width_fraction = 0.30
+collapse_graph_below_width_px = 900
+
+[execution.stream]
+buffer_bytes = 1048576
+chunk_bytes = 65536
+flush_ms = 100
+
+[execution.stop]
+sigterm_grace_seconds = 5
+
+[harness]
+inference_gateway_port = 7331
