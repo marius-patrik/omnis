@@ -1,0 +1,49 @@
+version = 1
+
+[value_types.none]
+code = 0
+storage = "empty"
+
+[value_types.bool]
+code = 1
+storage = "capnp-value"
+
+[value_types.sint]
+code = 2
+storage = "capnp-value"
+
+[value_types.uint]
+code = 3
+storage = "capnp-value"
+
+[value_types.float]
+code = 4
+storage = "capnp-value"
+finite_only = true
+
+[value_types.text]
+code = 5
+storage = "capnp-value"
+unicode = "NFC"
+
+[value_types.data]
+code = 6
+storage = "capnp-value"
+
+[value_types.uuid]
+code = 7
+storage = "capnp-value"
+length = 16
+
+[value_types.artifact]
+code = 8
+storage = "capnp-value"
+
+[value_types.list]
+code = 9
+storage = "capnp-value"
+
+[value_types.map]
+code = 10
+storage = "capnp-value"
+keys = "UTF-8 byte lexical ascending, unique"

@@ -388,12 +388,14 @@ Failed preconditions produce no partial graph mutation.
 The first implementation requires deterministic predicates for:
 
 - node exists/does not exist;
-- property equals/does not equal;
-- relation exists/does not exist;
-- revision matches;
-- authority owns namespace;
-- target identity still refers to expected foreign realization;
-- optional cardinality constraints.
+- property equals / property absent;
+- edge exists / edge absent;
+- exact relation exists / absent;
+- revision equals;
+- relation cardinality bounds.
+
+Authority ownership is an unconditional graphd check, not a caller-selectable predicate. A foreign
+realization guard is expressed by propertyEquals against its exact foreign identity/locator.
 
 Graph predicates are operational consistency checks, not a replacement for OmnisOS system
 invariants or OmnisAgent reasoning.
@@ -418,8 +420,8 @@ dimension/lens projection
 subscription to node/relation/query changes
 ```
 
-The graph protocol should support query plans rich enough for Control to maintain live projections
-without polling entire subgraphs.
+`protocol/graph.capnp` freezes selector, property-filter, BFS traversal, shortest-path, alias and
+provenance APIs. Detailed ordering/limit semantics are in `DECISION_COMPLETE_V0.md §69`.
 
 ---
 

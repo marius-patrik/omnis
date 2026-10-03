@@ -1,6 +1,12 @@
 version = 1
 namespace = "omnis"
 
+dimensions = [
+  "physical","system","enforcement","resource","capability","binding","execution","placement",
+  "foreign","activity","cognitive","memory","goal","context","judgement","worker","learning",
+  "presentation","interaction","scene","navigation","provenance","causal","authority"
+]
+
 kinds = [
   "omnis.kind.host","omnis.kind.cpu","omnis.kind.gpu","omnis.kind.memory_device",
   "omnis.kind.storage_device","omnis.kind.network_device","omnis.kind.input_device",

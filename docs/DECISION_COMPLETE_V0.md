@@ -2595,3 +2595,103 @@ omnis manager host unpair <host-uuid>
 
 removes authority grants/cache roots and marks peer binding unavailable; it does not delete historical
 Host identity/worldline events.
+
+
+---
+
+## 69. Graph value and query semantics
+
+### 69.1 property storage encoding
+
+`spec/value_types.toml` is canonical.
+
+For every node/edge property, SQLite `value_type` is the corresponding numeric union code and
+`value` stores the standard **unpacked Cap'n Proto message serialization** of
+`common.capnp::Value`.
+
+Graphd decodes values for semantic comparison; SQLite BLOB byte equality is never used as semantic
+value equality.
+
+Rules:
+
+- float values must be finite; reject NaN and +/-Infinity;
+- text must be valid UTF-8 and is normalized to NFC before storage;
+- UUID is exactly 16 bytes;
+- maps have unique keys sorted by UTF-8 byte lexical order before storage;
+- lists preserve order;
+- nested maps/lists recursively obey the same rules.
+
+### 69.2 selectors
+
+`NodeSelector` semantics:
+
+- empty `ids` means no ID restriction; otherwise node ID must be in the list;
+- empty `kinds` means no kind restriction; otherwise node must have at least one listed kind;
+- all propertyFilters are ANDed;
+- equals/notEquals compare decoded typed values;
+- exists/notExists ignore the supplied value field;
+- selector groups (ID/kind/properties) are ANDed;
+- an entirely empty selector selects all visible nodes subject to query limit.
+
+### 69.3 traversal
+
+- depth 0 returns roots only;
+- relation list empty => all visible relations;
+- dimension list empty => all visible dimensions;
+- traversal is breadth-first;
+- a node appears once at its shallowest discovered depth;
+- edges are ordered by relation UTF-8 bytes, opposite NodeId bytes, then EdgeId bytes;
+- output nodes are ordered by discovery depth then NodeId bytes;
+- `both` explores outgoing before incoming for the same ordered relation/peer tuple.
+
+### 69.4 paths
+
+Path query uses breadth-first search and returns shortest paths only until `maxPaths`.
+Default `maxPaths=16` when caller supplies 0; hard max 256.
+Maximum path depth is graph configured hard depth (8).
+
+Path ordering:
+1. edge count ascending;
+2. node-ID byte sequence lexicographic;
+3. edge-ID byte sequence lexicographic.
+
+### 69.5 aliases
+
+Alias namespace and alias are exact, case-sensitive UTF-8 NFC strings.
+
+`resolveAlias` returns candidate NodeIds sorted by bytes.
+Callers interpret 0 as NotFound, 1 as resolved, >1 as Conflict unless they explicitly requested all
+candidates.
+
+### 69.6 transaction events
+
+Every successful GraphTransaction:
+
+1. validates expectedRevision equals current revision exactly;
+2. rejects zero mutations;
+3. evaluates all preconditions inside `BEGIN IMMEDIATE`;
+4. applies mutations in listed order;
+5. sets supplied transaction-event `graphRevision` to new revision;
+6. enqueues supplied events in listed order;
+7. graphd creates and enqueues exactly one `omnis.event.graph.committed` event last;
+8. commits graph rows, transaction row and all outbox rows atomically.
+
+The synthesized graph-committed EventId is returned in CommitResult.
+
+For non-transaction `enqueueEvent`, graphRevision stays whatever valid revision the producer
+observed, including 0 only when genuinely unrelated to graph state.
+
+All events carry producer wall and monotonic timestamps. Graphd never replaces producer timestamps
+with ingest time; outbox `created_at_ns` separately records graphd receipt time.
+
+### 69.7 preconditions
+
+- propertyEquals compares canonical decoded Value semantics;
+- propertyAbsent means no current row for exact node/namespace/key;
+- relationExists/Absent match exact source/relation/target;
+- cardinality counts current matching edges in requested direction;
+- `max = 4294967295` means unbounded maximum;
+- authority namespace ownership is always checked independently and cannot be bypassed by
+  preconditions.
+
+A precondition failure returns Conflict and performs no writes.
