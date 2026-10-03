@@ -52,6 +52,13 @@ struct Value {
     data @6 :Data;
     uuid @7 :Uuid;
     artifact @8 :ArtifactRef;
+    list @9 :List(Value);
+    map @10 :List(Entry);
+  }
+
+  struct Entry {
+    key @0 :Text;
+    value @1 :Value;
   }
 }
 

@@ -64,6 +64,70 @@ marius-patrik/omnis-control
 `omnis` owns protocol schema versions so no component may silently redefine cross-component types.
 Generated Rust/C++ protocol bindings are build artifacts; the `.capnp` sources are canonical.
 
+## 2.1 First-party crate/workspace layout
+
+Repository-internal crate/module names are fixed for the first implementation so cross-repository
+dependencies do not grow ad hoc.
+
+```text
+omnis-os/omnis/
+  graph/omnis-graphd        binary
+  graph/omnis-graph         transaction/query/storage library
+  graph/omnis-cas           BLAKE3 artifact store
+  os/omnis-osd              binary
+  os/omnis-linux-observe    Linux observation/enforcement adapters
+
+omnis-manager/omnis/
+  managerd/omnis-managerd   Rust binary
+  managerd/registry         resource/capability/binding model
+  managerd/resolver         deterministic resolver/placement
+  managerd/executor         systemd execution broker
+  managerd/adapters         subprocess adapter host
+  nix-observer/             C++ observer/control additions to upstream Nix
+
+omnis-agent/
+  crates/agentd             binary/event loop
+  crates/worldline          append/replay storage
+  crates/memory             cognitive graph writes + retrieval indexes
+  crates/context            ContextCapsule compiler
+  crates/cognition          judgement/candidate/budget pipeline
+  crates/workers            durable worker/activity engine
+  crates/replay             deterministic replay/evaluation tooling
+
+omnis-control/
+  crates/control            compositor binary
+  crates/projection         graph -> ControlTree
+  crates/scene              ControlTree -> RenderScene
+  crates/render             wgpu renderer
+  crates/wayland            Smithay/XWayland integration
+  crates/shell              PTY/vte terminal source
+  crates/input              deterministic resolver + event normalization
+
+omnis/
+  protocol/                 canonical Cap'n Proto schemas
+  cli/                      thin `omnis` RPC client
+  tests/                    cross-component protocol/NixOS VM tests
+```
+
+Generated protocol bindings come from the pinned umbrella schema revision rather than copied source.
+
+## 2.2 CLI
+
+The umbrella `omnis` binary is a thin Rust RPC client, not a fifth authority. It performs no direct
+database writes:
+
+```text
+omnis graph ...
+omnis system ...
+omnis manager ...
+omnis agent ...
+omnis control ...
+omnis trace ...
+```
+
+Each command calls the owning RPC. OmnisControl and OmnisAgent use the same operations through typed
+protocol clients.
+
 ## 3. Runtime process topology
 
 ### 3.1 System scope
@@ -246,6 +310,16 @@ Large immutable payloads are never copied into graph properties or RPC messages.
 Writes go to a temporary file, fsync, verify BLAKE3, then atomic rename. Metadata records media type,
 length, protection class and creator. Garbage collection traces references from graph/worldline
 roots before deleting an unreferenced object.
+
+### 5.7 High-rate event streams
+
+Agent never discovers first-party events by inspecting rendered state. Key/button/touch/scroll/focus
+and lifecycle events are emitted directly. Dense ordered streams such as pointer motion, audio timing
+or fine telemetry may be losslessly batched for I/O efficiency.
+
+A batch artifact contains each original item with producer sequence, monotonic timestamp, event type
+and payload. The enclosing EventEnvelope carries the batch ArtifactId and sequence range. Agent can
+replay every original item; batching is not semantic sampling or loss.
 
 ## 6. Protocol and IPC
 
