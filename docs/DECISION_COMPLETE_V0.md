@@ -1528,3 +1528,395 @@ If active docs appear to conflict for v0 implementation mechanics:
 
 An implementation agent does not resolve a real contradiction itself. It reports the conflicting
 clauses and waits for a documentation fix.
+
+
+---
+
+## 40. Package persistence scopes
+
+Package realization has exactly three scopes:
+
+```text
+execution   ephemeral realization for one Execution/Activity
+user        persistent package for one user
+system      persistent package/service/configuration for the machine
+```
+
+Default interpretation:
+
+- "run/use X" => execution;
+- "install X" with no scope => user;
+- "install X system-wide", service enablement, driver/kernel/network/security changes => system.
+
+User profile path:
+
+```text
+/nix/var/nix/profiles/per-user/<user>/omnis
+```
+
+Manager operates it through Nix profile APIs and records profile generation/resource relations in the
+graph. It does not mutate the user's unrelated default Nix profile.
+
+System package persistence is emitted through `environment.systemPackages` in generated
+`/etc/omnis/managed.nix`.
+
+Execution scope creates/realizes the closure and supplies it to the Execution environment without
+adding a persistent profile root after the Activity finishes unless another graph root references it.
+
+---
+
+## 41. Nix update, generation and GC policy
+
+No automatic upstream update exists in v0.
+
+`omnis system update` performs an explicit candidate update of the pinned OmnisOS/nixpkgs inputs,
+shows source/closure/semantic diff, builds, validates and activates using the normal generation path.
+
+Successful system generations retained as GC roots: newest 10 plus current, even if older.
+Failed candidate generations/artifacts retained 7 days.
+
+Nix GC timer: Sunday 05:17 local time.
+
+Before GC:
+
+1. collect active system generation roots;
+2. newest 10 successful rollback roots;
+3. all Omnis-managed user profile roots;
+4. active/candidate execution roots;
+5. model/artifact store paths referenced by current Manager graph state;
+6. call Nix GC.
+
+Manager emits planned deletion set before GC and resulting deletion event after GC.
+
+---
+
+## 42. Inference gateway and universal model-event interception
+
+`omnis-managerd` exposes a loopback-only inference gateway:
+
+```text
+127.0.0.1:7331
+[::1]:7331
+```
+
+It serves:
+
+- OpenAI-compatible HTTP endpoints under `/v1/*`;
+- Anthropic-compatible endpoints under `/anthropic/v1/*`.
+
+It never listens externally in v0.
+
+Every gateway request is processed in this order:
+
+1. authenticate local execution identity/HandleId;
+2. parse provider-compatible request;
+3. create `omnis.event.inference.request` with metadata + protected ArtifactRef for request body;
+4. ask Agent context service for injection material when the calling Execution is attached to an
+   Omnis Worker/Activity and injection is enabled;
+5. inject context using §43;
+6. resolve concrete model/provider binding through Manager;
+7. execute upstream request using protected provider credential;
+8. stream response to caller while recording protected response artifact;
+9. enqueue `omnis.event.inference.response` or failure event;
+10. update invocation cost/token/latency facts.
+
+Provider request bodies and responses are never written inline to ordinary logs.
+
+External harness adapters set their supported provider base URL/environment to this gateway. A
+built-in harness binding that can route through this gateway must do so; direct provider access is
+not allowed for that binding.
+
+If a harness cannot be routed or hooked, its binding is marked
+`memory_coverage = process_only`, not `full`.
+
+---
+
+## 43. Context injection into external harnesses
+
+Coverage tiers are exact:
+
+```text
+full          native pre-model hook + inference gateway
+gateway       inference gateway only
+hook          native harness hook only
+process_only  process/PTY/tool events only
+```
+
+Manager exposes this tier in Binding metadata.
+
+Injection precedence:
+
+1. harness-native context/pre-prompt hook when the pinned harness version supports one;
+2. otherwise inference-gateway injection.
+
+Gateway injection rules:
+
+- OpenAI chat-compatible request: prepend one system/developer message named logically
+  `omnis_context` after provider-required system messages and before user conversation;
+- Anthropic-compatible request: append an `<omnis-context>...</omnis-context>` block to the system
+  field;
+- never rewrite tool results or user content;
+- inject one context capsule per model request;
+- max injected text = min(25% input budget, 16384 tokens);
+- include stable NodeId/EventId citations inside the capsule serialization;
+- omit protected material disallowed for the resolved provider.
+
+The Agent context service returns an empty capsule when no relevant memory is activated; Manager does
+not manufacture filler context.
+
+Built-in Claude Code, Codex and OpenCode adapters must implement the highest coverage tier supported
+by their pinned versions. Their adapter tests assert the tier; implementers do not choose a weaker
+tier for convenience.
+
+---
+
+## 44. Desktop compatibility services
+
+OmnisControl owns compatibility bridges required by ordinary Linux desktop applications rather than
+requiring a second desktop shell.
+
+### 44.1 XDG portals
+
+OmnisOS runs `xdg-desktop-portal`.
+OmnisControl ships `xdg-desktop-portal-omnis`.
+
+v0 portal interfaces:
+
+```text
+OpenURI
+FileChooser
+Screenshot
+ScreenCast
+Settings
+Inhibit
+GlobalShortcuts
+```
+
+Behavior:
+
+- OpenURI -> Manager/Control unified resolver;
+- FileChooser -> Control resource/file picker backed by filesystem + graph;
+- Screenshot -> Control compositor render capture;
+- ScreenCast -> Control compositor DMA-BUF/PipeWire stream;
+- Settings -> Control theme/appearance values;
+- Inhibit -> graph-visible inhibition resource;
+- GlobalShortcuts -> Control input binding service.
+
+Unsupported portal interfaces return the standard NotImplemented/Unavailable response; do not launch
+another desktop portal backend automatically.
+
+### 44.2 clipboard/drag-drop
+
+Implement Wayland data-device and primary-selection protocols.
+
+Clipboard history is **off by default**.
+Clipboard contents are events only when the user/Agent performs a semantic paste/copy operation inside
+first-party Control; passive clipboard bytes are not persisted to worldline.
+
+Protected values with `control-hidden` or `execution-handle-only` cannot be put on clipboard.
+
+### 44.3 notifications
+
+Control provides `org.freedesktop.Notifications` on the user D-Bus.
+
+A notification becomes a presentation graph node + Agent event with app/resource identity, summary,
+body, actions and lifecycle. It is shown in the current workspace as a non-modal overlay for 5
+seconds unless urgency=critical, which remains until dismissed/actioned.
+
+Maximum visible simultaneous notifications: 3; additional notifications queue FIFO.
+Notification history persists as events, not as a separate notification database.
+
+### 44.4 status/tray
+
+Implement StatusNotifierWatcher/StatusNotifierItem bridge.
+Tray items are graph resources materialized in a compact Control region only when at least one item
+exists. There is no permanent taskbar solely for tray hosting.
+
+---
+
+## 45. Audio, media and screen streams
+
+PipeWire is the v0 audio/video stream substrate.
+
+OmnisControl/Manager bind:
+
+- default audio sink/source;
+- application streams;
+- ScreenCast portal streams;
+- camera/microphone resources.
+
+Wire audio/media bytes do not travel through Cap'n Proto; graph stores stream/resource identity and
+PipeWire node identifiers as realizations.
+
+Agent receives lifecycle/semantic stream events, not every PCM/video frame by default.
+If a Worker explicitly requests raw media cognition, Manager binds the stream to the selected
+vision/audio model capability and resulting observations enter the normal event path.
+
+---
+
+## 46. Input/gesture contract
+
+### 46.1 2D
+
+```text
+left click             select/focus
+shift+left click       toggle selection membership
+left drag node         pin/move selected semantic/control node
+left drag background   pan
+wheel/trackpad scroll  pan
+ctrl+wheel/pinch       zoom around pointer
+double click node      focus + semantic inspect level
+right click            context actions from graph capabilities
+Esc                    back one focus/navigation level
+Alt+Left/Right         global back/forward
+Ctrl+L                 focus primary input/address surface
+Ctrl+Space             focus primary input/semantic command surface
+```
+
+### 46.2 3D
+
+```text
+left click             select/focus
+left drag selected     move/pin in current layout plane/constraint
+right drag             orbit camera
+middle drag            pan camera
+wheel/pinch            dolly/zoom
+double click node      fly/focus on node
+F                      frame current selection
+2                      switch same workspace to 2D
+3                      switch same workspace to 3D
+```
+
+Touch maps one-finger to select/pan contextually, two-finger to pan/zoom, and three-finger horizontal
+swipe to back/forward.
+
+All semantic gestures emit Control events.
+
+---
+
+## 47. Appearance and theme
+
+Theme format is VS Code color-theme JSON, preserving the accepted historical decision where compatible
+with the reset.
+
+Built-in default theme name: `Omnis Dark`.
+
+Default appearance:
+
+```text
+dark background
+font UI: system sans through fontconfig/cosmic-text
+font monospace: system monospace through fontconfig/cosmic-text
+base UI scale: compositor output scale
+animation duration: 180 ms
+reduced-motion: follows portal/system setting; when true durations = 0
+corner radius: 8 logical px
+spacing unit: 4 logical px
+```
+
+Do not hard-code font family names; fontconfig result is deterministic for installed system
+configuration.
+
+Theme changes are presentation graph state and apply live to terminal/graph/Control chrome, not to
+native client-rendered surfaces.
+
+---
+
+## 48. Native surface policy
+
+Wayland/XWayland clients run unmodified.
+
+Toplevel behavior:
+
+- client-side decorations are preserved;
+- if client supplies no decorations and xdg-decoration negotiates server-side, Control draws a
+  minimal title/control region;
+- native surface gets one stable graph semantic identity for its lifetime;
+- closing the toplevel ends its active validity but does not delete historical worldline identity;
+- focus follows explicit user/Agent Control focus, never pointer-enter alone;
+- new application surface is inserted beside the currently focused view in 2D and into the focused
+  workspace cluster in 3D;
+- fullscreen maps to the current output but remains graph-addressable;
+- popups/subsurfaces remain owned by the parent NativeSurface.
+
+Direct scan-out is enabled only when Smithay reports eligibility and no Control overlay/interception
+requires composition.
+
+---
+
+## 49. Browser resource behavior
+
+Default browser resource is the user's `xdg-settings get default-web-browser` resolution if that
+desktop entry exists; otherwise the first Manager binding for `browser.navigate` by normal §14
+resolution.
+
+URL-like input from §22 opens in the currently focused browser resource if one exists; otherwise
+Manager launches the default browser binding.
+
+Structured browser control preference is fixed:
+
+1. CDP when the selected browser advertises it;
+2. WebDriver BiDi;
+3. accessibility tree;
+4. delegated native surface + synthetic input only for operations with no structured binding.
+
+Synthetic input against browser content must record that lower-confidence binding in provenance.
+
+---
+
+## 50. Configuration/settings mutation
+
+There is no separate privileged Settings application.
+
+All settings are one of:
+
+- persistent NixOS options -> OmnisOS generation path;
+- Manager resource/binding preferences -> Manager-owned graph/config;
+- Agent cognitive/user preference memory -> Agent-owned graph;
+- Control presentation preference -> Control-owned graph.
+
+Control can materialize a settings view from those graph schemas.
+CLI uses the same owning RPC.
+
+A settings mutation is never written directly to a component's private file when an owning graph/Nix
+contract exists.
+
+---
+
+## 51. Shutdown and suspend
+
+System shutdown:
+
+1. systemd stops user Control;
+2. Control commits pending presentation mutations and closes native surfaces;
+3. Agent checkpoints active durable workers and worldline transaction;
+4. Manager marks/cancels non-persistent local executions according to binding lifecycle;
+5. osd stops incremental observers;
+6. graphd drains writer queue and checkpoints WAL;
+7. systemd continues shutdown.
+
+Maximum graceful stop timeout per Omnis service: 15 seconds; then systemd kill policy applies.
+
+Suspend:
+
+- Control stops rendering and records suspend event;
+- Agent receives suspend event and stops starting new local work;
+- Manager pauses/cancels executions only if their binding declares suspend-sensitive;
+- on resume OS performs process/device/network reconciliation before publishing resume-complete event.
+
+---
+
+## 52. Specification completeness invariant
+
+For every observable v0 behavior, one of these must exist before implementation:
+
+- an exact clause in active normative docs;
+- an exact protocol schema;
+- an exact configuration default;
+- an exact acceptance test.
+
+If none exists, the correct implementation action is **SpecificationDefect**, not an implementation
+choice.
+
+The umbrella CLI command `omnis spec check` will eventually automate this mapping, but its absence
+does not weaken the rule.
