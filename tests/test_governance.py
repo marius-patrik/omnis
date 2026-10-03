@@ -82,45 +82,62 @@ def test_agents_documents_every_declared_area():
         assert f"area:{name}" in content, f"AGENTS.md must document the 'area:{name}' scope"
 
 
-def test_architecture_is_the_only_normative_document():
-    """Vision and architecture are one file; the transcript specifies nothing."""
+
+def test_architecture_is_the_normative_root():
+    """Architecture is the normative root and the transcript remains source material."""
     architecture = _read("ARCHITECTURE.md")
     transcript = _read("notes", "transcript.md")
 
     assert "Status: NORMATIVE" in architecture
-    assert "only normative document" in architecture
+    for term in ("OmnisOS", "OmnisManager", "OmnisAgent", "OmnisControl"):
+        assert term in architecture, f"architecture must define {term}"
+    assert "shared multidimensional graph" in architecture.lower()
 
     assert "SOURCE MATERIAL" in transcript, "the transcript must declare that it is not a spec"
     assert "ARCHITECTURE.md" in transcript, "the transcript must point at the normative document"
     assert not os.path.exists(
         os.path.join(REPO_ROOT, "VISION.md")
-    ), "VISION.md was merged into ARCHITECTURE.md; a second one would reintroduce the split"
+    ), "VISION.md would reintroduce a competing normative vision"
 
 
-def test_architecture_states_its_principles_with_enforcement():
-    """A principle nobody enforces erodes; the table must say what enforces each one."""
+def test_architecture_states_implementation_invariants():
+    """The architecture must end in explicit implementation-checkable invariants."""
     architecture = _read("ARCHITECTURE.md")
-    principles = set(re.findall(r"^\| (P\d+) \|", architecture, re.MULTILINE))
-    assert len(principles) >= 8, f"expected the principle table, found {sorted(principles)}"
-    section = architecture[architecture.index("## 2. Principles") : architecture.index("## 3.")]
-    for line in section.splitlines():
-        if re.match(r"^\| P\d+ \|", line):
-            assert line.count("|") >= 4, f"principle has no enforcement column: {line[:60]}"
+    assert "## 16. Implementation invariants" in architecture
+    section = architecture[
+        architecture.index("## 16. Implementation invariants") : architecture.index("## 17.")
+    ]
+    invariants = re.findall(r"^\d+\. \*\*", section, re.MULTILINE)
+    assert len(invariants) >= 15, f"expected substantial hard invariants, found {len(invariants)}"
+    for phrase in (
+        "One stable identity space",
+        "shared multidimensional current-state graph",
+        "OmnisAgent owns the immutable causal worldline",
+        "Nix evaluation/build remains deterministic",
+    ):
+        assert phrase in section
 
 
-def test_architecture_lists_open_decisions_with_identifiers():
-    """Every open decision is addressable, so an issue and an ADR can reference it."""
+def test_architecture_defines_graph_worldline_and_authority_boundaries():
+    """The reset must explicitly separate current state, causal history, and four authorities."""
     architecture = _read("ARCHITECTURE.md")
-    identifiers = set(re.findall(r"\bD([1-9]\d*)\b", architecture))
-    assert {"1", "2", "3", "4", "5", "6", "7", "8"} <= identifiers
+    for phrase in (
+        "worldline = historical causal truth",
+        "shared graph = current structured state",
+        "OmnisOS",
+        "OmnisManager",
+        "OmnisAgent",
+        "OmnisControl",
+        "write ownership",
+    ):
+        assert phrase.lower() in architecture.lower()
 
 
-def test_roadmap_epics_are_addressable():
-    """Every epic has an `E<n>` identifier that issues and gates can cite."""
+def test_roadmap_phases_are_addressable():
+    """The implementation roadmap must expose a concrete dependency-ordered phase sequence."""
     roadmap = _read("ROADMAP.md")
-    epics = set(re.findall(r"\bE(\d+)\b", roadmap))
-    assert len(epics) >= 8, f"expected at least 8 epics, found {sorted(epics)}"
-
+    phases = set(re.findall(r"^## Phase (\d+) ", roadmap, re.MULTILINE))
+    assert {str(i) for i in range(0, 11)} <= phases, f"missing roadmap phases: {sorted(phases)}"
 
 def test_transcript_declares_its_provenance():
     """Source material must say where it came from and how completely it was captured."""
@@ -153,18 +170,20 @@ def test_transcript_carries_review_notes():
     assert "ARCHITECTURE.md" in transcript, "the transcript must defer to the normative document"
 
 
-def test_reference_declaration_exists_and_is_documented():
-    """The declaration is the product's central artifact; a stale example is worse than none."""
+
+def test_reference_declaration_exists_and_matches_new_component_split():
+    """The illustrative declaration must demonstrate the four-component Omnis system."""
     declaration = _read("examples", "omnis.nix")
     architecture = _read("ARCHITECTURE.md")
 
-    assert "examples/omnis.nix" in architecture, "the architecture must point at the declaration"
-    for section in ("hosts", "placement", "subsystems", "environments", "presentation", "secrets"):
+    assert "examples/omnis.nix" in architecture
+    for section in ("graph", "manager", "agent", "control", "security"):
         assert (
             f"{section} = " in declaration or f"{section} =" in declaration
         ), f"the reference declaration must show `{section}`"
-    assert "keychain:" in declaration, "secrets must appear as references, never values"
-
+    assert "protectedHandles.enable = true" in declaration
+    assert "worldline.storage" in declaration
+    assert "defaultMode" in declaration
 
 @pytest.mark.parametrize(
     "document",

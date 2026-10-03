@@ -345,7 +345,7 @@ boundaries, mount/network namespaces, device isolation, and credential brokers.
 
 The Agent may reason freely; execution receives only the capabilities physically granted to it.
 
-### 5.6 Persistent transitions
+### 5.6 Reference configuration\n\nThe umbrella repository carries an illustrative OmnisOS configuration at [`examples/omnis.nix`](examples/omnis.nix). The exact option paths may evolve until the OmnisOS module schema is implemented; the four-authority split and persistent/transient boundary are normative.\n\n### 5.7 Persistent transitions
 
 Persistent structural changes use candidate system generations:
 

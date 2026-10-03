@@ -6,19 +6,18 @@
     "display_name": "Omnis",
     "project_title": "Omnis",
     "agent_slug": "omnis-agent",
-    "description": "Omnis - universal developer workspace and local-first personal data OS. Multi-process Rust daemon, Tauri shell, dual renderer (DOM + terminal cell-grid), multi-agent harness orchestration.",
+    "description": "Omnis — graph-native agentic operating system built on Linux and Nix, with OmnisOS, OmnisManager, OmnisAgent, OmnisControl, and one shared multidimensional graph.",
     "topics": [
-      "agentic-coding",
-      "agentic-development",
+      "agentic-os",
       "ai-agents",
-      "autonomous-agents",
-      "automation",
-      "developer-tools",
+      "nixos",
+      "nix",
+      "linux",
+      "knowledge-graph",
+      "wayland",
       "local-first",
-      "rust",
-      "tauri",
-      "terminal-ui",
-      "workspace"
+      "autonomous-agents",
+      "developer-tools"
     ]
   },
   "upstream": {
@@ -50,7 +49,7 @@
     "$comment": "Omnis's own domains. Declaration order is match order, so specific areas come before general ones.",
     "$default": "core",
     "term": {
-      "description": "Terminal cell-grid renderer, ANSI/TrueColor pipeline, PTY integration",
+      "description": "OmnisControl shell, PTY, terminal/text projections and cell-grid compatibility",
       "keywords": [
         "terminal",
         "cell-grid",
@@ -64,7 +63,7 @@
       ]
     },
     "browser": {
-      "description": "Embedded browser engine, CDP bridge, semantic and pixel render modes",
+      "description": "OmnisControl web/navigation surfaces and browser protocol/native bindings",
       "keywords": [
         "browser",
         "chromium",
@@ -76,7 +75,7 @@
       ]
     },
     "agents": {
-      "description": "Harness orchestration, provider adapters, personas, approvals",
+      "description": "OmnisAgent cognition plus Manager-provided model and external agent-harness bindings",
       "keywords": [
         "agent",
         "harness",
@@ -88,7 +87,7 @@
       ]
     },
     "ext": {
-      "description": "Extension host, plugin API, compatibility shims",
+      "description": "OmnisManager foreign capabilities, arbitrary bindings, MCP and protocol integration",
       "keywords": [
         "extension",
         "plugin",
@@ -98,7 +97,7 @@
       ]
     },
     "data": {
-      "description": "Schema, persistence, migrations, sync, local-first storage",
+      "description": "Shared graph, OmnisAgent worldline/memory, artifacts, persistence and indexes",
       "keywords": [
         "schema",
         "migration",
@@ -110,7 +109,7 @@
       ]
     },
     "ui": {
-      "description": "DOM renderer, layout topology, theming, profiles, settings surfaces",
+      "description": "OmnisControl graph desktop, 2D/3D projection, rendering, interaction and native surfaces",
       "keywords": [
         "ui",
         "gui",
@@ -148,7 +147,7 @@
       ]
     },
     "core": {
-      "description": "Microkernel, process topology, IPC/substrate bus, daemon lifecycle, config",
+      "description": "OmnisOS, OmnisManager, shared graph/protocol substrate, boot, generations and cross-component integration",
       "keywords": [
         "daemon",
         "omnisd",
