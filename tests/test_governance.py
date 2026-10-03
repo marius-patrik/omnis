@@ -171,18 +171,25 @@ def test_transcript_carries_review_notes():
 
 
 def test_reference_declaration_exists_and_matches_new_component_split():
-    """The illustrative declaration must demonstrate the four-component Omnis system."""
+    """The v0 declaration must demonstrate the frozen Omnis module families."""
     declaration = _read("examples", "omnis.nix")
     architecture = _read("ARCHITECTURE.md")
 
     assert "examples/omnis.nix" in architecture
-    for section in ("graph", "manager", "agent", "control", "security"):
-        assert (
-            f"{section} = " in declaration or f"{section} =" in declaration
-        ), f"the reference declaration must show `{section}`"
-    assert "protectedHandles.enable = true" in declaration
-    assert "worldline.storage" in declaration
-    assert "defaultMode" in declaration
+    for token in (
+        "graph = {",
+        "manager = {",
+        "agent.users.alice",
+        "control.users.alice",
+        "security = {",
+        'dataDir = "/var/lib/omnis/graph"',
+        'nixControlSocket = "/run/omnis/nix-control.sock"',
+        'vectorIndex = "sqlite-vec"',
+        'defaultMode = "2d"',
+        "quic.enable = true",
+        "systemdCredentials.enable = true",
+    ):
+        assert token in declaration, f"reference declaration must show {token!r}"
 
 
 @pytest.mark.parametrize(
