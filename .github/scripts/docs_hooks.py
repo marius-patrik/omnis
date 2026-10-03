@@ -1,14 +1,12 @@
 """ProperDocs hooks that publish the repository's canonical markdown without duplicating it.
 
-`AGENTS.md` rule 2 forbids storing a static documentation mirror and forbids a manually maintained
-index. The canonical documents live at the repository root (`README.md`, `ARCHITECTURE.md`,
-`ROADMAP.md`, `AGENTS.md`) and under `notes/`, with one file per decision in
-`notes/adr/`. Committing copies of them under `docs/` would create two sources of truth that drift.
+`AGENTS.md` forbids static mirrors of canonical root documents and manually maintained ADR indexes.
+The root documents remain canonical at their repository paths, while `docs/` contains genuine
+supporting architecture specifications rather than copies.
 
 These hooks therefore:
 
-- map each canonical file to a virtual page at build time, so the site is generated from the
-  originals and `docs/` stays empty of duplicated prose;
+- map each canonical root/note file to a virtual page at build time without duplicating it;
 - discover `notes/adr/*.md`, generate the decision index table from each record's title and status,
   and inject the navigation entries - so adding an ADR needs no configuration change;
 - rewrite links written for GitHub (``ARCHITECTURE.md``) to their site paths, so

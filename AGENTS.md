@@ -174,13 +174,13 @@ Repository area labels are delivery metadata retained for the current automation
 - **Format**: `<type>(<scope>): <description>` (e.g. `feat(term): add cell matrix buffer`).
 - **Allowed Types**: `feat`, `fix` (mapped from `bug`), `chore`, `docs`, `refactor`, `test`, `ci`.
 - **Allowed Area Scopes & Labels**:
-  - `area:core`: Microkernel, process topology, IPC/substrate bus, daemon lifecycle, config.
-  - `area:ui`: DOM renderer, layout topology, theming, profiles, settings surfaces.
-  - `area:term`: Terminal cell-grid renderer, ANSI/TrueColor pipeline, PTY integration.
-  - `area:agents`: Harness orchestration, provider adapters, personas, approvals.
-  - `area:browser`: Embedded browser engine, CDP bridge, semantic and pixel render modes.
-  - `area:data`: Schema, persistence, migrations, sync, local-first storage.
-  - `area:ext`: Extension host, plugin API, compatibility shims.
+  - `area:core`: OmnisOS, OmnisManager, shared graph/protocol substrate, boot, generations, and cross-component integration.
+  - `area:ui`: OmnisControl graph desktop, 2D/3D projections, rendering, interaction, layout, and native surfaces.
+  - `area:term`: OmnisControl shell, PTY, terminal/text projections, and cell-grid compatibility.
+  - `area:agents`: OmnisAgent cognition plus Manager-provided models, inference, and external agent-harness bindings.
+  - `area:browser`: OmnisControl web/navigation projections and browser protocol/native bindings.
+  - `area:data`: Shared graph, OmnisAgent worldline/memory, artifacts, persistence, and indexes.
+  - `area:ext`: OmnisManager foreign capabilities, arbitrary bindings, MCP, and protocol integration.
   - `area:ci`: GitHub Actions workflows, containers, runner scripts, repository automation.
   - `area:docs`: Documentation, ProperDocs configuration, architecture notes.
 

@@ -99,13 +99,16 @@
     "data": {
       "description": "Shared graph, OmnisAgent worldline/memory, artifacts, persistence and indexes",
       "keywords": [
-        "schema",
-        "migration",
-        "persistence",
+        "graph",
+        "worldline",
+        "event",
+        "memory",
+        "episode",
+        "assertion",
+        "artifact",
+        "index",
         "storage",
-        "database",
-        "sync",
-        "pglite"
+        "provenance"
       ]
     },
     "ui": {
@@ -149,18 +152,19 @@
     "core": {
       "description": "OmnisOS, OmnisManager, shared graph/protocol substrate, boot, generations and cross-component integration",
       "keywords": [
-        "daemon",
-        "omnisd",
-        "kernel",
-        "microkernel",
-        "ipc",
-        "bus",
-        "substrate",
-        "socket",
-        "process",
-        "topology",
-        "config",
-        "capability"
+        "omnisos",
+        "omnis-manager",
+        "nix",
+        "nixos",
+        "generation",
+        "graph",
+        "protocol",
+        "boot",
+        "system",
+        "resource",
+        "capability",
+        "binding",
+        "placement"
       ]
     }
   },
