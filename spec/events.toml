@@ -69,3 +69,6 @@ version = 1
 "omnis.event.control.notification.dismissed" = "notificationEvent"
 "omnis.event.timer.minute" = "timer"
 "omnis.event.timer.hour" = "timer"
+
+"omnis.event.manager.host.paired" = "identityOnly"
+"omnis.event.manager.host.unpaired" = "identityOnly"

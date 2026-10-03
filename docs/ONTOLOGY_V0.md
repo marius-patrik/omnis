@@ -310,6 +310,8 @@ omnis.capability.graph.query
 omnis.capability.control.materialize
 omnis.capability.control.mutate
 omnis.capability.ingest
+omnis.capability.host.pair
+omnis.capability.host.unpair
 ```
 
 A provider-specific capability does not replace these semantic names; it binds to them.
@@ -401,6 +403,10 @@ omnis.event.inference.failed
 omnis.event.manager.credential.lease.created
 omnis.event.manager.credential.lease.expired
   handle, lease, execution
+
+omnis.event.manager.host.paired
+omnis.event.manager.host.unpaired
+  identity
 ```
 
 ### 5.4 Agent
