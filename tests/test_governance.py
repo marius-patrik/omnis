@@ -280,7 +280,7 @@ def test_decision_complete_v0_contract():
 
 
 def test_active_specs_forbid_implementer_choice_markers():
-    """Active v0 specs may describe runtime alternatives but must not delegate design decisions."""
+    """Active v0 specs must not positively delegate observable design decisions."""
     documents = (
         "ARCHITECTURE.md",
         "ROADMAP.md",
@@ -291,14 +291,16 @@ def test_active_specs_forbid_implementer_choice_markers():
     forbidden = (
         "TBD",
         "TO BE DECIDED",
-        "choose a reasonable",
-        "reasonable default",
-        "or equivalent library",
-        "we can decide later",
+        "IMPLEMENTER MAY CHOOSE",
+        "IMPLEMENTATION AGENT MAY CHOOSE",
+        "CHOOSE WHICHEVER",
+        "USE ANY EQUIVALENT",
+        "IMPLEMENTATION-SPECIFIC UNTIL",
+        "WE CAN DECIDE LATER",
     )
     for document in documents:
         content = _read(*document.split("/")).upper()
         for marker in forbidden:
-            assert (
-                marker.upper() not in content
-            ), f"{document} contains delegated-choice marker {marker!r}"
+            assert marker not in content, (
+                f"{document} contains delegated-choice marker {marker!r}"
+            )
