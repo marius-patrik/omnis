@@ -315,7 +315,9 @@ ordinary downstream NixOS module, especially:</p>
 </code></pre></div>
 <p>OmnisControl is the default local interactive environment. A headless target may omit Control while
 retaining OS, Manager, Agent, graph, and remote-control capability.</p>
-<p>systemd is the v0 service supervisor and transient-scope executor. It is a physical mechanism, not a
+<p>systemd is the v0 service supervisor and transient-service execution mechanism. <code>omnis-osd</code> is the
+only Omnis component allowed to create restricted <code>omnis-exec-*.service</code> units. It is a physical
+mechanism, not a
 second semantic system model; desired service semantics remain represented in NixOS + graph.</p>
 <hr />
 <h2 id="3-graph-publication">3. Graph publication<a class="headerlink" href="#3-graph-publication" title="Permanent link">&para;</a></h2>
@@ -516,6 +518,20 @@ incremental event handling.</p>
 <p>On graph corruption or unrecoverable startup failure, OmnisOS enters <code>omnis-recovery.target</code> with a
 conventional TTY, Nix generation rollback and graph restore/rebuild tools. No model is required for
 boot, recovery or enforcement.</p>
+<hr />
+<h2 id="15-physical-launch-api">15. Physical launch API<a class="headerlink" href="#15-physical-launch-api" title="Permanent link">&para;</a></h2>
+<p>Manager owns semantic Execution resolution. OmnisOS owns the physical launch.</p>
+<p><code>omnis-osd</code> exposes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>execution_envelope.create/destroy
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>physical_process.launch
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>physical_process.get
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>physical_process.signal
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>physical_process.stop
+</code></pre></div>
+<p>Launch creates one <code>omnis-exec-&lt;ExecutionId&gt;.service</code> through systemd with the exact sandbox
+properties in <code>DECISION_COMPLETE_V0.md §§53-55</code>. osd creates pipes/PTY before unit start and returns
+typed stream capabilities. No arbitrary string shell command is accepted: executable, argv,
+environment and working directory are separate typed fields.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../GRAPH/">
@@ -568,6 +584,8 @@ boot, recovery or enforcement.</p>
           <li><a href="#13-non-goals">13. Non-goals</a>
           </li>
           <li><a href="#14-v0-process-and-persistence-binding">14. v0 process and persistence binding</a>
+          </li>
+          <li><a href="#15-physical-launch-api">15. Physical launch API</a>
           </li>
         </ul>
       </aside>

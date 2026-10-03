@@ -605,14 +605,15 @@ to the patched C++ <code>nix-daemon</code> over <code>/run/omnis/nix-control.soc
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>discovery     deterministic enrichment and provenance
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>resolver      hard filtering + inspectable stable scoring
 <a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>placement     host/runtime/device choice
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>executor      systemd transient-scope lifecycle
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>executor      semantic lifecycle; delegates physical launch to OmnisOS
 <a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>nix_bridge    Nix control/observer client
 <a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>secrets       protected HandleId broker
 <a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>adapters      subprocess/native binding providers
 </code></pre></div>
-<p>Local executions launch as systemd transient scopes under the Omnis cgroup hierarchy. ExecutionId is
-the idempotency key and is embedded in the unit/scope metadata so restart reconciliation can discover
-already-running work instead of duplicating it.</p>
+<p>Local executions are physically launched by OmnisOS through the typed PhysicalLaunch API.
+ExecutionId is the idempotency key and is embedded in the transient service metadata so restart
+reconciliation discovers already-running work instead of duplicating it. Manager never calls
+systemd's unit-management API directly.</p>
 <p>Third-party Manager adapters are subprocesses speaking the typed Cap'n Proto adapter protocol. They
 are not arbitrary shared libraries loaded into the privileged daemon.</p>
 <h2 id="18-v0-binding-providers">18. v0 binding providers<a class="headerlink" href="#18-v0-binding-providers" title="Permanent link">&para;</a></h2>
