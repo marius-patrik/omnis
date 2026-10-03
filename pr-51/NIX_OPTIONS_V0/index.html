@@ -1,0 +1,757 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OmnisOS v0 NixOS Option Contract · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnisos-v0-nixos-option-contract">OmnisOS v0 NixOS Option Contract<a class="headerlink" href="#omnisos-v0-nixos-option-contract" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> These are the exact public v0 NixOS option paths, types and defaults.
+Implementers must not rename, duplicate or invent competing configuration surfaces.</p>
+<p>Unless stated otherwise, options are declared under <code>options.omnis</code>.</p>
+<h2 id="1-root">1. Root<a class="headerlink" href="#1-root" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnis.enable</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>When false, no Omnis service/module side effect is enabled.</p>
+<h2 id="2-graph">2. Graph<a class="headerlink" href="#2-graph" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnis.graph.enable</code></td>
+<td>bool</td>
+<td><code>config.omnis.enable</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.dataDir</code></td>
+<td>path</td>
+<td><code>/var/lib/omnis/graph</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.socket</code></td>
+<td>str</td>
+<td><code>/run/omnis/graph.sock</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.writerQueue</code></td>
+<td>unsigned int</td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.inlinePayloadMax</code></td>
+<td>unsigned int</td>
+<td><code>65536</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.query.defaultLimit</code></td>
+<td>unsigned int</td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.query.hardLimit</code></td>
+<td>unsigned int</td>
+<td><code>10000</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.query.maxDepth</code></td>
+<td>unsigned int</td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.casDir</code></td>
+<td>path</td>
+<td><code>/var/lib/omnis/cas/blake3</code></td>
+</tr>
+<tr>
+<td><code>omnis.graph.backupDir</code></td>
+<td>path</td>
+<td><code>/var/lib/omnis/backups/graph</code></td>
+</tr>
+</tbody>
+</table>
+<p>SQLite journal/synchronous modes are not public options in v0: WAL/FULL are fixed contracts.</p>
+<h2 id="3-os-observation">3. OS observation<a class="headerlink" href="#3-os-observation" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnis.os.enable</code></td>
+<td>bool</td>
+<td><code>config.omnis.enable</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.socket</code></td>
+<td>str</td>
+<td><code>/run/omnis/os.sock</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.systemd</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.udev</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.rtnetlink</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.processes</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.sessions</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.cgroups</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.os.observe.watchedFileScopes</code></td>
+<td>list of paths</td>
+<td><code>[]</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-manager">4. Manager<a class="headerlink" href="#4-manager" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnis.manager.enable</code></td>
+<td>bool</td>
+<td><code>config.omnis.enable</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.socket</code></td>
+<td>str</td>
+<td><code>/run/omnis/manager.sock</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.nixControlSocket</code></td>
+<td>str</td>
+<td><code>/run/omnis/nix-control.sock</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.discovery.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.discovery.concurrency</code></td>
+<td>unsigned int</td>
+<td><code>16</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.inferenceGateway.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.inferenceGateway.port</code></td>
+<td>port</td>
+<td><code>7331</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.remote.listen</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>omnis.manager.remote.port</code></td>
+<td>port</td>
+<td><code>7443</code></td>
+</tr>
+</tbody>
+</table>
+<p>Provider toggles all default false except exact local-system providers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>omnis.manager.providers.nix.enable = true
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>omnis.manager.providers.cli.enable = true
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>omnis.manager.providers.systemd.enable = true
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>omnis.manager.providers.http.enable = true
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>omnis.manager.providers.mcp.enable = true
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>omnis.manager.providers.models.openaiCompatible.enable = false
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>omnis.manager.providers.models.anthropic.enable = false
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>omnis.manager.providers.models.llamaCpp.enable = false
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>omnis.manager.providers.models.onnx.enable = false
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>omnis.manager.providers.harnesses.claude.enable = false
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>omnis.manager.providers.harnesses.codex.enable = false
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>omnis.manager.providers.harnesses.opencode.enable = false
+</code></pre></div>
+<p>A provider can additionally become available through deterministic discovery even when its built-in
+adapter toggle is false; the toggle controls the first-party adapter, not resource visibility.</p>
+<h2 id="5-agent-users">5. Agent users<a class="headerlink" href="#5-agent-users" title="Permanent link">&para;</a></h2>
+<p><code>omnis.agent.users</code> is an attrsOf submodule keyed by existing NixOS username. No users are generated.</p>
+<p>Per user:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>memory.fts5</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>memory.vectorIndex</code></td>
+<td>enum <code>none|sqlite-vec</code></td>
+<td><code>sqlite-vec</code></td>
+</tr>
+<tr>
+<td><code>models.providers</code></td>
+<td>list of strings</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>retention.modelContextDays</code></td>
+<td>unsigned int</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>retention.modelOutputDays</code></td>
+<td>unsigned int</td>
+<td><code>30</code></td>
+</tr>
+</tbody>
+</table>
+<p>If <code>vectorIndex=sqlite-vec</code> and no <code>model.embed</code> binding exists, the extension/index remains
+available but contains no vectors; retrieval falls back exactly as specified.</p>
+<h2 id="6-control-users">6. Control users<a class="headerlink" href="#6-control-users" title="Permanent link">&para;</a></h2>
+<p><code>omnis.control.users</code> is attrsOf existing username submodule.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>defaultMode</code></td>
+<td>enum <code>2d|3d</code></td>
+<td><code>2d</code></td>
+</tr>
+<tr>
+<td><code>shell</code></td>
+<td>package</td>
+<td>user's login shell package if known, else <code>pkgs.bashInteractive</code></td>
+</tr>
+<tr>
+<td><code>xwayland.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>scrollbackLines</code></td>
+<td>unsigned int</td>
+<td><code>100000</code></td>
+</tr>
+<tr>
+<td><code>theme</code></td>
+<td>str</td>
+<td><code>Omnis Dark</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-hosts">7. Hosts<a class="headerlink" href="#7-hosts" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnis.hosts.nativeRemote.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.hosts.quic.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.hosts.quic.port</code></td>
+<td>port</td>
+<td><code>7443</code></td>
+</tr>
+<tr>
+<td><code>omnis.hosts.peers</code></td>
+<td>attrsOf peer submodule</td>
+<td><code>{}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Peer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>hostId         UUID string, required
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>publicKey      string, required
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>fingerprint    string, required
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>address        string, required
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>grants         list of strings, default []
+</code></pre></div>
+<h2 id="8-security">8. Security<a class="headerlink" href="#8-security" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>omnis.security.protectedHandles.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.systemdCredentials.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.executionIsolation.enable</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.defaultWorkerNetwork</code></td>
+<td>enum <code>deny|user</code></td>
+<td><code>deny</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.selfModification.agentProceduresAutoPromote</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.selfModification.agentConfigAutoPromote</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.selfModification.codeAutoPromote</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>omnis.security.selfModification.systemAutoPromote</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-generated-service-dependencies">9. Generated service dependencies<a class="headerlink" href="#9-generated-service-dependencies" title="Permanent link">&para;</a></h2>
+<p>Exact system ordering:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>omnis-graphd.service
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  after = local-fs.target
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  before = omnis-osd.service omnis-managerd.service
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>omnis-osd.service
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  requires = omnis-graphd.service
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  after = omnis-graphd.service systemd-udevd.service
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>omnis-managerd.service
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  requires = omnis-graphd.service nix-daemon.service
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  after = omnis-graphd.service nix-daemon.service
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>user omnis-agentd.service
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  after = graphical-session-pre.target
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>  wants network-online.target only when a configured binding needs it
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  requires no Control service
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>user omnis-control.service
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>  after = graphical-session-pre.target
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>  requires no Agent service
+</code></pre></div>
+<p>Agent and Control both reconnect indefinitely with the fixed retry schedule; neither creates a hard
+boot dependency on the other.</p>
+<h2 id="10-invalid-combinations">10. Invalid combinations<a class="headerlink" href="#10-invalid-combinations" title="Permanent link">&para;</a></h2>
+<p>Evaluation fails for:</p>
+<ul>
+<li><code>omnis.enable=false</code> with any child <code>enable=true</code>;</li>
+<li>Agent/Control user key that does not exist in <code>users.users</code>;</li>
+<li>remote listen=true while nativeRemote/quic=false;</li>
+<li>security protected handles disabled while any configured provider references a credential handle;</li>
+<li>writerQueue &lt; 64;</li>
+<li>graph hardLimit &lt; defaultLimit;</li>
+<li>port collisions among configured Omnis listeners.</li>
+</ul>
+<p>These are NixOS module assertions, not runtime warnings.</p>
+        </article>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/NIX_OPTIONS_V0.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-root">1. Root</a>
+          </li>
+          <li><a href="#2-graph">2. Graph</a>
+          </li>
+          <li><a href="#3-os-observation">3. OS observation</a>
+          </li>
+          <li><a href="#4-manager">4. Manager</a>
+          </li>
+          <li><a href="#5-agent-users">5. Agent users</a>
+          </li>
+          <li><a href="#6-control-users">6. Control users</a>
+          </li>
+          <li><a href="#7-hosts">7. Hosts</a>
+          </li>
+          <li><a href="#8-security">8. Security</a>
+          </li>
+          <li><a href="#9-generated-service-dependencies">9. Generated service dependencies</a>
+          </li>
+          <li><a href="#10-invalid-combinations">10. Invalid combinations</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
