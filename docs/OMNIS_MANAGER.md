@@ -3,7 +3,7 @@
 **Status: normative supporting specification.**
 
 OmnisManager is the resource, capability, binding, execution, and placement authority of Omnis. It
-is initially implemented as a maintained fork/extension of `NixOS/nix`.
+is implemented as a maintained fork/extension of `NixOS/nix` plus the Rust `omnis-managerd` service.
 
 Nix remains a package/build/store system. OmnisManager extends its reach so the same machine can
 reason uniformly about packages, programs, models, agent harnesses, services, devices, remote hosts,
@@ -158,7 +158,7 @@ Callers can request a specific binding when implementation identity is semantica
 
 ## 6. Nix extensions
 
-The maintained Nix fork should expose structured APIs for:
+The maintained Nix fork exposes structured observer/query APIs for:
 
 - derivation/resource identity mapping;
 - why a package/store path exists;
@@ -170,9 +170,15 @@ The maintained Nix fork should expose structured APIs for:
 - resource metadata discovery;
 - execution environment realization.
 
-Omnis-specific semantic metadata should live alongside, not corrupt, core derivation semantics.
+Omnis-specific semantic metadata lives alongside, not inside, core derivation semantics. The normal
+Nix daemon/client worker protocol remains compatible. Omnis-specific control and observation use the
+separate `/run/omnis/nix-control.sock` Cap'n Proto endpoint.
 
-Upstream-compatible behavior remains the default.
+The fork patches the current upstream evaluator/store boundaries rather than creating another Nix
+implementation. Required hook points include `EvalState::forceValue` in `src/libexpr`, derivation
+creation, `src/libstore` realization/substitution/closure operations, build lifecycle code under
+`src/libstore/build`, and daemon-operation correlation in `src/libstore/daemon.cc`. Upstream-compatible
+behavior remains the default.
 
 ---
 
@@ -330,7 +336,8 @@ resource use
 external effects
 ```
 
-Execution lifecycle events are sent directly to Agent and reflected in the graph.
+Execution lifecycle state is reflected in the graph and durably enqueued through graphd's event
+outbox for Agent delivery.
 
 ---
 
@@ -378,7 +385,7 @@ resolution error with explanation, not silent fallback.
 
 ## 15. Manager CLI/API
 
-The initial Manager surface should support at least:
+The v0 Manager CLI surface supports:
 
 ```text
 omnis manager resource list/inspect
@@ -409,3 +416,62 @@ Manager does not:
 - replace Nix derivation semantics with learned resolution;
 - own OS-level enforcement;
 - own presentation.
+---
+
+## 17. v0 daemon architecture
+
+`omnis-managerd` is a Rust 2024/Tokio process. It owns semantic resource/capability state and talks
+to the patched C++ `nix-daemon` over `/run/omnis/nix-control.sock`.
+
+Internal modules:
+
+```text
+registry      graph-backed resources/capabilities/bindings
+discovery     deterministic enrichment and provenance
+resolver      hard filtering + inspectable stable scoring
+placement     host/runtime/device choice
+executor      systemd transient-scope lifecycle
+nix_bridge    Nix control/observer client
+secrets       protected HandleId broker
+adapters      subprocess/native binding providers
+```
+
+Local executions launch as systemd transient scopes under the Omnis cgroup hierarchy. ExecutionId is
+the idempotency key and is embedded in the unit/scope metadata so restart reconciliation can discover
+already-running work instead of duplicating it.
+
+Third-party Manager adapters are subprocesses speaking the typed Cap'n Proto adapter protocol. They
+are not arbitrary shared libraries loaded into the privileged daemon.
+
+## 18. v0 binding providers
+
+The first implementation ships providers for:
+
+```text
+Nix package/store/derivation
+PATH executable + CLI metadata
+systemd service/D-Bus
+HTTP/OpenAPI
+MCP
+OpenAI-compatible model APIs
+Anthropic model APIs
+llama.cpp/local GGUF
+ONNX Runtime classifiers/embeddings
+Claude Code
+Codex
+OpenCode
+generic PTY agent harness
+container runtime
+SSH generic remote host
+native Omnis QUIC remote host
+```
+
+Provider-specific configuration is Manager state/Nix configuration. OmnisAgent asks only for
+semantic capabilities such as `model.embed` or `code.agent`.
+
+## 19. v0 protected-handle realization
+
+Persistent secret bytes are systemd encrypted credentials and may be TPM2-sealed by OmnisOS.
+Manager publishes only HandleId/purpose/scope/availability into the graph. At execution time the
+handle is materialized into a private credential file or sealed memory handle; environment
+injection is used only when the foreign program requires it.

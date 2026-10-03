@@ -330,3 +330,29 @@ and an idempotency key when retry is legal. Execution creation is idempotent on 
 
 Semantic/event IDs are UUIDv7 binary 16-byte values. Artifact IDs are BLAKE3-256. Inline payloads
 remain small; large payloads travel by ArtifactRef through the graphd CAS.
+
+## 14. Canonical schema ownership
+
+The umbrella repository owns six schema source files. Implementation repositories consume a pinned
+schema revision and generate bindings during their Nix build:
+
+```text
+protocol/common.capnp
+protocol/graph.capnp
+protocol/os.capnp
+protocol/manager.capnp
+protocol/agent.capnp
+protocol/control.capnp
+```
+
+`common.capnp` defines UUIDv7 IDs, ArtifactId, protocol/version handshake, TraceContext, provenance,
+protection labels, typed values and typed errors. Domain schemas import it; they may not redefine
+identity or error envelopes.
+
+Cap'n Proto field ordinals are append-only. Removed fields are reserved rather than reused. Every
+service interface exposes a `getCapabilities`/handshake feature set so minor-version peers can
+negotiate optional operations without guessing.
+
+Graph subscriptions resume from GraphRevision. Event delivery resumes from EventId/ingest sequence.
+Streaming APIs must expose backpressure and explicit cancellation; unbounded producer queues are
+forbidden.
