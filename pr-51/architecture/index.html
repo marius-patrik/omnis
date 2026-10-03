@@ -286,7 +286,10 @@
 expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
 <a href="../IMPLEMENTATION/"><code>docs/IMPLEMENTATION.md</code></a> and ADR-0024. All remaining v0 algorithms,
 constants, defaults and fallback behavior are frozen by
-<a href="../DECISION_COMPLETE_V0/"><code>docs/DECISION_COMPLETE_V0.md</code></a> and ADR-0025.</p>
+<a href="../DECISION_COMPLETE_V0/"><code>docs/DECISION_COMPLETE_V0.md</code></a> and ADR-0025. Canonical first-party
+kind/relation/capability/event names and lifecycle states are frozen by
+<a href="../ONTOLOGY_V0/"><code>docs/ONTOLOGY_V0.md</code></a>; public NixOS configuration is frozen by
+<a href="../NIX_OPTIONS_V0/"><code>docs/NIX_OPTIONS_V0.md</code></a>.</p>
 <p>Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.</p>
 <p>The system has four first-class authorities:</p>
@@ -1018,6 +1021,18 @@ addressable system.</p>
 <code>docs/IMPLEMENTATION.md</code>, <code>docs/DECISION_COMPLETE_V0.md</code>, subsystem specs, protocol schemas and
 tests do not determine a behavior, the item is blocked as a specification defect. "Reasonable
 default", "equivalent library", and "temporary fallback" are not implementation authority.</p>
+<h3 id="182-canonical-implementation-source-files">18.2 Canonical implementation source files<a class="headerlink" href="#182-canonical-implementation-source-files" title="Permanent link">&para;</a></h3>
+<p>The following are normative v0 implementation inputs, not examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>schema/graph.sql
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>schema/worldline.sql
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>schema/index.sql
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>protocol/*.capnp
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>prompts/*.md
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>docs/ONTOLOGY_V0.md
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>docs/NIX_OPTIONS_V0.md
+</code></pre></div>
+<p>An implementation worker copies/uses these contracts; it does not redesign their schema, prompt,
+identifier or option surfaces.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="..">
@@ -1144,6 +1159,7 @@ default", "equivalent library", and "temporary fallback" are not implementation 
           <li><a href="#18-completion-criterion">18. Completion criterion</a>
             <ul>
               <li><a href="#181-decision-completeness">18.1 Decision completeness</a></li>
+              <li><a href="#182-canonical-implementation-source-files">18.2 Canonical implementation source files</a></li>
             </ul>
           </li>
         </ul>

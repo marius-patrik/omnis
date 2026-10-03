@@ -291,6 +291,9 @@ creating parallel subsystem-specific models.</p>
 sources owned by the umbrella <code>omnis</code> repository. Local RPC runs over Unix-domain <code>SOCK_STREAM</code>;
 native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.</p>
 <p>JSON is allowed only as a diagnostic/export representation; it is not a second RPC contract.</p>
+<p>Every RPC returns a <code>C.RpcStatus</code>. Transport failures use Cap'n Proto transport exceptions; all
+expected/domain failures use <code>RpcStatus.error</code> with <code>RpcError</code>. Callers never infer absence from zero
+UUIDs or empty strings when a <code>Maybe*</code> union exists.</p>
 <p>Every request/event carries:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>protocol_version
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>message_id
@@ -299,7 +302,9 @@ native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.</p>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>causal_parents[] where applicable
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>graph_revision where applicable
 </code></pre></div>
-<p>Large payloads are referenced as artifacts rather than copied through every message.</p>
+<p>Large payloads are referenced as artifacts rather than copied through every message. Artifact bytes
+use <code>ArtifactUpload</code>/<code>ArtifactDownload</code>; each chunk is at most 1 MiB. The old whole-payload put/get
+shape is not a v0 API.</p>
 <hr />
 <h2 id="2-graph-api">2. Graph API<a class="headerlink" href="#2-graph-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
@@ -322,7 +327,8 @@ native remote Omnis RPC uses the same logical messages over QUIC/TLS 1.3.</p>
 </code></pre></div>
 <hr />
 <h2 id="3-event-api">3. Event API<a class="headerlink" href="#3-event-api" title="Permanent link">&para;</a></h2>
-<p>Components durably enqueue first-party events through the graph substrate:</p>
+<p>Components durably enqueue first-party events through the graph substrate. OmnisAgent has no public
+<code>submitEvent</code> bypass; graphd outbox is the sole first-party durable event ingress:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>outbox.enqueue(EventEnvelope)
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>outbox.enqueue_batch([...])
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>artifact.put(...)
@@ -538,6 +544,12 @@ negotiate optional operations without guessing.</p>
 <p>Graph subscriptions resume from GraphRevision. Event delivery resumes from EventId/ingest sequence.
 Streaming APIs must expose backpressure and explicit cancellation; unbounded producer queues are
 forbidden.</p>
+<h2 id="15-canonical-semantic-registries">15. Canonical semantic registries<a class="headerlink" href="#15-canonical-semantic-registries" title="Permanent link">&para;</a></h2>
+<p>Wire fields carrying kind/relation/event/capability names must use the first-party identifiers in
+<code>ONTOLOGY_V0.md</code>. Unknown third-party names are transported opaquely; a component must not invent a
+new <code>omnis.*</code> identifier during implementation.</p>
+<p>Domain state strings for Execution, Worker, Activity, Generation and Memory use the exact state
+machines from <code>ONTOLOGY_V0.md</code>.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_CONTROL/">
@@ -593,6 +605,8 @@ forbidden.</p>
           <li><a href="#13-v0-endpoints-and-handshake">13. v0 endpoints and handshake</a>
           </li>
           <li><a href="#14-canonical-schema-ownership">14. Canonical schema ownership</a>
+          </li>
+          <li><a href="#15-canonical-semantic-registries">15. Canonical semantic registries</a>
           </li>
         </ul>
       </aside>

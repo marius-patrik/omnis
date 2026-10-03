@@ -599,6 +599,16 @@ default, equivalent dependency, substitute algorithm, temporary fallback, or loc
 policy without updating the normative specification/ADR first.</p>
 <p>Private helper decomposition, variable names and semantics-preserving refactors remain ordinary
 implementation choices.</p>
+<h3 id="a24-canonical-source-files">A24. Canonical source files<a class="headerlink" href="#a24-canonical-source-files" title="Permanent link">&para;</a></h3>
+<p>Do not recreate these contracts inside component repositories:</p>
+<ul>
+<li>database DDL: <code>schema/*.sql</code>;</li>
+<li>cross-component wire schemas: <code>protocol/*.capnp</code>;</li>
+<li>Agent prompts: <code>prompts/*.md</code>;</li>
+<li>first-party ontology/event/state names: <code>docs/ONTOLOGY_V0.md</code>;</li>
+<li>NixOS option paths/types/defaults: <code>docs/NIX_OPTIONS_V0.md</code>.</li>
+</ul>
+<p>Component builds pin the umbrella revision and generate/consume these sources.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../pipeline/">
@@ -676,6 +686,7 @@ implementation choices.</p>
               <li><a href="#a21-documentation-changes">A21. Documentation changes</a></li>
               <li><a href="#a22-completion-behavior-for-coding-agents">A22. Completion behavior for coding agents</a></li>
               <li><a href="#a23-no-v0-design-discretion">A23. No v0 design discretion</a></li>
+              <li><a href="#a24-canonical-source-files">A24. Canonical source files</a></li>
             </ul>
           </li>
         </ul>
