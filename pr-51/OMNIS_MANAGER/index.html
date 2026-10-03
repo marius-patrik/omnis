@@ -276,7 +276,7 @@
           <h1 id="omnismanager">OmnisManager<a class="headerlink" href="#omnismanager" title="Permanent link">&para;</a></h1>
 <p><strong>Status: normative supporting specification.</strong></p>
 <p>OmnisManager is the resource, capability, binding, execution, and placement authority of Omnis. It
-is initially implemented as a maintained fork/extension of <code>NixOS/nix</code>.</p>
+is implemented as a maintained fork/extension of <code>NixOS/nix</code> plus the Rust <code>omnis-managerd</code> service.</p>
 <p>Nix remains a package/build/store system. OmnisManager extends its reach so the same machine can
 reason uniformly about packages, programs, models, agent harnesses, services, devices, remote hosts,
 and arbitrary foreign capabilities.</p>
@@ -398,7 +398,7 @@ and estimates, resolution should be reproducible.</p>
 <p>Callers can request a specific binding when implementation identity is semantically relevant.</p>
 <hr />
 <h2 id="6-nix-extensions">6. Nix extensions<a class="headerlink" href="#6-nix-extensions" title="Permanent link">&para;</a></h2>
-<p>The maintained Nix fork should expose structured APIs for:</p>
+<p>The maintained Nix fork exposes structured observer/query APIs for:</p>
 <ul>
 <li>derivation/resource identity mapping;</li>
 <li>why a package/store path exists;</li>
@@ -410,8 +410,14 @@ and estimates, resolution should be reproducible.</p>
 <li>resource metadata discovery;</li>
 <li>execution environment realization.</li>
 </ul>
-<p>Omnis-specific semantic metadata should live alongside, not corrupt, core derivation semantics.</p>
-<p>Upstream-compatible behavior remains the default.</p>
+<p>Omnis-specific semantic metadata lives alongside, not inside, core derivation semantics. The normal
+Nix daemon/client worker protocol remains compatible. Omnis-specific control and observation use the
+separate <code>/run/omnis/nix-control.sock</code> Cap'n Proto endpoint.</p>
+<p>The fork patches the current upstream evaluator/store boundaries rather than creating another Nix
+implementation. Required hook points include <code>EvalState::forceValue</code> in <code>src/libexpr</code>, derivation
+creation, <code>src/libstore</code> realization/substitution/closure operations, build lifecycle code under
+<code>src/libstore/build</code>, and daemon-operation correlation in <code>src/libstore/daemon.cc</code>. Upstream-compatible
+behavior remains the default.</p>
 <hr />
 <h2 id="7-arbitrary-bindings">7. Arbitrary bindings<a class="headerlink" href="#7-arbitrary-bindings" title="Permanent link">&para;</a></h2>
 <p>Manager must make it easy to bind things it has never seen before.</p>
@@ -524,7 +530,8 @@ calling process.</p>
 <a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>resource use
 <a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>external effects
 </code></pre></div>
-<p>Execution lifecycle events are sent directly to Agent and reflected in the graph.</p>
+<p>Execution lifecycle state is reflected in the graph and durably enqueued through graphd's event
+outbox for Agent delivery.</p>
 <hr />
 <h2 id="13-effect-semantics">13. Effect semantics<a class="headerlink" href="#13-effect-semantics" title="Permanent link">&para;</a></h2>
 <p>Manager attaches the strongest justified contract to a binding/execution:</p>
@@ -555,7 +562,7 @@ calling process.</p>
 resolution error with explanation, not silent fallback.</p>
 <hr />
 <h2 id="15-manager-cliapi">15. Manager CLI/API<a class="headerlink" href="#15-manager-cliapi" title="Permanent link">&para;</a></h2>
-<p>The initial Manager surface should support at least:</p>
+<p>The v0 Manager CLI surface supports:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>omnis manager resource list/inspect
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>omnis manager capability list/inspect
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>omnis manager bind
@@ -581,6 +588,51 @@ resolution error with explanation, not silent fallback.</p>
 <li>own OS-level enforcement;</li>
 <li>own presentation.</li>
 </ul>
+<hr />
+<h2 id="17-v0-daemon-architecture">17. v0 daemon architecture<a class="headerlink" href="#17-v0-daemon-architecture" title="Permanent link">&para;</a></h2>
+<p><code>omnis-managerd</code> is a Rust 2024/Tokio process. It owns semantic resource/capability state and talks
+to the patched C++ <code>nix-daemon</code> over <code>/run/omnis/nix-control.sock</code>.</p>
+<p>Internal modules:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>registry      graph-backed resources/capabilities/bindings
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>discovery     deterministic enrichment and provenance
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>resolver      hard filtering + inspectable stable scoring
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>placement     host/runtime/device choice
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>executor      systemd transient-scope lifecycle
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>nix_bridge    Nix control/observer client
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>secrets       protected HandleId broker
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>adapters      subprocess/native binding providers
+</code></pre></div>
+<p>Local executions launch as systemd transient scopes under the Omnis cgroup hierarchy. ExecutionId is
+the idempotency key and is embedded in the unit/scope metadata so restart reconciliation can discover
+already-running work instead of duplicating it.</p>
+<p>Third-party Manager adapters are subprocesses speaking the typed Cap'n Proto adapter protocol. They
+are not arbitrary shared libraries loaded into the privileged daemon.</p>
+<h2 id="18-v0-binding-providers">18. v0 binding providers<a class="headerlink" href="#18-v0-binding-providers" title="Permanent link">&para;</a></h2>
+<p>The first implementation ships providers for:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Nix package/store/derivation
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>PATH executable + CLI metadata
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>systemd service/D-Bus
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>HTTP/OpenAPI
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>MCP
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>OpenAI-compatible model APIs
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Anthropic model APIs
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>llama.cpp/local GGUF
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>ONNX Runtime classifiers/embeddings
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>Claude Code
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>Codex
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>OpenCode
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>generic PTY agent harness
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>container runtime
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>SSH generic remote host
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>native Omnis QUIC remote host
+</code></pre></div>
+<p>Provider-specific configuration is Manager state/Nix configuration. OmnisAgent asks only for
+semantic capabilities such as <code>model.embed</code> or <code>code.agent</code>.</p>
+<h2 id="19-v0-protected-handle-realization">19. v0 protected-handle realization<a class="headerlink" href="#19-v0-protected-handle-realization" title="Permanent link">&para;</a></h2>
+<p>Persistent secret bytes are systemd encrypted credentials and may be TPM2-sealed by OmnisOS.
+Manager publishes only HandleId/purpose/scope/availability into the graph. At execution time the
+handle is materialized into a private credential file or sealed memory handle; environment
+injection is used only when the foreign program requires it.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_OS/">
@@ -633,6 +685,12 @@ resolution error with explanation, not silent fallback.</p>
           <li><a href="#15-manager-cliapi">15. Manager CLI/API</a>
           </li>
           <li><a href="#16-non-goals">16. Non-goals</a>
+          </li>
+          <li><a href="#17-v0-daemon-architecture">17. v0 daemon architecture</a>
+          </li>
+          <li><a href="#18-v0-binding-providers">18. v0 binding providers</a>
+          </li>
+          <li><a href="#19-v0-protected-handle-realization">19. v0 protected-handle realization</a>
           </li>
         </ul>
       </aside>

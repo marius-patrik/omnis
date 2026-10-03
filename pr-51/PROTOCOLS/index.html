@@ -505,6 +505,25 @@ interfaces. Major mismatch rejects the connection; minor versions intersect opti
 and an idempotency key when retry is legal. Execution creation is idempotent on ExecutionId.</p>
 <p>Semantic/event IDs are UUIDv7 binary 16-byte values. Artifact IDs are BLAKE3-256. Inline payloads
 remain small; large payloads travel by ArtifactRef through the graphd CAS.</p>
+<h2 id="14-canonical-schema-ownership">14. Canonical schema ownership<a class="headerlink" href="#14-canonical-schema-ownership" title="Permanent link">&para;</a></h2>
+<p>The umbrella repository owns six schema source files. Implementation repositories consume a pinned
+schema revision and generate bindings during their Nix build:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>protocol/common.capnp
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>protocol/graph.capnp
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>protocol/os.capnp
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>protocol/manager.capnp
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>protocol/agent.capnp
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>protocol/control.capnp
+</code></pre></div>
+<p><code>common.capnp</code> defines UUIDv7 IDs, ArtifactId, protocol/version handshake, TraceContext, provenance,
+protection labels, typed values and typed errors. Domain schemas import it; they may not redefine
+identity or error envelopes.</p>
+<p>Cap'n Proto field ordinals are append-only. Removed fields are reserved rather than reused. Every
+service interface exposes a <code>getCapabilities</code>/handshake feature set so minor-version peers can
+negotiate optional operations without guessing.</p>
+<p>Graph subscriptions resume from GraphRevision. Event delivery resumes from EventId/ingest sequence.
+Streaming APIs must expose backpressure and explicit cancellation; unbounded producer queues are
+forbidden.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_CONTROL/">
@@ -555,6 +574,8 @@ remain small; large payloads travel by ArtifactRef through the graphd CAS.</p>
           <li><a href="#12-failure-semantics">12. Failure semantics</a>
           </li>
           <li><a href="#13-v0-endpoints-and-handshake">13. v0 endpoints and handshake</a>
+          </li>
+          <li><a href="#14-canonical-schema-ownership">14. Canonical schema ownership</a>
           </li>
         </ul>
       </aside>
