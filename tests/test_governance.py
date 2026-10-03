@@ -82,7 +82,6 @@ def test_agents_documents_every_declared_area():
         assert f"area:{name}" in content, f"AGENTS.md must document the 'area:{name}' scope"
 
 
-
 def test_architecture_is_the_normative_root():
     """Architecture is the normative root and the transcript remains source material."""
     architecture = _read("ARCHITECTURE.md")
@@ -139,6 +138,7 @@ def test_roadmap_phases_are_addressable():
     phases = set(re.findall(r"^## Phase (\d+) ", roadmap, re.MULTILINE))
     assert {str(i) for i in range(0, 11)} <= phases, f"missing roadmap phases: {sorted(phases)}"
 
+
 def test_transcript_declares_its_provenance():
     """Source material must say where it came from and how completely it was captured."""
     transcript = _read("notes", "transcript.md")
@@ -170,7 +170,6 @@ def test_transcript_carries_review_notes():
     assert "ARCHITECTURE.md" in transcript, "the transcript must defer to the normative document"
 
 
-
 def test_reference_declaration_exists_and_matches_new_component_split():
     """The illustrative declaration must demonstrate the four-component Omnis system."""
     declaration = _read("examples", "omnis.nix")
@@ -184,6 +183,7 @@ def test_reference_declaration_exists_and_matches_new_component_split():
     assert "protectedHandles.enable = true" in declaration
     assert "worldline.storage" in declaration
     assert "defaultMode" in declaration
+
 
 @pytest.mark.parametrize(
     "document",
