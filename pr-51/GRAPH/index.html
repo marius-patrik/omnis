@@ -618,19 +618,21 @@ does not need a separate observe call to know what changed.</p>
 <a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>mutation summary
 <a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>payload/artifact references where needed
 </code></pre></div>
-<p>Subsystem-specific lifecycle events that do not correspond to graph mutation are also sent directly
-to Agent.</p>
+<p>Subsystem-specific lifecycle/input events that do not correspond to graph mutation are durably
+enqueued through graphd's outbox. Dense event classes may use lossless batch artifacts, but Agent can
+recover every original ordered item without observing the scene.</p>
 <p>No first-party component silently mutates durable state without producing an event.</p>
 <hr />
 <h2 id="14-storage">14. Storage<a class="headerlink" href="#14-storage" title="Permanent link">&para;</a></h2>
-<p>Initial implementation:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>SQLite WAL
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>+ normalized node/edge tables
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>+ property tables or efficient encoded blobs
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>+ relation indexes
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>+ alias index
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>+ revision table
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>+ transaction journal
+<p>Omnis v0 storage is fixed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>SQLite WAL + synchronous=FULL
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>+ one serialized writer
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>+ normalized node/kind/property/edge/provenance tables
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>+ revision validity intervals
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>+ relation/alias indexes
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>+ graph transaction metadata
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>+ durable event outbox
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>+ filesystem BLAKE3 CAS for large payloads
 </code></pre></div>
 <p>Rationale:</p>
 <ul>

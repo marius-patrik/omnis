@@ -543,23 +543,14 @@ identity is not itself relevant.</p>
 and event stream.</p>
 <hr />
 <h2 id="15-persistence">15. Persistence<a class="headerlink" href="#15-persistence" title="Permanent link">&para;</a></h2>
-<p>Omnis v0 persists per-user Agent state under <code>$XDG_STATE_HOME/omnis/agent/</code>. The canonical</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>worldline events
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>causal edges
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>memories
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>entities/relations
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>sessions/activities
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>worker/workflow state
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>context activations
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>model invocations
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>procedures/skills
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>expectations
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>lineage
+<p>Omnis v0 persists per-user Agent state under <code>$XDG_STATE_HOME/omnis/agent/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>worldline.sqlite3   immutable events, causal edges, entity/artifact references
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>index.sqlite3       rebuildable FTS5/sqlite-vec retrieval indexes
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>checkpoints/        worker/activity checkpoint references and metadata
 </code></pre></div>
-<p>SQLite/WAL is acceptable initially. Large immutable artifacts belong in content-addressed storage and
-are referenced from events/memory.</p>
-<p>The persistence implementation must support snapshot + replay/reconciliation and must not make model
-availability a recovery dependency.</p>
+<p>Current cognitive memory, goals, procedures, expectations and worker/activity identities are Agent-
+owned graph state linked back to worldline evidence. Large immutable bodies live in graphd's BLAKE3
+CAS. Recovery is worldline/graph/checkpoint based and never depends on model availability.</p>
 <hr />
 <h2 id="16-hard-invariants">16. Hard invariants<a class="headerlink" href="#16-hard-invariants" title="Permanent link">&para;</a></h2>
 <ol>

@@ -331,6 +331,12 @@ outbox into its worldline and then calls <code>outbox.ack(event_id)</code>.</p>
 <p>Enqueue success means graphd durably owns the event for lossless delivery. Delivery to Agent is
 at-least-once and Agent deduplicates EventId. Silent event drop is not valid first-party behavior.</p>
 <hr />
+<h3 id="31-dense-event-batches">3.1 Dense event batches<a class="headerlink" href="#31-dense-event-batches" title="Permanent link">&para;</a></h3>
+<p>High-rate producers may enqueue an EventEnvelope whose payload is a BLAKE3 artifact containing an
+ordered batch of original events. The batch header carries producer identity, first/last sequence
+and monotonic time range. Each item retains sequence, monotonic timestamp, type and payload.</p>
+<p>Lossless batching is permitted; semantic sampling/drop is not permitted for first-party event
+classes declared lossless.</p>
 <h2 id="4-manager-api">4. Manager API<a class="headerlink" href="#4-manager-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>resource.get/list/search
@@ -550,6 +556,9 @@ forbidden.</p>
           <li><a href="#2-graph-api">2. Graph API</a>
           </li>
           <li><a href="#3-event-api">3. Event API</a>
+            <ul>
+              <li><a href="#31-dense-event-batches">3.1 Dense event batches</a></li>
+            </ul>
           </li>
           <li><a href="#4-manager-api">4. Manager API</a>
             <ul>

@@ -415,7 +415,8 @@ change graph identity.</p>
 </ul>
 <p>Omnis should not fork a full traditional desktop environment because that would import the wrong
 interaction ontology.</p>
-<p>A small compositor skeleton/fork is acceptable where it accelerates DRM/KMS/input/Wayland bootstrap.</p>
+<p><code>omnis-control</code> is implemented directly on Smithay; it does not fork a traditional desktop or a
+second compositor framework.</p>
 <hr />
 <h2 id="10-native-applications">10. Native applications<a class="headerlink" href="#10-native-applications" title="Permanent link">&para;</a></h2>
 <p>Existing Wayland/XWayland applications run unmodified.</p>
@@ -506,6 +507,13 @@ access.</p>
 <p>Agent-originated Control mutations also emit events so their consequences are part of the same
 causal history.</p>
 <hr />
+<h3 id="151-raw-event-delivery">15.1 Raw event delivery<a class="headerlink" href="#151-raw-event-delivery" title="Permanent link">&para;</a></h3>
+<p>Control never requires Agent to inspect the rendered scene to discover first-party interaction.
+Keyboard, button, touch, scroll, focus, selection, navigation, tree mutation and native-surface
+lifecycle events are emitted directly with stable ordering metadata.</p>
+<p>Pointer-motion and other dense streams may be grouped into short lossless batches before durable
+enqueue. Each original item retains producer sequence and monotonic timestamp inside the batch;
+Agent can expand/replay it exactly.</p>
 <h2 id="16-accessibility">16. Accessibility<a class="headerlink" href="#16-accessibility" title="Permanent link">&para;</a></h2>
 <p>Because Control owns custom rendering, native accessibility trees are mandatory, not optional.</p>
 <p>Graph semantics should improve accessibility: a rendered identity already has role, label,
@@ -604,6 +612,9 @@ state and therefore preserves focus, selection, lens and timeline frontier.</p>
           <li><a href="#14-user-and-agent-authority">14. User and Agent authority</a>
           </li>
           <li><a href="#15-events">15. Events</a>
+            <ul>
+              <li><a href="#151-raw-event-delivery">15.1 Raw event delivery</a></li>
+            </ul>
           </li>
           <li><a href="#16-accessibility">16. Accessibility</a>
           </li>
