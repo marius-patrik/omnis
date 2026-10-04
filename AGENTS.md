@@ -399,7 +399,7 @@ Before declaring work complete, an implementation agent must:
 
 For Omnis v0, coding agents implement the frozen design; they do not finish it.
 
-Before implementation, read `docs/DECISION_COMPLETE_V0.md`. If an observable behavior remains
+Before implementation, load `spec/contract.toml`, then read the normative/shared and owning-component sources it names, including `docs/DECISION_COMPLETE_V0.md`. If an observable behavior remains
 unspecified, stop that item and report a `SpecificationDefect`. Do not introduce a reasonable
 default, equivalent dependency, substitute algorithm, temporary fallback, or locally convenient
 policy without updating the normative specification/ADR first.

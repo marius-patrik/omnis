@@ -2210,7 +2210,7 @@ Runtime curl-to-shell installers and CLI flag guessing are forbidden.
 
 It validates:
 
-1. `spec/v0.toml` parses and has the expected schema version;
+1. `spec/contract.toml` and `spec/v0.toml` parse and have the expected schema version, and every contract path exists;
 2. `spec/ontology.toml` contains no duplicate first-party identifier;
 3. every `omnis.*` identifier referenced by protocol/schema/prompt source is registered or is a
    documented property prefix;

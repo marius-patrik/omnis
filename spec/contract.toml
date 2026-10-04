@@ -1,0 +1,83 @@
+version = 1
+profile = "omnis-v0"
+
+[normative]
+architecture = "ARCHITECTURE.md"
+decision_complete = "docs/DECISION_COMPLETE_V0.md"
+implementation = "docs/IMPLEMENTATION.md"
+graph = "docs/GRAPH.md"
+protocols = "docs/PROTOCOLS.md"
+ontology = "docs/ONTOLOGY_V0.md"
+nix_options = "docs/NIX_OPTIONS_V0.md"
+nix_control = "docs/NIX_CONTROL_V0.md"
+control_render = "docs/CONTROL_RENDER_V0.md"
+harness_adapters = "docs/HARNESS_ADAPTERS_V0.md"
+learning = "docs/LEARNING_V0.md"
+os = "docs/OMNIS_OS.md"
+manager = "docs/OMNIS_MANAGER.md"
+agent = "docs/OMNIS_AGENT.md"
+control = "docs/OMNIS_CONTROL.md"
+
+[machine]
+v0 = "spec/v0.toml"
+ontology = "spec/ontology.toml"
+properties = "spec/properties.toml"
+states = "spec/state_machines.toml"
+events = "spec/events.toml"
+event_priorities = "spec/event_priorities.toml"
+capabilities = "spec/capabilities.toml"
+value_types = "spec/value_types.toml"
+nix_control = "spec/nix_control.toml"
+control_render = "spec/control_render.toml"
+harnesses = "spec/harnesses.toml"
+learning = "spec/learning.toml"
+generic_harness = "spec/generic_harness.schema.json"
+
+[protocol]
+common = "protocol/common.capnp"
+events = "protocol/events.capnp"
+capabilities = "protocol/capabilities.capnp"
+graph = "protocol/graph.capnp"
+nix_control = "protocol/nix_control.capnp"
+os = "protocol/os.capnp"
+manager = "protocol/manager.capnp"
+agent = "protocol/agent.capnp"
+control = "protocol/control.capnp"
+control_scene = "protocol/control_scene.capnp"
+
+[database]
+graph = "schema/graph.sql"
+worldline = "schema/worldline.sql"
+index = "schema/index.sql"
+
+[prompts]
+judgement = "prompts/judgement.md"
+intention = "prompts/intention.md"
+memory_extract = "prompts/memory_extract.md"
+reason = "prompts/reason.md"
+code_worker = "prompts/code_worker.md"
+candidate_evaluate = "prompts/candidate_evaluate.md"
+
+[assets]
+theme = "theme/omnis-dark.json"
+reference_nix = "examples/omnis.nix"
+
+[ownership]
+"os" = ["docs/OMNIS_OS.md","protocol/os.capnp","docs/NIX_OPTIONS_V0.md","schema/graph.sql"]
+"manager" = ["docs/OMNIS_MANAGER.md","protocol/manager.capnp","protocol/nix_control.capnp","docs/NIX_CONTROL_V0.md","spec/harnesses.toml"]
+"agent" = ["docs/OMNIS_AGENT.md","protocol/agent.capnp","schema/worldline.sql","schema/index.sql","prompts/README.md","docs/LEARNING_V0.md"]
+"control" = ["docs/OMNIS_CONTROL.md","protocol/control.capnp","protocol/control_scene.capnp","docs/CONTROL_RENDER_V0.md","theme/omnis-dark.json"]
+"shared" = ["ARCHITECTURE.md","docs/DECISION_COMPLETE_V0.md","docs/GRAPH.md","docs/PROTOCOLS.md","docs/ONTOLOGY_V0.md","protocol/common.capnp","protocol/events.capnp","protocol/capabilities.capnp","spec/ontology.toml","spec/events.toml","spec/capabilities.toml","spec/properties.toml","spec/state_machines.toml","spec/value_types.toml"]
+
+[implementation_order]
+phase0 = ["normative","machine","protocol","database","prompts","assets"]
+phase1 = ["graph","os"]
+phase2 = ["manager"]
+phase3 = ["os"]
+phase4 = ["control"]
+phase5 = ["agent"]
+phase6 = ["agent"]
+phase7 = ["manager","agent"]
+phase8 = ["control"]
+phase9 = ["manager","os","agent"]
+phase10 = ["agent","manager","control","os"]

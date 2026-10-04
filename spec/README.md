@@ -2,6 +2,10 @@
 
 These files are canonical inputs for generated constants/registries.
 
+`contract.toml` is the root manifest enumerating the complete v0 implementation contract. Tools and
+implementation agents begin there rather than discovering authority ad hoc.
+
+- `contract.toml` — complete authoritative-source manifest and component ownership.
 - `v0.toml` — scalar baselines, paths, ports, limits, weights, schedules and defaults.
 - `ontology.toml` — first-party kind/relation/capability/event/state names.
 - `events.toml` — event name -> `events.capnp::Payload` union variant.

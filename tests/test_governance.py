@@ -750,3 +750,34 @@ def test_competence_gap_event_is_fully_registered():
     assert event in load("events.toml")["events"]
     assert event in load("event_priorities.toml")["events"]
     assert event in _read("docs", "ONTOLOGY_V0.md")
+
+
+def test_contract_manifest_references_existing_files():
+    """One machine-readable root must enumerate every authoritative v0 contract source."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "contract.toml"), "rb") as handle:
+        contract = tomllib.load(handle)
+
+    assert contract["version"] == 1
+    assert contract["profile"] == "omnis-v0"
+
+    for section in ("normative", "machine", "protocol", "database", "prompts", "assets"):
+        for _, rel in contract[section].items():
+            assert os.path.isfile(os.path.join(REPO_ROOT, rel)), (
+                f"contract manifest references missing {section} source {rel}"
+            )
+
+    required_normative = {
+        "ARCHITECTURE.md",
+        "docs/DECISION_COMPLETE_V0.md",
+        "docs/IMPLEMENTATION.md",
+        "docs/HARNESS_ADAPTERS_V0.md",
+        "docs/LEARNING_V0.md",
+        "docs/CONTROL_RENDER_V0.md",
+        "docs/NIX_CONTROL_V0.md",
+    }
+    assert required_normative <= set(contract["normative"].values())
