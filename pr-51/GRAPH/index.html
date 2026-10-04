@@ -516,7 +516,9 @@ Graph core rejects unauthorized direct writes.</p>
 default.</p>
 <hr />
 <h2 id="8-provenance">8. Provenance<a class="headerlink" href="#8-provenance" title="Permanent link">&para;</a></h2>
-<p>Every nontrivial discovered/inferred graph fact should record provenance quality.</p>
+<p>Every discovered or inferred graph fact that is not a native identity/lifecycle primitive MUST carry
+a Provenance record. Native identity/lifecycle primitives carry their authoritative producer as
+source even when no additional evidence artifact exists.</p>
 <p>Required provenance categories:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>native-authoritative
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>nix-evaluation
@@ -675,8 +677,9 @@ Ephemeral layout-only nodes use Control-local identity and must not masquerade a
 <p>Agent memory may point directly to graph nodes:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Memory:m1 --cognitive.about--&gt; Repository:r1
 </code></pre></div>
-<p>It should not duplicate current operational facts when the graph already contains authoritative
-state. Derived memories explain, generalize, predict, associate, or preserve historical meaning.</p>
+<p>Agent memory MUST NOT duplicate an authoritative current operational fact solely as a second source
+of current truth. Derived memories may explain, generalize, predict, associate, or preserve
+historical meaning while linking to the authoritative graph identity.</p>
 <p>Agent context compilation may query the graph at a specific revision/frontier and include stable node
 references rather than copied descriptions.</p>
 <hr />

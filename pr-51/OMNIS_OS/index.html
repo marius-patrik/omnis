@@ -301,7 +301,7 @@ ordinary downstream NixOS module, especially:</p>
 <li>Manager/Control/Agent core subsystem composition;</li>
 <li>event-producing lifecycle integration.</li>
 </ul>
-<p>Ordinary packages should remain upstream nixpkgs packages wherever possible.</p>
+<p>Ordinary packages remain upstream nixpkgs packages unless an Omnis-specific patch/package definition is required by a normative contract or failing acceptance test.</p>
 <hr />
 <h2 id="2-boot-target">2. Boot target<a class="headerlink" href="#2-boot-target" title="Permanent link">&para;</a></h2>
 <p>The initial boot chain is conceptually:</p>
@@ -337,7 +337,9 @@ second semantic system model; desired service semantics remain represented in Ni
 <li>cgroups/resource envelopes;</li>
 <li>isolation/authority metadata.</li>
 </ul>
-<p>OS facts should reference Manager resource identities whenever those identities are known.</p>
+<p>OS facts MUST reference an existing Manager Resource NodeId when exact foreign/realization identity
+resolves uniquely. If none exists yet, OS publishes the physical identity and Manager later attaches
+its Resource through the normal exact-alias/provenance path; OS never guesses a fuzzy match.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Resource:Firefox
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  --system.realized_as--&gt; StorePath:/nix/store/...
@@ -420,7 +422,7 @@ enforcement response without requiring an LLM decision in the critical path.</p>
 <li>cgroup v2;</li>
 <li>namespaces;</li>
 <li>seccomp;</li>
-<li>LSM/Landlock/eBPF where appropriate;</li>
+<li>eBPF only for the frozen process-observation and constrained-network filters; no Omnis-specific LSM/Landlock layer in v0;</li>
 <li>Unix credentials/capabilities;</li>
 <li>container/VM runtimes when stronger isolation is required.</li>
 </ul>
@@ -453,7 +455,7 @@ identity.</p>
 <li>artifacts;</li>
 <li>Control views.</li>
 </ul>
-<p>High-volume filesystem observation should be normalized/coalesced at suitable boundaries while
+<p>High-volume watched-filesystem observation uses the exact inotify batching/reconciliation contract in <code>DECISION_COMPLETE_V0.md §70</code> while
 retaining enough causal evidence for Agent reconstruction.</p>
 <hr />
 <h2 id="10-services-and-processes">10. Services and processes<a class="headerlink" href="#10-services-and-processes" title="Permanent link">&para;</a></h2>

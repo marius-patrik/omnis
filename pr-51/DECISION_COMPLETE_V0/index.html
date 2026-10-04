@@ -1920,7 +1920,7 @@ before use.</p>
 <p><code>omnis spec check</code> is required in the first umbrella CLI implementation.</p>
 <p>It validates:</p>
 <ol>
-<li><code>spec/v0.toml</code> parses and has the expected schema version;</li>
+<li><code>spec/contract.toml</code> and <code>spec/v0.toml</code> parse and have the expected schema version, and every contract path exists;</li>
 <li><code>spec/ontology.toml</code> contains no duplicate first-party identifier;</li>
 <li>every <code>omnis.*</code> identifier referenced by protocol/schema/prompt source is registered or is a
    documented property prefix;</li>
@@ -2272,6 +2272,89 @@ with ingest time; outbox <code>created_at_ns</code> separately records graphd re
   preconditions.</li>
 </ul>
 <p>A precondition failure returns Conflict and performs no writes.</p>
+<hr />
+<h2 id="70-watched-filesystem-observation">70. Watched-filesystem observation<a class="headerlink" href="#70-watched-filesystem-observation" title="Permanent link">&para;</a></h2>
+<p>Filesystem observation exists only for roots explicitly present in
+<code>omnis.os.observe.watchedFileScopes</code> or requested by a live Repository/Workspace binding.</p>
+<p>v0 mechanism: Linux inotify.</p>
+<p>For each watched root:</p>
+<ol>
+<li>recursively enumerate directories in raw filename-byte lexical order;</li>
+<li>install one inotify watch per directory;</li>
+<li>watch create/delete/move/modify/attrib/close-write events;</li>
+<li>newly created directories receive a watch before their contents are considered reconciled;</li>
+<li>symlinks are observed as directory-entry objects and are not followed to extend watch scope;</li>
+<li>stay on the root filesystem device unless the binding explicitly registers another root;</li>
+<li>normalize kernel records into exact filesystem identity/path events;</li>
+<li>batch using the common dense-event limits: 256 records, 16 ms, or 64 KiB;</li>
+<li>preserve every ordered kernel record in the batch; do not replace repeated writes with one event.</li>
+</ol>
+<p>On <code>IN_Q_OVERFLOW</code>:
+1. publish <code>omnis.event.os.observation_gap</code>;
+2. pause semantic assertions from the affected watch stream;
+3. recursively rescan the affected root;
+4. reconcile graph state;
+5. reinstall missing watches;
+6. resume incremental observation.</p>
+<p>No fanotify or custom filesystem kernel module is used in v0.</p>
+<hr />
+<h2 id="71-linux-enforcement-primitives">71. Linux enforcement primitives<a class="headerlink" href="#71-linux-enforcement-primitives" title="Permanent link">&para;</a></h2>
+<p>v0 uses exactly:</p>
+<ul>
+<li>systemd transient-service mount/device/cgroup/system-call properties from §§53–55;</li>
+<li>cgroup v2;</li>
+<li>eBPF for process observation and the constrained network connect filter defined by the Execution
+  envelope;</li>
+<li>ordinary Unix UID/GID and socket peer credentials.</li>
+</ul>
+<p>v0 does <strong>not</strong> add a custom LSM policy, SELinux policy, AppArmor profile, or direct Landlock layer.
+The distribution may retain upstream NixOS/kernel security modules, but Omnis execution semantics do
+not depend on them in v0.</p>
+<p>Changing this enforcement stack requires an ADR/spec change.</p>
+<hr />
+<h2 id="72-protocol-handshake">72. Protocol handshake<a class="headerlink" href="#72-protocol-handshake" title="Permanent link">&para;</a></h2>
+<p>v0 protocol is exactly <strong>1.0</strong>.</p>
+<p>Handshake rules:</p>
+<ul>
+<li>request major != 1 =&gt; <code>incompatible</code>;</li>
+<li>request minor != 0 =&gt; <code>incompatible</code>;</li>
+<li>build IDs are informational and do not affect compatibility;</li>
+<li>no minor-version optional-operation negotiation exists in v0.</li>
+</ul>
+<p>Exact interface strings:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>omnis.graph.v1
+<a id="__codelineno-82-2" name="__codelineno-82-2" href="#__codelineno-82-2"></a>omnis.os.v1
+<a id="__codelineno-82-3" name="__codelineno-82-3" href="#__codelineno-82-3"></a>omnis.manager.v1
+<a id="__codelineno-82-4" name="__codelineno-82-4" href="#__codelineno-82-4"></a>omnis.agent.v1
+<a id="__codelineno-82-5" name="__codelineno-82-5" href="#__codelineno-82-5"></a>omnis.control.v1
+</code></pre></div>
+<p>Each server advertises only its own interface string in v0.</p>
+<p>A client must verify the expected interface is present before making any non-handshake RPC.</p>
+<hr />
+<h2 id="73-voice-input">73. Voice input<a class="headerlink" href="#73-voice-input" title="Permanent link">&para;</a></h2>
+<p>Voice is a first-party Control input path, but v0 has <strong>no hotword and no passive microphone
+recording</strong>.</p>
+<p>Desktop shortcut:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>hold Ctrl+Shift+Space   begin push-to-talk
+<a id="__codelineno-83-2" name="__codelineno-83-2" href="#__codelineno-83-2"></a>release                 end recording and submit
+<a id="__codelineno-83-3" name="__codelineno-83-3" href="#__codelineno-83-3"></a>Esc while held          cancel and discard
+</code></pre></div>
+<p>Algorithm:</p>
+<ol>
+<li>resolve default microphone PipeWire resource through Manager;</li>
+<li>capture 16-bit signed little-endian PCM, mono, 16 kHz;</li>
+<li>store the recording as <code>audio/L16;rate=16000;channels=1</code>, protection=<code>localOnly</code>;</li>
+<li>resolve <code>omnis.capability.model.audio.transcribe</code>;</li>
+<li>if unavailable, show inline unavailable error and retain no semantic submission;</li>
+<li>if available, execute transcription locally/remotely only if the artifact protection permits the
+   selected binding;</li>
+<li>submit the returned UTF-8 transcript through the <strong>same</strong> primary-input resolver as typed text;</li>
+<li>attach the audio ArtifactId and transcription ExecutionId as provenance to the input event.</li>
+</ol>
+<p>Raw voice artifact default retention: 24 hours.
+If transcription fails, retain the artifact 24 hours for diagnostics.
+If user explicitly saves/promotes it, ordinary artifact retention applies.</p>
+<p>There is no always-listening voice activity detection in v0.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../IMPLEMENTATION/">
@@ -2542,6 +2625,14 @@ with ingest time; outbox <code>created_at_ns</code> separately records graphd re
               <li><a href="#696-transaction-events">69.6 transaction events</a></li>
               <li><a href="#697-preconditions">69.7 preconditions</a></li>
             </ul>
+          </li>
+          <li><a href="#70-watched-filesystem-observation">70. Watched-filesystem observation</a>
+          </li>
+          <li><a href="#71-linux-enforcement-primitives">71. Linux enforcement primitives</a>
+          </li>
+          <li><a href="#72-protocol-handshake">72. Protocol handshake</a>
+          </li>
+          <li><a href="#73-voice-input">73. Voice input</a>
           </li>
         </ul>
       </aside>

@@ -521,8 +521,9 @@ realization must be deterministic according to Nix semantics.</p>
 worldline as events.</p>
 <h3 id="a11-control-is-not-a-conventional-gui">A11. Control is not a conventional GUI<a class="headerlink" href="#a11-control-is-not-a-conventional-gui" title="Permanent link">&para;</a></h3>
 <p>Do not build separate application architectures for terminal, browser, graph, 3D, or AI output.</p>
-<p>Control derives projections from the shared graph into one Control tree and renderer. Native apps are
-delegated surfaces where appropriate.</p>
+<p>Control derives projections from the shared graph into one Control tree and renderer. Existing
+Wayland/XWayland clients are NativeSurface leaves; first-party semantic content is rendered directly
+through Control primitives.</p>
 <p>2D and 3D must preserve the same identities/focus/selection/lens/frontier.</p>
 <h3 id="a12-agent-gets-structural-control-access">A12. Agent gets structural Control access<a class="headerlink" href="#a12-agent-gets-structural-control-access" title="Permanent link">&para;</a></h3>
 <p>If a first-party Control operation can only be performed by synthetic mouse/keyboard input, the API
@@ -563,7 +564,7 @@ obsolete APIs, schemas, or package structures merely because they appeared in hi
 <li>preserve upstream license requirements.</li>
 </ul>
 <h3 id="a19-implementation-quality">A19. Implementation quality<a class="headerlink" href="#a19-implementation-quality" title="Permanent link">&para;</a></h3>
-<p>Every architectural guarantee should become at least one of:</p>
+<p>Every architectural guarantee MUST be enforced by at least one of:</p>
 <ul>
 <li>a type/property boundary;</li>
 <li>protocol validation;</li>
@@ -593,7 +594,7 @@ README, architecture, protocol docs, and implementation to drift.</p>
 </ol>
 <h3 id="a23-no-v0-design-discretion">A23. No v0 design discretion<a class="headerlink" href="#a23-no-v0-design-discretion" title="Permanent link">&para;</a></h3>
 <p>For Omnis v0, coding agents implement the frozen design; they do not finish it.</p>
-<p>Before implementation, read <code>docs/DECISION_COMPLETE_V0.md</code>. If an observable behavior remains
+<p>Before implementation, load <code>spec/contract.toml</code>, then read the normative/shared and owning-component sources it names, including <code>docs/DECISION_COMPLETE_V0.md</code>. If an observable behavior remains
 unspecified, stop that item and report a <code>SpecificationDefect</code>. Do not introduce a reasonable
 default, equivalent dependency, substitute algorithm, temporary fallback, or locally convenient
 policy without updating the normative specification/ADR first.</p>

@@ -392,13 +392,13 @@ recalled memory.</p>
 <li>embedding model;</li>
 <li>reranker;</li>
 <li>reasoning model;</li>
-<li>vision/audio where useful;</li>
+<li>vision/audio capability bindings according to the frozen model-role fallback/stream rules;</li>
 <li>local inference engines;</li>
 <li>remote model APIs;</li>
 <li>Claude Code;</li>
 <li>Codex;</li>
 <li>OpenCode;</li>
-<li>generic harness;</li>
+<li>descriptor-driven generic harness using <code>spec/generic_harness.schema.json</code>;</li>
 <li>MCP.</li>
 </ul>
 <p>Agent integration:</p>
@@ -434,13 +434,13 @@ are indistinguishable in authority from user-created Control arrangements.</p>
 <li>remote execution envelopes;</li>
 <li>artifact transfer/cache;</li>
 <li>GPU/CPU placement;</li>
-<li>remote graph synchronization required for shared identities;</li>
+<li>federated remote graph queries/cache with shared NodeIds and authority rules from <code>DECISION_COMPLETE_V0.md</code>;</li>
 <li>QUIC/TLS remote RPC with the same EventId/TraceId/NodeId contracts.</li>
 </ul>
 <p>Exit: one Agent activity can use local Control, remote GPU, local repository, and remote worker while
 preserving shared graph/activity/event identity.</p>
 <h2 id="phase-10-learning-and-self-optimization">Phase 10 — Learning and self-optimization<a class="headerlink" href="#phase-10-learning-and-self-optimization" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
+<p>Implement exactly <code>docs/LEARNING_V0.md</code> and <code>spec/learning.toml</code>:</p>
 <ul>
 <li>memory utility learning;</li>
 <li>procedure induction;</li>

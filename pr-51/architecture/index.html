@@ -289,7 +289,10 @@ constants, defaults and fallback behavior are frozen by
 <a href="../DECISION_COMPLETE_V0/"><code>docs/DECISION_COMPLETE_V0.md</code></a> and ADR-0025. Canonical first-party
 kind/relation/capability/event names and lifecycle states are frozen by
 <a href="../ONTOLOGY_V0/"><code>docs/ONTOLOGY_V0.md</code></a>; public NixOS configuration is frozen by
-<a href="../NIX_OPTIONS_V0/"><code>docs/NIX_OPTIONS_V0.md</code></a>.</p>
+<a href="../NIX_OPTIONS_V0/"><code>docs/NIX_OPTIONS_V0.md</code></a>. Built-in coding harness integration is frozen by
+<a href="../HARNESS_ADAPTERS_V0/"><code>docs/HARNESS_ADAPTERS_V0.md</code></a>. Learning, routing adaptation,
+competence modeling, procedure induction and self-optimization are frozen by
+<a href="../LEARNING_V0/"><code>docs/LEARNING_V0.md</code></a>.</p>
 <p>Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.</p>
 <p>The system has four first-class authorities:</p>
@@ -539,8 +542,8 @@ Omnis product architecture.</p>
 <p>OmnisOS must remain compatible with nixpkgs packages and as much upstream NixOS module behavior as
 possible. The fork exists to add deep graph/event/control integration, not to gratuitously diverge
 from the package ecosystem.</p>
-<p>Upstream changes should be carried as a minimal reviewable patch stack until a permanent divergence
-is justified.</p>
+<p>Upstream changes MUST remain a minimal reviewable patch stack. A permanent divergence requires an
+explicit ADR naming the upstream behavior being replaced.</p>
 <h3 id="53-desired-and-actual-state">5.3 Desired and actual state<a class="headerlink" href="#53-desired-and-actual-state" title="Permanent link">&para;</a></h3>
 <p>OmnisOS maintains a distinction between:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>desired persistent system state
@@ -559,12 +562,14 @@ Examples include:</p>
 <li>a host must provide a required capability before placement;</li>
 <li>a persistent package/service relationship remains satisfied.</li>
 </ul>
-<p>Pure configuration invariants should be checked before activation where possible. Runtime invariants
-may be continuously evaluated from current graph state and enforced by physical mechanisms.</p>
+<p>An invariant whose inputs are entirely candidate Nix/graph state is checked before activation.
+An invariant depending on live physical state is evaluated after activation and continuously from
+authoritative OS observations. The invariant kind therefore determines the evaluation phase; an
+implementation does not choose ad hoc timing.</p>
 <h3 id="55-physical-enforcement">5.5 Physical enforcement<a class="headerlink" href="#55-physical-enforcement" title="Permanent link">&para;</a></h3>
-<p>Semantic authority must compile into real physical authority. Depending on the operation, OmnisOS may
-use Linux mechanisms such as namespaces, cgroups, seccomp, LSM/Landlock/eBPF hooks, UID/GID
-boundaries, mount/network namespaces, device isolation, and credential brokers.</p>
+<p>Semantic authority compiles into the fixed v0 enforcement stack in <code>DECISION_COMPLETE_V0.md §§53–55,71</code>:
+systemd transient services, mount/device/cgroup/system-call restrictions, cgroup v2, eBPF process and
+network filters, UID/GID boundaries, and protected credential injection.</p>
 <p>The Agent may reason freely; execution receives only the capabilities physically granted to it.</p>
 <h3 id="56-reference-configuration">5.6 Reference configuration<a class="headerlink" href="#56-reference-configuration" title="Permanent link">&para;</a></h3>
 <p>The umbrella repository carries the v0 reference shape at <a href="../declaration/"><code>examples/omnis.nix</code></a>.
@@ -677,7 +682,8 @@ core.</p>
 its plaintext value. Manager resolves authorized handles at execution time; OmnisOS enforces the
 physical access boundary.</p>
 <h3 id="68-effect-metadata">6.8 Effect metadata<a class="headerlink" href="#68-effect-metadata" title="Permanent link">&para;</a></h3>
-<p>Bindings should declare or infer execution properties where known:</p>
+<p>Every Binding declares exactly one effect class from <code>manager.capnp::EffectClass</code>; discovery may
+infer the class only when deterministic evidence supports it, otherwise the class is <code>opaque</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>pure/deterministic
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>read-only
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>idempotent
@@ -767,10 +773,10 @@ Manager capabilities.</p>
 simulation, memory/reflection, learning, and evolution.</p>
 <p>Every worker result re-enters the event stream. No worker maintains a hidden alternate history.</p>
 <h3 id="76-external-agents">7.6 External agents<a class="headerlink" href="#76-external-agents" title="Permanent link">&para;</a></h3>
-<p>Claude Code, Codex, OpenCode, and future harnesses are Manager resources that OmnisAgent may invoke as
-workers. Native harness hooks should emit events. Inference interception may provide a universal
-fallback so model-bound contexts can still participate in Omnis memory even when a harness exposes
-little semantic lifecycle information.</p>
+<p>Claude Code, Codex, OpenCode, and descriptor-driven future harnesses are Manager resources that
+OmnisAgent may invoke as workers. Their exact v0 adapters are defined by <code>HARNESS_ADAPTERS_V0.md</code>.
+All model-bound built-in harness traffic routes through the Manager inference gateway; available
+native hooks add lifecycle evidence but never replace that gateway boundary.</p>
 <hr />
 <h2 id="8-omniscontrol">8. OmnisControl<a class="headerlink" href="#8-omniscontrol" title="Permanent link">&para;</a></h2>
 <p>OmnisControl is the universal machine control environment. It replaces the old <code>OmnisGUI</code> concept.
@@ -814,7 +820,7 @@ the same identities:</p>
 identities. The render scene is an optimized lowering, never a semantic source of truth.</p>
 <h3 id="84-agent-access">8.4 Agent access<a class="headerlink" href="#84-agent-access" title="Permanent link">&para;</a></h3>
 <p>User interaction and Agent structural control share the same underlying state.</p>
-<p>The user primarily manipulates materialized controls through pointer/keyboard/touch/voice. The Agent
+<p>The user primarily manipulates materialized controls through pointer, keyboard, touch, and explicit push-to-talk voice input. The Agent
 has direct structural access and may:</p>
 <ul>
 <li>create/remove/replace/move views;</li>
@@ -824,14 +830,14 @@ has direct structural access and may:</p>
 <li>split or reorganize the workspace;</li>
 <li>create live visualizations;</li>
 <li>attach actions/interactions;</li>
-<li>persist a useful control arrangement where appropriate.</li>
+<li>persist a Control arrangement only when the user explicitly requests persistence, an existing durable presentation preference requires it, or the Agent-selected action has a persistence postcondition; otherwise the arrangement remains transient.</li>
 </ul>
 <p>These mutations emit events like user interactions do.</p>
 <h3 id="85-one-renderer">8.5 One renderer<a class="headerlink" href="#85-one-renderer" title="Permanent link">&para;</a></h3>
 <p>Terminal, browser semantics, widgets, code, graphs, media, 2D, and 3D do not require independent
 renderer architectures.</p>
-<p>Control lowers them into one GPU-oriented render scene. The initial compositor implementation should
-be Wayland-native, built using Smithay-class compositor primitives and wgpu-class GPU rendering.</p>
+<p>Control lowers them into one GPU-oriented render scene. The v0 compositor is Wayland-native, built
+with Smithay and wgpu according to <code>docs/CONTROL_RENDER_V0.md</code>.</p>
 <p>Existing applications remain existing applications. Wayland/XWayland surfaces are delegated/native
 regions where direct semantic rendering is unavailable or undesirable.</p>
 <h3 id="86-shell-and-input">8.6 Shell and input<a class="headerlink" href="#86-shell-and-input" title="Permanent link">&para;</a></h3>

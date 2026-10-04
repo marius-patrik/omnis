@@ -487,15 +487,16 @@ and historical snapshots.</p>
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>control-hidden
 <a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>execution-handle-only
 </code></pre></div>
-<p>Protected values should normally travel as opaque handles. Serialization endpoints must enforce
-disclosure metadata rather than rely on callers to remember redaction.</p>
+<p>Protected secret bytes NEVER appear in ordinary protocol Value/Event/Artifact bodies. Cross-component
+references use opaque HandleId/LeaseId identities; serialization endpoints enforce protection labels
+and reject disallowed disclosure rather than relying on caller redaction.</p>
 <hr />
 <h2 id="10-versioning">10. Versioning<a class="headerlink" href="#10-versioning" title="Permanent link">&para;</a></h2>
 <p>Protocols use explicit semantic versioning.</p>
 <p>Rules:</p>
 <ul>
 <li>additive fields are backward compatible within a major version;</li>
-<li>unknown optional fields are ignored/preserved where forwarding is required;</li>
+<li>Cap'n Proto unknown fields are preserved according to generated-library behavior; v0 defines no optional RPC feature negotiation;</li>
 <li>unknown required capability/field produces explicit incompatibility;</li>
 <li>identity formats cannot be silently reinterpreted;</li>
 <li>graph relation names are stable compatibility surface;</li>
@@ -548,7 +549,7 @@ without AI availability.</p>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>$XDG_RUNTIME_DIR/omnis/control.sock
 </code></pre></div>
 <p>Each connection negotiates protocol major/minor, component identity, build ID and supported
-interfaces. Major mismatch rejects the connection; minor versions intersect optional features.</p>
+interfaces. v0 accepts only protocol 1.0 exactly, per <code>DECISION_COMPLETE_V0.md §72</code>.</p>
 <p>Effectful requests carry RequestId, TraceId, actor NodeId, causal EventIds, authority scope, deadline
 and an idempotency key when retry is legal. Execution creation is idempotent on ExecutionId.</p>
 <p>Semantic/event IDs are UUIDv7 binary 16-byte values. Artifact IDs are BLAKE3-256. Inline payloads
@@ -567,8 +568,7 @@ schema revision and generate bindings during their Nix build:</p>
 protection labels, typed values and typed errors. Domain schemas import it; they may not redefine
 identity or error envelopes.</p>
 <p>Cap'n Proto field ordinals are append-only. Removed fields are reserved rather than reused. Every
-service interface exposes a <code>getCapabilities</code>/handshake feature set so minor-version peers can
-negotiate optional operations without guessing.</p>
+service interface exposes the common handshake and the exact v1 interface string; v0 has no minor-version optional-operation negotiation.</p>
 <p>Graph subscriptions resume from GraphRevision. Event delivery resumes from EventId/ingest sequence.
 Streaming APIs must expose backpressure and explicit cancellation; unbounded producer queues are
 forbidden.</p>

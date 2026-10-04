@@ -402,7 +402,8 @@ execution.</p>
 <li>Agent learned performance estimates.</li>
 </ul>
 <p>Learned estimates are input data, not hidden control flow. Given the same graph revision, policy,
-and estimates, resolution should be reproducible.</p>
+constraints, placement state, preferences, and learned estimates, resolution MUST return the exact
+score/order/tie-break result in <code>DECISION_COMPLETE_V0.md §14</code>.</p>
 <p>Callers can request a specific binding when implementation identity is semantically relevant.</p>
 <hr />
 <h2 id="6-nix-extensions">6. Nix extensions<a class="headerlink" href="#6-nix-extensions" title="Permanent link">&para;</a></h2>

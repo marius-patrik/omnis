@@ -584,6 +584,39 @@ erases both local tokens and records the session/diff artifacts.</p>
 5. change this document in the same commit;
 6. only then mark the new version compatible.</p>
 <p>There is no best-effort flag guessing.</p>
+<h2 id="12-upstream-interface-evidence">12. Upstream interface evidence<a class="headerlink" href="#12-upstream-interface-evidence" title="Permanent link">&para;</a></h2>
+<p>These references support the exact pinned adapter fixtures above. They are evidence only and do not
+weaken the version pins.</p>
+<ul>
+<li>Claude Code CLI: https://docs.anthropic.com/en/docs/claude-code/cli-usage</li>
+<li>Claude Code gateway configuration: https://docs.anthropic.com/en/docs/claude-code/llm-gateway</li>
+<li>Codex exec/app-server source surface: https://github.com/openai/codex</li>
+<li>OpenCode CLI: https://opencode.ai/v2/docs/cli/commands/</li>
+<li>OpenCode providers: https://opencode.ai/v2/docs/providers</li>
+</ul>
+<h2 id="13-descriptor-driven-generic-harness">13. Descriptor-driven generic harness<a class="headerlink" href="#13-descriptor-driven-generic-harness" title="Permanent link">&para;</a></h2>
+<p>The v0 generic harness adapter is intentionally narrower than the three built-ins. It supports one
+process-per-turn executable described by a JSON document that validates against
+<code>spec/generic_harness.schema.json</code>.</p>
+<p>Exact behavior:</p>
+<ol>
+<li>descriptor is supplied by an explicitly registered Resource; Manager never invents one from help text;</li>
+<li>run <code>probe.versionArgs</code>, then <code>probe.helpArgs</code>, each with the normal 2-second discovery timeout;</li>
+<li>normalize help output as UTF-8 with replacement, CRLF-&gt;LF, ASCII whitespace collapse, ASCII lowercase;</li>
+<li>every <code>probe.requiredTokens</code> token must occur after normalization or Binding is incompatible;</li>
+<li>expand only <code>{worktree}</code>, <code>{gateway}</code>, and <code>{model}</code> argv placeholders;</li>
+<li>prompt transport <code>last_arg</code> appends expanded <code>prompts/code_worker.md</code>; <code>stdin_utf8</code> writes those UTF-8 bytes then closes stdin;</li>
+<li>working directory is always the assigned Worktree path;</li>
+<li><code>process_only</code> receives no model-provider credential or gateway grant;</li>
+<li><code>gateway</code> is fixed to <code>http://127.0.0.1:7331/v1</code> and virtual model <code>omnis-reason</code>; the descriptor may name only the environment-variable keys expected by the foreign CLI. It receives one execution-scoped gateway token, and the credential variable value is that token;</li>
+<li>output <code>text</code> retains stdout bytes; <code>json</code> requires one RFC 8259 JSON value; <code>jsonl</code> requires every non-empty line to be one RFC 8259 JSON value;</li>
+<li>exit 0 plus valid declared output is success; non-zero or invalid declared output is failure;</li>
+<li>generic adapters expose process lifecycle only; they do not claim structured tool/session events or session resume.</li>
+</ol>
+<p>The generic descriptor cannot claim <code>full</code> or <code>hook</code> coverage in v0. Rich integration requires a
+first-party/versioned adapter contract.</p>
+<p>A generic descriptor cannot select a concrete provider, external base URL, or alternate model ID.
+Concrete model selection remains exclusively Manager resolution of <code>omnis.capability.model.reason</code>.</p>
         </article>
 
         <footer class="footer">
@@ -621,6 +654,10 @@ erases both local tokens and records the session/diff artifacts.</p>
           <li><a href="#10-no-direct-provider-escape">10. No direct provider escape</a>
           </li>
           <li><a href="#11-adapter-upgrade-rule">11. Adapter upgrade rule</a>
+          </li>
+          <li><a href="#12-upstream-interface-evidence">12. Upstream interface evidence</a>
+          </li>
+          <li><a href="#13-descriptor-driven-generic-harness">13. Descriptor-driven generic harness</a>
           </li>
         </ul>
       </aside>
