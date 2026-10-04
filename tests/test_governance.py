@@ -626,6 +626,7 @@ def test_reference_configuration_has_no_agent_service():
     assert "harnesses." not in declaration
     assert "agentAccess = {" in declaration
 
+
 def test_permanent_events_keep_cas_artifacts_alive():
     decision = _read("docs", "DECISION_COMPLETE_V0.md")
     assert 'owner_kind = "event"' in decision
