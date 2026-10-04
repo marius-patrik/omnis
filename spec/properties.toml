@@ -132,3 +132,19 @@ type = "text"
 [properties."omnis.presentation.timeline_event"]
 type = "event_ref"
 optional = true
+
+
+[properties."omnis.model.context_window"]
+type = "u64"
+min = 1
+[properties."omnis.model.max_output_tokens"]
+type = "u64"
+min = 1
+[properties."omnis.model.supports_tools"]
+type = "bool"
+[properties."omnis.model.supports_images"]
+type = "bool"
+[properties."omnis.model.supports_files"]
+type = "bool"
+[properties."omnis.model.supports_streaming"]
+type = "bool"

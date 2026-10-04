@@ -233,7 +233,7 @@ def test_v0_implementation_profile_is_concrete():
 
 def test_protocol_schema_sources_exist():
     """The frozen wire contract must exist as schema source, not prose only."""
-    for name in ("common", "events", "capabilities", "graph", "os", "manager", "agent", "control"):
+    for name in ("common", "events", "capabilities", "inference", "graph", "os", "manager", "agent", "control"):
         path = os.path.join(REPO_ROOT, "protocol", f"{name}.capnp")
         assert os.path.isfile(path), f"missing canonical protocol schema {name}.capnp"
         content = _read("protocol", f"{name}.capnp")
@@ -482,3 +482,76 @@ def test_capability_registry_has_wire_schema_mapping():
     for contract in capabilities.values():
         assert f"struct {contract['input']}" in capnp or contract["input"] == "Empty"
         assert f"struct {contract['output']}" in capnp or contract["output"] == "Empty"
+
+
+def test_harness_adapter_contracts_are_exact():
+    """Built-in coding harnesses must have exact versions, transport and full coverage."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "harnesses.toml"), "rb") as handle:
+        spec = tomllib.load(handle)
+    assert spec["virtual_model"] == "omnis-reason"
+    assert spec["gateway_base_url"] == "http://127.0.0.1:7331"
+
+    expected = {
+        "claude": "2.1.289",
+        "codex": "0.160.0",
+        "opencode": "1.18.34",
+    }
+    dimensions = spec["coverage"]["full_requires"]
+    assert len(dimensions) == 6
+    for name, version in expected.items():
+        harness = spec["harnesses"][name]
+        assert harness["version"] == version
+        assert harness["coverage"] == "full"
+        assert harness["network_profile"] == "loopback-gateway"
+        for dimension in dimensions:
+            assert harness[dimension] is True
+
+    assert "stream-json" in spec["harnesses"]["claude"]["command"]["argv"]
+    assert "app-server" in spec["harnesses"]["codex"]["command"]["argv"]
+    assert spec["harnesses"]["opencode"]["command"]["argv"][:2] == ["opencode", "serve"]
+
+
+def test_inference_gateway_contract_is_scoped_and_local():
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "inference_gateway.toml"), "rb") as handle:
+        gateway = tomllib.load(handle)
+
+    assert gateway["listener"]["ipv4"] == "127.0.0.1"
+    assert gateway["listener"]["port"] == 7331
+    assert gateway["listener"]["external_listen"] is False
+    assert gateway["auth"]["token_random_bytes"] == 32
+    assert gateway["auth"]["persistence"] == "memory-only"
+    assert gateway["model"]["virtual_id"] == "omnis-reason"
+    assert gateway["model"]["required_capability"] == "omnis.capability.model.reason"
+    assert gateway["network_profile"]["loopback_gateway"]["allowed_tcp_ports"] == [7331]
+
+
+def test_code_agent_requires_reason_model_and_canonical_inference():
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "capabilities.toml"), "rb") as handle:
+        capabilities = tomllib.load(handle)["capabilities"]
+
+    code = capabilities["omnis.capability.code.agent"]
+    assert code["requires"] == ["omnis.capability.model.reason"]
+    for name in ("omnis.capability.model.generate", "omnis.capability.model.reason"):
+        contract = capabilities[name]
+        assert contract["input"] == "InferenceRequestInput"
+        assert contract["output"] == "InferenceResultOutput"
+
+    inference = _read("protocol", "inference.capnp")
+    assert "struct InferenceRequest" in inference
+    assert "struct InferenceResult" in inference
+    assert "struct StreamEvent" in inference

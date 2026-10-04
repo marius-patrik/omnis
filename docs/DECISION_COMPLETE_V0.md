@@ -1592,81 +1592,59 @@ Manager emits planned deletion set before GC and resulting deletion event after 
 
 ## 42. Inference gateway and universal model-event interception
 
-`omnis-managerd` exposes a loopback-only inference gateway:
+The exact gateway, authentication, request translation, context injection and built-in harness
+contracts are normative in:
 
 ```text
-127.0.0.1:7331
-[::1]:7331
+docs/HARNESS_ADAPTERS_V0.md
+spec/inference_gateway.toml
+spec/harnesses.toml
+protocol/inference.capnp
 ```
 
-It serves:
+Manager listens only on `127.0.0.1:7331` and `[::1]:7331`. Built-in harnesses authenticate with
+execution-scoped `omnis1.*` bearer tokens and see only virtual model `omnis-reason`. Each token is
+bound to one resolved `model.reason` Binding and one Execution. Provider credentials never enter a
+harness.
 
-- OpenAI-compatible HTTP endpoints under `/v1/*`;
-- Anthropic-compatible endpoints under `/anthropic/v1/*`.
+The accepted HTTP surface is exactly:
 
-It never listens externally in v0.
+```text
+POST /v1/responses
+POST /v1/chat/completions
+GET  /v1/models
+POST /anthropic/v1/messages
+POST /anthropic/v1/messages/count_tokens
+GET  /anthropic/v1/models
+```
 
-Every gateway request is processed in this order:
-
-1. authenticate local execution identity/HandleId;
-2. parse provider-compatible request;
-3. create `omnis.event.inference.request` with metadata + protected ArtifactRef for request body;
-4. ask Agent context service for injection material when the calling Execution is attached to an
-   Omnis Worker/Activity and injection is enabled;
-5. inject context using §43;
-6. resolve concrete model/provider binding through Manager;
-7. execute upstream request using protected provider credential;
-8. stream response to caller while recording protected response artifact;
-9. enqueue `omnis.event.inference.response` or failure event;
-10. update invocation cost/token/latency facts.
-
-Provider request bodies and responses are never written inline to ordinary logs.
-
-External harness adapters set their supported provider base URL/environment to this gateway. A
-built-in harness binding that can route through this gateway must do so; direct provider access is
-not allowed for that binding.
-
-If a harness cannot be routed or hooked, its binding is marked
-`memory_coverage = process_only`, not `full`.
+No arbitrary proxy path exists.
 
 ---
 
-## 43. Context injection into external harnesses
+## 43. External-harness context and coverage
 
-Coverage tiers are exact:
+The gateway performs per-request context injection before invoking the locked reason-model Binding.
+Maximum injected content is `min(25% input budget, 16384 tokens)`, with NodeId/EventId evidence
+citations and provider protection filtering.
+
+Coverage dimensions are:
 
 ```text
-full          native pre-model hook + inference gateway
-gateway       inference gateway only
-hook          native harness hook only
-process_only  process/PTY/tool events only
+model_interception
+context_injection
+structured_lifecycle
+structured_tool_events
+session_resume
+permission_control
 ```
 
-Manager exposes this tier in Binding metadata.
+`full` means all six are true. For the exact v0 fixtures Claude Code 2.1.289, Codex 0.160.0 and
+OpenCode 1.18.34 are all `full`. Native hooks are optional enrichment, not a correctness
+requirement.
 
-Injection precedence:
-
-1. harness-native context/pre-prompt hook when the pinned harness version supports one;
-2. otherwise inference-gateway injection.
-
-Gateway injection rules:
-
-- OpenAI chat-compatible request: prepend one system/developer message named logically
-  `omnis_context` after provider-required system messages and before user conversation;
-- Anthropic-compatible request: append an `<omnis-context>...</omnis-context>` block to the system
-  field;
-- never rewrite tool results or user content;
-- inject one context capsule per model request;
-- max injected text = min(25% input budget, 16384 tokens);
-- include stable NodeId/EventId citations inside the capsule serialization;
-- omit protected material disallowed for the resolved provider.
-
-The Agent context service returns an empty capsule when no relevant memory is activated; Manager does
-not manufacture filler context.
-
-Built-in Claude Code, Codex and OpenCode adapters must implement the highest coverage tier supported
-by their pinned versions. Their adapter tests assert the tier; implementers do not choose a weaker
-tier for convenience.
+The complete commands, environment, session transports and success/failure parsing rules are frozen
+in `HARNESS_ADAPTERS_V0.md` and `spec/harnesses.toml`.
 
 ---
 
@@ -2190,24 +2168,25 @@ For MIME detection, order is:
 
 ## 60. External harness version/package policy
 
-Omnis does not vendor or silently download proprietary/external coding harnesses.
+Built-in adapter compatibility is exact, not major-version-based:
 
-Built-in harness adapters bind an executable resource discovered from:
+```text
+Claude Code 2.1.289
+Codex 0.160.0
+OpenCode 1.18.34
+```
 
-1. an existing Nix store/profile resource;
-2. PATH;
-3. an explicitly declared executable path.
+Discovery can represent other versions as Resources, but the built-in `code.agent` Binding is
+`incompatible` until `HARNESS_ADAPTERS_V0.md`, `spec/harnesses.toml`, fixtures and conformance
+tests are updated.
 
-The adapter records `--version` output and refuses unsupported major versions with
-`incompatible`, rather than guessing flags.
+Omnis does not vendor or silently curl-install harnesses. Binding lookup order is existing Nix
+store/profile Resource, PATH, then explicitly declared executable. Installing a missing exact
+fixture is a normal package operation; if the pinned Nix universe does not contain that exact
+version, its package definition/source hash must be added in a reviewed specification/package change
+before use.
 
-Installing a harness is a normal package/resource operation under §40. If pinned nixpkgs contains the
-requested package, use it. Otherwise a package definition with exact source version/hash must be added
-to OmnisManager/OmnisOS in a reviewed change before installation; runtime curl-to-shell installers are
-forbidden.
-
-Adapters are tested against explicit supported version fixtures. A new harness major version requires
-updating the adapter compatibility fixture before it can claim full/hook/gateway coverage.
+Runtime curl-to-shell installers and CLI flag guessing are forbidden.
 
 ---
 

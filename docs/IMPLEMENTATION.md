@@ -85,6 +85,7 @@ omnis-manager/omnis/
   managerd/resolver         deterministic resolver/placement
   managerd/executor         systemd execution broker
   managerd/adapters         subprocess adapter host
+  managerd/inference        local protocol gateway + canonical inference translation
   nix-observer/             C++ observer/control additions to upstream Nix
 
 omnis-agent/
@@ -947,7 +948,8 @@ schema/worldline.sql
 schema/index.sql
 ```
 
-Cross-process wire code is generated from `protocol/*.capnp`. Agent generative calls use
+Cross-process wire code is generated from `protocol/*.capnp`, including the canonical inference IR.
+Harness adapters consume `spec/harnesses.toml` and `spec/inference_gateway.toml`. Agent generative calls use
 `prompts/*.md`. First-party graph identifiers come from `ONTOLOGY_V0.md`. NixOS modules implement
 `NIX_OPTIONS_V0.md` exactly.
 

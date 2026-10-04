@@ -413,3 +413,17 @@ new `omnis.*` identifier during implementation.
 
 Domain state strings for Execution, Worker, Activity, Generation and Memory use the exact state
 machines from `ONTOLOGY_V0.md`.
+
+
+## 16. Canonical inference protocol
+
+`protocol/inference.capnp` is the only first-party model request/result semantic IR. The local
+OpenAI/Anthropic gateway and concrete model/provider adapters translate to/from this schema.
+
+`model.generate` and `model.reason` use the `InferenceRequestInput` /
+`InferenceResultOutput` capability contracts. Tool/message semantics are not provider-specific
+inside Manager.
+
+The exact HTTP compatibility subset and unsupported-feature behavior are defined in
+`HARNESS_ADAPTERS_V0.md`. Provider-specific raw request/response bytes are retained only as
+protected provenance artifacts.

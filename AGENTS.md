@@ -415,6 +415,8 @@ Do not recreate these contracts inside component repositories:
 - cross-component wire schemas: `protocol/*.capnp`;
 - Agent prompts: `prompts/*.md`;
 - first-party ontology/event/state names: `docs/ONTOLOGY_V0.md`;
-- NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`.
+- NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`;
+- harness adapter manifest/gateway: `spec/harnesses.toml`, `spec/inference_gateway.toml`, `docs/HARNESS_ADAPTERS_V0.md`;
+- canonical inference semantics: `protocol/inference.capnp`.
 
 Component builds pin the umbrella revision and generate/consume these sources.

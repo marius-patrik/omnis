@@ -234,34 +234,30 @@ The system may revisit older resources when better tooling/models become availab
 
 ## 9. External agent harnesses
 
-Agent harnesses are normal resources that provide capabilities.
+Agent harnesses are ordinary Resources/Bindings for `omnis.capability.code.agent`.
 
-Initial target bindings:
+The three built-in v0 adapters are frozen by
+[`HARNESS_ADAPTERS_V0.md`](HARNESS_ADAPTERS_V0.md) and `spec/harnesses.toml`:
 
 ```text
-Claude Code
-Codex
-OpenCode
-Agents-compatible runtimes
-arbitrary CLI harnesses
-MCP-capable agents
+Claude Code 2.1.289
+Codex 0.160.0
+OpenCode 1.18.34
 ```
 
-A harness binding should expose, when possible:
+Each built-in `code.agent` Binding has one hard `model.reason` dependency. Manager resolves that
+dependency before launch and presents only virtual model `omnis-reason` to the foreign harness.
+Every model request is forced through Manager's execution-scoped local inference gateway; raw provider
+credentials never enter the harness.
 
-- binary/package identity;
-- supported model/provider configuration;
-- tool/permission controls;
-- repository/workspace requirements;
-- session/resume semantics;
-- lifecycle hooks/events;
-- context interception endpoint or model proxy integration;
-- cost/quota status;
-- structured output/protocol capabilities.
+Harness-specific session/protocol state is foreign realization metadata attached to the Omnis Worker
+and Execution. OmnisAgent still reasons only in semantic capabilities, Worker/Activity identities and
+events.
 
-OmnisAgent can use harnesses as workers without encoding harness-specific behavior into its core.
+Coverage is the exact six-dimensional contract in `HARNESS_ADAPTERS_V0.md`; all three pinned
+built-ins are `full`. A different installed version is discoverable as a Resource but its built-in
+Binding is `incompatible` until its fixture/spec is updated.
 
----
 
 ## 10. Inference engines and models
 

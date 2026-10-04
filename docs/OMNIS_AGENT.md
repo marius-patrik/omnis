@@ -168,26 +168,26 @@ allow workers to expand details explicitly.
 
 ## 6. Universal inference interception
 
-Because Omnis can run arbitrary external harnesses, native hooks are not sufficient for complete
-memory coverage.
+Manager exposes the exact local gateway specified by
+[`HARNESS_ADAPTERS_V0.md`](HARNESS_ADAPTERS_V0.md), `spec/inference_gateway.toml`, and
+`protocol/inference.capnp`.
 
-Manager should support an inference-boundary interception binding for common model protocols. Agent
-uses it to:
+For Worker-attached model traffic the gateway is the mandatory path:
 
-1. observe context about to enter inference;
-2. deduplicate already observed context items;
-3. record new source events;
-4. retrieve/compile relevant Agent memory;
-5. inject a tagged memory projection where configured;
-6. observe the generated result.
+1. authenticate the execution-scoped local token;
+2. parse the foreign OpenAI/Anthropic request into canonical InferenceRequest;
+3. retain the protected original request artifact;
+4. ask Agent for the relevant ContextCapsule;
+5. inject one evidence-cited Omnis context segment;
+6. invoke the Worker Execution's locked `model.reason` Binding;
+7. stream the canonical result back in the foreign protocol;
+8. emit inference request/response/failure events.
 
-Native harness hooks enrich this with stronger semantics such as tool calls, file edits, compaction,
-permissions, subagent results, and session transitions.
+External harness native/structured event surfaces add tool/session/lifecycle evidence. They do not
+replace the gateway and they do not become a second memory path.
 
-Memory projections are tagged so their future retransmission does not become recursive source
-evidence.
+Tagged Omnis context is recognized on retransmission and never re-ingested as new source evidence.
 
----
 
 ## 7. Workers
 
@@ -423,5 +423,5 @@ Context compilation persists the selected source references and final ContextCap
 worker result can be traced back to the exact evidence and capability descriptors it received.
 
 Model roles are Manager capabilities (`model.classify`, `model.embed`, `model.rerank`,
-`model.generate`, `model.reason`, `model.vision`, `model.audio.transcribe`, `agent.code`). No provider
+`model.generate`, `model.reason`, `model.vision`, `model.audio.transcribe`, `code.agent`). No provider
 name is part of Agent core logic.

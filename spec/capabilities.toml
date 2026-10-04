@@ -79,6 +79,7 @@ effect = "readOnly"
 input = "CodeAgentInput"
 output = "CodeAgentOutput"
 effect = "opaque"
+requires = ["omnis.capability.model.reason"]
 
 [capabilities."omnis.capability.model.classify"]
 input = "ModelTextInput"
@@ -96,13 +97,13 @@ output = "RerankOutput"
 effect = "pure"
 
 [capabilities."omnis.capability.model.generate"]
-input = "ModelTextInput"
-output = "GenerateOutput"
+input = "InferenceRequestInput"
+output = "InferenceResultOutput"
 effect = "pure"
 
 [capabilities."omnis.capability.model.reason"]
-input = "ModelTextInput"
-output = "GenerateOutput"
+input = "InferenceRequestInput"
+output = "InferenceResultOutput"
 effect = "pure"
 
 [capabilities."omnis.capability.model.vision"]

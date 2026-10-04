@@ -42,6 +42,7 @@ LINK_REWRITES: Dict[str, str] = {
     "docs/DECISION_COMPLETE_V0.md": "DECISION_COMPLETE_V0.md",
     "docs/ONTOLOGY_V0.md": "ONTOLOGY_V0.md",
     "docs/NIX_OPTIONS_V0.md": "NIX_OPTIONS_V0.md",
+    "docs/HARNESS_ADAPTERS_V0.md": "HARNESS_ADAPTERS_V0.md",
     "docs/GRAPH.md": "GRAPH.md",
     "docs/OMNIS_OS.md": "OMNIS_OS.md",
     "docs/OMNIS_MANAGER.md": "OMNIS_MANAGER.md",

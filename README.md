@@ -126,6 +126,7 @@ Implementation specifications:
 - [Decision-complete v0 contract](docs/DECISION_COMPLETE_V0.md)
 - [v0 ontology/event registry](docs/ONTOLOGY_V0.md)
 - [v0 NixOS option contract](docs/NIX_OPTIONS_V0.md)
+- [Harness adapters + inference gateway](docs/HARNESS_ADAPTERS_V0.md)
 - [Shared graph](docs/GRAPH.md)
 - [OmnisOS](docs/OMNIS_OS.md)
 - [OmnisManager](docs/OMNIS_MANAGER.md)

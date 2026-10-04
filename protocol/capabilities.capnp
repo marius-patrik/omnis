@@ -1,6 +1,7 @@
 @0x8c1820c1aa7df621;
 
 using C = import "common.capnp";
+using I = import "inference.capnp";
 
 struct Empty {}
 
@@ -41,6 +42,8 @@ struct CodeAgentInput {
 struct CodeAgentOutput { execution @0 :C.Uuid; patch @1 :C.MaybeArtifactRef; commit @2 :Text; }
 
 struct ModelTextInput { context @0 :C.ArtifactRef; }
+struct InferenceRequestInput { request @0 :I.InferenceRequest; }
+struct InferenceResultOutput { result @0 :I.InferenceResult; }
 struct ClassifyOutput { labels @0 :List(LabelScore); }
 struct LabelScore { label @0 :Text; score @1 :Float64; }
 struct EmbedOutput { model @0 :C.Uuid; dimension @1 :UInt32; vectorF32Le @2 :Data; }

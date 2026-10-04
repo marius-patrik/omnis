@@ -8,6 +8,8 @@ These files are canonical inputs for generated constants/registries.
 - `capabilities.toml` — capability name -> input/output Cap'n Proto types + effect class.
 - `properties.toml` — first-party property key types/constraints.
 - `state_machines.toml` — legal lifecycle transitions.
+- `harnesses.toml` — exact external coding-harness versions, commands, transports and coverage.
+- `inference_gateway.toml` — local gateway listener/auth/model/network/context constants.
 
 Component repositories pin an umbrella commit and generate language-specific constants from these
 files during Nix builds. They must not copy values into independent handwritten registries.
