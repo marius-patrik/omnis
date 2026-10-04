@@ -767,9 +767,9 @@ def test_contract_manifest_references_existing_files():
 
     for section in ("normative", "machine", "protocol", "database", "prompts", "assets"):
         for _, rel in contract[section].items():
-            assert os.path.isfile(os.path.join(REPO_ROOT, rel)), (
-                f"contract manifest references missing {section} source {rel}"
-            )
+            assert os.path.isfile(
+                os.path.join(REPO_ROOT, rel)
+            ), f"contract manifest references missing {section} source {rel}"
 
     required_normative = {
         "ARCHITECTURE.md",
