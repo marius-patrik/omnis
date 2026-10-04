@@ -93,7 +93,7 @@ Rules:
 - no embedded JavaScript/Python runtime in core services;
 - no hidden global singleton runtime.
 
-### 2.2 Graph/Agent persistence
+### 2.2 Graph/external agent persistence
 
 ```text
 rusqlite              SQLite
@@ -169,11 +169,7 @@ These paths/names are exact v0 contracts.
 ### 3.2 Per-user state
 
 ```text
-$XDG_STATE_HOME/omnis/agent/worldline.sqlite3
-$XDG_STATE_HOME/omnis/agent/index.sqlite3
-$XDG_STATE_HOME/omnis/agent/checkpoints/
 $XDG_STATE_HOME/omnis/control/
-$XDG_RUNTIME_DIR/omnis/agent.sock
 $XDG_RUNTIME_DIR/omnis/control.sock
 ```
 
@@ -189,7 +185,6 @@ omnis-managerd.service
 omnis-recovery.target
 
 user:
-omnis-agentd.service
 omnis-control.service
 
 execution scopes:
@@ -212,7 +207,7 @@ Shared local IPC group:
 omnis
 ```
 
-Sockets are root/owning-service:omnis, mode 0660. User Agent/Control sockets are mode 0600.
+Sockets are root/owning-service:omnis, mode 0660. User external agent/Control sockets are mode 0600.
 
 ---
 
@@ -379,8 +374,6 @@ Mark roots:
 
 - current graph ArtifactRefs;
 - unexpired historical graph refs retained by backup policy;
-- Agent worldline ArtifactRefs;
-- active worker checkpoints;
 - active Nix candidate metadata.
 
 Unmarked objects receive a tombstone timestamp; deletion occurs only on the next GC >=7 days later.
@@ -391,23 +384,20 @@ Unmarked objects receive a tombstone timestamp; deletion occurs only on the next
 
 ### 7.1 producer contract
 
-A first-party producer considers an event published only after graphd confirms durable outbox enqueue.
+A first-party producer considers an event published only after graphd confirms durable event journal enqueue.
 
 Graph mutation events are inserted in the same SQLite transaction as the graph mutation.
 
 ### 7.2 delivery
 
-Graphd outbox has monotonically increasing u64 ingest_seq.
+Graphd journal has monotonically increasing u64 `ingest_seq`.
+Any authorized consumer requests from `after_ingest_seq`.
+Graphd delivers in ascending sequence.
+Each consumer persists its own cursor and reconnects from that cursor.
+There is no global ACK and one consumer can never delete or advance another consumer's history.
 
-Agent requests from `after_ingest_seq`.
-Graphd delivers in ascending ingest_seq.
-Agent transactionally inserts EventId + ingest_seq into worldline.
-Only after commit does Agent ACK that exact pair.
-
-Semantics: at-least-once transport, exactly-once worldline identity through EventId primary-key
-deduplication.
-
-ACKed outbox rows remain for 24 hours, then are purged hourly.
+v0 performs no automatic deletion of journal rows or event-referenced artifacts. This guarantees
+that an agent installed later can replay every core event since initialization.
 
 ### 7.3 dense event batching
 
@@ -433,7 +423,7 @@ producer shutdown
 Every item retains producer sequence, monotonic timestamp, type and payload.
 No coalescing/replacement is allowed in a lossless batch.
 
-Render-frame state itself is not an Agent event. Semantic Control mutations and user input events are.
+Render-frame state itself is not an external agent event. Semantic Control mutations and user input events are.
 
 ---
 
@@ -457,8 +447,8 @@ Default bounded channel capacities:
 ```text
 graph writer:              4096
 graph subscription:        4096 deltas
-Agent ingest internal:     8192 events
-Agent ready-worker queue:  1024
+external agent ingest internal:     8192 events
+external agent ready-worker queue:  1024
 Manager execution events:  4096
 Control semantic input:    4096
 Control graph deltas:      4096
@@ -529,7 +519,7 @@ Logical shared graph across hosts is federated:
 
 - each host graphd is authoritative for its local physical/system facts;
 - Manager is authoritative for executions/bindings it owns;
-- Agent cognitive state remains on the Agent's home host;
+- external agent cognitive state remains on the external agent's home host;
 - remote queries use remote graph RPC and preserve original NodeIds;
 - remote facts cached locally carry source HostId, source GraphRevision and stale_after;
 - default remote cache stale_after = 30 seconds for live physical state, infinite for immutable
@@ -616,7 +606,7 @@ Repository/workspace Manager bindings request watched roots explicitly.
 
 ### 12.1 execution envelope
 
-Non-interactive Agent/Manager executions default to:
+Non-interactive external agent/Manager executions default to:
 
 ```text
 filesystem: deny except explicit read-only inputs + explicit writable workdir
@@ -655,7 +645,7 @@ used.
 
 Default LeaseId TTL: 5 minutes.
 Lease ends earlier when ExecutionId completes/cancels.
-Secret bytes are never logged, graph-stored, worldline-stored or model-context serialized.
+Secret bytes are never logged, graph-stored, event-journal-stored, or serialized into MCP/plugin/model payloads.
 
 ---
 
@@ -790,269 +780,6 @@ Cancellation:
 
 ---
 
-## 16. Agent event priority and cognition
-
-### 16.1 base event priority
-
-```text
-security/invariant violation     1.00
-explicit user semantic request   0.95
-persistent mutation failure      0.95
-execution/worker failure         0.90
-worker/model result              0.75
-goal/commitment deadline         0.85
-Control submit/action            0.75
-Control focus/selection          0.55
-file/repo semantic change        0.55
-process/service lifecycle        0.45
-resource availability change     0.45
-dense telemetry batch            0.20
-periodic internal timer          0.10
-```
-
-Unknown event type base priority: 0.40.
-
-Additional features [0,1]:
-
-```text
-goal_relevance
-novelty
-urgency
-```
-
-If a classifier capability is unavailable, goal_relevance=0.5, novelty=0.5, urgency derives only from
-explicit deadlines else 0.
-
-Salience:
-
-```text
-clamp01(0.55*base + 0.20*goal_relevance + 0.15*novelty + 0.10*urgency)
-```
-
-Routing:
-
-```text
->= 0.75 immediate judgement queue
->= 0.40 normal judgement queue
-<  0.40 deterministic reducers + memory only
-```
-
-An event causally attached to an active user Activity is raised to at least 0.75.
-
-### 16.2 exact fast path
-
-Before any generative model:
-
-1. exact Control command;
-2. exact URI/path/NodeId;
-3. exact registered capability;
-4. deterministic query/transform;
-5. classifier;
-6. retrieval/reranker;
-7. generative reasoning;
-8. external agent/search workflow.
-
-Stop at the first level that can satisfy the postcondition.
-
----
-
-## 17. Agent candidate scheduling
-
-Every judgement cycle includes NullIntention.
-
-Each non-null candidate has normalized features:
-
-```text
-goal_progress
-information_gain
-urgency
-risk_reduction
-novelty
-user_relevance
-normalized_cost
-```
-
-Priority:
-
-```text
-0.30*goal_progress
-+0.20*information_gain
-+0.15*urgency
-+0.15*risk_reduction
-+0.10*novelty
-+0.10*user_relevance
--0.20*normalized_cost
-```
-
-NullIntention priority = 0.15.
-
-Candidates with hard unsatisfied constraints are removed.
-Pareto-dominated candidates on benefit dimensions with >= cost are removed.
-Remaining candidates sort by priority descending then candidate UUID ascending.
-
-Run candidates only while priority > NullIntention and budgets permit.
-
-### 17.1 concurrency
-
-```text
-global active Workers: min(16, max(4, logical_cpu_count))
-generative/reasoning model Workers: 4
-external coding-agent Workers: 2 per repository
-mutating coding-agent Workers: 1 per repository/worktree
-local single-GPU non-batching model executions: 1 per GPU
-retrieval/classifier Workers: min(8, logical_cpu_count)
-```
-
-Repository mutation lock key = Repository NodeId + worktree path identity.
-
----
-
-## 18. Agent retrieval
-
-Mandatory context is gathered first:
-
-- trigger event;
-- causal parents recursively to max 32 events;
-- explicit referenced NodeIds/ArtifactIds;
-- active Activity/Goal/Commitment state;
-- current user request;
-- capability schemas selected for the worker.
-
-Retrieval candidates:
-
-```text
-FTS5 top 64
-vector cosine top 64 when model.embed exists
-graph neighborhood depth 2, max 128 nodes
-same Activity recent events top 64
-procedures matching requested capability top 32
-```
-
-Merge lexical/vector lists with Reciprocal Rank Fusion:
-
-```text
-RRF score = sum(1 / (60 + rank))
-```
-
-Graph/activity/procedure candidates receive a synthetic RRF rank of 1, 8 and 16 respectively when
-not already retrieved.
-
-Deduplicate by semantic NodeId/EventId.
-
-If `model.rerank` is available, rerank the top 32 RRF candidates and use reranker order.
-Otherwise use RRF score descending then ID bytes ascending.
-
----
-
-## 19. Agent context compilation
-
-Model context window W is taken from selected Manager model metadata.
-
-Input budget:
-
-```text
-if W >= 8192:
-  min(floor(W * 0.70), 65536)
-else:
-  floor(W * 0.60)
-```
-
-Output reserve:
-
-```text
-if W >= 8192:
-  min(floor(W * 0.20), 16384)
-else:
-  floor(W * 0.30)
-```
-
-Remaining context is safety margin.
-
-Input budget allocation after mandatory system/tool headers:
-
-```text
-trigger + causal history     20%
-active goal/project state    15%
-retrieved memories           25%
-artifacts/code               30%
-negative evidence/attempts   10%
-```
-
-If a bucket does not use its allocation, redistribute in this exact order:
-
-1. artifacts/code;
-2. retrieved memories;
-3. trigger/causal;
-4. goal/project;
-5. negative evidence.
-
-Truncation within a bucket removes lowest-ranked items first.
-Never truncate an artifact in the middle of a UTF-8 codepoint; text excerpts truncate at line
-boundaries when possible.
-
-Token counting:
-
-- use provider/model tokenizer binding when advertised;
-- otherwise estimate `ceil(UTF8_bytes / 3.5)` and apply additional 15% guard.
-
-The selected source refs and serialized final context are persisted as ContextCapsule provenance.
-
----
-
-## 20. Agent model-role fallback
-
-Agent core names roles only; Manager selects bindings by §14.
-
-When a role is unavailable:
-
-```text
-model.classify  -> deterministic default features in §16
-model.embed     -> disable vector retrieval; FTS/graph remain
-model.rerank    -> use RRF order
-model.generate  -> generative worker is infeasible
-model.reason    -> reasoning worker is infeasible
-model.vision    -> opaque visual content remains uninterpreted except metadata
-model.audio.transcribe -> audio remains artifact-only
-agent.code      -> code-agent worker infeasible; deterministic code tools remain
-```
-
-No remote model provider is enabled by default.
-No credential is generated or requested during boot.
-The system remains deterministic-operable without any model binding.
-
----
-
-## 21. Agent consolidation/internal time
-
-Physics emits internal timer events; it does not encode "improve yourself" behavior.
-
-Timer events:
-
-```text
-omnis.event.timer.second      every 1 s
-omnis.event.timer.minute      every 60 s
-omnis.event.timer.hour        every 3600 s
-```
-
-Only minute/hour events enter normal cognition by default; second events are reducer-only unless a
-registered commitment depends on them.
-
-Memory consolidation becomes a candidate when either:
-
-- 5000 new worldline events since last successful consolidation; or
-- 6 hours since last successful consolidation.
-
-It is infeasible while:
-- explicit user request queue is non-empty; or
-- CPU load > 70%; or
-- selected local GPU memory pressure > 80%.
-
-It must run at least once every 24 hours unless Agent is stopped.
-
-Consolidation never deletes worldline events.
-
----
-
 ## 22. Control input routing
 
 For a submitted primary-input string, exact precedence is:
@@ -1068,11 +795,11 @@ For a submitted primary-input string, exact precedence is:
    persistent PTY shell;
 9. exact registered capability name => Manager resolve/execute;
 10. exact Control command name => Control structural operation;
-11. otherwise => OmnisAgent semantic request event.
+11. otherwise => append `omnis.event.control.input.unresolved`; if an agent client is attached it may handle that event.
 
 Do not use an LLM to choose between steps 1–10.
 
-If an exact lookup at a higher step is ambiguous, show the ambiguity; do not fall through to Agent.
+If an exact lookup at a higher step is ambiguous, show the ambiguity; do not fall through to an external agent.
 
 ---
 
@@ -1115,7 +842,7 @@ Those contracts take precedence over descriptive presentation prose below.
 
 ## 24. Control render scheduling
 
-Compositor/input thread never blocks on graph RPC, Agent or model work.
+Compositor/input thread never blocks on graph RPC, external agent or model work.
 
 Render policy:
 
@@ -1248,11 +975,6 @@ Retention:
 
 Backup integrity check: `PRAGMA integrity_check` must return ok before backup is marked valid.
 
-### 28.2 Agent worldline
-
-Online backup daily at 03:47 local time and before schema migration.
-Retention: 14 daily + 8 weekly.
-
 ### 28.3 corruption
 
 Graph corruption => `omnis-recovery.target`.
@@ -1262,15 +984,15 @@ Recovery sequence:
 2. restore newest valid backup;
 3. replay/reconcile OS physical state;
 4. reconcile Manager executions;
-5. reconnect Agent outbox/worldline;
+5. verify event-journal continuity;
 6. publish recovery-gap event.
 
-Worldline corruption:
 
-1. stop Agent only;
+
+1. stop external agent only;
 2. preserve corrupt DB;
 3. restore newest valid backup;
-4. replay graphd outbox events still available;
+4. replay/reconcile the append-only core event journal;
 5. mark unavailable historical range explicitly;
 6. never fabricate events.
 
@@ -1332,7 +1054,7 @@ Model request/response bodies live only as protected ArtifactRefs when retention
 
 Default:
 
-- model invocation metadata retained permanently in Agent worldline;
+- model invocation metadata is retained as ordinary core inference events;
 - serialized prompt/context artifact retained 30 days;
 - model output artifact retained 30 days unless promoted into project/memory evidence;
 - protected/sensitive artifact can specify shorter retention;
@@ -1378,7 +1100,7 @@ Browser:
 - launch configured browser resource as normal Wayland client;
 - structured preference order: CDP if browser exposes it, then WebDriver BiDi, then accessibility,
   then delegated surface/input;
-- exact URL navigation bypasses Agent.
+- exact URL navigation bypasses external-agent interpretation.
 
 ---
 
@@ -1403,7 +1125,7 @@ Control:
 
 Event:
 - durable local enqueue p95 < 20 ms for <=64 KiB;
-- Agent outbox ingest begins within 100 ms while Agent healthy.
+- an attached local event consumer receives a newly appended event within 100 ms on an idle machine.
 
 Tests fail if architecture code introduces blocking model/network work in these critical paths.
 
@@ -1429,13 +1151,13 @@ Umbrella integration tests use real processes and Unix sockets once both endpoin
 
 Required acceptance scenarios are those in `docs/IMPLEMENTATION.md §17` plus:
 
-1. Agent offline for 10 minutes while Control/OS/Manager emit events, then exact semantic catch-up;
-2. duplicate EventEnvelope delivery produces one worldline EventId;
+1. external agent offline for 10 minutes while Control/OS/Manager emit events, then exact semantic catch-up;
+2. duplicate event reads preserve one EventId and stable ingest_seq;
 3. Manager retry of same ExecutionId starts one scope;
 4. graphd crash during transaction produces either full old or full new revision, never partial;
 5. Control switch 2D→3D→2D preserves selected NodeIds/focus/lens/frontier;
 6. remote host disconnect marks cached live state stale/offline without deleting semantic identity;
-7. protected credential never appears in graph DB, worldline DB, journald or model context;
+7. protected credential never appears in graph DB, core event journal, journald or MCP/plugin/model payloads;
 8. failed Nix generation activation restores prior generation and records failure causally.
 
 ---
@@ -1481,7 +1203,7 @@ omnis.security.executionIsolation.enable = true
 omnis.security.defaultWorkerNetwork = deny
 ```
 
-No undeclared user automatically gets Agent/Control state.
+No undeclared user automatically gets external agent/Control state.
 
 ---
 
@@ -1604,64 +1326,6 @@ Manager emits planned deletion set before GC and resulting deletion event after 
 
 ---
 
-## 42. Inference gateway and universal model-event interception
-
-The exact gateway, authentication, request translation, context injection and built-in harness
-contracts are normative in:
-
-```text
-docs/HARNESS_ADAPTERS_V0.md
-spec/inference_gateway.toml
-spec/harnesses.toml
-protocol/inference.capnp
-```
-
-Manager listens only on `127.0.0.1:7331` and `[::1]:7331`. Built-in harnesses authenticate with
-execution-scoped `omnis1.*` bearer tokens and see only virtual model `omnis-reason`. Each token is
-bound to one resolved `model.reason` Binding and one Execution. Provider credentials never enter a
-harness.
-
-The accepted HTTP surface is exactly:
-
-```text
-POST /v1/responses
-POST /v1/chat/completions
-GET  /v1/models
-POST /anthropic/v1/messages
-POST /anthropic/v1/messages/count_tokens
-GET  /anthropic/v1/models
-```
-
-No arbitrary proxy path exists.
-
----
-
-## 43. External-harness context and coverage
-
-The gateway performs per-request context injection before invoking the locked reason-model Binding.
-Maximum injected content is `min(25% input budget, 16384 tokens)`, with NodeId/EventId evidence
-citations and provider protection filtering.
-
-Coverage dimensions are:
-
-```text
-model_interception
-context_injection
-structured_lifecycle
-structured_tool_events
-session_resume
-permission_control
-```
-
-`full` means all six are true. For the exact v0 fixtures Claude Code 2.1.289, Codex 0.160.0 and
-OpenCode 1.18.34 are all `full`. Native hooks are optional enrichment, not a correctness
-requirement.
-
-The complete commands, environment, session transports and success/failure parsing rules are frozen
-in `HARNESS_ADAPTERS_V0.md` and `spec/harnesses.toml`.
-
----
-
 ## 44. Desktop compatibility services
 
 OmnisControl owns compatibility bridges required by ordinary Linux desktop applications rather than
@@ -1702,8 +1366,8 @@ another desktop portal backend automatically.
 Implement Wayland data-device and primary-selection protocols.
 
 Clipboard history is **off by default**.
-Clipboard contents are events only when the user/Agent performs a semantic paste/copy operation inside
-first-party Control; passive clipboard bytes are not persisted to worldline.
+Clipboard contents are events only when the user/external agent performs a semantic paste/copy operation inside
+first-party Control; passive clipboard bytes are not persisted to the core event journal.
 
 Protected values with `control-hidden` or `execution-handle-only` cannot be put on clipboard.
 
@@ -1711,7 +1375,7 @@ Protected values with `control-hidden` or `execution-handle-only` cannot be put 
 
 Control provides `org.freedesktop.Notifications` on the user D-Bus.
 
-A notification becomes a presentation graph node + Agent event with app/resource identity, summary,
+A notification becomes a presentation graph node + external agent event with app/resource identity, summary,
 body, actions and lifecycle. It is shown in the current workspace as a non-modal overlay for 5
 seconds unless urgency=critical, which remains until dismissed/actioned.
 
@@ -1740,7 +1404,7 @@ OmnisControl/Manager bind:
 Wire audio/media bytes do not travel through Cap'n Proto; graph stores stream/resource identity and
 PipeWire node identifiers as realizations.
 
-Agent receives lifecycle/semantic stream events, not every PCM/video frame by default.
+external agent receives lifecycle/semantic stream events, not every PCM/video frame by default.
 If a Worker explicitly requests raw media cognition, Manager binds the stream to the selected
 vision/audio model capability and resulting observations enter the normal event path.
 
@@ -1824,8 +1488,8 @@ Toplevel behavior:
 - if client supplies no decorations and xdg-decoration negotiates server-side, Control draws a
   minimal title/control region;
 - native surface gets one stable graph semantic identity for its lifetime;
-- closing the toplevel ends its active validity but does not delete historical worldline identity;
-- focus follows explicit user/Agent Control focus, never pointer-enter alone;
+- closing the toplevel ends its active validity but does not delete historical core event identity;
+- focus follows explicit user/external agent Control focus, never pointer-enter alone;
 - new application surface is inserted beside the currently focused view in 2D and into the focused
   workspace cluster in 3D;
 - fullscreen maps to the current output but remains graph-addressable;
@@ -1864,7 +1528,7 @@ All settings are one of:
 
 - persistent NixOS options -> OmnisOS generation path;
 - Manager resource/binding preferences -> Manager-owned graph/config;
-- Agent cognitive/user preference memory -> Agent-owned graph;
+- external agent cognitive/user preference memory -> external agent-owned graph;
 - Control presentation preference -> Control-owned graph.
 
 Control can materialize a settings view from those graph schemas.
@@ -1881,7 +1545,7 @@ System shutdown:
 
 1. systemd stops user Control;
 2. Control commits pending presentation mutations and closes native surfaces;
-3. Agent checkpoints active durable workers and worldline transaction;
+3. external clients are not part of core suspend/shutdown correctness;
 4. Manager marks/cancels non-persistent local executions according to binding lifecycle;
 5. osd stops incremental observers;
 6. graphd drains writer queue and checkpoints WAL;
@@ -1892,7 +1556,7 @@ Maximum graceful stop timeout per Omnis service: 15 seconds; then systemd kill p
 Suspend:
 
 - Control stops rendering and records suspend event;
-- Agent receives suspend event and stops starting new local work;
+- external agent receives suspend event and stops starting new local work;
 - Manager pauses/cancels executions only if their binding declares suspend-sensitive;
 - on resume OS performs process/device/network reconciliation before publishing resume-complete event.
 
@@ -2006,7 +1670,7 @@ SystemCallFilter=~@mount @reboot @raw-io @swap
 A Binding requiring a syscall in those denied groups must declare it as a hard execution requirement;
 OmnisOS then records the exact exception in the envelope and event provenance.
 
-`MemoryDenyWriteExecute=no` in v0 because JIT runtimes/agent harnesses are legitimate resources.
+`MemoryDenyWriteExecute=no` in v0 because JIT runtimes/agent runtimes are legitimate resources.
 No binding can gain Linux capabilities unless an explicit privileged capability is added to the
 ontology by a spec change.
 
@@ -2073,7 +1737,7 @@ lens = ["physical","activity","presentation"]
 focus = local Host NodeId
 central view = Terminal/InputSurface
 terminal = user's configured login shell
-graph context = local Host + Omnis core services + active Agent/Activity nodes, depth 1
+graph context = local Host + Omnis core services + active external agent/Activity nodes, depth 1
 timeline frontier = live
 ```
 
@@ -2089,7 +1753,7 @@ split algorithm:
 - landscape workspace: split horizontally 50/50;
 - portrait workspace: split vertically 50/50.
 
-User/Agent rearrangement persists as Control graph state.
+User/external agent rearrangement persists as Control graph state.
 
 ---
 
@@ -2180,30 +1844,6 @@ For MIME detection, order is:
 
 ---
 
-## 60. External harness version/package policy
-
-Built-in adapter compatibility is exact, not major-version-based:
-
-```text
-Claude Code 2.1.289
-Codex 0.160.0
-OpenCode 1.18.34
-```
-
-Discovery can represent other versions as Resources, but the built-in `code.agent` Binding is
-`incompatible` until `HARNESS_ADAPTERS_V0.md`, `spec/harnesses.toml`, fixtures and conformance
-tests are updated.
-
-Omnis does not vendor or silently curl-install harnesses. Binding lookup order is existing Nix
-store/profile Resource, PATH, then explicitly declared executable. Installing a missing exact
-fixture is a normal package operation; if the pinned Nix universe does not contain that exact
-version, its package definition/source hash must be added in a reviewed specification/package change
-before use.
-
-Runtime curl-to-shell installers and CLI flag guessing are forbidden.
-
----
-
 ## 61. `omnis spec check`
 
 `omnis spec check` is required in the first umbrella CLI implementation.
@@ -2268,18 +1908,7 @@ Reinstall preserving `/var/lib/omnis` preserves HostId.
 Restoring a full machine clone to become a distinct machine requires `omnis system rekey-host`,
 which generates a new HostId and host key before network participation.
 
-### 62.2 Agent identity
-
-Each enabled Omnis Agent user has:
-
-```text
-$XDG_STATE_HOME/omnis/agent/identity
-```
-
-containing one UUIDv7, mode 0600, created atomically on first Agent start. It survives Agent/provider
-replacement.
-
-### 62.3 Foreign identity reuse
+### 62.2 Foreign identity reuse
 
 For a foreign object with stable foreign identity, Manager exact alias namespace is:
 
@@ -2306,7 +1935,6 @@ The v0 implementation repositories are exactly:
 marius-patrik/omnis
 marius-patrik/omnis-os
 marius-patrik/omnis-manager
-marius-patrik/omnis-agent
 marius-patrik/omnis-control
 ```
 
@@ -2346,7 +1974,7 @@ Existing Nix LGPL-2.1-or-later licensing remains intact; Omnis derivative change
 LGPL-2.1-or-later. The Rust managerd code in the same repository also uses LGPL-2.1-or-later so the
 repository has one clear redistribution regime.
 
-### 63.3 omnis-agent / omnis-control / umbrella omnis
+### 63.3 external-agent / omnis-control / umbrella omnis
 
 Original Omnis code remains **not licensed for third-party reuse** in v0, matching the umbrella
 repository's existing `license.spdx = NONE` decision. No agent inserts an OSS license automatically.
@@ -2362,8 +1990,7 @@ Every component:
 - tags use `v0.MINOR.PATCH`;
 - first integrated release is `v0.1.0`.
 
-The umbrella `omnis` release tag is the system release identity. Its flake.lock pins exact component
-commits plus exact Nix/nixpkgs baselines. Component tags are convenience markers; the umbrella lock
+The umbrella `omnis` release tag is the system release identity. Its flake.lock pins exact OS/Manager/Control commits plus exact Nix/nixpkgs baselines. Component tags are convenience markers; the umbrella lock
 is authoritative for a complete OmnisOS release.
 
 No component independently selects an incompatible protocol major.
@@ -2388,21 +2015,17 @@ Exact sequence after NixOS activation:
 10. run deterministic Manager discovery for enabled built-in providers;
 11. enable login/session target.
 
-No Agent/model is called during this sequence.
+No external agent/model is called during this sequence.
 
 ### 64.2 first login for an enabled user
 
-1. initialize Agent UUIDv7 identity if absent;
-2. initialize/upgrade worldline/index DB;
-3. start Agent outbox drain;
-4. create default Workspace if none exists;
-5. start Control compositor;
-6. materialize §57 default workspace;
-7. focus primary terminal/input view;
-8. publish user-session/control lifecycle events.
+1. create default Workspace if none exists;
+2. start Control compositor;
+3. materialize §57 default workspace;
+4. focus primary terminal/input view;
+5. publish user-session/control lifecycle events.
 
-Agent may still be catching up on queued events while Control becomes usable. Control does not wait
-for Agent catch-up.
+No external agent is started or required by the core login target.
 
 ---
 
@@ -2417,8 +2040,7 @@ Every Omnis system closure embeds a generated read-only
   "umbrella_commit": "<40 hex>",
   "omnis_os_commit": "<40 hex>",
   "omnis_manager_commit": "<40 hex>",
-  "omnis_agent_commit": "<40 hex>",
-  "omnis_control_commit": "<40 hex>",
+    "omnis_control_commit": "<40 hex>",
   "nixpkgs_commit": "<40 hex>",
   "nix_commit": "<40 hex>",
   "protocol_major": 1,
@@ -2430,42 +2052,6 @@ Every Omnis system closure embeds a generated read-only
 Keys are emitted in the exact order above, UTF-8, LF newline, two-space JSON indentation.
 The file is generated by Nix from pinned inputs; no runtime mutation is permitted.
 
-
----
-
-## 66. Event-to-cognition routing
-
-`spec/event_priorities.toml` is the canonical base-priority table.
-
-For every ingested event:
-
-1. apply deterministic reducers;
-2. obtain base priority by exact event type; unknown => 0.40;
-3. if causally attached to an active explicit user Activity, base becomes max(base, 0.75);
-4. compute goal_relevance/novelty/urgency:
-   - call `model.classify` only when base >=0.40 and a binding exists;
-   - otherwise use deterministic fallback values from §16;
-5. compute salience using §16 formula;
-6. run exact fast-path resolver;
-7. if fast path satisfies the postcondition, execute it and do not invoke intention/reason model;
-8. if salience >=0.40, no fast path satisfies the event, and `model.reason` exists, run
-   `omnis.prompt.intention.v1`;
-9. if no reasoning binding exists, retain the unresolved/deferred intention state and do not invent an
-   action.
-
-Memory extraction:
-- deterministic memory rules in `ONTOLOGY_V0.md §11` always run;
-- generative `omnis.prompt.memory_extract.v1` runs only for:
-  - explicit user input;
-  - Activity/Worker terminal result;
-  - Generation success/failure/rollback;
-  - execution/inference failure;
-  - event with final salience >=0.75;
-- and only when `model.generate` exists.
-- model-derived records then pass the confidence/provenance rules before graph commit.
-
-Do not run generative memory extraction for raw dense telemetry unless the telemetry triggered a
-higher-level event satisfying the rules above.
 
 ---
 
@@ -2587,7 +2173,7 @@ omnis manager host unpair <host-uuid>
 ```
 
 removes authority grants/cache roots and marks peer binding unavailable; it does not delete historical
-Host identity/worldline events.
+Host identity/core-event history.
 
 
 ---
@@ -2667,7 +2253,7 @@ Every successful GraphTransaction:
 5. sets supplied transaction-event `graphRevision` to new revision;
 6. enqueues supplied events in listed order;
 7. graphd creates and enqueues exactly one `omnis.event.graph.committed` event last;
-8. commits graph rows, transaction row and all outbox rows atomically.
+8. commits graph rows, transaction row and all event journal rows atomically.
 
 The synthesized graph-committed EventId is returned in CommitResult.
 
@@ -2675,7 +2261,7 @@ For non-transaction `enqueueEvent`, graphRevision stays whatever valid revision 
 observed, including 0 only when genuinely unrelated to graph state.
 
 All events carry producer wall and monotonic timestamps. Graphd never replaces producer timestamps
-with ingest time; outbox `created_at_ns` separately records graphd receipt time.
+with ingest time; event journal `created_at_ns` separately records graphd receipt time.
 
 ### 69.7 preconditions
 
