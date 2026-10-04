@@ -281,7 +281,8 @@ def on_config(config: Any) -> Any:
                 {"Decision-complete v0": "DECISION_COMPLETE_V0.md"},
                 {"Shared graph": "GRAPH.md"},
                 {"OmnisOS": "OMNIS_OS.md"},
-                {"OmnisManager": "OMNIS_MANAGER.md"},                {"OmnisControl": "OMNIS_CONTROL.md"},
+                {"OmnisManager": "OMNIS_MANAGER.md"},
+                {"OmnisControl": "OMNIS_CONTROL.md"},
                 {"Protocols": "PROTOCOLS.md"},
                 {"Decisions": decisions},
             ]

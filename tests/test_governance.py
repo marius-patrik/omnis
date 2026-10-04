@@ -133,6 +133,7 @@ def test_architecture_defines_three_core_authorities_and_external_agents():
         assert phrase.lower() in architecture.lower()
     assert "OmnisAgent — cognitive/event/memory authority" not in architecture
 
+
 def test_roadmap_phases_are_addressable():
     """The implementation roadmap must expose a concrete dependency-ordered phase sequence."""
     roadmap = _read("ROADMAP.md")
@@ -353,6 +354,7 @@ def test_canonical_v0_source_contracts():
     ):
         assert token in nix_options
 
+
 def test_sql_v1_schemas_parse_with_sqlite():
     """The canonical core graph schema must execute on SQLite."""
     import sqlite3
@@ -365,6 +367,7 @@ def test_sql_v1_schemas_parse_with_sqlite():
         db.close()
     assert "CREATE TABLE event_log" in sql
     assert "acked_at_ns" not in sql
+
 
 def test_machine_readable_v0_manifests_parse_and_are_unique():
     """Scalar and ontology manifests must be valid TOML with unique canonical identifiers."""
@@ -545,9 +548,9 @@ def test_contract_manifest_references_existing_files():
 
     for section in ("normative", "machine", "protocol", "database", "assets"):
         for _, rel in contract[section].items():
-            assert os.path.isfile(os.path.join(REPO_ROOT, rel)), (
-                f"contract manifest references missing {section} source {rel}"
-            )
+            assert os.path.isfile(
+                os.path.join(REPO_ROOT, rel)
+            ), f"contract manifest references missing {section} source {rel}"
 
     required_normative = {
         "ARCHITECTURE.md",
@@ -581,7 +584,9 @@ def test_core_has_no_builtin_agent_or_harness_contracts():
         "schema/worldline.sql",
         "schema/index.sql",
     ):
-        assert not os.path.exists(os.path.join(REPO_ROOT, rel)), f"obsolete core agent artifact: {rel}"
+        assert not os.path.exists(
+            os.path.join(REPO_ROOT, rel)
+        ), f"obsolete core agent artifact: {rel}"
 
 
 def test_event_journal_is_permanent_multi_consumer():
