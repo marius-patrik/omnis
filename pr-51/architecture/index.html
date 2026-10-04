@@ -688,7 +688,7 @@ pretended to roll back because a later internal operation failed.</p>
 <li>warm caches/state;</li>
 <li>user/system policy.</li>
 </ul>
-<p>Agent asks for semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
+<p>Callers request semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
 realization unless the caller requests a specific implementation.</p>
 <hr />
 <h2 id="7-agent-runtime-agnostic-agent-access">7. Agent-runtime-agnostic agent access<a class="headerlink" href="#7-agent-runtime-agnostic-agent-access" title="Permanent link">&para;</a></h2>
@@ -704,12 +704,12 @@ realization unless the caller requests a specific implementation.</p>
 <ol>
 <li><strong>MCP</strong> — <code>omnis mcp</code> exposes the exact public OS/Manager/Control/graph operations as MCP
    tools/resources and exposes the core event journal as a replayable/subscribable resource.</li>
-<li><strong>Plugin SDK</strong> — typed generated clients expose the exact same operations/events to native agent
-   plugins without MCP serialization.</li>
+<li><strong>Plugin SDK</strong> — <code>@omnis/agent-access</code> exposes typed generated clients for the exact same
+   operations/events to native agent plugins without MCP serialization.</li>
 </ol>
 <p>Neither path owns additional semantics. <code>spec/agent_access.toml</code> is the parity registry and CI fails
 when a public core operation/event exists without both projections.</p>
-<h3 id="72-no-harness-dependency">7.2 No harness dependency<a class="headerlink" href="#72-no-harness-dependency" title="Permanent link">&para;</a></h3>
+<h3 id="72-no-agent-runtime-dependency">7.2 No agent-runtime dependency<a class="headerlink" href="#72-no-agent-runtime-dependency" title="Permanent link">&para;</a></h3>
 <p>The core does not know any particular external agent runtime.
 There are no built-in agent-runtime adapters, agent-runtime version pins, agent-runtime routing chains, or provider
 credentials injected into foreign agent processes.</p>
@@ -1045,7 +1045,7 @@ identifier or option surfaces.</p>
           <li><a href="#7-agent-runtime-agnostic-agent-access">7. Agent-runtime-agnostic agent access</a>
             <ul>
               <li><a href="#71-two-projections-one-semantics">7.1 Two projections, one semantics</a></li>
-              <li><a href="#72-no-harness-dependency">7.2 No harness dependency</a></li>
+              <li><a href="#72-no-agent-runtime-dependency">7.2 No agent-runtime dependency</a></li>
               <li><a href="#73-direct-control-authority">7.3 Direct Control authority</a></li>
               <li><a href="#74-reference-agent">7.4 Reference agent</a></li>
             </ul>
