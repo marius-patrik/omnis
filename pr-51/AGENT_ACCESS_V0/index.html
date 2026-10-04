@@ -284,7 +284,7 @@
           <h1 id="omnis-v0-agent-access-contract">Omnis v0 Agent Access Contract<a class="headerlink" href="#omnis-v0-agent-access-contract" title="Permanent link">&para;</a></h1>
 <p><strong>Status: NORMATIVE.</strong> Omnis core has no built-in agent runtime. This document defines how arbitrary
 agents access OmnisOS, OmnisManager, OmnisControl, the shared graph, and the complete core event
-journal without harness-specific integration.</p>
+journal without agent-runtime-specific integration.</p>
 <h2 id="1-principle">1. Principle<a class="headerlink" href="#1-principle" title="Permanent link">&para;</a></h2>
 <p>There are exactly three core semantic authorities:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>OmnisOS
@@ -396,10 +396,10 @@ exists.</p>
 - Codex adapter;
 - OpenCode adapter;
 - DeepSeek Harness adapter;
-- generic PTY coding-harness adapter;
+- generic PTY coding-agent-runtime adapter;
 - harness version pin;
 - harness failover chain;
-- harness-specific model gateway.</p>
+- agent-runtime-specific model gateway.</p>
 <p>An external agent runtime may itself use any models/providers/harness machinery it wants. From Omnis'
 perspective it is still only a client of the same three surfaces.</p>
 <h2 id="9-dsh-reference-direction">9. DSH reference direction<a class="headerlink" href="#9-dsh-reference-direction" title="Permanent link">&para;</a></h2>

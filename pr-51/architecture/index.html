@@ -290,7 +290,7 @@ constants, defaults and fallback behavior are frozen by
 <a href="../DECISION_COMPLETE_V0/"><code>docs/DECISION_COMPLETE_V0.md</code></a> and ADR-0025. Canonical first-party
 kind/relation/capability/event names and lifecycle states are frozen by
 <a href="../ONTOLOGY_V0/"><code>docs/ONTOLOGY_V0.md</code></a>; public NixOS configuration is frozen by
-<a href="../NIX_OPTIONS_V0/"><code>docs/NIX_OPTIONS_V0.md</code></a>. Harness-agnostic agent access is frozen by
+<a href="../NIX_OPTIONS_V0/"><code>docs/NIX_OPTIONS_V0.md</code></a>. Agent-runtime-agnostic agent access is frozen by
 <a href="../AGENT_ACCESS_V0/"><code>docs/AGENT_ACCESS_V0.md</code></a> and <code>spec/agent_access.toml</code>.</p>
 <p>Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.</p>
@@ -584,7 +584,7 @@ into a universal resource/capability/binding layer.</p>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Execution    one concrete use of a binding
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>Constraint   a condition on resolution, placement, or execution
 </code></pre></div>
-<p>Packages, models, harnesses, GPUs, services, CLIs, APIs, libraries, devices, containers, VMs,
+<p>Packages, models, GPUs, services, CLIs, APIs, libraries, devices, containers, VMs,
 credentials, and remote hosts are resources rather than separate architecture families.</p>
 <h3 id="62-nix-integration">6.2 Nix integration<a class="headerlink" href="#62-nix-integration" title="Permanent link">&para;</a></h3>
 <p>Nix remains the canonical mechanism for packages, derivations, store paths, environments, and builds.
@@ -638,7 +638,7 @@ inform candidate scoring, but hidden nondeterministic "first match wins" behavio
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  bindings -&gt; local LLM, remote API, specialist service
 </code></pre></div>
 <p>An external agent may use these Manager capabilities or its own model stack. Omnis does not embed,
-launch, adapt, version-pin, or depend on external coding-agent harnesses.</p>
+launch, adapt, version-pin, or depend on external agent runtimes.</p>
 <h3 id="66-discovery">6.6 Discovery<a class="headerlink" href="#66-discovery" title="Permanent link">&para;</a></h3>
 <p>Discovery is deterministic-first:</p>
 <ol>
@@ -691,7 +691,7 @@ pretended to roll back because a later internal operation failed.</p>
 <p>Agent asks for semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
 realization unless the caller requests a specific implementation.</p>
 <hr />
-<h2 id="7-harness-agnostic-agent-access">7. Harness-agnostic agent access<a class="headerlink" href="#7-harness-agnostic-agent-access" title="Permanent link">&para;</a></h2>
+<h2 id="7-agent-runtime-agnostic-agent-access">7. Agent-runtime-agnostic agent access<a class="headerlink" href="#7-agent-runtime-agnostic-agent-access" title="Permanent link">&para;</a></h2>
 <p>There is no core OmnisAgent service.</p>
 <p>Any authorized agent can consume Omnis through the <strong>same three semantic surfaces</strong>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>OmnisOS       -&gt; physical/system inspection and mutation
@@ -710,8 +710,8 @@ realization unless the caller requests a specific implementation.</p>
 <p>Neither path owns additional semantics. <code>spec/agent_access.toml</code> is the parity registry and CI fails
 when a public core operation/event exists without both projections.</p>
 <h3 id="72-no-harness-dependency">7.2 No harness dependency<a class="headerlink" href="#72-no-harness-dependency" title="Permanent link">&para;</a></h3>
-<p>The core does not know Claude Code, Codex, OpenCode, DeepSeek Harness, or any other agent runtime.
-There are no built-in harness adapters, harness version pins, harness routing chains, or provider
+<p>The core does not know any particular external agent runtime.
+There are no built-in agent-runtime adapters, agent-runtime version pins, agent-runtime routing chains, or provider
 credentials injected into foreign agent processes.</p>
 <p>An agent is simply a client with authority.</p>
 <h3 id="73-direct-control-authority">7.3 Direct Control authority<a class="headerlink" href="#73-direct-control-authority" title="Permanent link">&para;</a></h3>
@@ -914,7 +914,7 @@ A core release does not pin a DSH/agent version.</p>
 <li><strong>Protected values remain handles unless explicit authorized disclosure is required.</strong></li>
 <li><strong>Semantic identity survives version, host, path, process, provider and agent changes.</strong></li>
 <li><strong>External effects are accounted for honestly; opaque effects are not falsely rolled back.</strong></li>
-<li><strong>The core contains no built-in external-agent harness integration or harness-specific version policy.</strong></li>
+<li><strong>The core contains no built-in external-agent agent-runtime integration or agent-runtime-specific version policy.</strong></li>
 </ol>
 <h2 id="17-non-goals">17. Non-goals<a class="headerlink" href="#17-non-goals" title="Permanent link">&para;</a></h2>
 <p>The initial architecture explicitly does not require:</p>
@@ -1042,7 +1042,7 @@ identifier or option surfaces.</p>
               <li><a href="#69-placement-and-optimization">6.9 Placement and optimization</a></li>
             </ul>
           </li>
-          <li><a href="#7-harness-agnostic-agent-access">7. Harness-agnostic agent access</a>
+          <li><a href="#7-agent-runtime-agnostic-agent-access">7. Agent-runtime-agnostic agent access</a>
             <ul>
               <li><a href="#71-two-projections-one-semantics">7.1 Two projections, one semantics</a></li>
               <li><a href="#72-no-harness-dependency">7.2 No harness dependency</a></li>

@@ -417,7 +417,7 @@ envelopes without changing system generation unless requested.</p>
 <p><code>omnis-managerd</code> never launches a restricted process itself. It sends <code>PhysicalLaunchRequest</code> to
 <code>omnis-osd</code>. osd validates the envelope, starts the transient systemd service and returns either
 pipe or PTY stream capabilities. ExecutionId is preserved across Manager/OS/process graph state.</p>
-<h2 id="6-harness-agnostic-agent-projections">6. Harness-agnostic agent projections<a class="headerlink" href="#6-harness-agnostic-agent-projections" title="Permanent link">&para;</a></h2>
+<h2 id="6-agent-runtime-agnostic-agent-projections">6. Agent-runtime-agnostic agent projections<a class="headerlink" href="#6-agent-runtime-agnostic-agent-projections" title="Permanent link">&para;</a></h2>
 <p>There is no AgentService protocol.</p>
 <p><code>docs/AGENT_ACCESS_V0.md</code> and <code>spec/agent_access.toml</code> project the public GraphService, OsService,
 ManagerService and ControlService APIs into:
@@ -607,7 +607,7 @@ provenance artifacts when policy permits.</p>
               <li><a href="#51-physical-launch-ownership">5.1 Physical launch ownership</a></li>
             </ul>
           </li>
-          <li><a href="#6-harness-agnostic-agent-projections">6. Harness-agnostic agent projections</a>
+          <li><a href="#6-agent-runtime-agnostic-agent-projections">6. Agent-runtime-agnostic agent projections</a>
           </li>
           <li><a href="#7-control-api">7. Control API</a>
           </li>

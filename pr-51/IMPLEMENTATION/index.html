@@ -286,7 +286,7 @@
 this document freezes the first implementation profile. <code>DECISION_COMPLETE_V0.md</code> freezes all v0
 algorithms, constants, defaults and fallback behavior. <code>ONTOLOGY_V0.md</code> freezes semantic names/state
 machines, <code>NIX_OPTIONS_V0.md</code> freezes the public NixOS option surface, and <code>AGENT_ACCESS_V0.md</code>
-freezes harness-agnostic external-agent access. A mechanism changes only through an explicit
+freezes agent-runtime-agnostic external-agent access. A mechanism changes only through an explicit
 architecture/ADR change.</p>
 <h2 id="1-implementation-profile">1. Implementation profile<a class="headerlink" href="#1-implementation-profile" title="Permanent link">&para;</a></h2>
 <p>Omnis v0 is a Linux/NixOS system with exactly three product authorities and one shared graph/event substrate.</p>
@@ -723,7 +723,7 @@ Cap'n Proto adapter interface. They are not loaded as arbitrary shared libraries
 <a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>container runtime
 <a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>SSH/remote Omnis host
 </code></pre></div>
-<h2 id="9-harness-agnostic-agent-access-implementation">9. Harness-agnostic agent-access implementation<a class="headerlink" href="#9-harness-agnostic-agent-access-implementation" title="Permanent link">&para;</a></h2>
+<h2 id="9-agent-runtime-agnostic-agent-access-implementation">9. Agent-runtime-agnostic agent-access implementation<a class="headerlink" href="#9-agent-runtime-agnostic-agent-access-implementation" title="Permanent link">&para;</a></h2>
 <p>Core ships no agent daemon.</p>
 <p>Two projections are built from <code>spec/agent_access.toml</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>omnis mcp
@@ -1022,7 +1022,7 @@ NixOS modules implement <code>NIX_OPTIONS_V0.md</code> exactly.</p>
               <li><a href="#86-binding-provider-abi">8.6 Binding provider ABI</a></li>
             </ul>
           </li>
-          <li><a href="#9-harness-agnostic-agent-access-implementation">9. Harness-agnostic agent-access implementation</a>
+          <li><a href="#9-agent-runtime-agnostic-agent-access-implementation">9. Agent-runtime-agnostic agent-access implementation</a>
           </li>
           <li><a href="#10-omniscontrol-implementation">10. OmnisControl implementation</a>
             <ul>

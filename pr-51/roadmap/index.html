@@ -283,7 +283,7 @@
         <article class="prose">
           <h1 id="omnis-core-implementation-roadmap">Omnis — Core Implementation Roadmap<a class="headerlink" href="#omnis-core-implementation-roadmap" title="Permanent link">&para;</a></h1>
 <p>This roadmap implements the three core authorities only: OmnisOS, OmnisManager and OmnisControl.
-No agent runtime or external coding harness is a core dependency. Concrete behavior is frozen by the
+No agent runtime or external agent runtime is a core dependency. Concrete behavior is frozen by the
 normative contracts and <code>spec/contract.toml</code>; workers report SpecificationDefect instead of designing
 missing behavior.</p>
 <h2 id="phase-0-architecture-reset-and-repository-split">Phase 0 — Architecture reset and repository split<a class="headerlink" href="#phase-0-architecture-reset-and-repository-split" title="Permanent link">&para;</a></h2>
@@ -292,7 +292,7 @@ missing behavior.</p>
 <li>maintain <code>omnis-os</code>, <code>omnis-manager</code>, <code>omnis-control</code>;</li>
 <li>keep shared protocol/spec ownership in <code>omnis</code>;</li>
 <li>establish upstream NixOS/nixpkgs and Nix tracking;</li>
-<li>remove core OmnisAgent/harness assumptions;</li>
+<li>remove core built-in agent-runtime assumptions;</li>
 <li>establish end-to-end compatibility CI.</li>
 </ul>
 <p>Exit: all core implementation work has one owner and no fourth core authority remains normative.</p>
@@ -342,7 +342,7 @@ missing behavior.</p>
 - 2D graph desktop;
 - complete Control event publication.</p>
 <p>Exit: boot lands in Control and works fully with no agent installed.</p>
-<h2 id="phase-5-harness-agnostic-agent-access">Phase 5 — Harness-agnostic agent access<a class="headerlink" href="#phase-5-harness-agnostic-agent-access" title="Permanent link">&para;</a></h2>
+<h2 id="phase-5-agent-runtime-agnostic-agent-access">Phase 5 — Agent-runtime-agnostic agent access<a class="headerlink" href="#phase-5-agent-runtime-agnostic-agent-access" title="Permanent link">&para;</a></h2>
 <p>Implement exactly <code>docs/AGENT_ACCESS_V0.md</code> + <code>spec/agent_access.toml</code>:
 - <code>omnis mcp</code> stdio server;
 - <code>@omnis/agent-access</code> typed client package;
@@ -361,7 +361,7 @@ without core changes.</p>
 - HTTP/OpenAPI;
 - MCP foreign endpoints;
 - repository/VCS/LSP/tooling discovery.</p>
-<p>These are semantic resources, not external agent harnesses.</p>
+<p>These are semantic resources, not external agent runtimes.</p>
 <p>Exit: agents can use Manager's generic capabilities or their own stack interchangeably.</p>
 <h2 id="phase-7-omniscontrol-full-graph-desktop">Phase 7 — OmnisControl full graph desktop<a class="headerlink" href="#phase-7-omniscontrol-full-graph-desktop" title="Permanent link">&para;</a></h2>
 <p>Implement:
@@ -433,7 +433,7 @@ the same MCP/plugin surface available to any other agent.</p>
           </li>
           <li><a href="#phase-4-omniscontrol-minimum-usable-environment">Phase 4 — OmnisControl minimum usable environment</a>
           </li>
-          <li><a href="#phase-5-harness-agnostic-agent-access">Phase 5 — Harness-agnostic agent access</a>
+          <li><a href="#phase-5-agent-runtime-agnostic-agent-access">Phase 5 — Agent-runtime-agnostic agent access</a>
           </li>
           <li><a href="#phase-6-generic-inference-and-foreign-capability-depth">Phase 6 — Generic inference and foreign capability depth</a>
           </li>
