@@ -234,10 +234,14 @@ interface GraphSubscription {
   cancel @1 () -> (status :C.RpcStatus);
 }
 
-interface OutboxSubscription {
-  next @0 () -> (status :C.RpcStatus, event :EventEnvelope, ingestSeq :UInt64);
-  ack @1 (eventId :C.Uuid, ingestSeq :UInt64) -> (status :C.RpcStatus);
-  cancel @2 () -> (status :C.RpcStatus);
+struct EventRecord {
+  ingestSeq @0 :UInt64;
+  event @1 :EventEnvelope;
+}
+
+interface EventSubscription {
+  next @0 () -> (status :C.RpcStatus, record :EventRecord);
+  cancel @1 () -> (status :C.RpcStatus);
 }
 
 interface ArtifactUpload {
@@ -258,16 +262,18 @@ interface GraphService {
   query @3 (query :GraphQuery) -> (status :C.RpcStatus, result :QueryResult);
   commit @4 (transaction :GraphTransaction) -> (status :C.RpcStatus, result :CommitResult);
   subscribe @5 (query :GraphQuery, afterRevision :UInt64) -> (status :C.RpcStatus, subscription :GraphSubscription);
-  outbox @6 (afterIngestSeq :UInt64) -> (status :C.RpcStatus, subscription :OutboxSubscription);
-  enqueueEvent @7 (event :EventEnvelope) -> (status :C.RpcStatus, ingestSeq :UInt64);
-  beginArtifactUpload @8 (
+  readEvents @6 (afterIngestSeq :UInt64, limit :UInt32) -> (status :C.RpcStatus, events :List(EventRecord));
+  subscribeEvents @7 (afterIngestSeq :UInt64) -> (status :C.RpcStatus, subscription :EventSubscription);
+  getEvent @8 (id :C.Uuid) -> (status :C.RpcStatus, record :EventRecord);
+  enqueueEvent @9 (event :EventEnvelope) -> (status :C.RpcStatus, ingestSeq :UInt64);
+  beginArtifactUpload @10 (
     mediaType :Text,
     protection :C.ProtectionClass,
     expectedLength :UInt64,
     expectedId :C.MaybeArtifactId
   ) -> (status :C.RpcStatus, upload :ArtifactUpload);
-  openArtifact @9 (id :C.ArtifactId) -> (status :C.RpcStatus, artifact :C.ArtifactRef, download :ArtifactDownload);
-  resolveAlias @10 (namespace :Text, alias :Text, atRevision :UInt64) -> (status :C.RpcStatus, result :AliasResult);
-  paths @11 (query :PathQuery) -> (status :C.RpcStatus, result :PathResult);
-  getProvenance @12 (id :C.Uuid) -> (status :C.RpcStatus, provenance :C.Provenance);
+  openArtifact @11 (id :C.ArtifactId) -> (status :C.RpcStatus, artifact :C.ArtifactRef, download :ArtifactDownload);
+  resolveAlias @12 (namespace :Text, alias :Text, atRevision :UInt64) -> (status :C.RpcStatus, result :AliasResult);
+  paths @13 (query :PathQuery) -> (status :C.RpcStatus, result :PathResult);
+  getProvenance @14 (id :C.Uuid) -> (status :C.RpcStatus, provenance :C.Provenance);
 }

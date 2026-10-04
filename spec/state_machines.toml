@@ -4,40 +4,10 @@ version = 1
 initial = "created"
 terminal = ["succeeded","failed","cancelled","lost"]
 transitions = [
-  "created->starting",
-  "starting->running",
-  "running->waiting",
-  "waiting->running",
-  "running->succeeded",
-  "waiting->succeeded",
-  "running->failed",
-  "waiting->failed",
-  "starting->failed",
-  "created->cancelling",
-  "starting->cancelling",
-  "running->cancelling",
-  "waiting->cancelling",
-  "cancelling->cancelled",
-  "running->lost",
-  "waiting->lost"
-]
-
-[state_machines.worker]
-initial = "created"
-terminal = ["succeeded","failed","cancelled"]
-transitions = [
-  "created->ready","ready->running","running->waiting","waiting->ready",
-  "running->succeeded","running->failed","created->cancelling","ready->cancelling",
-  "running->cancelling","waiting->cancelling","cancelling->cancelled",
-  "running->suspended","waiting->suspended","suspended->ready"
-]
-
-[state_machines.activity]
-initial = "active"
-terminal = ["completed","failed","cancelled"]
-transitions = [
-  "active->waiting","waiting->active","active->completed","waiting->completed",
-  "active->failed","waiting->failed","active->cancelled","waiting->cancelled"
+  "created->starting","starting->running","running->waiting","waiting->running",
+  "running->succeeded","waiting->succeeded","running->failed","waiting->failed",
+  "starting->failed","created->cancelling","starting->cancelling","running->cancelling",
+  "waiting->cancelling","cancelling->cancelled","running->lost","waiting->lost"
 ]
 
 [state_machines.generation]
@@ -48,12 +18,4 @@ transitions = [
   "activating->active","proposed->failed","evaluated->failed","building->failed",
   "built->failed","activating->failed","active->rolling_back","failed->rolling_back",
   "rolling_back->rolled_back"
-]
-
-[state_machines.memory]
-initial = "current"
-terminal = ["erased"]
-transitions = [
-  "current->superseded","current->retracted","current->erased",
-  "superseded->erased","retracted->erased"
 ]

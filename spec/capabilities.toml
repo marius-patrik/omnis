@@ -75,12 +75,6 @@ input = "CodeToolInput"
 output = "TextArtifactOutput"
 effect = "readOnly"
 
-[capabilities."omnis.capability.code.agent"]
-input = "CodeAgentInput"
-output = "CodeAgentOutput"
-effect = "opaque"
-requires = ["omnis.capability.model.reason"]
-
 [capabilities."omnis.capability.model.classify"]
 input = "ModelTextInput"
 output = "ClassifyOutput"

@@ -50,8 +50,6 @@ type = "text"
 type = "text"
 [properties."omnis.binding.effect_class"]
 type = "text"
-[properties."omnis.binding.memory_coverage"]
-type = "text"
 [properties."omnis.execution.exit_code"]
 type = "i64"
 optional = true
@@ -70,43 +68,20 @@ type = "text"
 type = "i64"
 unit = "unix_ns"
 
-[properties."omnis.cognitive.confidence"]
-type = "f64"
-min = 0.0
-max = 1.0
-[properties."omnis.cognitive.salience"]
-type = "f64"
-min = 0.0
-max = 1.0
-[properties."omnis.cognitive.valid_from"]
-type = "i64"
-unit = "unix_ns"
-[properties."omnis.cognitive.valid_until"]
-type = "i64"
-unit = "unix_ns"
-optional = true
-[properties."omnis.cognitive.text"]
-type = "text"
-[properties."omnis.cognitive.status"]
-type = "text"
-[properties."omnis.goal.priority"]
-type = "f64"
-min = 0.0
-max = 1.0
-[properties."omnis.goal.deadline"]
-type = "i64"
-unit = "unix_ns"
-optional = true
-[properties."omnis.worker.priority"]
-type = "f64"
-[properties."omnis.worker.checkpoint"]
-type = "artifact_ref"
-optional = true
-[properties."omnis.context.token_budget"]
+[properties."omnis.model.context_window"]
 type = "u64"
-[properties."omnis.context.model_binding"]
-type = "node_ref"
-optional = true
+min = 1
+[properties."omnis.model.max_output_tokens"]
+type = "u64"
+min = 1
+[properties."omnis.model.supports_tools"]
+type = "bool"
+[properties."omnis.model.supports_images"]
+type = "bool"
+[properties."omnis.model.supports_files"]
+type = "bool"
+[properties."omnis.model.supports_streaming"]
+type = "bool"
 
 [properties."omnis.presentation.mode"]
 type = "enum"
@@ -132,19 +107,3 @@ type = "text"
 [properties."omnis.presentation.timeline_event"]
 type = "event_ref"
 optional = true
-
-
-[properties."omnis.model.context_window"]
-type = "u64"
-min = 1
-[properties."omnis.model.max_output_tokens"]
-type = "u64"
-min = 1
-[properties."omnis.model.supports_tools"]
-type = "bool"
-[properties."omnis.model.supports_images"]
-type = "bool"
-[properties."omnis.model.supports_files"]
-type = "bool"
-[properties."omnis.model.supports_streaming"]
-type = "bool"

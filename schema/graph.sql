@@ -140,18 +140,16 @@ CREATE TABLE transaction_causes (
   PRIMARY KEY(transaction_id, event_id)
 ) WITHOUT ROWID;
 
-CREATE TABLE outbox_events (
+CREATE TABLE event_log (
   ingest_seq INTEGER PRIMARY KEY AUTOINCREMENT,
   event_id BLOB NOT NULL UNIQUE CHECK(length(event_id)=16),
   event_type TEXT NOT NULL,
   envelope BLOB NOT NULL,
-  created_at_ns INTEGER NOT NULL,
-  acked_at_ns INTEGER NULL
+  created_at_ns INTEGER NOT NULL
 );
 
-CREATE INDEX outbox_pending
-ON outbox_events(ingest_seq)
-WHERE acked_at_ns IS NULL;
+CREATE INDEX event_log_type_seq
+ON event_log(event_type, ingest_seq);
 
 CREATE TABLE artifact_meta (
   artifact_id BLOB PRIMARY KEY CHECK(length(artifact_id)=32),

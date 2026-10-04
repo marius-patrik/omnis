@@ -3,8 +3,7 @@ namespace = "omnis"
 
 dimensions = [
   "physical","system","enforcement","resource","capability","binding","execution","placement",
-  "foreign","activity","cognitive","memory","goal","context","judgement","worker","learning",
-  "presentation","interaction","scene","navigation","provenance","causal","authority"
+  "foreign","presentation","interaction","scene","navigation","provenance","causal","authority"
 ]
 
 kinds = [
@@ -16,18 +15,14 @@ kinds = [
   "omnis.kind.nix_generation","omnis.kind.nix_store_path","omnis.kind.system_invariant",
   "omnis.kind.resource","omnis.kind.package","omnis.kind.derivation","omnis.kind.executable",
   "omnis.kind.library","omnis.kind.endpoint","omnis.kind.container","omnis.kind.vm",
-  "omnis.kind.model","omnis.kind.inference_runtime","omnis.kind.agent_harness",
-  "omnis.kind.mcp_server","omnis.kind.repository","omnis.kind.worktree","omnis.kind.capability",
-  "omnis.kind.binding","omnis.kind.execution","omnis.kind.credential_handle",
-  "omnis.kind.credential_lease","omnis.kind.remote_host_binding","omnis.kind.activity",
-  "omnis.kind.goal","omnis.kind.commitment","omnis.kind.worker","omnis.kind.context_capsule",
-  "omnis.kind.hypothesis","omnis.kind.memory.episode","omnis.kind.memory.assertion",
-  "omnis.kind.memory.procedure","omnis.kind.memory.preference","omnis.kind.memory.expectation",
-  "omnis.kind.memory.decision","omnis.kind.memory.project_state","omnis.kind.memory.summary",
-  "omnis.kind.workspace","omnis.kind.view","omnis.kind.projection","omnis.kind.lens",
-  "omnis.kind.control_node","omnis.kind.native_surface","omnis.kind.terminal",
-  "omnis.kind.notification","omnis.kind.input_surface","omnis.kind.chart","omnis.kind.table",
-  "omnis.kind.document","omnis.kind.editor"
+  "omnis.kind.model","omnis.kind.inference_runtime","omnis.kind.mcp_server",
+  "omnis.kind.repository","omnis.kind.worktree","omnis.kind.capability","omnis.kind.binding",
+  "omnis.kind.execution","omnis.kind.credential_handle","omnis.kind.credential_lease",
+  "omnis.kind.remote_host_binding","omnis.kind.workspace","omnis.kind.view",
+  "omnis.kind.projection","omnis.kind.lens","omnis.kind.control_node",
+  "omnis.kind.native_surface","omnis.kind.terminal","omnis.kind.notification",
+  "omnis.kind.input_surface","omnis.kind.chart","omnis.kind.table","omnis.kind.document",
+  "omnis.kind.editor"
 ]
 
 relations = [
@@ -45,15 +40,7 @@ relations = [
   "omnis.relation.execution.placed_on","omnis.relation.execution.uses",
   "omnis.relation.execution.produced","omnis.relation.execution.consumed",
   "omnis.relation.execution.spawned","omnis.relation.execution.authorized_by",
-  "omnis.relation.foreign.identity","omnis.relation.activity.goal",
-  "omnis.relation.activity.worker","omnis.relation.activity.execution",
-  "omnis.relation.activity.repository","omnis.relation.worker.context",
-  "omnis.relation.worker.parent","omnis.relation.cognitive.about",
-  "omnis.relation.cognitive.evidence","omnis.relation.cognitive.derived_from",
-  "omnis.relation.cognitive.supersedes","omnis.relation.cognitive.contradicts",
-  "omnis.relation.cognitive.supports","omnis.relation.cognitive.refutes",
-  "omnis.relation.cognitive.procedure_for","omnis.relation.cognitive.expectation_about",
-  "omnis.relation.context.includes","omnis.relation.presentation.contains",
+  "omnis.relation.foreign.identity","omnis.relation.presentation.contains",
   "omnis.relation.presentation.represents","omnis.relation.presentation.focus",
   "omnis.relation.presentation.selection","omnis.relation.presentation.lens",
   "omnis.relation.presentation.native_surface","omnis.relation.presentation.terminal_execution",
@@ -71,7 +58,7 @@ capabilities = [
   "omnis.capability.system.generation.build","omnis.capability.system.generation.activate",
   "omnis.capability.system.generation.rollback","omnis.capability.vcs.status",
   "omnis.capability.vcs.diff","omnis.capability.vcs.commit","omnis.capability.vcs.push",
-  "omnis.capability.code.format","omnis.capability.code.test","omnis.capability.code.agent",
+  "omnis.capability.code.format","omnis.capability.code.test",
   "omnis.capability.model.classify","omnis.capability.model.embed","omnis.capability.model.rerank",
   "omnis.capability.model.generate","omnis.capability.model.reason","omnis.capability.model.vision",
   "omnis.capability.model.audio.transcribe","omnis.capability.browser.navigate",
@@ -98,16 +85,6 @@ events = [
   "omnis.event.manager.execution.lost","omnis.event.inference.request",
   "omnis.event.inference.response","omnis.event.inference.failed",
   "omnis.event.manager.credential.lease.created","omnis.event.manager.credential.lease.expired",
-  "omnis.event.agent.activity.created","omnis.event.agent.activity.completed",
-  "omnis.event.agent.activity.failed","omnis.event.agent.worker.created",
-  "omnis.event.agent.worker.started","omnis.event.agent.worker.waiting",
-  "omnis.event.agent.worker.succeeded","omnis.event.agent.worker.failed",
-  "omnis.event.agent.worker.cancelled","omnis.event.agent.memory.created",
-  "omnis.event.agent.memory.updated","omnis.event.agent.memory.superseded",
-  "omnis.event.agent.memory.retracted","omnis.event.agent.memory.erased",
-  "omnis.event.agent.context.compiled","omnis.event.agent.procedure.promoted","omnis.event.agent.competence_gap",
-  "omnis.event.agent.candidate.proposed","omnis.event.agent.candidate.evaluated",
-  "omnis.event.agent.candidate.promoted","omnis.event.agent.candidate.rejected",
   "omnis.event.control.input.submitted","omnis.event.control.focus.changed",
   "omnis.event.control.selection.changed","omnis.event.control.mode.changed",
   "omnis.event.control.lens.changed","omnis.event.control.tree.mutated",
@@ -120,7 +97,4 @@ events = [
 
 [states]
 execution = ["created","starting","running","waiting","cancelling","succeeded","failed","cancelled","lost"]
-worker = ["created","ready","running","waiting","cancelling","cancelled","suspended","succeeded","failed"]
-activity = ["active","waiting","completed","failed","cancelled"]
 generation = ["proposed","evaluated","building","built","activating","active","failed","rolling_back","rolled_back"]
-memory = ["current","superseded","retracted","erased"]

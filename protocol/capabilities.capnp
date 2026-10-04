@@ -32,15 +32,6 @@ struct VcsPushInput { repository @0 :C.Uuid; remote @1 :Text; refspec @2 :Text; 
 struct TextArtifactOutput { artifact @0 :C.ArtifactRef; }
 
 struct CodeToolInput { repository @0 :C.Uuid; worktree @1 :C.MaybeUuid; paths @2 :List(Text); }
-struct CodeAgentInput {
-  repository @0 :C.Uuid;
-  worktree @1 :C.Uuid;
-  goal @2 :Text;
-  acceptance @3 :C.ArtifactRef;
-  context @4 :C.ArtifactRef;
-}
-struct CodeAgentOutput { execution @0 :C.Uuid; patch @1 :C.MaybeArtifactRef; commit @2 :Text; }
-
 struct ModelTextInput { context @0 :C.ArtifactRef; }
 struct InferenceRequestInput { request @0 :I.InferenceRequest; }
 struct InferenceResultOutput { result @0 :I.InferenceResult; }
