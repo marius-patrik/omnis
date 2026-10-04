@@ -766,3 +766,18 @@ def test_learning_preference_retraction_is_reachable():
     doc = _read("docs", "LEARNING_V0.md")
     assert "floor 0.00" in doc
     assert "below 0.50" in doc
+
+def test_generic_gateway_cannot_escape_manager_resolution():
+    import json
+
+    with open(
+        os.path.join(REPO_ROOT, "spec", "generic_harness.schema.json"),
+        encoding="utf-8",
+    ) as handle:
+        schema = json.load(handle)
+
+    invoke = schema["properties"]["invoke"]["properties"]
+    assert invoke["gatewayBaseUrl"]["enum"] == ["http://127.0.0.1:7331/v1", None]
+    assert invoke["modelValue"]["enum"] == ["omnis-reason", None]
+    doc = _read("docs", "HARNESS_ADAPTERS_V0.md")
+    assert "cannot select a concrete provider" in doc

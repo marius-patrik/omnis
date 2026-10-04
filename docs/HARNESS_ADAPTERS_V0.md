@@ -400,10 +400,13 @@ Exact behavior:
 6. prompt transport `last_arg` appends expanded `prompts/code_worker.md`; `stdin_utf8` writes those UTF-8 bytes then closes stdin;
 7. working directory is always the assigned Worktree path;
 8. `process_only` receives no model-provider credential or gateway grant;
-9. `gateway` receives exactly the descriptor gateway/model environment plus one execution-scoped gateway token; the credential variable value is that token;
+9. `gateway` is fixed to `http://127.0.0.1:7331/v1` and virtual model `omnis-reason`; the descriptor may name only the environment-variable keys expected by the foreign CLI. It receives one execution-scoped gateway token, and the credential variable value is that token;
 10. output `text` retains stdout bytes; `json` requires one RFC 8259 JSON value; `jsonl` requires every non-empty line to be one RFC 8259 JSON value;
 11. exit 0 plus valid declared output is success; non-zero or invalid declared output is failure;
 12. generic adapters expose process lifecycle only; they do not claim structured tool/session events or session resume.
 
 The generic descriptor cannot claim `full` or `hook` coverage in v0. Rich integration requires a
 first-party/versioned adapter contract.
+
+A generic descriptor cannot select a concrete provider, external base URL, or alternate model ID.
+Concrete model selection remains exclusively Manager resolution of `omnis.capability.model.reason`.

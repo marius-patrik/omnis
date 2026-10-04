@@ -104,6 +104,10 @@
           "type": [
             "string",
             "null"
+          ],
+          "enum": [
+            "http://127.0.0.1:7331/v1",
+            null
           ]
         },
         "credentialEnv": {
@@ -122,6 +126,10 @@
           "type": [
             "string",
             "null"
+          ],
+          "enum": [
+            "omnis-reason",
+            null
           ]
         }
       }
@@ -152,8 +160,7 @@
                 "minLength": 1
               },
               "gatewayBaseUrl": {
-                "type": "string",
-                "minLength": 1
+                "const": "http://127.0.0.1:7331/v1"
               },
               "credentialEnv": {
                 "type": "string",
@@ -164,8 +171,7 @@
                 "minLength": 1
               },
               "modelValue": {
-                "type": "string",
-                "minLength": 1
+                "const": "omnis-reason"
               }
             }
           }
