@@ -127,6 +127,7 @@ Implementation specifications:
 - [v0 ontology/event registry](docs/ONTOLOGY_V0.md)
 - [v0 NixOS option contract](docs/NIX_OPTIONS_V0.md)
 - [Built-in harness adapters](docs/HARNESS_ADAPTERS_V0.md)
+- [v0 learning/self-optimization](docs/LEARNING_V0.md)
 - [Harness adapters + inference gateway](docs/HARNESS_ADAPTERS_V0.md)
 - [Nix control + provenance](docs/NIX_CONTROL_V0.md)
 - [ControlTree + RenderScene](docs/CONTROL_RENDER_V0.md)

@@ -690,3 +690,58 @@ def test_harness_adapters_do_not_bypass_inference_gateway():
     assert "OPENAI_BASE_URL=http://127.0.0.1:7331/v1" in doc
     assert "http://127.0.0.1:7331/v1" in doc
     assert "There is no weaker built-in direct-provider fallback." in doc
+
+
+def test_learning_manifest_and_roadmap_are_frozen():
+    """Phase 10 must point to exact learning constants instead of delegating algorithms."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "learning.toml"), "rb") as handle:
+        learning = tomllib.load(handle)
+
+    assert learning["version"] == 1
+    assert learning["binding_quality"]["ewma_alpha"] == 0.20
+    assert learning["competence_gap"]["failures_trigger"] == 3
+    assert learning["replay"]["ordinary_fixture_max"] == 1000
+
+    roadmap = _read("ROADMAP.md")
+    assert "docs/LEARNING_V0.md" in roadmap
+    assert "where useful" not in roadmap
+    assert "remote graph synchronization required for shared identities" not in roadmap
+
+
+def test_generic_harness_schema_is_closed_and_required():
+    import json
+
+    with open(
+        os.path.join(REPO_ROOT, "spec", "generic_harness.schema.json"),
+        encoding="utf-8",
+    ) as handle:
+        schema = json.load(handle)
+
+    assert schema["additionalProperties"] is False
+    assert schema["properties"]["schema"]["const"] == "omnis.harness.v1"
+    assert set(schema["required"]) == {
+        "schema", "name", "executable", "probe", "invoke", "coverage"
+    }
+    assert "descriptor-driven generic harness" in _read("ROADMAP.md")
+
+
+def test_competence_gap_event_is_fully_registered():
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    def load(name):
+        with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
+            return tomllib.load(handle)
+
+    event = "omnis.event.agent.competence_gap"
+    assert event in load("ontology.toml")["events"]
+    assert event in load("events.toml")["events"]
+    assert event in load("event_priorities.toml")["events"]
+    assert event in _read("docs", "ONTOLOGY_V0.md")

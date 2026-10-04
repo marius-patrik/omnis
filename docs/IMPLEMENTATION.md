@@ -958,3 +958,17 @@ Harness adapters consume `spec/harnesses.toml` and `spec/inference_gateway.toml`
 `NIX_OPTIONS_V0.md` exactly.
 
 These files eliminate local schema/prompt/ontology/config design inside component repos.
+
+
+## 24. Learning and self-optimization inputs
+
+ROADMAP Phase 10 consumes:
+
+```text
+docs/LEARNING_V0.md
+spec/learning.toml
+```
+
+Derived learning counters/statistics are rebuildable. Implementations do not substitute alternate
+smoothing, decay, competence thresholds, procedure induction rules, replay sampling, or promotion
+metrics.

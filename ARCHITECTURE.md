@@ -8,7 +8,9 @@ constants, defaults and fallback behavior are frozen by
 kind/relation/capability/event names and lifecycle states are frozen by
 [`docs/ONTOLOGY_V0.md`](docs/ONTOLOGY_V0.md); public NixOS configuration is frozen by
 [`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md). Built-in coding harness integration is frozen by
-[`docs/HARNESS_ADAPTERS_V0.md`](docs/HARNESS_ADAPTERS_V0.md).
+[`docs/HARNESS_ADAPTERS_V0.md`](docs/HARNESS_ADAPTERS_V0.md). Learning, routing adaptation,
+competence modeling, procedure induction and self-optimization are frozen by
+[`docs/LEARNING_V0.md`](docs/LEARNING_V0.md).
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.

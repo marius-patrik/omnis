@@ -43,6 +43,7 @@ LINK_REWRITES: Dict[str, str] = {
     "docs/ONTOLOGY_V0.md": "ONTOLOGY_V0.md",
     "docs/NIX_OPTIONS_V0.md": "NIX_OPTIONS_V0.md",
     "docs/HARNESS_ADAPTERS_V0.md": "HARNESS_ADAPTERS_V0.md",
+    "docs/LEARNING_V0.md": "LEARNING_V0.md",
     "docs/NIX_CONTROL_V0.md": "NIX_CONTROL_V0.md",
     "docs/CONTROL_RENDER_V0.md": "CONTROL_RENDER_V0.md",
     "docs/GRAPH.md": "GRAPH.md",

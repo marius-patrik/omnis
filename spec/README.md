@@ -8,6 +8,9 @@ These files are canonical inputs for generated constants/registries.
 - `capabilities.toml` — capability name -> input/output Cap'n Proto types + effect class.
 - `properties.toml` — first-party property key types/constraints.
 - `state_machines.toml` — legal lifecycle transitions.
+- `harnesses.toml` — built-in coding harness adapter contracts.
+- `learning.toml` — exact v0 learning/self-optimization constants.
+- `generic_harness.schema.json` — descriptor schema for third-party coding harnesses.
 - `harnesses.toml` — exact external coding-harness versions, commands, transports and coverage.
 - `inference_gateway.toml` — local gateway listener/auth/model/network/context constants.
 - `nix_control.toml` — exact evaluator/store control transports, configuration roots, fingerprints and recovery.
