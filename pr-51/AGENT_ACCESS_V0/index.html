@@ -390,18 +390,12 @@ namespace. Core never requires or interprets those structures.</p>
 The agent operates the tree directly and receives resulting Control events from the journal.</p>
 <p>First-party automation MUST NOT use screenshots/synthetic input when the typed Control operation
 exists.</p>
-<h2 id="8-no-external-harness-architecture">8. No external harness architecture<a class="headerlink" href="#8-no-external-harness-architecture" title="Permanent link">&para;</a></h2>
-<p>Omnis core contains no:
-- Claude Code adapter;
-- Codex adapter;
-- OpenCode adapter;
-- DeepSeek Harness adapter;
-- generic PTY coding-agent-runtime adapter;
-- harness version pin;
-- harness failover chain;
-- agent-runtime-specific model gateway.</p>
-<p>An external agent runtime may itself use any models/providers/harness machinery it wants. From Omnis'
-perspective it is still only a client of the same three surfaces.</p>
+<h2 id="8-agent-runtime-neutrality">8. Agent-runtime neutrality<a class="headerlink" href="#8-agent-runtime-neutrality" title="Permanent link">&para;</a></h2>
+<p>Omnis core defines no agent runtime, agent-runtime adapter, runtime version policy, cognitive worker
+model, or agent-specific inference gateway.</p>
+<p>An external agent is free to use its own models, providers, memory, execution engine and internal
+tooling. From Omnis' perspective it remains a caller of the same three typed surfaces and the same
+core event journal.</p>
 <h2 id="9-dsh-reference-direction">9. DSH reference direction<a class="headerlink" href="#9-dsh-reference-direction" title="Permanent link">&para;</a></h2>
 <p><code>dsh-stack</code> is the reference agent environment and is upgraded independently toward:
 - durable event ingestion from <code>omnis://events/core</code>;
@@ -436,7 +430,7 @@ perspective it is still only a client of the same three surfaces.</p>
           </li>
           <li><a href="#7-control-structural-access">7. Control structural access</a>
           </li>
-          <li><a href="#8-no-external-harness-architecture">8. No external harness architecture</a>
+          <li><a href="#8-agent-runtime-neutrality">8. Agent-runtime neutrality</a>
           </li>
           <li><a href="#9-dsh-reference-direction">9. DSH reference direction</a>
           </li>

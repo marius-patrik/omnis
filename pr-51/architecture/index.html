@@ -655,7 +655,7 @@ launch, adapt, version-pin, or depend on external agent runtimes.</p>
 <p>Foreign provenance must record how each capability/relationship was learned.</p>
 <h3 id="67-protected-values">6.7 Protected values<a class="headerlink" href="#67-protected-values" title="Permanent link">&para;</a></h3>
 <p>Credentials and sensitive data are protected resources/handles.</p>
-<p>The Agent may know that a credential exists and what capabilities it can authorize without receiving
+<p>An authorized caller may know that a credential exists and what capabilities it can authorize without receiving
 its plaintext value. Manager resolves authorized handles at execution time; OmnisOS enforces the
 physical access boundary.</p>
 <h3 id="68-effect-metadata">6.8 Effect metadata<a class="headerlink" href="#68-effect-metadata" title="Permanent link">&para;</a></h3>
@@ -764,8 +764,8 @@ the same identities:</p>
 </code></pre></div>
 <p>The Control tree may contain ephemeral layout nodes, but semantic leaves reference shared graph
 identities. The render scene is an optimized lowering, never a semantic source of truth.</p>
-<h3 id="84-agent-access">8.4 Agent access<a class="headerlink" href="#84-agent-access" title="Permanent link">&para;</a></h3>
-<p>User interaction and Agent structural control share the same underlying state.</p>
+<h3 id="84-external-agent-access">8.4 External-agent access<a class="headerlink" href="#84-external-agent-access" title="Permanent link">&para;</a></h3>
+<p>User interaction and external-agent structural control share the same underlying state.</p>
 <p>The user primarily manipulates materialized controls through pointer, keyboard, touch, and explicit push-to-talk voice input. An authorized agent client has direct structural access and may:</p>
 <ul>
 <li>create/remove/replace/move views;</li>
@@ -775,7 +775,7 @@ identities. The render scene is an optimized lowering, never a semantic source o
 <li>split or reorganize the workspace;</li>
 <li>create live visualizations;</li>
 <li>attach actions/interactions;</li>
-<li>persist a Control arrangement only when the user explicitly requests persistence, an existing durable presentation preference requires it, or the Agent-selected action has a persistence postcondition; otherwise the arrangement remains transient.</li>
+<li>persist a Control arrangement only when the user explicitly requests persistence, an existing durable presentation preference requires it, or the caller-selected action has a persistence postcondition; otherwise the arrangement remains transient.</li>
 </ul>
 <p>These mutations emit events like user interactions do.</p>
 <h3 id="85-one-renderer">8.5 One renderer<a class="headerlink" href="#85-one-renderer" title="Permanent link">&para;</a></h3>
@@ -805,7 +805,6 @@ surface rather than a separate product.</p>
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>omnis://resource/&lt;id&gt;
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>omnis://capability/&lt;id&gt;
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>omnis://scene/&lt;id&gt;
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>omnis://memory/&lt;id&gt;
 </code></pre></div>
 <p>Protocol v0 uses <code>omnis://</code> stable-reference URIs as defined by <code>docs/PROTOCOLS.md</code>; first-party
 surfaces exchange NodeId/EventId/ArtifactId values directly on the wire rather than copied
@@ -848,7 +847,7 @@ other client.</p>
 <p>Changes to OmnisOS, OmnisManager or OmnisControl themselves are candidate builds/generations evaluated
 outside the active implementation before promotion.</p>
 <h2 id="13-host-independence">13. Host independence<a class="headerlink" href="#13-host-independence" title="Permanent link">&para;</a></h2>
-<p>A semantic resource or activity is not identified by the machine currently executing it.</p>
+<p>A semantic resource or execution is not identified by the machine currently executing it.</p>
 <p>Manager may place execution on:</p>
 <ul>
 <li>local host;</li>
@@ -859,7 +858,7 @@ outside the active implementation before promotion.</p>
 <li>cloud resource;</li>
 <li>GPU/accelerator host.</li>
 </ul>
-<p>Placement preserves graph/resource/activity identity and emits causal events describing the physical
+<p>Placement preserves graph/resource/execution identity and emits causal events describing the physical
 realization.</p>
 <p>The long-term system may span laptop, workstation, phone, and server without treating one device as
 the conceptual owner of all computation.</p>
@@ -914,7 +913,7 @@ A core release does not pin a DSH/agent version.</p>
 <li><strong>Protected values remain handles unless explicit authorized disclosure is required.</strong></li>
 <li><strong>Semantic identity survives version, host, path, process, provider and agent changes.</strong></li>
 <li><strong>External effects are accounted for honestly; opaque effects are not falsely rolled back.</strong></li>
-<li><strong>The core contains no built-in external-agent agent-runtime integration or agent-runtime-specific version policy.</strong></li>
+<li><strong>The core contains no built-in agent runtime or agent-runtime-specific policy.</strong></li>
 </ol>
 <h2 id="17-non-goals">17. Non-goals<a class="headerlink" href="#17-non-goals" title="Permanent link">&para;</a></h2>
 <p>The initial architecture explicitly does not require:</p>
@@ -967,8 +966,8 @@ default", "equivalent library", and "temporary fallback" are not implementation 
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>docs/ONTOLOGY_V0.md
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>docs/NIX_OPTIONS_V0.md
 </code></pre></div>
-<p>An implementation worker copies/uses these contracts; it does not redesign their schema, prompt,
-identifier or option surfaces.</p>
+<p>An implementation worker copies/uses these contracts; it does not redesign their schema,
+identifier, projection or option surfaces.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="..">
@@ -1055,7 +1054,7 @@ identifier or option surfaces.</p>
               <li><a href="#81-responsibilities">8.1 Responsibilities</a></li>
               <li><a href="#82-desktop-model">8.2 Desktop model</a></li>
               <li><a href="#83-control-tree">8.3 Control tree</a></li>
-              <li><a href="#84-agent-access">8.4 Agent access</a></li>
+              <li><a href="#84-external-agent-access">8.4 External-agent access</a></li>
               <li><a href="#85-one-renderer">8.5 One renderer</a></li>
               <li><a href="#86-shell-and-input">8.6 Shell and input</a></li>
             </ul>

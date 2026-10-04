@@ -310,8 +310,8 @@ by humans and arbitrary agents.</strong></p>
 <p>They share one multidimensional graph, one append-only core event journal and one stable identity
 space.</p>
 <h2 id="agents-are-clients-not-a-core-subsystem">Agents are clients, not a core subsystem<a class="headerlink" href="#agents-are-clients-not-a-core-subsystem" title="Permanent link">&para;</a></h2>
-<p>Omnis does <strong>not</strong> ship or depend on an OmnisAgent daemon, Claude Code, Codex, OpenCode, DeepSeek
-Harness, or another agent runtime.</p>
+<p>Omnis does <strong>not</strong> ship or depend on a built-in agent runtime. Agent implementations are separate,
+replaceable clients of the core.</p>
 <p>Any authorized agent can use the same three core surfaces through:
 - <code>omnis mcp</code> — stdio MCP projection;
 - <code>@omnis/agent-access</code> — generated native plugin client.</p>
