@@ -252,22 +252,27 @@ def test_protocol_schema_sources_exist():
 
 
 def test_decision_complete_v0_contract():
-    """Implementation workers must receive frozen algorithms/defaults instead of design gaps."""
+    """Implementation workers receive frozen core algorithms/defaults instead of design gaps."""
     spec = _read("docs", "DECISION_COMPLETE_V0.md")
     required = (
         "Frozen source baselines",
+        "Event delivery",
+        "Nix and persistent mutation",
+        "OS observation",
+        "Manager discovery",
         "Manager resolution and placement algorithm",
-        "Agent event priority and cognition",
-        "Agent candidate scheduling",
-        "Agent retrieval",
-        "Agent context compilation",
+        "Manager execution",
         "Control input routing",
         "Control graph layout",
         "Backup and recovery",
         "Package persistence scopes",
-        "Inference gateway and universal model-event interception",
         "Desktop compatibility services",
         "Specification completeness invariant",
+        "Native remote-host pairing",
+        "Graph value and query semantics",
+        "Watched-filesystem observation",
+        "Linux enforcement primitives",
+        "Protocol handshake",
         "SpecificationDefect",
     )
     for heading in required:
@@ -279,13 +284,14 @@ def test_decision_complete_v0_contract():
         "Rust toolchain:",
         "1.99.0",
         "cddab5f1c359539147959163142ff95a24995f6a",
-        "NullIntention priority = 0.15",
-        "RRF score = sum(1 / (60 + rank))",
-        "127.0.0.1:7331",
+        "no global ACK",
         "UDP 7443",
+        "omnis.graph.v1",
+        "omnis.os.v1",
+        "omnis.manager.v1",
+        "omnis.control.v1",
     ):
         assert token in spec, f"decision-complete spec must freeze {token!r}"
-
 
 def test_active_specs_forbid_implementer_choice_markers():
     """Active v0 specs must not positively delegate observable design decisions."""
