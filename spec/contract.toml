@@ -30,6 +30,7 @@ value_types = "spec/value_types.toml"
 nix_control = "spec/nix_control.toml"
 control_render = "spec/control_render.toml"
 harnesses = "spec/harnesses.toml"
+inference_gateway = "spec/inference_gateway.toml"
 learning = "spec/learning.toml"
 generic_harness = "spec/generic_harness.schema.json"
 
@@ -37,6 +38,7 @@ generic_harness = "spec/generic_harness.schema.json"
 common = "protocol/common.capnp"
 events = "protocol/events.capnp"
 capabilities = "protocol/capabilities.capnp"
+inference = "protocol/inference.capnp"
 graph = "protocol/graph.capnp"
 nix_control = "protocol/nix_control.capnp"
 os = "protocol/os.capnp"
@@ -64,7 +66,7 @@ reference_nix = "examples/omnis.nix"
 
 [ownership]
 "os" = ["docs/OMNIS_OS.md","protocol/os.capnp","docs/NIX_OPTIONS_V0.md","schema/graph.sql"]
-"manager" = ["docs/OMNIS_MANAGER.md","protocol/manager.capnp","protocol/nix_control.capnp","docs/NIX_CONTROL_V0.md","spec/harnesses.toml"]
+"manager" = ["docs/OMNIS_MANAGER.md","protocol/manager.capnp","protocol/nix_control.capnp","protocol/inference.capnp","docs/NIX_CONTROL_V0.md","spec/harnesses.toml","spec/inference_gateway.toml"]
 "agent" = ["docs/OMNIS_AGENT.md","protocol/agent.capnp","schema/worldline.sql","schema/index.sql","prompts/README.md","docs/LEARNING_V0.md"]
 "control" = ["docs/OMNIS_CONTROL.md","protocol/control.capnp","protocol/control_scene.capnp","docs/CONTROL_RENDER_V0.md","theme/omnis-dark.json"]
 "shared" = ["ARCHITECTURE.md","docs/DECISION_COMPLETE_V0.md","docs/GRAPH.md","docs/PROTOCOLS.md","docs/ONTOLOGY_V0.md","protocol/common.capnp","protocol/events.capnp","protocol/capabilities.capnp","spec/ontology.toml","spec/events.toml","spec/capabilities.toml","spec/properties.toml","spec/state_machines.toml","spec/value_types.toml"]
