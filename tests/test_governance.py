@@ -745,3 +745,23 @@ def test_contract_manifest_references_existing_files():
         "docs/NIX_CONTROL_V0.md",
     }
     assert required_normative <= set(contract["normative"].values())
+
+def test_generic_harness_contract_has_no_undefined_hook_mode():
+    import json
+
+    with open(
+        os.path.join(REPO_ROOT, "spec", "generic_harness.schema.json"),
+        encoding="utf-8",
+    ) as handle:
+        schema = json.load(handle)
+
+    assert schema["properties"]["coverage"]["enum"] == ["gateway", "process_only"]
+    doc = _read("docs", "HARNESS_ADAPTERS_V0.md")
+    assert "generic adapters expose process lifecycle only" in doc
+    assert "cannot claim `full` or `hook` coverage" in doc
+
+
+def test_learning_preference_retraction_is_reachable():
+    doc = _read("docs", "LEARNING_V0.md")
+    assert "floor 0.00" in doc
+    assert "below 0.50" in doc

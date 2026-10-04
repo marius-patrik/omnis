@@ -3,37 +3,174 @@
   "$id": "urn:omnis:v0:generic-harness-descriptor",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "name", "executable", "probe", "invoke", "coverage"],
+  "required": [
+    "schema",
+    "name",
+    "executable",
+    "probe",
+    "invoke",
+    "coverage"
+  ],
   "properties": {
-    "schema": { "const": "omnis.harness.v1" },
-    "name": { "type": "string", "minLength": 1 },
-    "executable": { "type": "string", "minLength": 1 },
-    "coverage": { "enum": ["gateway", "hook", "process_only"] },
+    "schema": {
+      "const": "omnis.harness.v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "executable": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coverage": {
+      "enum": [
+        "gateway",
+        "process_only"
+      ]
+    },
     "probe": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["versionArgs", "helpArgs", "requiredTokens"],
+      "required": [
+        "versionArgs",
+        "helpArgs",
+        "requiredTokens"
+      ],
       "properties": {
-        "versionArgs": { "type": "array", "items": {"type":"string"} },
-        "helpArgs": { "type": "array", "items": {"type":"string"} },
-        "requiredTokens": { "type": "array", "minItems": 1, "items": {"type":"string"} }
+        "versionArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "helpArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requiredTokens": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "invoke": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["args", "promptTransport", "output"],
+      "required": [
+        "args",
+        "promptTransport",
+        "output"
+      ],
       "properties": {
-        "args": { "type": "array", "items": {"type":"string"} },
-        "promptTransport": { "enum": ["last_arg", "stdin_utf8"] },
-        "output": { "enum": ["jsonl", "json", "text"] },
-        "workingDirectoryEnv": { "type": ["string","null"] },
-        "gatewayBaseUrlEnv": { "type": ["string","null"] },
-        "gatewayBaseUrl": { "type": ["string","null"] },
-        "credentialEnv": { "type": ["string","null"] },
-        "modelEnv": { "type": ["string","null"] },
-        "modelValue": { "type": ["string","null"] }
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Literal argv element; exact placeholders {worktree}, {gateway}, {model} may appear."
+          }
+        },
+        "promptTransport": {
+          "enum": [
+            "last_arg",
+            "stdin_utf8"
+          ]
+        },
+        "output": {
+          "enum": [
+            "jsonl",
+            "json",
+            "text"
+          ]
+        },
+        "workingDirectoryEnv": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gatewayBaseUrlEnv": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gatewayBaseUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "credentialEnv": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modelEnv": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modelValue": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "coverage": {
+            "const": "gateway"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "invoke": {
+            "required": [
+              "gatewayBaseUrlEnv",
+              "gatewayBaseUrl",
+              "credentialEnv",
+              "modelEnv",
+              "modelValue"
+            ],
+            "properties": {
+              "gatewayBaseUrlEnv": {
+                "type": "string",
+                "minLength": 1
+              },
+              "gatewayBaseUrl": {
+                "type": "string",
+                "minLength": 1
+              },
+              "credentialEnv": {
+                "type": "string",
+                "minLength": 1
+              },
+              "modelEnv": {
+                "type": "string",
+                "minLength": 1
+              },
+              "modelValue": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

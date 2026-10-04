@@ -383,3 +383,27 @@ weaken the version pins.
 - Codex exec/app-server source surface: https://github.com/openai/codex
 - OpenCode CLI: https://opencode.ai/v2/docs/cli/commands/
 - OpenCode providers: https://opencode.ai/v2/docs/providers
+
+## 13. Descriptor-driven generic harness
+
+The v0 generic harness adapter is intentionally narrower than the three built-ins. It supports one
+process-per-turn executable described by a JSON document that validates against
+`spec/generic_harness.schema.json`.
+
+Exact behavior:
+
+1. descriptor is supplied by an explicitly registered Resource; Manager never invents one from help text;
+2. run `probe.versionArgs`, then `probe.helpArgs`, each with the normal 2-second discovery timeout;
+3. normalize help output as UTF-8 with replacement, CRLF->LF, ASCII whitespace collapse, ASCII lowercase;
+4. every `probe.requiredTokens` token must occur after normalization or Binding is incompatible;
+5. expand only `{worktree}`, `{gateway}`, and `{model}` argv placeholders;
+6. prompt transport `last_arg` appends expanded `prompts/code_worker.md`; `stdin_utf8` writes those UTF-8 bytes then closes stdin;
+7. working directory is always the assigned Worktree path;
+8. `process_only` receives no model-provider credential or gateway grant;
+9. `gateway` receives exactly the descriptor gateway/model environment plus one execution-scoped gateway token; the credential variable value is that token;
+10. output `text` retains stdout bytes; `json` requires one RFC 8259 JSON value; `jsonl` requires every non-empty line to be one RFC 8259 JSON value;
+11. exit 0 plus valid declared output is success; non-zero or invalid declared output is failure;
+12. generic adapters expose process lifecycle only; they do not claim structured tool/session events or session resume.
+
+The generic descriptor cannot claim `full` or `hook` coverage in v0. Rich integration requires a
+first-party/versioned adapter contract.

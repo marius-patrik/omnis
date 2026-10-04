@@ -304,7 +304,7 @@ Behavioral:
 - initial confidence = 0.60;
 - each additional consistent independent Activity adds 0.05 to max 0.85;
 - one contradictory explicit user statement immediately supersedes the inferred preference;
-- contradictory behavior alone creates competing evidence and reduces confidence by 0.10, floor 0.50;
+- contradictory behavior alone creates competing evidence and reduces confidence by 0.10, floor 0.00;
 - below 0.50 the inferred preference is retracted.
 
 Preferences never change system authority/security policy.
