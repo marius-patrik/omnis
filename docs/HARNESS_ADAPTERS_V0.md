@@ -85,7 +85,7 @@ is authoritative**. This removes implementer judgment while remaining robust to 
 ## 3. Claude Code
 
 Official CLI surfaces used by the adapter are non-interactive print mode, JSON/stream-JSON output,
-system-prompt append, model selection and permission controls. citeturn470322search0turn423183search0
+system-prompt append, model selection and permission controls.
 
 Executable discovery name:
 
@@ -144,7 +144,7 @@ weaker built-in direct-provider fallback.
 ## 4. Codex CLI
 
 The current Codex automation surface is `codex exec` with JSONL output; current SDK/source exposes
-working-directory, model, sandbox, approval, output schema and base-URL routing controls. citeturn932115search1turn932115search0
+working-directory, model, sandbox, approval, output schema and base-URL routing controls.
 
 Executable discovery name:
 
@@ -184,14 +184,14 @@ an authority boundary and can create false failures.
 Stream handling:
 - stdout is JSONL and is the only structured control stream;
 - stderr is always treated as unstructured diagnostics, because current Codex builds can place
-  diagnostic/tool text there; it is never parsed as Codex JSON events. citeturn932115search8
+  diagnostic/tool text there; it is never parsed as Codex JSON events.
 - `thread.started` records thread identity;
 - terminal `turn.completed` plus exit 0 => success unless a terminal failure event was emitted;
 - terminal `turn.failed`, top-level error, malformed JSONL, or non-zero exit => failure;
 - item-level error records are retained as evidence; they become terminal only when the run also
-  terminates unsuccessfully, because current versions may emit non-fatal item errors. citeturn932115search4
+  terminates unsuccessfully, because current versions may emit non-fatal item errors.
 - do not require reasoning items or complete subagent/tool trajectory from `--json`; current Codex
-  streams may omit them. citeturn932115search5turn932115search6
+  streams may omit them.
 - the final assistant message and all raw JSONL are persisted as artifacts.
 
 Memory coverage tier: `gateway`. Codex's gateway-mediated model requests are visible, while the
@@ -201,7 +201,7 @@ adapter does not claim that its JSONL is a complete internal trajectory.
 
 OpenCode provides `opencode run` for non-interactive automation and JSON event output. Current
 documentation exposes `--format json`, `--model`, `--dir`, `--standalone`, and provider
-base-URL configuration. citeturn828219search2turn531674search1
+base-URL configuration.
 
 Executable discovery name:
 
@@ -254,7 +254,7 @@ interpolation mechanism, never as literal config-file bytes. The temporary confi
 
 OpenCode provider policy denies every provider except `omnis`; this prevents ambient saved
 credentials or catalog providers from bypassing the gateway. Current OpenCode supports provider-use
-policy for this purpose. citeturn531674search4
+policy for this purpose.
 
 Stream handling:
 - parse stdout as newline-delimited JSON events;
@@ -315,3 +315,31 @@ At each discovery/start:
 7. emit a resource/binding discovery change event.
 
 A spec/fixture update is required to support a new incompatible upstream interface.
+
+
+## 10. External interface references
+
+These references justify the upstream CLI/config surfaces frozen above. They are evidence, not
+runtime dependencies.
+
+- Claude Code CLI reference:
+  https://docs.anthropic.com/en/docs/claude-code/cli-usage
+- Claude Code LLM gateway configuration:
+  https://docs.anthropic.com/en/docs/claude-code/llm-gateway
+- Codex source/SDK exec surface:
+  https://github.com/openai/codex/blob/main/sdk/typescript/src/exec.ts
+- Codex issue documenting `exec --json` JSONL behavior:
+  https://github.com/openai/codex/issues/35415
+- Codex issue documenting stderr/JSONL diagnostics risk:
+  https://github.com/openai/codex/issues/36804
+- Codex issue documenting non-fatal item errors:
+  https://github.com/openai/codex/issues/19689
+- Codex issues documenting incomplete reasoning/subagent stream coverage:
+  https://github.com/openai/codex/issues/10746
+  https://github.com/openai/codex/issues/41590
+- OpenCode CLI automation:
+  https://opencode.ai/v2/docs/cli/commands/
+- OpenCode provider endpoint configuration:
+  https://opencode.ai/v2/docs/providers
+- OpenCode provider policy:
+  https://opencode.ai/v2/docs/policies/
