@@ -1,0 +1,633 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Omnis v0 Harness Adapters and Inference Gateway · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-v0-harness-adapters-and-inference-gateway">Omnis v0 Harness Adapters and Inference Gateway<a class="headerlink" href="#omnis-v0-harness-adapters-and-inference-gateway" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> This document freezes the three built-in external coding-agent adapters and
+the model gateway they use. Implementers do not choose alternate CLI modes, model-routing behavior,
+session transport, inner permission modes, or coverage tiers.</p>
+<p>The exact release fixtures are:</p>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th style="text-align: right;">v0 version</th>
+<th>Control surface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td style="text-align: right;">2.1.289</td>
+<td>print mode + stream-json stdin/stdout</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td style="text-align: right;">0.160.0 (<code>rust-v0.160.0</code>)</td>
+<td>app-server over stdio JSON-RPC</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td style="text-align: right;">1.18.34</td>
+<td><code>opencode serve</code> HTTP + SSE</td>
+</tr>
+</tbody>
+</table>
+<p><code>spec/harnesses.toml</code> is the machine-readable adapter manifest.
+<code>spec/inference_gateway.toml</code> is the machine-readable gateway contract.</p>
+<h2 id="1-common-execution-contract">1. Common execution contract<a class="headerlink" href="#1-common-execution-contract" title="Permanent link">&para;</a></h2>
+<p>Every built-in <code>omnis.capability.code.agent</code> binding has one hard dependency on
+<code>omnis.capability.model.reason</code>.</p>
+<p>Manager resolves the code-agent Binding first, then resolves exactly one reason-model Binding under
+the same Activity authority/privacy/locality constraints. If no reason-model Binding is feasible,
+the built-in harness Binding is infeasible. The harness never chooses a provider.</p>
+<p>The selected model binding is locked to the harness Execution for its lifetime and is exposed to the
+harness only as virtual model:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>omnis-reason
+</code></pre></div>
+<p>A request authenticated by a harness token that names any other model is rejected.</p>
+<h2 id="2-execution-scoped-gateway-authentication">2. Execution-scoped gateway authentication<a class="headerlink" href="#2-execution-scoped-gateway-authentication" title="Permanent link">&para;</a></h2>
+<p>Before launching a built-in harness, Manager generates 32 CSPRNG bytes and serializes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>omnis1.&lt;base64url-without-padding(random32)&gt;
+</code></pre></div>
+<p>Only BLAKE3-256(token bytes) is retained in Manager memory. The record contains:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ExecutionId
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>WorkerId
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ActivityId
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>selected model BindingId
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>protection/provider constraints
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>creation monotonic time
+</code></pre></div>
+<p>The plaintext token is injected only as <code>OMNIS_GATEWAY_TOKEN</code> and, when a harness requires it, its
+provider-specific bearer-token variable.</p>
+<p>HTTP requests must send:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">Authorization: Bearer &lt;OMNIS_GATEWAY_TOKEN&gt;</span>
+</code></pre></div>
+<p>There is no persistent gateway-token database. Token lifetime equals Execution lifetime. On terminal
+Execution state it is erased immediately. After managerd restart all old tokens are invalid; live
+harness processes are stopped, restarted with new tokens, and resumed through their recorded foreign
+session/thread identity.</p>
+<p>A gateway token is never accepted as an upstream provider credential and never leaves the local
+machine.</p>
+<h2 id="3-gateway-network-envelope">3. Gateway network envelope<a class="headerlink" href="#3-gateway-network-envelope" title="Permanent link">&para;</a></h2>
+<p>A built-in harness does not receive broad network access merely to reach a model.</p>
+<p>Its base network requirement is <code>loopback-gateway</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>PrivateNetwork=no
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>IPAddressDeny=any
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>IPAddressAllow=127.0.0.1
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>IPAddressAllow=::1
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>cgroup connect eBPF: TCP destination port must equal 7331 for loopback gateway traffic
+</code></pre></div>
+<p>If the coding task requires other network access, Manager unions only the destinations already
+granted by the selected code-agent Binding/Activity. Gateway access never implies public network.</p>
+<h2 id="4-canonical-inference-path">4. Canonical inference path<a class="headerlink" href="#4-canonical-inference-path" title="Permanent link">&para;</a></h2>
+<p>The inference gateway accepts only the endpoint set in <code>spec/inference_gateway.toml</code>.</p>
+<p>Every request becomes <code>protocol/inference.capnp::InferenceRequest</code>. Model provider adapters consume
+that canonical request and emit <code>InferenceResult</code> / <code>StreamEvent</code>. Provider-specific request
+translation exists only at the Manager adapter boundary.</p>
+<p>The canonical subset supports:</p>
+<ul>
+<li>system/developer/user/assistant messages;</li>
+<li>text, image ArtifactRef and file ArtifactRef content;</li>
+<li>tool definitions using UTF-8 JSON Schema artifacts;</li>
+<li>tool results keyed by call ID;</li>
+<li>automatic/none/required/specific tool choice;</li>
+<li>max output tokens;</li>
+<li>finite temperature/top-p;</li>
+<li>stop sequences;</li>
+<li>streaming text/tool-call deltas;</li>
+<li>final usage and finish reason.</li>
+</ul>
+<p>Unsupported hosted-provider-only features are rejected with <code>InvalidArgument</code>; they are never
+silently approximated.</p>
+<h3 id="41-openai-responses-mapping">4.1 OpenAI Responses mapping<a class="headerlink" href="#41-openai-responses-mapping" title="Permanent link">&para;</a></h3>
+<p><code>POST /v1/responses</code> maps:
+- <code>instructions</code> -&gt; first developer Message;
+- input message items -&gt; Message;
+- function-call-output items -&gt; ToolResult;
+- function/custom function tool definitions -&gt; ToolDefinition;
+- function tool choice -&gt; ToolChoice;
+- <code>max_output_tokens</code>, <code>temperature</code>, <code>top_p</code> -&gt; canonical scalar fields;
+- streaming response events -&gt; canonical StreamEvent -&gt; OpenAI-compatible SSE.</p>
+<p>Hosted web/file-search/computer/code-interpreter/image tools are rejected for this local gateway.
+The harness must use its own local tools.</p>
+<h3 id="42-openai-chat-completions-mapping">4.2 OpenAI Chat Completions mapping<a class="headerlink" href="#42-openai-chat-completions-mapping" title="Permanent link">&para;</a></h3>
+<p><code>POST /v1/chat/completions</code> maps system/developer/user/assistant/tool roles, function tools and
+tool-choice directly to the canonical structures. Unknown top-level request fields are rejected
+except metadata fields explicitly documented as nonsemantic and ignored by the compatibility parser.</p>
+<h3 id="43-anthropic-messages-mapping">4.3 Anthropic Messages mapping<a class="headerlink" href="#43-anthropic-messages-mapping" title="Permanent link">&para;</a></h3>
+<p><code>POST /anthropic/v1/messages</code> maps:
+- top-level <code>system</code> -&gt; system Message;
+- user/assistant messages -&gt; Message;
+- <code>tool_use</code> -&gt; ToolCall;
+- <code>tool_result</code> -&gt; ToolResult;
+- <code>tools[].input_schema</code> -&gt; ToolDefinition;
+- <code>tool_choice</code> -&gt; ToolChoice;
+- <code>max_tokens</code>, <code>temperature</code>, <code>top_p</code>, <code>stop_sequences</code> -&gt; canonical fields.</p>
+<p>Known Anthropic cache-control annotations are ignored as nonsemantic cache hints after being retained
+in the protected original-request artifact. Unknown beta features that alter semantics are rejected.</p>
+<p><code>/anthropic/v1/messages/count_tokens</code> tokenizes the mapped canonical request using the selected
+model Binding tokenizer when advertised; otherwise it uses the same conservative byte estimator as
+Agent context compilation.</p>
+<h2 id="5-context-injection">5. Context injection<a class="headerlink" href="#5-context-injection" title="Permanent link">&para;</a></h2>
+<p>For every model request authenticated by a Worker-attached harness token:</p>
+<ol>
+<li>gateway parses the request;</li>
+<li>stores the protected original request artifact;</li>
+<li>asks Agent to compile a ContextCapsule for the Worker and current inference call;</li>
+<li>caps injected content at <code>min(25% input budget, 16384 tokens)</code>;</li>
+<li>excludes material prohibited for the selected concrete provider;</li>
+<li>adds stable NodeId/EventId evidence citations;</li>
+<li>injects exactly one tagged Omnis context segment;</li>
+<li>emits <code>omnis.event.inference.request</code>;</li>
+<li>invokes the locked reason-model Binding;</li>
+<li>streams result and emits response/failure event.</li>
+</ol>
+<p>Injection representation:
+- Responses: prepend one developer input message;
+- Chat Completions: prepend one developer message;
+- Anthropic Messages: append one <code>&lt;omnis-context&gt;...&lt;/omnis-context&gt;</code> block to the system content.</p>
+<p>The tag is recognized on future interception and is not re-ingested as new source evidence.</p>
+<h2 id="6-coverage-contract">6. Coverage contract<a class="headerlink" href="#6-coverage-contract" title="Permanent link">&para;</a></h2>
+<p>Coverage is dimensional:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>model_interception
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>context_injection
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>structured_lifecycle
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>structured_tool_events
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>session_resume
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>permission_control
+</code></pre></div>
+<p>A built-in adapter is <code>full</code> only when all six are true. Claude Code, Codex and OpenCode are all
+<code>full</code> for the pinned v0 versions.</p>
+<p>This supersedes the older rule that <code>full</code> necessarily required a native pre-model hook. Gateway
+interception plus the harness's structured control/event surface is sufficient. Native hooks may
+supply additional evidence but are not a correctness dependency.</p>
+<h2 id="7-claude-code-21289">7. Claude Code 2.1.289<a class="headerlink" href="#7-claude-code-21289" title="Permanent link">&para;</a></h2>
+<p>Discovery requires executable <code>claude</code> and exact parsed version <code>2.1.289</code>. Any other version is
+reported as a Resource but this built-in Binding is <code>incompatible</code>.</p>
+<p>Each Agent Worker turn launches one process in the Worker worktree:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>claude -p
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  --input-format stream-json
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  --output-format stream-json
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  --verbose
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  --dangerously-skip-permissions
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  --model omnis-reason
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  [--resume &lt;foreign_session_id&gt;]
+</code></pre></div>
+<p>Prompt text never appears in argv. Manager writes one NDJSON user envelope from
+<code>spec/harnesses.toml</code> to stdin.</p>
+<p>Environment is exact:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>OMNIS_GATEWAY_TOKEN=&lt;execution token&gt;
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ANTHROPIC_BASE_URL=http://127.0.0.1:7331/anthropic
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ANTHROPIC_AUTH_TOKEN=&lt;execution token&gt;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ANTHROPIC_MODEL=omnis-reason
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>DISABLE_AUTOUPDATER=1
+</code></pre></div>
+<p><code>ANTHROPIC_API_KEY</code> is removed from the environment.</p>
+<p>Output parsing:
+- every non-empty stdout line must be a JSON object or the Execution fails as incompatible output;
+- retain the raw NDJSON as an Execution artifact;
+- first non-empty <code>session_id</code> becomes the foreign session alias;
+- <code>assistant.message.content[].type=tool_use</code> records a tool-call semantic event;
+- <code>user.message.content[].type=tool_result</code> records its result;
+- <code>system</code> messages record session/compaction/lifecycle evidence;
+- terminal <code>type=result, subtype=success</code> means turn success;
+- any result error subtype or non-zero process exit means failure;
+- unknown JSON message types are preserved as evidence and produce a compatibility diagnostic, not
+  silently discarded.</p>
+<p>Claude's inner permission layer is deliberately bypassed. OmnisOS ExecutionEnvelope is the sole
+physical authority boundary for this Worker.</p>
+<h2 id="8-codex-01600">8. Codex 0.160.0<a class="headerlink" href="#8-codex-01600" title="Permanent link">&para;</a></h2>
+<p>Discovery requires exact <code>codex --version</code> semver <code>0.160.0</code>.</p>
+<p>Manager starts one app-server per Worker using the exact argv in <code>spec/harnesses.toml</code>:
+- stdio transport;
+- strict config;
+- provider <code>omnis</code>;
+- base URL <code>http://127.0.0.1:7331/v1</code>;
+- bearer token from <code>OMNIS_GATEWAY_TOKEN</code>;
+- Responses wire API;
+- WebSockets off;
+- approvals <code>never</code>;
+- Codex sandbox <code>danger-full-access</code>.</p>
+<p>OmnisOS remains the sole physical sandbox; Codex is not allowed to add a divergent inner sandbox.</p>
+<p>At package build time, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>codex app-server generate-json-schema --out &lt;build-output&gt;/share/omnis/codex-app-server-schema
+</code></pre></div>
+<p>with <strong>no</strong> <code>--experimental</code>. The generated stable schema for 0.160.0 is the adapter parser
+authority.</p>
+<p>RPC sequence:</p>
+<ol>
+<li>send <code>initialize</code> with clientInfo name <code>omnis</code>, title <code>Omnis</code>, system release version and
+   <code>experimentalApi=false</code>;</li>
+<li>wait for successful response;</li>
+<li>send <code>initialized</code>;</li>
+<li>new Worker session: <code>thread/start</code> with cwd = Worker worktree, model = <code>omnis-reason</code>;</li>
+<li>resumed session: <code>thread/resume</code> with recorded thread ID;</li>
+<li>persist returned <code>thread.id</code> as foreign session alias;</li>
+<li>send <code>turn/start</code> with text input containing the expanded code-worker prompt;</li>
+<li>consume all typed notifications and store unknown stable-schema notifications as evidence;</li>
+<li><code>turn/completed</code> is terminal for the turn; only status <code>completed</code> succeeds. <code>failed</code> or
+   <code>interrupted</code> fails/cancels accordingly.</li>
+</ol>
+<h2 id="9-opencode-11834">9. OpenCode 1.18.34<a class="headerlink" href="#9-opencode-11834" title="Permanent link">&para;</a></h2>
+<p>Discovery requires exact <code>opencode --version</code> semver <code>1.18.34</code>.</p>
+<p>Each Worker starts a dedicated headless server:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>opencode serve --hostname 127.0.0.1 --port 0
+</code></pre></div>
+<p>It is not the user's shared OpenCode service. Manager parses the selected ephemeral port from the
+startup line and immediately verifies <code>GET /global/health</code>.</p>
+<p>The server has independent random 32-byte Basic Auth password
+<code>OMNIS_HARNESS_SERVER_TOKEN</code>; username is <code>omnis</code>. This token exists only in Manager memory and
+the child environment.</p>
+<p>Manager supplies <code>OPENCODE_CONFIG_CONTENT</code> as canonical minified JSON:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">"$schema"</span><span class="p">:</span><span class="s2">"https://opencode.ai/config.json"</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">"autoupdate"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nt">"model"</span><span class="p">:</span><span class="s2">"omnis/omnis-reason"</span><span class="p">,</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="nt">"small_model"</span><span class="p">:</span><span class="s2">"omnis/omnis-reason"</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span><span class="nt">"permission"</span><span class="p">:</span><span class="s2">"allow"</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="nt">"provider"</span><span class="p">:{</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="nt">"omnis"</span><span class="p">:{</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">      </span><span class="nt">"npm"</span><span class="p">:</span><span class="s2">"@ai-sdk/openai"</span><span class="p">,</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Omnis"</span><span class="p">,</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">      </span><span class="nt">"options"</span><span class="p">:{</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">        </span><span class="nt">"baseURL"</span><span class="p">:</span><span class="s2">"http://127.0.0.1:7331/v1"</span><span class="p">,</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">        </span><span class="nt">"apiKey"</span><span class="p">:</span><span class="s2">"{env:OMNIS_GATEWAY_TOKEN}"</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">      </span><span class="p">},</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">      </span><span class="nt">"models"</span><span class="p">:{</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">        </span><span class="nt">"omnis-reason"</span><span class="p">:{</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">          </span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Omnis Reason"</span><span class="p">,</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">          </span><span class="nt">"limit"</span><span class="p">:{</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">            </span><span class="nt">"context"</span><span class="p">:</span><span class="err">&lt;selec</span><span class="kc">te</span><span class="err">d_bi</span><span class="kc">n</span><span class="err">di</span><span class="kc">n</span><span class="err">g_co</span><span class="kc">nte</span><span class="err">x</span><span class="kc">t</span><span class="err">_wi</span><span class="kc">n</span><span class="err">dow&gt;</span><span class="p">,</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">            </span><span class="nt">"output"</span><span class="p">:</span><span class="err">&lt;selec</span><span class="kc">te</span><span class="err">d_bi</span><span class="kc">n</span><span class="err">di</span><span class="kc">n</span><span class="err">g_max_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">&gt;</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">          </span><span class="p">}</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="p">}</span>
+</code></pre></div>
+<p>Also set <code>OPENCODE_DISABLE_AUTOUPDATE=1</code> and <code>OPENCODE_DISABLE_MODELS_FETCH=1</code>.</p>
+<p>Control sequence:</p>
+<ol>
+<li>open authenticated <code>GET /event</code> SSE stream;</li>
+<li><code>POST /session</code> to create a session, or reuse the recorded session ID after process restart if
+   the server instance can resolve it;</li>
+<li>persist returned session ID as foreign session alias;</li>
+<li><code>POST /session/&lt;id&gt;/message</code> with model
+   <code>{"providerID":"omnis","modelID":"omnis-reason"}</code> and one text part containing the expanded
+   code-worker prompt;</li>
+<li>consume the synchronous response plus SSE lifecycle/tool/message events;</li>
+<li>use <code>GET /session/status</code> to reconcile after reconnect;</li>
+<li>cancel through <code>POST /session/&lt;id&gt;/abort</code>;</li>
+<li>collect <code>GET /session/&lt;id&gt;/diff</code> at terminal state.</li>
+</ol>
+<p>OpenCode's permission config is <code>allow</code> because OmnisOS is the physical authority boundary.
+Its server binds only loopback and is protected by Basic Auth.</p>
+<p>On Worker terminal state Manager calls <code>POST /instance/dispose</code>, terminates the server process,
+erases both local tokens and records the session/diff artifacts.</p>
+<h2 id="10-no-direct-provider-escape">10. No direct provider escape<a class="headerlink" href="#10-no-direct-provider-escape" title="Permanent link">&para;</a></h2>
+<p>For all three built-ins:
+- remove inherited provider API key/token variables not explicitly required by the adapter;
+- physical network policy allows the inference gateway but not provider endpoints unless an unrelated
+  task capability explicitly grants them;
+- model identity presented to the harness is always <code>omnis-reason</code>;
+- the concrete provider/model never enters harness configuration;
+- provider credential bytes never enter harness environment, argv, config, graph or Agent context.</p>
+<h2 id="11-adapter-upgrade-rule">11. Adapter upgrade rule<a class="headerlink" href="#11-adapter-upgrade-rule" title="Permanent link">&para;</a></h2>
+<p>A different harness version is not "close enough."</p>
+<p>To support it:
+1. update <code>spec/harnesses.toml</code>;
+2. update version-specific fixtures/schema snapshots;
+3. run adapter conformance tests;
+4. verify gateway routing, structured events, resume and permission behavior;
+5. change this document in the same commit;
+6. only then mark the new version compatible.</p>
+<p>There is no best-effort flag guessing.</p>
+        </article>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/HARNESS_ADAPTERS_V0.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-common-execution-contract">1. Common execution contract</a>
+          </li>
+          <li><a href="#2-execution-scoped-gateway-authentication">2. Execution-scoped gateway authentication</a>
+          </li>
+          <li><a href="#3-gateway-network-envelope">3. Gateway network envelope</a>
+          </li>
+          <li><a href="#4-canonical-inference-path">4. Canonical inference path</a>
+            <ul>
+              <li><a href="#41-openai-responses-mapping">4.1 OpenAI Responses mapping</a></li>
+              <li><a href="#42-openai-chat-completions-mapping">4.2 OpenAI Chat Completions mapping</a></li>
+              <li><a href="#43-anthropic-messages-mapping">4.3 Anthropic Messages mapping</a></li>
+            </ul>
+          </li>
+          <li><a href="#5-context-injection">5. Context injection</a>
+          </li>
+          <li><a href="#6-coverage-contract">6. Coverage contract</a>
+          </li>
+          <li><a href="#7-claude-code-21289">7. Claude Code 2.1.289</a>
+          </li>
+          <li><a href="#8-codex-01600">8. Codex 0.160.0</a>
+          </li>
+          <li><a href="#9-opencode-11834">9. OpenCode 1.18.34</a>
+          </li>
+          <li><a href="#10-no-direct-provider-escape">10. No direct provider escape</a>
+          </li>
+          <li><a href="#11-adapter-upgrade-rule">11. Adapter upgrade rule</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
