@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -232,6 +228,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -282,145 +282,84 @@
       <main class="content" id="content">
         <article class="prose">
           <h1 id="omnis">Omnis<a class="headerlink" href="#omnis" title="Permanent link">&para;</a></h1>
-<p><strong>A graph-native, agentic operating system built on Linux and Nix.</strong></p>
-<p>Omnis is not an assistant application running on top of a conventional desktop. It is an operating
-system in which the machine, its software, its resources, its agent, and its interface share one
-addressable model of reality.</p>
-<p>The system is organized around four first-class products:</p>
+<p><strong>A graph-native operating environment built on Linux, Nix and NixOS, designed to be fully operable
+by humans and arbitrary agents.</strong></p>
+<p>Omnis core has exactly three authorities:</p>
 <table>
 <thead>
 <tr>
 <th>Component</th>
-<th>Role</th>
+<th>Authority</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>OmnisOS</strong></td>
-<td>Linux/NixOS-derived system substrate. Owns physical machine state, system invariants, generations, enforcement, and the shared graph substrate.</td>
+<td>physical/system state, NixOS generations, enforcement, observation</td>
 </tr>
 <tr>
 <td><strong>OmnisManager</strong></td>
-<td>Nix-derived universal resource manager. Owns packages, resources, capabilities, bindings, placement, inference engines, external agent harnesses, and arbitrary foreign integrations.</td>
-</tr>
-<tr>
-<td><strong>OmnisAgent</strong></td>
-<td>Persistent cognitive subsystem. Owns the causal event worldline, memory, context compilation, judgement, workers, internal dynamics, and learning.</td>
+<td>resources, capabilities, bindings, execution, placement, generic model/inference resources</td>
 </tr>
 <tr>
 <td><strong>OmnisControl</strong></td>
-<td>Universal control surface. Projects the shared graph into an interactive 2D/3D graph desktop, shell, native application regions, inspectors, and arbitrary visualizations.</td>
+<td>graph desktop, 2D/3D interaction, ControlTree, renderer, shell and native app surfaces</td>
 </tr>
 </tbody>
 </table>
-<p>The unifying substrate is a <strong>shared multidimensional graph</strong>. OmnisOS contributes physical and
-system state; OmnisManager contributes resources, capabilities, bindings, and executions;
-OmnisAgent contributes cognitive and memory state; OmnisControl contributes presentation and
-interaction state. Every object keeps one stable identity across those dimensions.</p>
-<p>A separate immutable <strong>worldline</strong> in OmnisAgent records causal experience. The graph describes the
-current structured world; the worldline records how that world changed.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                              USER
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                │
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                                ▼
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                         ┌──────────────┐
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                         │ OmnisControl │
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                         │ graph desktop│
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                         └──────┬───────┘
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                │
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                                ▼
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                SHARED MULTIDIMENSIONAL GRAPH
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                                │
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>          ┌─────────────────────┼─────────────────────┐
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>          │                     │                     │
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>          ▼                     ▼                     ▼
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>      OmnisOS              OmnisManager           OmnisAgent
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  physical reality       possibility/action    meaning/cognition
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>          │                     │                     │
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>          └─────────────────────┼─────────────────────┘
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                                │
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                                ▼
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                              Linux
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>Every meaningful transition ───────────────────────▶ Agent worldline
+<p>They share one multidimensional graph, one append-only core event journal and one stable identity
+space.</p>
+<h2 id="agents-are-clients-not-a-core-subsystem">Agents are clients, not a core subsystem<a class="headerlink" href="#agents-are-clients-not-a-core-subsystem" title="Permanent link">&para;</a></h2>
+<p>Omnis does <strong>not</strong> ship or depend on an OmnisAgent daemon, Claude Code, Codex, OpenCode, DeepSeek
+Harness, or another coding-agent harness.</p>
+<p>Any authorized agent can use the same three core surfaces through:
+- <code>omnis mcp</code> — stdio MCP projection;
+- <code>@omnis/agent-access</code> — generated native plugin client.</p>
+<p>Both expose the same typed OS/Manager/Control/graph operations. The event journal is replayable from
+sequence 0 and streams every first-party transition, so an agent never needs to infer first-party
+state changes from screenshots.</p>
+<p>The separately developed <code>marius-patrik/dsh-stack</code> project is the reference agent environment. It
+owns its own memory, cognition, tasks/workers, models/providers and agent UX; from Omnis' perspective
+it is an ordinary plugin/MCP client.</p>
+<h2 id="core-thesis">Core thesis<a class="headerlink" href="#core-thesis" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>One world, one graph.</strong> Processes, packages, services, resources, executions and Control views use
+  stable shared identities.</li>
+<li><strong>Every event is explicit.</strong> OS, Manager and Control append every meaningful transition to the core
+  event journal.</li>
+<li><strong>Nix realizes persistent state.</strong> AI never participates in Nix evaluation/build semantics.</li>
+<li><strong>Bind existing software.</strong> Unmodified Linux applications and mature tools remain real resources.</li>
+<li><strong>Control is the graph made interactive.</strong> 2D and 3D are projections over the same identities.</li>
+<li><strong>Agents get structural access.</strong> An authorized agent can mutate the Control tree directly instead
+  of observing screenshots or simulating clicks.</li>
+<li><strong>Agent runtime is replaceable.</strong> Removing or changing the agent does not change core semantics.</li>
+</ul>
+<h2 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>marius-patrik/omnis          umbrella contracts/integration
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>marius-patrik/omnis-os       NixOS/nixpkgs-derived system
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>marius-patrik/omnis-manager  Nix-derived universal manager
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>marius-patrik/omnis-control  graph desktop/compositor/control
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>marius-patrik/dsh-stack      separate reference agent environment
 </code></pre></div>
-<h2 id="the-core-idea">The core idea<a class="headerlink" href="#the-core-idea" title="Permanent link">&para;</a></h2>
-<p>Omnis deliberately separates four questions:</p>
+<h2 id="architecture-documents">Architecture documents<a class="headerlink" href="#architecture-documents" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>What physically is?</strong> — OmnisOS.</li>
-<li><strong>What can be done, and what can realize it?</strong> — OmnisManager.</li>
-<li><strong>What does it mean, and what should happen next?</strong> — OmnisAgent.</li>
-<li><strong>How is that reality exposed and manipulated interactively?</strong> — OmnisControl.</li>
-</ul>
-<p>The graph connects the answers without collapsing them into one implementation.</p>
-<p>This design takes several ideas from Invariant-Oriented Engineering while dropping the custom
-language: stable semantic identity, capability/binding separation, deterministic-first discovery,
-host-independent placement, protected values, causal history, graph projections, and replacement of
-physical realizations without changing meaning. Linux, Nix, existing applications, model runtimes,
-and external agent harnesses remain real software; Omnis binds and composes them rather than
-requiring them to be rewritten.</p>
-<h2 id="nix-foundation">Nix foundation<a class="headerlink" href="#nix-foundation" title="Permanent link">&para;</a></h2>
-<p>Omnis intentionally forks both major Nix layers:</p>
-<ul>
-<li><strong>OmnisOS</strong> tracks a fork of <code>nixpkgs</code>/NixOS for complete system-level integration while retaining
-  compatibility with the nixpkgs package ecosystem.</li>
-<li><strong>OmnisManager</strong> tracks a fork of <code>NixOS/nix</code> and extends the evaluator/store/package-manager layer
-  into a universal resource, binding, capability, execution, and placement manager.</li>
-</ul>
-<p>Nix remains deterministic machinery. AI does not run inside Nix evaluation. OmnisAgent may decide
-<em>what</em> should change; OmnisManager resolves <em>how</em>; OmnisOS/Nix deterministically builds and realizes
-persistent system state.</p>
-<h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">&para;</a></h2>
-<p>OmnisControl provides a desktop, but not a traditional desktop environment. The desktop is an
-interactive projection of the shared graph.</p>
-<p>It has two equivalent spatial modes:</p>
-<ul>
-<li><strong>2D</strong> — Airgraph/Blueprint-like graph interaction optimized for precision, editing, inspection,
-  workflow manipulation, and dense information.</li>
-<li><strong>3D</strong> — spatial graph interaction optimized for large-scale navigation, clusters, causal depth,
-  temporal structure, and multidimensional relationships.</li>
-</ul>
-<p>Switching modes preserves identity, focus, selection, lens, and timeline position. A terminal,
-browser, editor, system monitor, memory explorer, or application window is not a separate UI
-architecture; each is a projection or delegated region inside the same control environment.</p>
-<p>The shell remains a first-class default interaction surface. Exact shell syntax and known commands
-execute directly. URLs, graph identities, capabilities, and semantic requests resolve through the
-same input surface without requiring a mode switch into an "AI chat".</p>
-<h2 id="agent">Agent<a class="headerlink" href="#agent" title="Permanent link">&para;</a></h2>
-<p>OmnisAgent is not a single LLM loop. It is a persistent event-driven cognitive system.</p>
-<p>Every meaningful system event reaches it directly. Its worldline, memory, world model, context
-compiler, judgement mechanisms, and workers persist independently of any one model or process.
-LLMs, classifiers, embedding models, rerankers, vision/audio models, coding agents, and deterministic
-algorithms are resources resolved through OmnisManager.</p>
-<p>The Agent never needs to periodically inspect the UI to learn what happened. OmnisControl, OmnisOS,
-and OmnisManager emit their events directly. The Agent also has direct structural access to the
-Control graph and can create, replace, rebind, reorganize, or remove interactive projections without
-simulating user clicks.</p>
-<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h2>
-<p>This repository is the <strong>umbrella architecture and integration specification</strong> for the Omnis system.
-The previous daemon/workspace architecture is superseded by the graph-native four-component
-architecture defined in <a href="architecture/">ARCHITECTURE.md</a>.</p>
-<p>Implementation specifications:</p>
-<ul>
-<li><a href="IMPLEMENTATION/">Concrete v0 implementation</a></li>
-<li><a href="DECISION_COMPLETE_V0/">Decision-complete v0 contract</a></li>
-<li><a href="ONTOLOGY_V0/">v0 ontology/event registry</a></li>
-<li><a href="NIX_OPTIONS_V0/">v0 NixOS option contract</a></li>
-<li><a href="HARNESS_ADAPTERS_V0/">Built-in harness adapters</a></li>
-<li><a href="LEARNING_V0/">v0 learning/self-optimization</a></li>
-<li><a href="HARNESS_ADAPTERS_V0/">Harness adapters + inference gateway</a></li>
-<li><a href="NIX_CONTROL_V0/">Nix control + provenance</a></li>
-<li><a href="CONTROL_RENDER_V0/">ControlTree + RenderScene</a></li>
+<li><a href="architecture/">Architecture</a></li>
+<li><a href="IMPLEMENTATION/">Implementation blueprint</a></li>
+<li><a href="DECISION_COMPLETE_V0/">Decision-complete v0 core</a></li>
 <li><a href="GRAPH/">Shared graph</a></li>
+<li><a href="ONTOLOGY_V0/">Core ontology/events</a></li>
+<li><a href="AGENT_ACCESS_V0/">Agent access</a></li>
 <li><a href="OMNIS_OS/">OmnisOS</a></li>
 <li><a href="OMNIS_MANAGER/">OmnisManager</a></li>
-<li><a href="OMNIS_AGENT/">OmnisAgent</a></li>
 <li><a href="OMNIS_CONTROL/">OmnisControl</a></li>
-<li><a href="PROTOCOLS/">Protocols and contracts</a></li>
+<li><a href="CONTROL_RENDER_V0/">Control renderer</a></li>
+<li><a href="NIX_CONTROL_V0/">Nix control</a></li>
+<li><a href="NIX_OPTIONS_V0/">NixOS options</a></li>
+<li><a href="PROTOCOLS/">Protocols</a></li>
 <li><a href="roadmap/">Implementation roadmap</a></li>
-<li><a href="agents/">Contributor/agent rules</a></li>
+<li><a href="agents/">Contributor rules</a></li>
 </ul>
-<p>Historical ADRs remain useful source material but are non-normative where they conflict with the
-architecture reset in <code>notes/adr/0023-graph-native-os-architecture-reset.md</code>.</p>
+<p><code>spec/contract.toml</code> is the machine-readable root of the complete core v0 contract.</p>
         </article>
         <nav class="pager" aria-label="Page navigation"><span></span>
           <a class="pager__link pager__link--next" href="architecture/">
@@ -437,15 +376,13 @@ architecture reset in <code>notes/adr/0023-graph-native-os-architecture-reset.md
       <aside class="toc">
         <div class="toc__title">On this page</div>
         <ul class="toc__list">
-          <li><a href="#the-core-idea">The core idea</a>
+          <li><a href="#agents-are-clients-not-a-core-subsystem">Agents are clients, not a core subsystem</a>
           </li>
-          <li><a href="#nix-foundation">Nix foundation</a>
+          <li><a href="#core-thesis">Core thesis</a>
           </li>
-          <li><a href="#interface">Interface</a>
+          <li><a href="#repositories">Repositories</a>
           </li>
-          <li><a href="#agent">Agent</a>
-          </li>
-          <li><a href="#status">Status</a>
+          <li><a href="#architecture-documents">Architecture documents</a>
           </li>
         </ul>
       </aside>

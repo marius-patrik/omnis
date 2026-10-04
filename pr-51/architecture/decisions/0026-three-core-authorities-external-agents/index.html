@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context · Omnis</title>
+    <title>ADR-0026 — Keep exactly three core authorities and make every agent an external client · Omnis</title>
     <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,8 +163,8 @@
          href="../0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link nav__link--active"
-         href="./">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+      <a class="nav__link"
+         href="../0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -227,8 +227,8 @@
          href="../0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+      <a class="nav__link nav__link--active"
+         href="./">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -281,57 +281,93 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="adr-0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context<a class="headerlink" href="#adr-0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context" title="Permanent link">&para;</a></h1>
+          <h1 id="adr-0026-keep-exactly-three-core-authorities-and-make-every-agent-an-external-client">ADR-0026 — Keep exactly three core authorities and make every agent an external client<a class="headerlink" href="#adr-0026-keep-exactly-three-core-authorities-and-make-every-agent-an-external-client" title="Permanent link">&para;</a></h1>
 <ul>
-<li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-09-06 · <strong>Promotes</strong>: <code>notes/transcript.md</code> §9.4</li>
+<li><strong>Status</strong>: Accepted · <strong>Date</strong>: 2026-10-04</li>
+<li><strong>Supersedes:</strong> ADR-0023's four-authority topology and the Agent/worldline/outbox portions of ADR-0024.</li>
+<li><strong>Narrows:</strong> ADR-0025 to the current three-authority core contract.</li>
 </ul>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>Terminals, VCS pushes, package installs, and agents all need credentials. The usual answer is a
-<code>.env</code> file on disk and environment variables inherited broadly, which puts plaintext at rest and
-inside every child process. With autonomous agents in the loop there is a second exposure the
-transcript names explicitly: secrets landing in an agent's context window, and from there in a model
-provider's logs.</p>
+<p>The graph-native reset correctly made the operating system, resource manager and Control surface share
+one semantic machine model, but it still made one particular cognitive implementation
+(<code>OmnisAgent</code>) a first-party authority. It also pulled external coding-agent harnesses into Manager
+and designed graph event delivery around one Agent-owned ACK/worldline consumer.</p>
+<p>That is the wrong boundary.</p>
+<p>Omnis must be intrinsically agent-operable without being intrinsically tied to one agent runtime. A
+different agent should be able to attach tomorrow, consume the complete machine history, use the same
+OS/Manager/Control operations and obtain the same structural Control access without an Omnis core
+change. The reference agent can then evolve much faster than the operating system.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<ul>
-<li>The master key derives via Argon2id; the key-encryption key is held in a zeroising buffer with
-  <code>mlock</code>, never serialised.</li>
-<li>Device secrets bridge to the OS keychain (Apple Keychain, DPAPI, Secret Service).</li>
-<li>Secrets reach child processes by injection into the spawned process's environment at spawn time —
-  never written to disk, and never to a file the child reads.</li>
-<li><strong>Secrets are never placed in agent context.</strong> An agent may reference a secret by name and cause it
-  to be injected; it may not read its value.</li>
-<li>Git, forge, and SSH authentication go through <code>omnis-ssh-agent</code> over a local socket, so private
-  keys are decrypted on demand and never handed out.</li>
-</ul>
+<p>Omnis v0 has exactly three core semantic authorities:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>OmnisOS       physical/system authority
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>OmnisManager  resource/capability/execution authority
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>OmnisControl  interaction/presentation authority
+</code></pre></div>
+<p>The shared multidimensional graph and append-only core event journal are common substrate, not
+additional product authorities.</p>
+<p>There is no core <code>OmnisAgent</code> service, repository, socket, NixOS user service, lifecycle state
+machine, cognitive namespace, memory store or <code>code.agent</code> capability.</p>
+<p>Every meaningful first-party OS/Manager/Control transition is appended durably to graphd's core event
+journal. The journal is multi-consumer:
+- monotonically increasing <code>ingest_seq</code>;
+- replay from any retained cursor;
+- live subscription after catch-up;
+- no global ACK;
+- no consumer may delete/advance another consumer's history;
+- no automatic event deletion in v0.</p>
+<p>All public Graph/OS/Manager/Control operations and all core events are projected with semantic parity
+through:
+- <code>omnis mcp</code> over stdio;
+- the generated native <code>@omnis/agent-access</code> client/plugin SDK.</p>
+<p>An agent is therefore a client with granted authority. Agent-owned worldline, memory, context,
+goals/tasks, model sessions, worker state, procedures and learning live outside core. An authorized
+agent may optionally publish selected semantic state into a granted <code>ext.&lt;client-id&gt;.*</code> namespace;
+it cannot acquire first-party <code>omnis.*</code> write ownership.</p>
+<p>Manager may still expose generic model/inference capabilities. It does not launch, pin, adapt or
+fail over between Claude Code, Codex, OpenCode, DeepSeek Harness or other agent runtimes.</p>
+<p>The separately released <code>marius-patrik/dsh-stack</code> project is the reference agent environment. Its
+Omnis integration consumes exactly the same MCP/native-plugin surfaces available to any other agent.
+Omnis releases never depend on or pin a DSH release.</p>
 <h2 id="alternatives-rejected">Alternatives rejected<a class="headerlink" href="#alternatives-rejected" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>.env</code> files on disk.</strong> Plaintext at rest, trivially readable by anything running as the user,
-  and routinely committed by accident.</li>
-<li><strong>OS keychain as the only store.</strong> Not portable across the sync mesh, and inconsistent APIs make
-  the behaviour differ per platform in ways users notice.</li>
-<li><strong>Passing secrets through agent context.</strong> Leaks them to the model provider, into logs, and into
-  any transcript the user later shares.</li>
-<li><strong>A long-lived decrypted cache.</strong> Convenient, and it converts a memory-disclosure bug into full
-  credential compromise.</li>
+<li><strong>Keep OmnisAgent as a privileged fourth service but also expose MCP.</strong> This leaves two classes of
+  agent: the privileged built-in one and everyone else. The OS would still encode one cognitive
+  architecture as authority.</li>
+<li><strong>Put DSH Stack inside the Omnis release.</strong> This couples fast-moving cognition/provider/UI work to
+  OS releases and makes replacing the agent runtime a system migration.</li>
+<li><strong>Expose only MCP.</strong> MCP is the portable boundary, but a local typed plugin client avoids
+  unnecessary serialization and gives native integrations exact schema parity. Both must project one
+  semantic API.</li>
+<li><strong>Expose only a native SDK.</strong> This excludes arbitrary existing agents and recreates a proprietary
+  harness boundary.</li>
+<li><strong>Keep one global Agent ACK queue.</strong> A slow/disconnected consumer would become a system retention
+  authority and newly installed agents could not independently replay history.</li>
+<li><strong>Treat external agents as screen automation.</strong> Omnis already owns structured state and Control
+  tree semantics; throwing them away and re-inferring pixels is less capable and less reliable.</li>
 </ul>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
-<p>Every subsystem needing credentials goes through the vault, so the vault is on the critical path for
-terminals, VCS, packages, and agents — arguing for building it early (E11). Injection at spawn time
-means a child that re-executes or daemonises may outlive the grant; process lifetime is part of the
-threat surface.</p>
-<p><strong>Scope limit:</strong> as with ADR-0009, this fixes the <em>shape</em>. Argon2id parameters, what <code>mlock</code>
-genuinely defends against on each platform, whether environment injection is acceptable against the
-intended adversary, and the revocation story for in-flight secrets are D10's, and D10 may constrain
-this ADR without superseding it.</p>
+<ul>
+<li>Core boot, recovery, package management, execution and Control work with no agent installed.</li>
+<li>Multiple independent agents can attach concurrently without changing core semantics.</li>
+<li>The event journal grows monotonically in v0; retention/archival requires a later explicit protocol
+  that preserves replay guarantees rather than an implicit GC policy.</li>
+<li>Event-referenced CAS artifacts remain GC roots while their core events are retained.</li>
+<li>OmnisControl must expose enough typed structure that agents never need screenshot/synthetic-input
+  automation for first-party UI when an equivalent structural operation exists.</li>
+<li>DSH Stack becomes the place for the removed cognitive worldline/memory/task/learning architecture,
+  but remains independently deployable and replaceable.</li>
+<li>ADR-0004 remains valid only as repository <strong>delivery automation</strong>; its coding-CLI harness chain is
+  not Omnis product architecture.</li>
+</ul>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">
+          <a class="pager__link pager__link--prev" href="../0025-decision-complete-v0/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</span>
+            <span class="pager__title">ADR-0025 — Make Omnis v0 decision-complete</span>
           </a>
-          <a class="pager__link pager__link--next" href="../0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">
+          <a class="pager__link pager__link--next" href="../process/">
             <span class="pager__label">Next</span>
-            <span class="pager__title">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</span>
+            <span class="pager__title">Process</span>
           </a>
         </nav>
 

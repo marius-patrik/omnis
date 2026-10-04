@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="../OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -232,6 +228,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -282,7 +282,7 @@
       <main class="content" id="content">
         <article class="prose">
           <h1 id="omnis-contributor-and-agent-rules">Omnis — Contributor and Agent Rules<a class="headerlink" href="#omnis-contributor-and-agent-rules" title="Permanent link">&para;</a></h1>
-<p>These rules bind human and automated contributors. Repository delivery governance and product architecture are separate concerns: the GitHub approval pipeline governs changes to this repository; it does not define OmnisAgent cognition or universal machine policy.</p>
+<p>These rules bind human and automated contributors. Repository delivery governance and product architecture are separate concerns: the GitHub approval pipeline governs changes to this repository; it does not define external-agent cognition or universal machine policy.</p>
 <hr />
 <h3 id="1-unit-tests-with-every-commit">1. Unit Tests with Every Commit<a class="headerlink" href="#1-unit-tests-with-every-commit" title="Permanent link">&para;</a></h3>
 <p>Every commit that adds or modifies code, classes, or methods must be accompanied by corresponding
@@ -302,7 +302,7 @@ repository. All documentation builds must succeed with <code>properdocs build --
 zero errors — and deploy automatically to GitHub Pages.</p>
 <h3 id="3-architecture-conformance">3. Architecture Conformance<a class="headerlink" href="#3-architecture-conformance" title="Permanent link">&para;</a></h3>
 <p><code>ARCHITECTURE.md</code> is the normative system architecture. Supporting specifications in <code>docs/</code> refine
-the graph, OmnisOS, OmnisManager, OmnisAgent, OmnisControl, and cross-component protocols.
+the graph, OmnisOS, OmnisManager, OmnisControl, agent-access projections, and cross-component protocols.
 <code>notes/transcript.md</code> and superseded ADRs are historical source material only. Any implementation
 change that alters a normative architecture contract requires an ADR/architecture update first.</p>
 <h3 id="4-language-consistency">4. Language Consistency<a class="headerlink" href="#4-language-consistency" title="Permanent link">&para;</a></h3>
@@ -435,7 +435,7 @@ issues labeled <code>Request</code> before any planning, branching, or code chan
   <code>Blocked</code>, comments the resume instructions, and exits cleanly. Commenting <code>resume</code> continues from
   the checkpoint.</p>
 <h3 id="15-conventional-commits-repository-taxonomy-enforcement">15. Conventional Commits &amp; Repository Taxonomy Enforcement<a class="headerlink" href="#15-conventional-commits-repository-taxonomy-enforcement" title="Permanent link">&para;</a></h3>
-<p>Repository area labels are delivery metadata retained for the current automation. They do not define Omnis product authority boundaries; architecture ownership is OmnisOS / OmnisManager / OmnisAgent / OmnisControl plus the shared graph substrate.</p>
+<p>Repository area labels are delivery metadata retained for the current automation. They do not define Omnis product authority boundaries; architecture ownership is exactly OmnisOS / OmnisManager / OmnisControl plus the shared graph/event substrate.</p>
 <ul>
 <li><strong>Format</strong>: <code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;</code> (e.g. <code>feat(term): add cell matrix buffer</code>).</li>
 <li><strong>Allowed Types</strong>: <code>feat</code>, <code>fix</code> (mapped from <code>bug</code>), <code>chore</code>, <code>docs</code>, <code>refactor</code>, <code>test</code>, <code>ci</code>.</li>
@@ -443,9 +443,9 @@ issues labeled <code>Request</code> before any planning, branching, or code chan
 <li><code>area:core</code>: OmnisOS, OmnisManager, shared graph/protocol substrate, boot, generations, and cross-component integration.</li>
 <li><code>area:ui</code>: OmnisControl graph desktop, 2D/3D projections, rendering, interaction, layout, and native surfaces.</li>
 <li><code>area:term</code>: OmnisControl shell, PTY, terminal/text projections, and cell-grid compatibility.</li>
-<li><code>area:agents</code>: OmnisAgent cognition plus Manager-provided models, inference, and external agent-harness bindings.</li>
+<li><code>area:agents</code>: external-agent access projections, MCP/plugin parity, and reference-agent integration work; cognition itself lives outside core.</li>
 <li><code>area:browser</code>: OmnisControl web/navigation projections and browser protocol/native bindings.</li>
-<li><code>area:data</code>: Shared graph, OmnisAgent worldline/memory, artifacts, persistence, and indexes.</li>
+<li><code>area:data</code>: shared graph, core event journal, artifacts, persistence, and indexes.</li>
 <li><code>area:ext</code>: OmnisManager foreign capabilities, arbitrary bindings, MCP, and protocol integration.</li>
 <li><code>area:ci</code>: GitHub Actions workflows, containers, runner scripts, repository automation.</li>
 <li><code>area:docs</code>: Documentation, ProperDocs configuration, architecture notes.</li>
@@ -461,12 +461,11 @@ OS keychain. Workflow logs must be assumed public.</p>
 <p><code>ARCHITECTURE.md</code> is normative. Supporting specs under <code>docs/</code> refine it. A change that contradicts
 them requires an architecture/ADR change first.</p>
 <p>Historical ADRs before the architecture reset are source material only where superseded.</p>
-<h3 id="a2-preserve-the-four-authorities">A2. Preserve the four authorities<a class="headerlink" href="#a2-preserve-the-four-authorities" title="Permanent link">&para;</a></h3>
+<h3 id="a2-preserve-the-three-core-authorities">A2. Preserve the three core authorities<a class="headerlink" href="#a2-preserve-the-three-core-authorities" title="Permanent link">&para;</a></h3>
 <p>Do not move responsibilities across product boundaries casually:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>OmnisOS      physical/system authority
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>OmnisManager resource/capability/binding authority
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>OmnisAgent   event/memory/cognitive authority
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>OmnisControl interaction/presentation authority
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>OmnisControl interaction/presentation authority
 </code></pre></div>
 <p>The shared graph is a substrate, not a fifth semantic authority.</p>
 <h3 id="a3-one-identity-one-graph">A3. One identity, one graph<a class="headerlink" href="#a3-one-identity-one-graph" title="Permanent link">&para;</a></h3>
@@ -484,7 +483,7 @@ shared graph.</p>
 through the owning API.</p>
 <p>Graph core must enforce this rule; do not rely only on review convention.</p>
 <h3 id="a5-every-meaningful-transition-becomes-an-event">A5. Every meaningful transition becomes an event<a class="headerlink" href="#a5-every-meaningful-transition-becomes-an-event" title="Permanent link">&para;</a></h3>
-<p>First-party components must not make durable/meaningful state transitions invisible to OmnisAgent.</p>
+<p>First-party components must not make durable/meaningful state transitions invisible to the shared core event journal.</p>
 <p>Do not add polling as the primary integration path when the producer can emit the event directly.</p>
 <h3 id="a6-bind-before-rebuilding">A6. Bind before rebuilding<a class="headerlink" href="#a6-bind-before-rebuilding" title="Permanent link">&para;</a></h3>
 <p>Before implementing a tool/runtime/service, ask whether a mature implementation already exists.
@@ -515,17 +514,17 @@ realization must be deterministic according to Nix semantics.</p>
 <h3 id="a9-persistent-versus-transient-actions">A9. Persistent versus transient actions<a class="headerlink" href="#a9-persistent-versus-transient-actions" title="Permanent link">&para;</a></h3>
 <p>Do not route every runtime action through Nix generations.</p>
 <p>Use a generation for persistent structural system state. Use Manager execution for transient work.</p>
-<h3 id="a10-agent-is-not-an-llm-loop">A10. Agent is not an LLM loop<a class="headerlink" href="#a10-agent-is-not-an-llm-loop" title="Permanent link">&para;</a></h3>
-<p>Do not introduce a universal <code>while ask_model</code> executive loop.</p>
-<p>Cognition is event-driven. Models are Manager resources used by workers. Worker outputs re-enter the
-worldline as events.</p>
+<h3 id="a10-agent-runtime-is-external">A10. Agent runtime is external<a class="headerlink" href="#a10-agent-runtime-is-external" title="Permanent link">&para;</a></h3>
+<p>Do not implement cognition, memory, worker orchestration or external coding-harness adapters inside
+the three core services. Agents are clients of OS/Manager/Control/graph through the frozen MCP/plugin
+projection. The reference agent lives in <code>dsh-stack</code>, outside the core release dependency graph.</p>
 <h3 id="a11-control-is-not-a-conventional-gui">A11. Control is not a conventional GUI<a class="headerlink" href="#a11-control-is-not-a-conventional-gui" title="Permanent link">&para;</a></h3>
 <p>Do not build separate application architectures for terminal, browser, graph, 3D, or AI output.</p>
 <p>Control derives projections from the shared graph into one Control tree and renderer. Existing
 Wayland/XWayland clients are NativeSurface leaves; first-party semantic content is rendered directly
 through Control primitives.</p>
 <p>2D and 3D must preserve the same identities/focus/selection/lens/frontier.</p>
-<h3 id="a12-agent-gets-structural-control-access">A12. Agent gets structural Control access<a class="headerlink" href="#a12-agent-gets-structural-control-access" title="Permanent link">&para;</a></h3>
+<h3 id="a12-external-agents-get-structural-control-access">A12. External agents get structural Control access<a class="headerlink" href="#a12-external-agents-get-structural-control-access" title="Permanent link">&para;</a></h3>
 <p>If a first-party Control operation can only be performed by synthetic mouse/keyboard input, the API
 is incomplete unless the operation is inherently physical input testing.</p>
 <p>Agent must be able to manipulate Control structure directly.</p>
@@ -605,11 +604,11 @@ implementation choices.</p>
 <ul>
 <li>database DDL: <code>schema/*.sql</code>;</li>
 <li>cross-component wire schemas: <code>protocol/*.capnp</code>;</li>
-<li>Agent prompts: <code>prompts/*.md</code>;</li>
+<li>external-agent access parity: <code>docs/AGENT_ACCESS_V0.md</code> + <code>spec/agent_access.toml</code>;</li>
 <li>first-party ontology/event/state names: <code>docs/ONTOLOGY_V0.md</code>;</li>
 <li>NixOS option paths/types/defaults: <code>docs/NIX_OPTIONS_V0.md</code>;</li>
-<li>harness adapter manifest/gateway: <code>spec/harnesses.toml</code>, <code>spec/inference_gateway.toml</code>, <code>docs/HARNESS_ADAPTERS_V0.md</code>;</li>
-<li>canonical inference semantics: <code>protocol/inference.capnp</code>;</li>
+<li>agent-access parity: <code>docs/AGENT_ACCESS_V0.md</code> + <code>spec/agent_access.toml</code>;</li>
+<li>canonical generic inference semantics: <code>protocol/inference.capnp</code>;</li>
 <li>Nix evaluator/store control, provenance and candidate semantics: <code>protocol/nix_control.capnp</code>, <code>spec/nix_control.toml</code>, <code>docs/NIX_CONTROL_V0.md</code>;</li>
 <li>ControlTree/RenderScene schemas and renderer policy: <code>protocol/control_scene.capnp</code>, <code>spec/control_render.toml</code>, <code>docs/CONTROL_RENDER_V0.md</code>.</li>
 </ul>
@@ -669,7 +668,7 @@ implementation choices.</p>
           <li><a href="#product-architecture-invariants">Product architecture invariants</a>
             <ul>
               <li><a href="#a1-architecture-authority">A1. Architecture authority</a></li>
-              <li><a href="#a2-preserve-the-four-authorities">A2. Preserve the four authorities</a></li>
+              <li><a href="#a2-preserve-the-three-core-authorities">A2. Preserve the three core authorities</a></li>
               <li><a href="#a3-one-identity-one-graph">A3. One identity, one graph</a></li>
               <li><a href="#a4-respect-graph-namespace-ownership">A4. Respect graph namespace ownership</a></li>
               <li><a href="#a5-every-meaningful-transition-becomes-an-event">A5. Every meaningful transition becomes an event</a></li>
@@ -677,9 +676,9 @@ implementation choices.</p>
               <li><a href="#a7-deterministic-first">A7. Deterministic first</a></li>
               <li><a href="#a8-nix-remains-deterministic">A8. Nix remains deterministic</a></li>
               <li><a href="#a9-persistent-versus-transient-actions">A9. Persistent versus transient actions</a></li>
-              <li><a href="#a10-agent-is-not-an-llm-loop">A10. Agent is not an LLM loop</a></li>
+              <li><a href="#a10-agent-runtime-is-external">A10. Agent runtime is external</a></li>
               <li><a href="#a11-control-is-not-a-conventional-gui">A11. Control is not a conventional GUI</a></li>
-              <li><a href="#a12-agent-gets-structural-control-access">A12. Agent gets structural Control access</a></li>
+              <li><a href="#a12-external-agents-get-structural-control-access">A12. External agents get structural Control access</a></li>
               <li><a href="#a13-protected-values-are-handles">A13. Protected values are handles</a></li>
               <li><a href="#a14-effects-must-be-honest">A14. Effects must be honest</a></li>
               <li><a href="#a15-identity-is-not-location">A15. Identity is not location</a></li>

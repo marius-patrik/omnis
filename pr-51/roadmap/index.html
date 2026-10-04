@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="../OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -232,6 +228,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -281,191 +281,128 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="omnis-implementation-roadmap">Omnis — Implementation Roadmap<a class="headerlink" href="#omnis-implementation-roadmap" title="Permanent link">&para;</a></h1>
-<p>This roadmap replaces the old daemon/workspace epic sequence. The ordering is dependency-driven and
-is intended to reach a bootable vertical slice as early as possible. Concrete mechanisms and paths are frozen by <code>docs/IMPLEMENTATION.md</code>; all remaining algorithms,
-defaults and constants are frozen by <code>docs/DECISION_COMPLETE_V0.md</code>. Roadmap workers implement those
-contracts and must report a specification defect instead of selecting substitutes.</p>
+          <h1 id="omnis-core-implementation-roadmap">Omnis — Core Implementation Roadmap<a class="headerlink" href="#omnis-core-implementation-roadmap" title="Permanent link">&para;</a></h1>
+<p>This roadmap implements the three core authorities only: OmnisOS, OmnisManager and OmnisControl.
+No agent runtime or external coding harness is a core dependency. Concrete behavior is frozen by the
+normative contracts and <code>spec/contract.toml</code>; workers report SpecificationDefect instead of designing
+missing behavior.</p>
 <h2 id="phase-0-architecture-reset-and-repository-split">Phase 0 — Architecture reset and repository split<a class="headerlink" href="#phase-0-architecture-reset-and-repository-split" title="Permanent link">&para;</a></h2>
-<p>Deliverables:</p>
 <ul>
-<li>land the architecture reset in <code>omnis</code>;</li>
-<li>mark conflicting historical ADRs non-normative/superseded;</li>
-<li>create/restore repositories for <code>omnis-os</code>, <code>omnis-manager</code>, <code>omnis-agent</code>, <code>omnis-control</code>;</li>
-<li>establish upstream tracking for NixOS/nixpkgs and Nix forks;</li>
-<li>define protocol/version ownership in umbrella repo;</li>
-<li>add end-to-end compatibility CI skeleton.</li>
+<li>land the three-authority architecture;</li>
+<li>maintain <code>omnis-os</code>, <code>omnis-manager</code>, <code>omnis-control</code>;</li>
+<li>keep shared protocol/spec ownership in <code>omnis</code>;</li>
+<li>establish upstream NixOS/nixpkgs and Nix tracking;</li>
+<li>remove core OmnisAgent/harness assumptions;</li>
+<li>establish end-to-end compatibility CI.</li>
 </ul>
-<p>Exit: all implementation work has a canonical target repo and no old <code>omnisd</code> architecture remains
-normative.</p>
-<h2 id="phase-1-shared-graph-substrate">Phase 1 — Shared graph substrate<a class="headerlink" href="#phase-1-shared-graph-substrate" title="Permanent link">&para;</a></h2>
-<p>Implement in OmnisOS/integration layer:</p>
-<ul>
-<li>stable NodeId/EdgeId identity;</li>
-<li>graph namespaces/dimension ownership;</li>
-<li>SQLite/WAL graph store with serialized writer, validity intervals and migrations;</li>
-<li>BLAKE3 artifact CAS;</li>
-<li>durable graphd event outbox with Agent ACK/dedup;</li>
-<li>atomic transactions/revisions;</li>
-<li>query/traversal API;</li>
-<li>subscriptions;</li>
-<li>normalized graph-change events;</li>
-<li>CLI inspector.</li>
-</ul>
-<p>Exit: two independent test clients can create/query shared identities and receive ordered changes.</p>
+<p>Exit: all core implementation work has one owner and no fourth core authority remains normative.</p>
+<h2 id="phase-1-shared-graph-and-core-event-journal">Phase 1 — Shared graph and core event journal<a class="headerlink" href="#phase-1-shared-graph-and-core-event-journal" title="Permanent link">&para;</a></h2>
+<p>Implement in OmnisOS/shared substrate:
+- stable NodeId/EdgeId/EventId identity;
+- graph namespace/dimension ownership;
+- SQLite/WAL graph store with serialized writer and revision validity;
+- BLAKE3 artifact CAS;
+- append-only core event journal with monotonic ingest_seq;
+- atomic graph mutation + event commit;
+- query/path/alias/provenance APIs;
+- graph subscriptions;
+- event replay/live subscription from any cursor;
+- CLI inspector.</p>
+<p>Exit: independent clients can create/query allowed graph state and replay every first-party event.</p>
 <h2 id="phase-2-omnismanager-foundation">Phase 2 — OmnisManager foundation<a class="headerlink" href="#phase-2-omnismanager-foundation" title="Permanent link">&para;</a></h2>
-<p>Fork/extend Nix with:</p>
-<ul>
-<li>Resource/Capability/Binding/Execution graph model;</li>
-<li>Nix derivation/store-path resource publication;</li>
-<li>generic command/path/service/API/native bindings;</li>
-<li>deterministic capability resolution;</li>
-<li>discovery framework;</li>
-<li>execution lifecycle events;</li>
-<li>protected handle contract;</li>
-<li>placement abstraction.</li>
-</ul>
-<p>Exit: Manager can discover and execute at least three interchangeable bindings for one semantic
-capability while preserving graph identity/provenance.</p>
+<p>Implement:
+- Resource/Capability/Binding/Execution graph model;
+- Nix derivation/store-path resource publication;
+- deterministic discovery/resolution;
+- arbitrary CLI/API/MCP/model/container/VM/native bindings;
+- protected handles;
+- placement;
+- execution lifecycle;
+- Nix explain/realization planning.</p>
+<p>Exit: Manager resolves and executes interchangeable semantic bindings without any agent dependency.</p>
 <h2 id="phase-3-omnisos-vertical-system-integration">Phase 3 — OmnisOS vertical system integration<a class="headerlink" href="#phase-3-omnisos-vertical-system-integration" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
-<ul>
-<li>NixOS/nixpkgs fork/patch stack;</li>
-<li>boot of graph + Manager core services;</li>
-<li>hardware/device/process/service graph publication;</li>
-<li>generation metadata/semantic diff;</li>
-<li>candidate evaluate/build/activate/rollback API;</li>
-<li>execution envelopes using cgroups/namespaces/security primitives;</li>
-<li>host identity and physical capability advertisement.</li>
-</ul>
-<p>Exit: a booted machine can inspect itself entirely through graph + Manager APIs and switch/rollback
-an OmnisOS generation.</p>
+<p>Implement:
+- NixOS/nixpkgs fork/patch stack;
+- boot of graph + Manager services;
+- hardware/device/process/service observation;
+- generation metadata/semantic diff;
+- evaluate/build/activate/rollback;
+- cgroup/systemd/eBPF execution envelopes;
+- host identity, pairing and physical capability publication.</p>
+<p>Exit: a booted machine can inspect and mutate system state entirely through graph/OS/Manager APIs.</p>
 <h2 id="phase-4-omniscontrol-minimum-usable-environment">Phase 4 — OmnisControl minimum usable environment<a class="headerlink" href="#phase-4-omniscontrol-minimum-usable-environment" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
+<p>Implement:
+- Smithay compositor;
+- wgpu renderer;
+- typed ControlTree/RenderScene;
+- graph projection/focus/selection/lens;
+- PTY/shell default surface;
+- native Wayland/XWayland surfaces;
+- unified deterministic input resolver;
+- 2D graph desktop;
+- complete Control event publication.</p>
+<p>Exit: boot lands in Control and works fully with no agent installed.</p>
+<h2 id="phase-5-harness-agnostic-agent-access">Phase 5 — Harness-agnostic agent access<a class="headerlink" href="#phase-5-harness-agnostic-agent-access" title="Permanent link">&para;</a></h2>
+<p>Implement exactly <code>docs/AGENT_ACCESS_V0.md</code> + <code>spec/agent_access.toml</code>:
+- <code>omnis mcp</code> stdio server;
+- <code>@omnis/agent-access</code> typed client package;
+- complete OS/Manager/Control/graph operation projection;
+- core event journal replay/subscription;
+- parity generator/checker;
+- authority propagation;
+- extension graph namespaces.</p>
+<p>Exit: an arbitrary external agent can inspect/control all three core surfaces and receive every event
+without core changes.</p>
+<h2 id="phase-6-generic-inference-and-foreign-capability-depth">Phase 6 — Generic inference and foreign capability depth<a class="headerlink" href="#phase-6-generic-inference-and-foreign-capability-depth" title="Permanent link">&para;</a></h2>
+<p>Manager:
+- classifier/embed/rerank/generate/reason/vision/audio bindings;
+- local inference engines;
+- remote model APIs;
+- HTTP/OpenAPI;
+- MCP foreign endpoints;
+- repository/VCS/LSP/tooling discovery.</p>
+<p>These are semantic resources, not external agent harnesses.</p>
+<p>Exit: agents can use Manager's generic capabilities or their own stack interchangeably.</p>
+<h2 id="phase-7-omniscontrol-full-graph-desktop">Phase 7 — OmnisControl full graph desktop<a class="headerlink" href="#phase-7-omniscontrol-full-graph-desktop" title="Permanent link">&para;</a></h2>
+<p>Implement:
+- clustering/LOD;
+- core event-journal timeline;
+- causal/resource/provenance lenses;
+- inspectors;
+- graph mutation affordances;
+- 3D mode;
+- lossless 2D/3D toggle;
+- direct external-agent tree mutation;
+- tables/charts/editors/media/web semantics;
+- accessibility.</p>
+<p>Exit: core system operation is fully graph-native and externally agent-controllable.</p>
+<h2 id="phase-8-distributed-multi-host-core">Phase 8 — Distributed multi-host core<a class="headerlink" href="#phase-8-distributed-multi-host-core" title="Permanent link">&para;</a></h2>
+<p>Implement:
+- host pairing;
+- remote typed RPC;
+- capability advertisement;
+- remote execution;
+- artifact transfer/cache;
+- placement;
+- federated graph queries with shared identities;
+- event/provenance continuity.</p>
+<p>Exit: OS/Manager/Control can span multiple Omnis hosts without an agent runtime.</p>
+<h2 id="phase-9-hardening-and-first-core-release">Phase 9 — Hardening and first core release<a class="headerlink" href="#phase-9-hardening-and-first-core-release" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Wayland compositor bootstrap;</li>
-<li>wgpu render scene;</li>
-<li>ControlTree projection engine;</li>
-<li>graph identity/focus/selection/lens model;</li>
-<li>shell/PTY as default surface;</li>
-<li>native Wayland/XWayland delegated surfaces;</li>
-<li>unified input resolver;</li>
-<li>2D focus+context graph desktop;</li>
-<li>Agent/control structural API stub and full Control event publication.</li>
+<li>recovery/backup/migration;</li>
+<li>protocol conformance;</li>
+<li>authority/security tests;</li>
+<li>event losslessness tests;</li>
+<li>MCP/plugin parity tests;</li>
+<li>performance budgets;</li>
+<li>release provenance;</li>
+<li>real-machine/VM acceptance suite.</li>
 </ul>
-<p>Exit: boot lands in OmnisControl; user can execute Linux shell commands, open native applications,
-and navigate system graph in 2D.</p>
-<h2 id="phase-5-omnisagent-eventworldline-core">Phase 5 — OmnisAgent event/worldline core<a class="headerlink" href="#phase-5-omnisagent-eventworldline-core" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
-<ul>
-<li>durable SQLite worldline fed from graphd outbox;</li>
-<li>EventId deduplication + causal DAG + append ingest order;</li>
-<li>graph-change and Control/Manager/OS event ingestion;</li>
-<li>embedded artifact CAS;</li>
-<li>event/entity/project state;</li>
-<li>judgement interface;</li>
-<li>worker lifecycle;</li>
-<li>context capsule model;</li>
-<li>deterministic/null-action handling.</li>
-</ul>
-<p>Exit: Agent survives restart, reconstructs active state, and receives all first-party system/control
-transitions without polling.</p>
-<h2 id="phase-6-structured-memory-and-context">Phase 6 — Structured memory and context<a class="headerlink" href="#phase-6-structured-memory-and-context" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
-<ul>
-<li>episodic/semantic/procedural memory;</li>
-<li>assertions with temporal validity;</li>
-<li>evidence/provenance;</li>
-<li>contradictions/supersession;</li>
-<li>graph + FTS5 lexical + pinned sqlite-vec derived vector retrieval;</li>
-<li>activation/reranking;</li>
-<li>context compiler;</li>
-<li>projection deduplication/feedback-loop prevention;</li>
-<li>consolidation jobs.</li>
-</ul>
-<p>Exit: Agent can continue a long-running project across restarts with inspectable evidence for every
-recalled memory.</p>
-<h2 id="phase-7-models-inference-and-external-harnesses">Phase 7 — Models, inference, and external harnesses<a class="headerlink" href="#phase-7-models-inference-and-external-harnesses" title="Permanent link">&para;</a></h2>
-<p>Manager bindings:</p>
-<ul>
-<li>classifier;</li>
-<li>embedding model;</li>
-<li>reranker;</li>
-<li>reasoning model;</li>
-<li>vision/audio capability bindings according to the frozen model-role fallback/stream rules;</li>
-<li>local inference engines;</li>
-<li>remote model APIs;</li>
-<li>Claude Code;</li>
-<li>Codex;</li>
-<li>OpenCode;</li>
-<li>descriptor-driven generic harness using <code>spec/generic_harness.schema.json</code>;</li>
-<li>MCP.</li>
-</ul>
-<p>Agent integration:</p>
-<ul>
-<li>worker-specific model capability resolution;</li>
-<li>universal inference-boundary interception;</li>
-<li>native harness hooks;</li>
-<li>code/research/reasoning/verification workers.</li>
-</ul>
-<p>Exit: replacing model provider or code harness requires Manager binding/config change, not Agent core
-changes.</p>
-<h2 id="phase-8-omniscontrol-full-graph-desktop">Phase 8 — OmnisControl full graph desktop<a class="headerlink" href="#phase-8-omniscontrol-full-graph-desktop" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
-<ul>
-<li>semantic clustering and LOD;</li>
-<li>worldline timeline;</li>
-<li>causal/memory/resource/provenance lenses;</li>
-<li>graph-aware inspectors;</li>
-<li>interactive graph mutation affordances;</li>
-<li>3D spatial graph mode;</li>
-<li>lossless 2D/3D toggle preserving state;</li>
-<li>Agent-driven materialization and tree mutation;</li>
-<li>charts/tables/editors/media/web semantic sources;</li>
-<li>accessibility tree.</li>
-</ul>
-<p>Exit: the system can be operated primarily through the graph desktop, and Agent-created interfaces
-are indistinguishable in authority from user-created Control arrangements.</p>
-<h2 id="phase-9-distributed-placement-and-multi-host-system">Phase 9 — Distributed placement and multi-host system<a class="headerlink" href="#phase-9-distributed-placement-and-multi-host-system" title="Permanent link">&para;</a></h2>
-<p>Implement:</p>
-<ul>
-<li>remote Omnis host protocol;</li>
-<li>capability advertisement;</li>
-<li>remote execution envelopes;</li>
-<li>artifact transfer/cache;</li>
-<li>GPU/CPU placement;</li>
-<li>federated remote graph queries/cache with shared NodeIds and authority rules from <code>DECISION_COMPLETE_V0.md</code>;</li>
-<li>QUIC/TLS remote RPC with the same EventId/TraceId/NodeId contracts.</li>
-</ul>
-<p>Exit: one Agent activity can use local Control, remote GPU, local repository, and remote worker while
-preserving shared graph/activity/event identity.</p>
-<h2 id="phase-10-learning-and-self-optimization">Phase 10 — Learning and self-optimization<a class="headerlink" href="#phase-10-learning-and-self-optimization" title="Permanent link">&para;</a></h2>
-<p>Implement exactly <code>docs/LEARNING_V0.md</code> and <code>spec/learning.toml</code>:</p>
-<ul>
-<li>memory utility learning;</li>
-<li>procedure induction;</li>
-<li>learned routing estimates;</li>
-<li>competence/self-model;</li>
-<li>endogenous intention generation;</li>
-<li>consolidation/sleep regimes;</li>
-<li>candidate Agent variants;</li>
-<li>candidate Control/Manager/OS generation proposals;</li>
-<li>replay/evaluation/promotion lineage.</li>
-</ul>
-<p>Exit: repeated expensive behavior can compile toward reusable procedures/capabilities and structural
-changes are evaluated as candidate generations rather than mutating live code in place.</p>
-<h2 id="parallelization">Parallelization<a class="headerlink" href="#parallelization" title="Permanent link">&para;</a></h2>
-<p>After Phase 1 protocol freeze, the following lanes can run concurrently:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>OmnisOS physical integration
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>OmnisManager capability/binding work
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>OmnisAgent worldline/memory work
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>OmnisControl compositor/2D work
-</code></pre></div>
-<p>Cross-lane integration tests live in <code>omnis</code> and must exercise actual protocols rather than mocks once
-both sides exist.</p>
-<h2 id="first-complete-release-criterion">First complete release criterion<a class="headerlink" href="#first-complete-release-criterion" title="Permanent link">&para;</a></h2>
-<p>The first release is complete only when all criteria in <code>ARCHITECTURE.md §18</code> pass end to end on a
-real booted machine.</p>
+<p>Exit: every criterion in <code>ARCHITECTURE.md §18</code> passes.</p>
+<h2 id="separate-reference-agent-track">Separate reference-agent track<a class="headerlink" href="#separate-reference-agent-track" title="Permanent link">&para;</a></h2>
+<p><code>marius-patrik/dsh-stack</code> evolves independently into the reference Omnis agent environment. It is
+not in the dependency chain above and never blocks a core release. Its Omnis integration must consume
+the same MCP/plugin surface available to any other agent.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../declaration/">
@@ -488,7 +425,7 @@ real booted machine.</p>
         <ul class="toc__list">
           <li><a href="#phase-0-architecture-reset-and-repository-split">Phase 0 — Architecture reset and repository split</a>
           </li>
-          <li><a href="#phase-1-shared-graph-substrate">Phase 1 — Shared graph substrate</a>
+          <li><a href="#phase-1-shared-graph-and-core-event-journal">Phase 1 — Shared graph and core event journal</a>
           </li>
           <li><a href="#phase-2-omnismanager-foundation">Phase 2 — OmnisManager foundation</a>
           </li>
@@ -496,21 +433,17 @@ real booted machine.</p>
           </li>
           <li><a href="#phase-4-omniscontrol-minimum-usable-environment">Phase 4 — OmnisControl minimum usable environment</a>
           </li>
-          <li><a href="#phase-5-omnisagent-eventworldline-core">Phase 5 — OmnisAgent event/worldline core</a>
+          <li><a href="#phase-5-harness-agnostic-agent-access">Phase 5 — Harness-agnostic agent access</a>
           </li>
-          <li><a href="#phase-6-structured-memory-and-context">Phase 6 — Structured memory and context</a>
+          <li><a href="#phase-6-generic-inference-and-foreign-capability-depth">Phase 6 — Generic inference and foreign capability depth</a>
           </li>
-          <li><a href="#phase-7-models-inference-and-external-harnesses">Phase 7 — Models, inference, and external harnesses</a>
+          <li><a href="#phase-7-omniscontrol-full-graph-desktop">Phase 7 — OmnisControl full graph desktop</a>
           </li>
-          <li><a href="#phase-8-omniscontrol-full-graph-desktop">Phase 8 — OmnisControl full graph desktop</a>
+          <li><a href="#phase-8-distributed-multi-host-core">Phase 8 — Distributed multi-host core</a>
           </li>
-          <li><a href="#phase-9-distributed-placement-and-multi-host-system">Phase 9 — Distributed placement and multi-host system</a>
+          <li><a href="#phase-9-hardening-and-first-core-release">Phase 9 — Hardening and first core release</a>
           </li>
-          <li><a href="#phase-10-learning-and-self-optimization">Phase 10 — Learning and self-optimization</a>
-          </li>
-          <li><a href="#parallelization">Parallelization</a>
-          </li>
-          <li><a href="#first-complete-release-criterion">First complete release criterion</a>
+          <li><a href="#separate-reference-agent-track">Separate reference-agent track</a>
           </li>
         </ul>
       </aside>

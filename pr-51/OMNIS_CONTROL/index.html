@@ -111,10 +111,6 @@
          href="../OMNIS_MANAGER/">OmnisManager</a>
     </li>
     <li class="nav__item">
-      <a class="nav__link"
-         href="../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
       <a class="nav__link nav__link--active"
          href="./">OmnisControl</a>
     </li>
@@ -229,6 +225,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../architecture/decisions/0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -364,13 +364,13 @@ change graph identity.</p>
 </code></pre></div>
 <p>Collapsed clusters retain stable identity where they correspond to meaningful graph groups.</p>
 <hr />
-<h2 id="6-timelineworldline">6. Timeline/worldline<a class="headerlink" href="#6-timelineworldline" title="Permanent link">&para;</a></h2>
-<p>Control exposes OmnisAgent's causal worldline as a first-class navigation dimension.</p>
+<h2 id="6-timelinecore-event-journal">6. Timeline/core event journal<a class="headerlink" href="#6-timelinecore-event-journal" title="Permanent link">&para;</a></h2>
+<p>Control exposes the core event journal as a first-class navigation dimension. An external agent may add its own private/cognitive timeline separately.</p>
 <p>Timeline interaction must support:</p>
 <ul>
 <li>chronological browsing;</li>
 <li>causal branches;</li>
-<li>worker/activity lanes;</li>
+<li>external-client/execution lanes;</li>
 <li>speculative/self-evolution branches;</li>
 <li>selecting a historical event/frontier;</li>
 <li>reconstructing available graph/memory projections for that frontier where retained data permits;</li>
@@ -462,7 +462,7 @@ reasoning.</p>
 </code></pre></div>
 <p>The resolver uses deterministic parsing before classification/LLM reasoning.</p>
 <hr />
-<h2 id="14-user-and-agent-authority">14. User and Agent authority<a class="headerlink" href="#14-user-and-agent-authority" title="Permanent link">&para;</a></h2>
+<h2 id="14-user-and-external-agent-authority">14. User and external-agent authority<a class="headerlink" href="#14-user-and-external-agent-authority" title="Permanent link">&para;</a></h2>
 <p>User and Agent interact with the same Control state but through different affordances.</p>
 <p>User:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>click/type/drag/scroll/select/focus/gesture/voice
@@ -506,7 +506,7 @@ Keyboard, button, touch, scroll, focus, selection, navigation, tree mutation and
 lifecycle events are emitted directly with stable ordering metadata.</p>
 <p>Pointer-motion and other dense streams may be grouped into short lossless batches before durable
 enqueue. Each original item retains producer sequence and monotonic timestamp inside the batch;
-Agent can expand/replay it exactly.</p>
+Any event consumer can expand/replay it exactly.</p>
 <h2 id="16-accessibility">16. Accessibility<a class="headerlink" href="#16-accessibility" title="Permanent link">&para;</a></h2>
 <p>Because Control owns custom rendering, native accessibility trees are mandatory, not optional.</p>
 <p>Graph semantics feed accessibility directly: a rendered identity already has role, label,
@@ -525,7 +525,7 @@ interfaces.</p>
 <li>explicit materializations.</li>
 </ul>
 <p>Incidental render/layout cache state remains ephemeral.</p>
-<p>Agent may propose/persist useful workspace arrangements through the same Control state APIs.</p>
+<p>Authorized external agents may propose/persist useful workspace arrangements through the same Control state APIs.</p>
 <hr />
 <h2 id="18-hard-invariants">18. Hard invariants<a class="headerlink" href="#18-hard-invariants" title="Permanent link">&para;</a></h2>
 <ol>
@@ -557,9 +557,9 @@ WebDriver BiDi and accessibility data are Manager bindings rather than a second 
 state and therefore preserves focus, selection, lens and timeline frontier.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../OMNIS_AGENT/">
+          <a class="pager__link pager__link--prev" href="../OMNIS_MANAGER/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">OmnisAgent</span>
+            <span class="pager__title">OmnisManager</span>
           </a>
           <a class="pager__link pager__link--next" href="../PROTOCOLS/">
             <span class="pager__label">Next</span>
@@ -586,7 +586,7 @@ state and therefore preserves focus, selection, lens and timeline frontier.</p>
           </li>
           <li><a href="#5-semantic-levels-of-detail">5. Semantic levels of detail</a>
           </li>
-          <li><a href="#6-timelineworldline">6. Timeline/worldline</a>
+          <li><a href="#6-timelinecore-event-journal">6. Timeline/core event journal</a>
           </li>
           <li><a href="#7-control-tree">7. Control tree</a>
           </li>
@@ -602,7 +602,7 @@ state and therefore preserves focus, selection, lens and timeline frontier.</p>
           </li>
           <li><a href="#13-unified-input-resolver">13. Unified input resolver</a>
           </li>
-          <li><a href="#14-user-and-agent-authority">14. User and Agent authority</a>
+          <li><a href="#14-user-and-external-agent-authority">14. User and external-agent authority</a>
           </li>
           <li><a href="#15-events">15. Events</a>
             <ul>

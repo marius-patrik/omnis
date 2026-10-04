@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="../OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -232,6 +228,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -284,14 +284,14 @@
           <h1 id="shared-multidimensional-graph">Shared Multidimensional Graph<a class="headerlink" href="#shared-multidimensional-graph" title="Permanent link">&para;</a></h1>
 <p><strong>Status: normative supporting specification.</strong></p>
 <p>The shared graph is the current structured state substrate of Omnis. It is used directly by
-OmnisOS, OmnisManager, OmnisAgent, and OmnisControl.</p>
+OmnisOS, OmnisManager, and OmnisControl.</p>
 <p>It is not a fifth product, not an agent memory database, and not a rendering scene graph.</p>
 <hr />
 <h2 id="1-design-goals">1. Design goals<a class="headerlink" href="#1-design-goals" title="Permanent link">&para;</a></h2>
 <p>The graph must provide:</p>
 <ul>
 <li>one stable identity space across the whole system;</li>
-<li>simultaneous physical, semantic, cognitive, resource, causal, and presentation relations;</li>
+<li>simultaneous physical, system, resource, capability, causal, authority, and presentation relations;</li>
 <li>explicit write ownership;</li>
 <li>atomic graph transactions;</li>
 <li>versioned current state;</li>
@@ -300,10 +300,9 @@ OmnisOS, OmnisManager, OmnisAgent, and OmnisControl.</p>
 <li>provenance on facts and relations;</li>
 <li>temporal validity where state changes over time;</li>
 <li>enough structure for OmnisControl to derive interactive projections;</li>
-<li>enough structure for OmnisAgent to reason without scraping subsystem-specific stores.</li>
+<li>enough structure for arbitrary external clients to inspect the machine without scraping subsystem-specific stores.</li>
 </ul>
-<p>The graph is optimized for <strong>shared identity and current state</strong>, not for preserving the complete
-causal past. The causal past belongs to OmnisAgent's worldline.</p>
+<p>The graph is optimized for <strong>shared identity and current state</strong>. Complete first-party transition history lives in the append-only core event journal; richer cognitive history, if any, belongs to an external agent.</p>
 <hr />
 <h2 id="2-identity">2. Identity<a class="headerlink" href="#2-identity" title="Permanent link">&para;</a></h2>
 <h3 id="21-stable-semantic-identity">2.1 Stable semantic identity<a class="headerlink" href="#21-stable-semantic-identity" title="Permanent link">&para;</a></h3>
@@ -434,37 +433,21 @@ not by a giant central type switch.</p>
 <p>Examples:</p>
 <ul>
 <li>package provides executable;</li>
-<li>harness provides <code>code.agent</code>;</li>
 <li>model runtime can execute model artifact;</li>
 <li>resource requires credential;</li>
 <li>execution placed on host;</li>
 <li>capability discovered from D-Bus/CLI/API.</li>
 </ul>
-<h3 id="53-omnisagent-namespaces">5.3 OmnisAgent namespaces<a class="headerlink" href="#53-omnisagent-namespaces" title="Permanent link">&para;</a></h3>
-<p>OmnisAgent owns:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>cognitive.*
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>memory.*
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>goal.*
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>context.*
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>judgement.*
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>worker.*
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>learning.*
-</code></pre></div>
-<p>Examples:</p>
-<ul>
-<li>memory about repository;</li>
-<li>hypothesis supported by events;</li>
-<li>active project goal;</li>
-<li>worker context activation;</li>
-<li>learned procedure;</li>
-<li>expectation/prediction.</li>
-</ul>
+<h3 id="53-external-extension-namespaces">5.3 External extension namespaces<a class="headerlink" href="#53-external-extension-namespaces" title="Permanent link">&para;</a></h3>
+<p>Core assigns no cognitive namespace to an agent. Authorized plugins may publish optional agent-owned
+state only under <code>ext.&lt;client-id&gt;.*</code>; those namespaces are not interpreted by the core and never
+become first-party <code>omnis.*</code> truth.</p>
 <h3 id="54-omniscontrol-namespaces">5.4 OmnisControl namespaces<a class="headerlink" href="#54-omniscontrol-namespaces" title="Permanent link">&para;</a></h3>
 <p>OmnisControl owns:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>presentation.*
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>interaction.*
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>scene.*
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>navigation.*
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>presentation.*
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>interaction.*
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>scene.*
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>navigation.*
 </code></pre></div>
 <p>Examples:</p>
 <ul>
@@ -483,18 +466,18 @@ Graph core rejects unauthorized direct writes.</p>
 <hr />
 <h2 id="6-properties">6. Properties<a class="headerlink" href="#6-properties" title="Permanent link">&para;</a></h2>
 <p>Properties are namespaced and strongly encoded at the wire level:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>string
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>bytes
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>bool
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>i64
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>u64
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>f64
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>timestamp
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>duration
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>node_ref
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>artifact_ref
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>sequence
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>mapping
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>string
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>bytes
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>bool
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>i64
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>u64
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>f64
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>timestamp
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>duration
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>node_ref
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>artifact_ref
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>sequence
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>mapping
 </code></pre></div>
 <p>Domain-specific schemas are discoverable metadata layered above this primitive representation.</p>
 <p>The graph core does not require a globally closed user-defined type system.</p>
@@ -502,35 +485,34 @@ Graph core rejects unauthorized direct writes.</p>
 <h2 id="7-temporal-validity">7. Temporal validity<a class="headerlink" href="#7-temporal-validity" title="Permanent link">&para;</a></h2>
 <p>State that changes over time must distinguish historical observation from current validity.</p>
 <p>An edge/property may carry:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>observed_at
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>valid_from
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>valid_until
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>confidence
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>observed_at
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>valid_from
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>valid_until
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>confidence
 </code></pre></div>
-<p>Deleting current graph state does not delete historical worldline events.</p>
+<p>Deleting current graph state does not delete historical core journal events.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Project --resource.framework--&gt; React   valid T1..T2
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Project --resource.framework--&gt; Svelte  valid T2..present
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Project --resource.framework--&gt; React   valid T1..T2
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Project --resource.framework--&gt; Svelte  valid T2..present
 </code></pre></div>
-<p>Agent memory may interpret both while current graph queries select the valid present edge by
-default.</p>
+<p>An external consumer may interpret both while current graph queries select the valid present edge by default.</p>
 <hr />
 <h2 id="8-provenance">8. Provenance<a class="headerlink" href="#8-provenance" title="Permanent link">&para;</a></h2>
 <p>Every discovered or inferred graph fact that is not a native identity/lifecycle primitive MUST carry
 a Provenance record. Native identity/lifecycle primitives carry their authoritative producer as
 source even when no additional evidence artifact exists.</p>
 <p>Required provenance categories:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>native-authoritative
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>nix-evaluation
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>kernel-observation
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>protocol-descriptor
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>structured-tooling
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>foreign-api
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>source-analysis
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>deterministic-probe
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>learned-inference
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>user-declared
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>agent-derived
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>native-authoritative
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>nix-evaluation
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>kernel-observation
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>protocol-descriptor
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>structured-tooling
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>foreign-api
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>source-analysis
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>deterministic-probe
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>learned-inference
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>user-declared
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>agent-derived
 </code></pre></div>
 <p>Provenance may additionally point to:</p>
 <ul>
@@ -545,30 +527,30 @@ source even when no additional evidence artifact exists.</p>
 <hr />
 <h2 id="9-transactions">9. Transactions<a class="headerlink" href="#9-transactions" title="Permanent link">&para;</a></h2>
 <p>All changes occur through <code>GraphTransaction</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">struct</span><span class="w"> </span><span class="nc">GraphTransaction</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">    </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nc">TxnId</span><span class="p">,</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="n">actor</span><span class="p">:</span><span class="w"> </span><span class="nc">NodeId</span><span class="p">,</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="n">authority</span><span class="p">:</span><span class="w"> </span><span class="nc">Authority</span><span class="p">,</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="n">causal_parents</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">EventId</span><span class="o">&gt;</span><span class="p">,</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">    </span><span class="n">expected_revision</span><span class="p">:</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">GraphRevision</span><span class="o">&gt;</span><span class="p">,</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">    </span><span class="n">preconditions</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">GraphPredicate</span><span class="o">&gt;</span><span class="p">,</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="n">mutations</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Mutation</span><span class="o">&gt;</span><span class="p">,</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="n">provenance</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">ProvenanceRef</span><span class="o">&gt;</span><span class="p">,</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">struct</span><span class="w"> </span><span class="nc">GraphTransaction</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nc">TxnId</span><span class="p">,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="n">actor</span><span class="p">:</span><span class="w"> </span><span class="nc">NodeId</span><span class="p">,</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="n">authority</span><span class="p">:</span><span class="w"> </span><span class="nc">Authority</span><span class="p">,</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="n">causal_parents</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">EventId</span><span class="o">&gt;</span><span class="p">,</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="n">expected_revision</span><span class="p">:</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">GraphRevision</span><span class="o">&gt;</span><span class="p">,</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="n">preconditions</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">GraphPredicate</span><span class="o">&gt;</span><span class="p">,</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="n">mutations</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Mutation</span><span class="o">&gt;</span><span class="p">,</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="n">provenance</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">ProvenanceRef</span><span class="o">&gt;</span><span class="p">,</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="p">}</span>
 </code></pre></div>
 <p>Mutations:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>create_node
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>set_property
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>remove_property
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>create_edge
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>set_edge_property
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>remove_edge
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>tombstone_node
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>create_node
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>set_property
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>remove_property
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>create_edge
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>set_edge_property
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>remove_edge
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>tombstone_node
 </code></pre></div>
 <p>A successful transaction returns:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>new revision
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>changed node/edge IDs
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>normalized graph-change event payload
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>new revision
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>changed node/edge IDs
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>normalized graph-change event payload
 </code></pre></div>
 <p>Failed preconditions produce no partial graph mutation.</p>
 <hr />
@@ -585,21 +567,21 @@ source even when no additional evidence artifact exists.</p>
 <p>Authority ownership is an unconditional graphd check, not a caller-selectable predicate. A foreign
 realization guard is expressed by propertyEquals against its exact foreign identity/locator.</p>
 <p>Graph predicates are operational consistency checks, not a replacement for OmnisOS system
-invariants or OmnisAgent reasoning.</p>
+invariants or external-agent reasoning.</p>
 <hr />
 <h2 id="11-queries">11. Queries<a class="headerlink" href="#11-queries" title="Permanent link">&para;</a></h2>
 <p>Minimum graph query capabilities:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>lookup by NodeId
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>resolve aliases
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>filter nodes by kind/property/dimension
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>outgoing/incoming relation traversal
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>bounded neighborhood traversal
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>path queries
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>current-validity filtering
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>graph-revision snapshot reads
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>provenance expansion
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>dimension/lens projection
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>subscription to node/relation/query changes
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>lookup by NodeId
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>resolve aliases
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>filter nodes by kind/property/dimension
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>outgoing/incoming relation traversal
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>bounded neighborhood traversal
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>path queries
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>current-validity filtering
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>graph-revision snapshot reads
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>provenance expansion
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>dimension/lens projection
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>subscription to node/relation/query changes
 </code></pre></div>
 <p><code>protocol/graph.capnp</code> freezes selector, property-filter, BFS traversal, shortest-path, alias and
 provenance APIs. Detailed ordering/limit semantics are in <code>DECISION_COMPLETE_V0.md §69</code>.</p>
@@ -614,36 +596,36 @@ provenance APIs. Detailed ordering/limit semantics are in <code>DECISION_COMPLET
 <li>all committed transactions for its authority.</li>
 </ul>
 <p>Subscriptions deliver revision-ordered changes.</p>
-<p>Control uses subscriptions to update projections. Agent receives the normalized event stream and
-does not need a separate observe call to know what changed.</p>
+<p>Control uses subscriptions to update projections. Any authorized agent client consumes the normalized
+core event journal and does not need a separate observe/screenshot loop.</p>
 <hr />
-<h2 id="13-event-handoff">13. Event handoff<a class="headerlink" href="#13-event-handoff" title="Permanent link">&para;</a></h2>
-<p>Every committed graph transaction yields an Agent event containing at least:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>transaction id
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>actor
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>authority
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>previous revision
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>new revision
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>causal parents
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>changed identities
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>mutation summary
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>payload/artifact references where needed
+<h2 id="13-core-event-journal">13. Core event journal<a class="headerlink" href="#13-core-event-journal" title="Permanent link">&para;</a></h2>
+<p>Every committed graph transaction yields a core event containing at least:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>transaction id
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>actor
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>authority
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>previous revision
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>new revision
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>causal parents
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>changed identities
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>mutation summary
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>payload/artifact references where needed
 </code></pre></div>
 <p>Subsystem-specific lifecycle/input events that do not correspond to graph mutation are durably
-enqueued through graphd's outbox. Dense event classes may use lossless batch artifacts, but Agent can
+appended through graphd's core event journal. Dense event classes may use lossless batch artifacts, but any consumer can
 recover every original ordered item without observing the scene.</p>
 <p>No first-party component silently mutates durable state without producing an event.</p>
 <hr />
 <h2 id="14-storage">14. Storage<a class="headerlink" href="#14-storage" title="Permanent link">&para;</a></h2>
 <p>Omnis v0 storage is fixed:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>SQLite WAL + synchronous=FULL
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>+ one serialized writer
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>+ normalized node/kind/property/edge/provenance tables
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>+ revision validity intervals
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>+ relation/alias indexes
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>+ graph transaction metadata
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>+ durable event outbox
-<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>+ filesystem BLAKE3 CAS for large payloads
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>SQLite WAL + synchronous=FULL
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>+ one serialized writer
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>+ normalized node/kind/property/edge/provenance tables
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>+ revision validity intervals
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>+ relation/alias indexes
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>+ graph transaction metadata
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>+ append-only core event journal
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>+ filesystem BLAKE3 CAS for large payloads
 </code></pre></div>
 <p>Rationale:</p>
 <ul>
@@ -656,47 +638,43 @@ recover every original ordered item without observing the scene.</p>
 </ul>
 <p>The protocol must permit later replacement with a distributed implementation without changing graph
 identity or relation semantics.</p>
-<p>Vector indexes, search indexes, spatial indexes, and Agent memory indexes are derived accelerators
-outside the graph's canonical state.</p>
+<p>Vector/search/spatial indexes and external-agent memory indexes are derived accelerators outside the
+graph's canonical state.</p>
 <hr />
 <h2 id="15-control-projection-contract">15. Control projection contract<a class="headerlink" href="#15-control-projection-contract" title="Permanent link">&para;</a></h2>
 <p>Control requests a projection using:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>focus identities
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>lens/dimensions
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>relation filters
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>semantic level of detail
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>historical/current frontier
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>authority/visibility constraints
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>layout intent
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>focus identities
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>lens/dimensions
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>relation filters
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>semantic level of detail
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>historical/current frontier
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>authority/visibility constraints
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>layout intent
 </code></pre></div>
 <p>The result preserves graph IDs and produces an interactive <code>ControlTree</code>.</p>
 <p>A Control node that semantically represents an existing graph object must retain that <code>NodeId</code>.
 Ephemeral layout-only nodes use Control-local identity and must not masquerade as domain objects.</p>
 <hr />
-<h2 id="16-agent-relationship">16. Agent relationship<a class="headerlink" href="#16-agent-relationship" title="Permanent link">&para;</a></h2>
-<p>Agent memory may point directly to graph nodes:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Memory:m1 --cognitive.about--&gt; Repository:r1
-</code></pre></div>
-<p>Agent memory MUST NOT duplicate an authoritative current operational fact solely as a second source
-of current truth. Derived memories may explain, generalize, predict, associate, or preserve
-historical meaning while linking to the authoritative graph identity.</p>
-<p>Agent context compilation may query the graph at a specific revision/frontier and include stable node
-references rather than copied descriptions.</p>
-<hr />
+<h2 id="16-external-agent-relationship">16. External-agent relationship<a class="headerlink" href="#16-external-agent-relationship" title="Permanent link">&para;</a></h2>
+<p>External agents consume graph identities and the core event journal through MCP or the native plugin
+SDK. Agent-owned memory/cognition remains outside core, but it may reference stable NodeIds/EventIds.</p>
+<p>An authorized native plugin may publish selected cognitive state into a granted <code>ext.&lt;client-id&gt;.*</code>
+namespace. It cannot write core-owned <code>omnis.*</code> namespaces except through the owning typed service
+operation.</p>
 <h2 id="17-manager-relationship">17. Manager relationship<a class="headerlink" href="#17-manager-relationship" title="Permanent link">&para;</a></h2>
 <p>Manager expresses possibility through graph structure:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Resource:ClaudeCode --capability.provides--&gt; Capability:code.agent
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>Resource:RTX5090    --capability.provides--&gt; Capability:cuda.compute
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>Model:Qwen          --resource.runnable_by--&gt; Runtime:vLLM
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>Resource:Git       --capability.provides--&gt; Capability:vcs.status
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>Resource:RTX5090    --capability.provides--&gt; Capability:cuda.compute
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>Model:Qwen          --resource.runnable_by--&gt; Runtime:vLLM
 </code></pre></div>
 <p>Resolution is a graph query plus constraint evaluation, not an independent registry with separate
 identity.</p>
 <hr />
 <h2 id="18-os-relationship">18. OS relationship<a class="headerlink" href="#18-os-relationship" title="Permanent link">&para;</a></h2>
 <p>OS publishes authoritative current physical state:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Host:h --physical.has_device--&gt; GPU:g
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>Host:h --physical.runs--&gt; Process:p
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>Generation:g42 --system.active_on--&gt; Host:h
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Host:h --physical.has_device--&gt; GPU:g
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>Host:h --physical.runs--&gt; Process:p
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>Generation:g42 --system.active_on--&gt; Host:h
 </code></pre></div>
 <p>OmnisOS may retain rebuildable caches, but every cached object keeps its shared NodeId and graph
 identity remains the cross-system reference point.</p>
@@ -710,25 +688,25 @@ identity remains the cross-system reference point.</p>
 <li>Namespace ownership is enforced.</li>
 <li>Provenance is retained when available.</li>
 <li>Current graph state is not historical truth.</li>
-<li>Agent worldline is not replaced by graph transaction WAL.</li>
+<li>External-agent memory/worldlines are not replaced by graph transaction WAL.</li>
 <li>Control render state is not graph truth.</li>
 <li>Derived indexes are disposable.</li>
-<li>Every committed first-party graph mutation emits an Agent event.</li>
+<li>Every committed first-party graph mutation appends a core journal event.</li>
 </ol>
 <hr />
 <h2 id="20-v0-storage-and-delivery-binding">20. v0 storage and delivery binding<a class="headerlink" href="#20-v0-storage-and-delivery-binding" title="Permanent link">&para;</a></h2>
 <p>The concrete v0 graph implementation is <code>omnis-graphd</code> from OmnisOS.</p>
 <p>Canonical locations:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>/var/lib/omnis/graph/graph.sqlite3
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>/var/lib/omnis/cas/blake3/
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>/run/omnis/graph.sock
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>/var/lib/omnis/graph/graph.sqlite3
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>/var/lib/omnis/cas/blake3/
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>/run/omnis/graph.sock
 </code></pre></div>
 <p><code>graph.sqlite3</code> uses SQLite WAL, <code>synchronous=FULL</code>, one serialized writer task, independent reader
 connections, validity intervals for revision reads, and schema migrations owned by graphd.</p>
-<p>The graph database also contains the durable event outbox. A graph transaction commits graph
+<p>The graph database also contains the append-only core event journal. A graph transaction commits graph
 mutations and its normalized event envelopes atomically. Non-graph first-party producers enqueue
-events through graphd before considering publication durable. OmnisAgent drains the outbox into its
-worldline and acknowledges EventId; delivery is at-least-once and deduplicated by EventId.</p>
+events through graphd before considering publication durable. Consumers replay by monotonically
+increasing ingest_seq and maintain independent cursors; there is no global ACK.</p>
 <p>Large payloads use the BLAKE3 CAS rather than SQLite/RPC blobs. The graph stores ArtifactId references
 plus media/protection/provenance metadata.</p>
 <p>The exact relational table families, transaction operations and query policy are frozen in
@@ -771,7 +749,7 @@ plus media/protection/provenance metadata.</p>
             <ul>
               <li><a href="#51-omnisos-namespaces">5.1 OmnisOS namespaces</a></li>
               <li><a href="#52-omnismanager-namespaces">5.2 OmnisManager namespaces</a></li>
-              <li><a href="#53-omnisagent-namespaces">5.3 OmnisAgent namespaces</a></li>
+              <li><a href="#53-external-extension-namespaces">5.3 External extension namespaces</a></li>
               <li><a href="#54-omniscontrol-namespaces">5.4 OmnisControl namespaces</a></li>
               <li><a href="#55-shared-facts">5.5 Shared facts</a></li>
             </ul>
@@ -790,13 +768,13 @@ plus media/protection/provenance metadata.</p>
           </li>
           <li><a href="#12-subscriptions">12. Subscriptions</a>
           </li>
-          <li><a href="#13-event-handoff">13. Event handoff</a>
+          <li><a href="#13-core-event-journal">13. Core event journal</a>
           </li>
           <li><a href="#14-storage">14. Storage</a>
           </li>
           <li><a href="#15-control-projection-contract">15. Control projection contract</a>
           </li>
-          <li><a href="#16-agent-relationship">16. Agent relationship</a>
+          <li><a href="#16-external-agent-relationship">16. External-agent relationship</a>
           </li>
           <li><a href="#17-manager-relationship">17. Manager relationship</a>
           </li>

@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="../../OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -229,6 +225,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -431,13 +431,13 @@ from the files in <code>notes/adr/</code> at build time - it is never hand-maint
 <tr>
 <td><a href="0023-graph-native-os-architecture-reset/">0023</a></td>
 <td><a href="0023-graph-native-os-architecture-reset/">Reset Omnis around a graph-native four-authority operating system</a></td>
-<td>Accepted</td>
+<td>Superseded by ADR-0026</td>
 <td>—</td>
 </tr>
 <tr>
 <td><a href="0024-freeze-v0-implementation-substrate/">0024</a></td>
 <td><a href="0024-freeze-v0-implementation-substrate/">Freeze the Omnis v0 implementation substrate</a></td>
-<td>Accepted</td>
+<td>Superseded in part by ADR-0026</td>
 <td>—</td>
 </tr>
 <tr>
@@ -446,9 +446,15 @@ from the files in <code>notes/adr/</code> at build time - it is never hand-maint
 <td>Accepted</td>
 <td>—</td>
 </tr>
+<tr>
+<td><a href="0026-three-core-authorities-external-agents/">0026</a></td>
+<td><a href="0026-three-core-authorities-external-agents/">Keep exactly three core authorities and make every agent an external client</a></td>
+<td>Accepted</td>
+<td>—</td>
+</tr>
 </tbody>
 </table>
-<p>25 records — 14 accepted, 0 proposed. Records are append-only: a decision that turns out wrong is superseded by a new one, never edited away.</p>
+<p>26 records — 13 accepted, 0 proposed. Records are append-only: a decision that turns out wrong is superseded by a new one, never edited away.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../../PROTOCOLS/">

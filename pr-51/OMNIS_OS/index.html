@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="../OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -232,6 +228,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -311,10 +311,10 @@ ordinary downstream NixOS module, especially:</p>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; omnis-graphd
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; {omnis-osd, nix-daemon, omnis-managerd}
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; user session
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  -&gt; {omnis-agentd, omnis-control}
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  -&gt; omnis-control
 </code></pre></div>
 <p>OmnisControl is the default local interactive environment. A headless target may omit Control while
-retaining OS, Manager, Agent, graph, and remote-control capability.</p>
+retaining OS, Manager, graph, agent-access APIs, and remote-control capability.</p>
 <p>systemd is the v0 service supervisor and transient-service execution mechanism. <code>omnis-osd</code> is the
 only Omnis component allowed to create restricted <code>omnis-exec-*.service</code> units. It is a physical
 mechanism, not a
@@ -362,7 +362,7 @@ its Resource through the normal exact-alias/provenance path; OS never guesses a 
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  observed post-activation effects
 </code></pre></div>
 <p>Generation metadata must not require embedding model output into Nix derivations. Model reasoning is
-stored as external Agent/graph provenance; Nix receives deterministic configuration inputs.</p>
+stored as external-client/graph provenance; Nix receives deterministic configuration inputs.</p>
 <hr />
 <h2 id="5-candidate-generation-workflow">5. Candidate generation workflow<a class="headerlink" href="#5-candidate-generation-workflow" title="Permanent link">&para;</a></h2>
 <p>Persistent mutation path:</p>
@@ -396,7 +396,7 @@ effects must be reported honestly and reconciled rather than described as imposs
 <p>Examples:</p>
 <ul>
 <li>execution remains inside cgroup resource limits;</li>
-<li>worker cannot access filesystem outside mounts;</li>
+<li>execution cannot access filesystem outside mounts;</li>
 <li>network scope remains restricted;</li>
 <li>credential handle remains unavailable outside execution scope.</li>
 </ul>
@@ -473,7 +473,6 @@ than becoming invisible side configuration.</p>
 <li>identify active Nix generation;</li>
 <li>republish/reconcile physical state;</li>
 <li>start Manager;</li>
-<li>start Agent and replay/restore Agent worldline state;</li>
 <li>start Control;</li>
 <li>emit reconciliation events for differences between expected and observed state.</li>
 </ol>
@@ -491,6 +490,7 @@ than becoming invisible side configuration.</p>
 </code></pre></div>
 <p>The exact wire protocol is defined in <code>PROTOCOLS.md</code>.</p>
 <hr />
+<p>Agent runtimes are not started, supervised or recovered by OmnisOS. They attach as ordinary clients.</p>
 <h2 id="13-non-goals">13. Non-goals<a class="headerlink" href="#13-non-goals" title="Permanent link">&para;</a></h2>
 <p>Initial OmnisOS does not:</p>
 <ul>
@@ -505,8 +505,8 @@ than becoming invisible side configuration.</p>
 <p>A future custom kernel is only justified by measured limitations of Linux against Omnis requirements.</p>
 <hr />
 <h2 id="14-v0-process-and-persistence-binding">14. v0 process and persistence binding<a class="headerlink" href="#14-v0-process-and-persistence-binding" title="Permanent link">&para;</a></h2>
-<p><code>omnis-graphd</code>, <code>omnis-osd</code> and <code>omnis-managerd</code> are system services. <code>omnis-agentd</code> and
-<code>omnis-control</code> are per-user services/session processes. Agent and Control are never boot-critical.</p>
+<p><code>omnis-graphd</code>, <code>omnis-osd</code> and <code>omnis-managerd</code> are system services. <code>omnis-control</code> is the per-user
+session process. No agent daemon is generated or boot-critical; external agents attach as clients.</p>
 <p>OmnisOS adds the <code>omnis.*</code> NixOS module family and two concrete configuration files:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/etc/omnis/configuration.nix
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>/etc/omnis/managed.nix

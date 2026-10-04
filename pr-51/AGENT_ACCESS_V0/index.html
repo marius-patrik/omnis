@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>OmnisOS v0 NixOS Option Contract · Omnis</title>
+    <title>Omnis v0 Agent Access Contract · Omnis</title>
     <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -281,400 +281,164 @@
 
       <main class="content" id="content">
         <article class="prose">
-          <h1 id="omnisos-v0-nixos-option-contract">OmnisOS v0 NixOS Option Contract<a class="headerlink" href="#omnisos-v0-nixos-option-contract" title="Permanent link">&para;</a></h1>
-<p><strong>Status: NORMATIVE.</strong> These are the exact public v0 NixOS option paths, types and defaults.
-Implementers must not rename, duplicate or invent competing configuration surfaces.</p>
-<p>Unless stated otherwise, options are under <code>options.omnis</code>.</p>
-<h2 id="1-root">1. Root<a class="headerlink" href="#1-root" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.enable</code></td>
-<td>bool</td>
-<td><code>false</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="2-graph-and-core-event-journal">2. Graph and core event journal<a class="headerlink" href="#2-graph-and-core-event-journal" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.graph.enable</code></td>
-<td>bool</td>
-<td><code>config.omnis.enable</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.dataDir</code></td>
-<td>path</td>
-<td><code>/var/lib/omnis/graph</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.socket</code></td>
-<td>str</td>
-<td><code>/run/omnis/graph.sock</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.writerQueue</code></td>
-<td>unsigned int</td>
-<td><code>4096</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.inlinePayloadMax</code></td>
-<td>unsigned int</td>
-<td><code>65536</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.query.defaultLimit</code></td>
-<td>unsigned int</td>
-<td><code>1000</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.query.hardLimit</code></td>
-<td>unsigned int</td>
-<td><code>10000</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.query.maxDepth</code></td>
-<td>unsigned int</td>
-<td><code>8</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.casDir</code></td>
-<td>path</td>
-<td><code>/var/lib/omnis/cas/blake3</code></td>
-</tr>
-<tr>
-<td><code>omnis.graph.backupDir</code></td>
-<td>path</td>
-<td><code>/var/lib/omnis/backups/graph</code></td>
-</tr>
-</tbody>
-</table>
-<p>SQLite WAL/FULL and indefinite v0 core-event retention are fixed contracts, not options.</p>
-<h2 id="3-os-observation">3. OS observation<a class="headerlink" href="#3-os-observation" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.os.enable</code></td>
-<td>bool</td>
-<td><code>config.omnis.enable</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.socket</code></td>
-<td>str</td>
-<td><code>/run/omnis/os.sock</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.systemd</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.udev</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.rtnetlink</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.processes</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.sessions</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.cgroups</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.os.observe.watchedFileScopes</code></td>
-<td>list of paths</td>
-<td><code>[]</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="4-manager">4. Manager<a class="headerlink" href="#4-manager" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.manager.enable</code></td>
-<td>bool</td>
-<td><code>config.omnis.enable</code></td>
-</tr>
-<tr>
-<td><code>omnis.manager.socket</code></td>
-<td>str</td>
-<td><code>/run/omnis/manager.sock</code></td>
-</tr>
-<tr>
-<td><code>omnis.manager.nixControlSocket</code></td>
-<td>str</td>
-<td><code>/run/omnis/nix-control.sock</code></td>
-</tr>
-<tr>
-<td><code>omnis.manager.discovery.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.manager.discovery.concurrency</code></td>
-<td>unsigned int</td>
-<td><code>16</code></td>
-</tr>
-<tr>
-<td><code>omnis.manager.remote.listen</code></td>
-<td>bool</td>
-<td><code>false</code></td>
-</tr>
-<tr>
-<td><code>omnis.manager.remote.port</code></td>
-<td>port</td>
-<td><code>7443</code></td>
-</tr>
-</tbody>
-</table>
-<p>Built-in provider defaults:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>omnis.manager.providers.nix.enable = true
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>omnis.manager.providers.cli.enable = true
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>omnis.manager.providers.systemd.enable = true
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>omnis.manager.providers.http.enable = true
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>omnis.manager.providers.mcp.enable = true
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>omnis.manager.providers.models.openaiCompatible.enable = false
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>omnis.manager.providers.models.anthropic.enable = false
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>omnis.manager.providers.models.llamaCpp.enable = false
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>omnis.manager.providers.models.onnx.enable = false
+          <h1 id="omnis-v0-agent-access-contract">Omnis v0 Agent Access Contract<a class="headerlink" href="#omnis-v0-agent-access-contract" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> Omnis core has no built-in agent runtime. This document defines how arbitrary
+agents access OmnisOS, OmnisManager, OmnisControl, the shared graph, and the complete core event
+journal without harness-specific integration.</p>
+<h2 id="1-principle">1. Principle<a class="headerlink" href="#1-principle" title="Permanent link">&para;</a></h2>
+<p>There are exactly three core semantic authorities:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>OmnisOS
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>OmnisManager
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>OmnisControl
 </code></pre></div>
-<p>There are no external-agent/harness provider options.</p>
-<h2 id="5-agent-access">5. Agent access<a class="headerlink" href="#5-agent-access" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.agentAccess.enable</code></td>
-<td>bool</td>
-<td><code>config.omnis.enable</code></td>
-</tr>
-<tr>
-<td><code>omnis.agentAccess.mcp.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.agentAccess.pluginSdk.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-</tbody>
-</table>
-<p><code>omnis mcp</code> is stdio-only and starts on demand; these options install/permit the projection rather
-than starting a daemon.</p>
-<h2 id="6-control-users">6. Control users<a class="headerlink" href="#6-control-users" title="Permanent link">&para;</a></h2>
-<p><code>omnis.control.users</code> is attrsOf existing username submodule.</p>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>enable</code></td>
-<td>bool</td>
-<td><code>false</code></td>
-</tr>
-<tr>
-<td><code>defaultMode</code></td>
-<td>enum <code>2d|3d</code></td>
-<td><code>2d</code></td>
-</tr>
-<tr>
-<td><code>shell</code></td>
-<td>package</td>
-<td>user's login shell package if known, else <code>pkgs.bashInteractive</code></td>
-</tr>
-<tr>
-<td><code>xwayland.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>scrollbackLines</code></td>
-<td>unsigned int</td>
-<td><code>100000</code></td>
-</tr>
-<tr>
-<td><code>theme</code></td>
-<td>str</td>
-<td><code>Omnis Dark</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="7-hosts">7. Hosts<a class="headerlink" href="#7-hosts" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.hosts.nativeRemote.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.hosts.quic.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.hosts.quic.port</code></td>
-<td>port</td>
-<td><code>7443</code></td>
-</tr>
-<tr>
-<td><code>omnis.hosts.peers</code></td>
-<td>attrsOf peer submodule</td>
-<td><code>{}</code></td>
-</tr>
-</tbody>
-</table>
-<p>Peer fields: <code>hostId</code>, <code>publicKey</code>, <code>fingerprint</code>, <code>address</code>, <code>grants</code>.</p>
-<h2 id="8-security">8. Security<a class="headerlink" href="#8-security" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>omnis.security.protectedHandles.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.security.systemdCredentials.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.security.executionIsolation.enable</code></td>
-<td>bool</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>omnis.security.defaultExecutionNetwork</code></td>
-<td>enum <code>deny|user</code></td>
-<td><code>deny</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="9-generated-service-dependencies">9. Generated service dependencies<a class="headerlink" href="#9-generated-service-dependencies" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>omnis-graphd.service
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  after = local-fs.target
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  before = omnis-osd.service omnis-managerd.service
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>omnis-osd.service
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  requires = omnis-graphd.service
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  after = omnis-graphd.service systemd-udevd.service
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>omnis-managerd.service
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  requires = omnis-graphd.service nix-daemon.service
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  after = omnis-graphd.service nix-daemon.service
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>user omnis-control.service
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  after = graphical-session-pre.target
+<p>Graphd is shared substrate. Agent-access adapters are projections, not authorities.</p>
+<p>An agent is a client. Removing every agent client must not change boot, recovery, package management,
+execution, Control rendering or graph/event correctness.</p>
+<h2 id="2-canonical-source-of-truth">2. Canonical source of truth<a class="headerlink" href="#2-canonical-source-of-truth" title="Permanent link">&para;</a></h2>
+<p>Canonical semantics remain the Cap'n Proto service APIs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>protocol/os.capnp
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>protocol/manager.capnp
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>protocol/control.capnp
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>protocol/graph.capnp
 </code></pre></div>
-<p>No agent service is generated by OmnisOS.</p>
-<h2 id="10-invalid-combinations">10. Invalid combinations<a class="headerlink" href="#10-invalid-combinations" title="Permanent link">&para;</a></h2>
-<p>Evaluation fails for:
-- <code>omnis.enable=false</code> with any child <code>enable=true</code>;
-- Control user key not present in <code>users.users</code>;
-- remote listen=true while nativeRemote/quic=false;
-- protected handles disabled while a configured provider references a credential handle;
-- writerQueue &lt; 64;
-- graph hardLimit &lt; defaultLimit;
-- port collisions among configured Omnis listeners.</p>
+<p><code>spec/agent_access.toml</code> maps every public operation/event to:
+- MCP name/resource;
+- native plugin client method;
+- effect/read classification.</p>
+<p>CI requires exact parity. An MCP/plugin-only operation is invalid.</p>
+<h2 id="3-mcp-projection">3. MCP projection<a class="headerlink" href="#3-mcp-projection" title="Permanent link">&para;</a></h2>
+<p>Command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>omnis mcp
+</code></pre></div>
+<p>Transport: MCP over stdio. It opens no listening network socket.</p>
+<p>The process runs as the invoking Unix user, connects to the normal local Omnis sockets, and receives
+exactly that caller's authority. It never runs setuid/root and never stores credentials.</p>
+<p>Tool names are stable dotted names:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>omnis.os.*
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>omnis.manager.*
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>omnis.control.*
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>omnis.graph.*
+</code></pre></div>
+<p>Read-only graph/event objects are additionally exposed as MCP resources under:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>omnis://graph/node/&lt;uuid&gt;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>omnis://graph/revision/&lt;u64&gt;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>omnis://event/&lt;event-uuid&gt;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>omnis://events/core
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>omnis://artifact/&lt;blake3&gt;
+</code></pre></div>
+<p>The <code>omnis://events/core</code> resource supports cursor replay from <code>ingest_seq</code> and resource-change
+notifications for newly appended events. The MCP adapter never samples or semantically summarizes
+events.</p>
+<h2 id="4-native-plugin-sdk">4. Native plugin SDK<a class="headerlink" href="#4-native-plugin-sdk" title="Permanent link">&para;</a></h2>
+<p>The umbrella repository generates a native agent-access client from the same manifest and Cap'n Proto
+schemas.</p>
+<p>The v0 reference package is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>@omnis/agent-access
+</code></pre></div>
+<p>It exposes four clients:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>os
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>manager
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>control
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>graph
+</code></pre></div>
+<p>and one lossless event iterator:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>events({ afterIngestSeq })
+</code></pre></div>
+<p>The package contains no cognition, memory, provider routing or agent lifecycle. Runtime-specific
+plugins wrap this client.</p>
+<p>The DSH reference integration is owned by <code>marius-patrik/dsh-stack</code>; it is not implemented inside
+Omnis core.</p>
+<h2 id="5-event-contract">5. Event contract<a class="headerlink" href="#5-event-contract" title="Permanent link">&para;</a></h2>
+<p>Every first-party event is appended durably to graphd's core event journal before publication is
+considered complete.</p>
+<p>Consumers:
+- choose an initial <code>after_ingest_seq</code>;
+- receive strictly increasing <code>ingest_seq</code>;
+- persist their own cursor;
+- reconnect from that cursor;
+- deduplicate by EventId if desired.</p>
+<p>There is no global ACK and no consumer-owned deletion.</p>
+<p>v0 performs <strong>no automatic deletion of core event-journal rows or referenced event artifacts</strong>.
+Archival/compaction is a future explicit feature, not implicit GC.</p>
+<p>This guarantees that a newly attached authorized agent can replay every core event since system
+initialization.</p>
+<h2 id="6-agent-owned-state">6. Agent-owned state<a class="headerlink" href="#6-agent-owned-state" title="Permanent link">&para;</a></h2>
+<p>An agent owns its own:
+- conversations;
+- causal/cognitive worldline;
+- memory/indexes;
+- goals/tasks/workers;
+- model/provider sessions;
+- procedures/skills;
+- self-model and learning.</p>
+<p>It may store these outside Omnis or publish selected semantic state to a granted extension graph
+namespace. Core never requires or interprets those structures.</p>
+<p>Extension namespace convention:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>ext.&lt;client-id&gt;.*
+</code></pre></div>
+<p>Core-owned <code>omnis.*</code> namespaces remain write-protected.</p>
+<h2 id="7-control-structural-access">7. Control structural access<a class="headerlink" href="#7-control-structural-access" title="Permanent link">&para;</a></h2>
+<p>Agent clients get the full typed ControlService, including:
+- materialize;
+- tree transactions;
+- focus/selection;
+- lens/mode;
+- navigation;
+- input submission;
+- Control-node reads.</p>
+<p>This is intentionally more structural access than normal end-user pointer/keyboard gestures expose.
+The agent operates the tree directly and receives resulting Control events from the journal.</p>
+<p>First-party automation MUST NOT use screenshots/synthetic input when the typed Control operation
+exists.</p>
+<h2 id="8-no-external-harness-architecture">8. No external harness architecture<a class="headerlink" href="#8-no-external-harness-architecture" title="Permanent link">&para;</a></h2>
+<p>Omnis core contains no:
+- Claude Code adapter;
+- Codex adapter;
+- OpenCode adapter;
+- DeepSeek Harness adapter;
+- generic PTY coding-harness adapter;
+- harness version pin;
+- harness failover chain;
+- harness-specific model gateway.</p>
+<p>An external agent runtime may itself use any models/providers/harness machinery it wants. From Omnis'
+perspective it is still only a client of the same three surfaces.</p>
+<h2 id="9-dsh-reference-direction">9. DSH reference direction<a class="headerlink" href="#9-dsh-reference-direction" title="Permanent link">&para;</a></h2>
+<p><code>dsh-stack</code> is the reference agent environment and is upgraded independently toward:
+- durable event ingestion from <code>omnis://events/core</code>;
+- DSH-owned memory/cognition/task state;
+- one Omnis integration plugin exposing all MCP/native operations to DSH tools;
+- direct Control-tree mutation;
+- shared NodeId/EventId references;
+- optional publication of cognitive dimensions under an extension namespace.</p>
+<p>DSH/Cordis remains an agent-runtime implementation detail, never an Omnis core dependency.</p>
         </article>
 
         <footer class="footer">
           <span>Omnis</span>
-          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/NIX_OPTIONS_V0.md">Edit this page</a>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/AGENT_ACCESS_V0.md">Edit this page</a>
         </footer>
       </main>
 
       <aside class="toc">
         <div class="toc__title">On this page</div>
         <ul class="toc__list">
-          <li><a href="#1-root">1. Root</a>
+          <li><a href="#1-principle">1. Principle</a>
           </li>
-          <li><a href="#2-graph-and-core-event-journal">2. Graph and core event journal</a>
+          <li><a href="#2-canonical-source-of-truth">2. Canonical source of truth</a>
           </li>
-          <li><a href="#3-os-observation">3. OS observation</a>
+          <li><a href="#3-mcp-projection">3. MCP projection</a>
           </li>
-          <li><a href="#4-manager">4. Manager</a>
+          <li><a href="#4-native-plugin-sdk">4. Native plugin SDK</a>
           </li>
-          <li><a href="#5-agent-access">5. Agent access</a>
+          <li><a href="#5-event-contract">5. Event contract</a>
           </li>
-          <li><a href="#6-control-users">6. Control users</a>
+          <li><a href="#6-agent-owned-state">6. Agent-owned state</a>
           </li>
-          <li><a href="#7-hosts">7. Hosts</a>
+          <li><a href="#7-control-structural-access">7. Control structural access</a>
           </li>
-          <li><a href="#8-security">8. Security</a>
+          <li><a href="#8-no-external-harness-architecture">8. No external harness architecture</a>
           </li>
-          <li><a href="#9-generated-service-dependencies">9. Generated service dependencies</a>
-          </li>
-          <li><a href="#10-invalid-combinations">10. Invalid combinations</a>
+          <li><a href="#9-dsh-reference-direction">9. DSH reference direction</a>
           </li>
         </ul>
       </aside>

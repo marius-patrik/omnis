@@ -112,10 +112,6 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../OMNIS_AGENT/">OmnisAgent</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
          href="../OMNIS_CONTROL/">OmnisControl</a>
     </li>
     <li class="nav__item">
@@ -232,6 +228,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../architecture/decisions/0026-three-core-authorities-external-agents/">ADR-0026 — Keep exactly three core authorities and make every agent an external client</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../architecture/decisions/process/">Process</a>
     </li>
 </ul>
@@ -326,74 +326,60 @@ shape is not a v0 API.</p>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>event_payload_ref
 </code></pre></div>
 <hr />
-<h2 id="3-event-api">3. Event API<a class="headerlink" href="#3-event-api" title="Permanent link">&para;</a></h2>
-<p>Components durably enqueue first-party events through the graph substrate. OmnisAgent has no public
-<code>submitEvent</code> bypass; graphd outbox is the sole first-party durable event ingress:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>outbox.enqueue(EventEnvelope)
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>outbox.enqueue_batch([...])
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>artifact.put(...)
+<h2 id="3-core-event-journal-api">3. Core event journal API<a class="headerlink" href="#3-core-event-journal-api" title="Permanent link">&para;</a></h2>
+<p>Every first-party OS/Manager/Control producer durably appends typed <code>EventEnvelope</code> values through
+graphd. Graph transactions append their events atomically with graph mutations.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>events.read(after_ingest_seq, limit)
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>events.subscribe(after_ingest_seq)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>events.get(event_id)
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>artifact.put/get(...)
 </code></pre></div>
-<p>Graph transactions enqueue their events atomically with graph mutations. OmnisAgent drains the
-outbox into its worldline and then calls <code>outbox.ack(event_id)</code>.</p>
-<p>Agent exposes durable subscriptions/query:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>worldline.tail(filter)
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>worldline.query(filter)
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>worldline.get(event_id)
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>worldline.causes(event_id)
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>worldline.effects(event_id)
-</code></pre></div>
-<p>Enqueue success means graphd durably owns the event for lossless delivery. Delivery to Agent is
-at-least-once and Agent deduplicates EventId. Silent event drop is not valid first-party behavior.</p>
-<hr />
+<p>There is no Agent-specific ingress and no global ACK.</p>
+<p><code>ingest_seq</code> is strictly increasing. Any consumer persists its own cursor and reconnects from that
+sequence. v0 performs no automatic journal deletion, so a newly attached authorized agent can replay
+every core event since initialization.</p>
 <h3 id="31-dense-event-batches">3.1 Dense event batches<a class="headerlink" href="#31-dense-event-batches" title="Permanent link">&para;</a></h3>
-<p>High-rate producers may enqueue an EventEnvelope whose payload is a BLAKE3 artifact containing an
-ordered batch of original events. The batch header carries producer identity, first/last sequence
-and monotonic time range. Each item retains sequence, monotonic timestamp, type and payload.</p>
-<p>Lossless batching is permitted; semantic sampling/drop is not permitted for first-party event
-classes declared lossless.</p>
+<p>High-rate producers use <code>events.capnp::DenseBatch</code> with the exact lossless limits from the core
+decision contract. Each original ordered item retains producer sequence, monotonic timestamp, type
+and typed payload.</p>
 <h3 id="32-event-payload-encoding">3.2 Event payload encoding<a class="headerlink" href="#32-event-payload-encoding" title="Permanent link">&para;</a></h3>
 <p>Every first-party event type in <code>spec/events.toml</code> maps to exactly one union variant in
-<code>protocol/events.capnp::Payload</code>. <code>EventEnvelope.payload</code> is that typed union; arbitrary JSON or
-component-private binary payloads are not valid first-party event encoding.</p>
-<p>Persistent/event-outbox bytes use standard <strong>unpacked Cap'n Proto message serialization</strong> of the full
-EventEnvelope with deterministic field/list ordering supplied by the producer. Worldline stores those
-exact envelope bytes in <code>events.envelope</code> while indexing the identity/type/source/time/revision
-columns separately.</p>
-<p>Dense-batch item <code>payload</code> contains the same unpacked Cap'n Proto serialization of the mapped
-<code>events.capnp::Payload</code> variant for that item's event type.</p>
+<code>protocol/events.capnp::Payload</code>. Arbitrary component-private JSON/binary payloads are invalid.</p>
+<p>Persistent journal bytes use standard unpacked Cap'n Proto serialization of the full EventEnvelope.
+Dense-batch item payload contains the same serialization of the mapped Payload variant.</p>
 <h2 id="4-manager-api">4. Manager API<a class="headerlink" href="#4-manager-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>resource.get/list/search
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>capability.get/list/search
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>binding.get/list
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>binding.declare
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>resource.discover
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>capability.resolve
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>execution.start
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>execution.cancel
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>execution.get
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>placement.explain
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>protected.resolve_handle
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>nix.explain
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>nix.plan_realization
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>resource.get/list/search
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>capability.get/list/search
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>binding.get/list
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>binding.declare
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>resource.discover
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>capability.resolve
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>execution.start
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>execution.cancel
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>execution.get
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>placement.explain
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>protected.resolve_handle
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>nix.explain
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>nix.plan_realization
 </code></pre></div>
 <h3 id="41-resolve-request">4.1 Resolve request<a class="headerlink" href="#41-resolve-request" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ResolveRequest
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  capability
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  inputs/schema refs
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  hard_constraints
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  soft_preferences
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  activity/actor
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  graph_revision
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>ResolveRequest
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  capability
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  inputs/schema refs
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  hard_constraints
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  soft_preferences
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  activity/actor
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  graph_revision
 </code></pre></div>
 <h3 id="42-resolve-result">4.2 Resolve result<a class="headerlink" href="#42-resolve-result" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>ResolveResult
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  candidate_bindings[]
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  selected_binding?
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  rejected_candidates + reasons
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  scoring/policy inputs
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  placement
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  required_authorities
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ResolveResult
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  candidate_bindings[]
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  selected_binding?
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  rejected_candidates + reasons
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  scoring/policy inputs
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  placement
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  required_authorities
 </code></pre></div>
 <p>No selected binding is acceptable when the caller requested discovery-only resolution.</p>
 <hr />
@@ -412,17 +398,17 @@ one unpacked Cap'n Proto <code>NixExplanation</code> artifact. <code>nixPlanReal
 Callers never receive scraped Nix CLI text as structured evidence.</p>
 <h2 id="5-omnisos-api">5. OmnisOS API<a class="headerlink" href="#5-omnisos-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>host.inventory
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>execution_envelope.create/destroy
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>physical_process.launch/get/signal/stop
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>system.evaluate(candidate)
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>system.build(candidate)
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>system.diff(active, candidate)
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>system.activate(generation)
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>system.rollback(generation)
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>system.generation.get/list
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>system.invariant.check
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>protected_handle.inject
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>host.inventory
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>execution_envelope.create/destroy
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>physical_process.launch/get/signal/stop
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>system.evaluate(candidate)
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>system.build(candidate)
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>system.diff(active, candidate)
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>system.activate(generation)
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>system.rollback(generation)
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>system.generation.get/list
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>system.invariant.check
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>protected_handle.inject
 </code></pre></div>
 <p>Persistent mutation uses system candidate/generation APIs. Transient Manager executions use execution
 envelopes without changing system generation unless requested.</p>
@@ -431,47 +417,38 @@ envelopes without changing system generation unless requested.</p>
 <p><code>omnis-managerd</code> never launches a restricted process itself. It sends <code>PhysicalLaunchRequest</code> to
 <code>omnis-osd</code>. osd validates the envelope, starts the transient systemd service and returns either
 pipe or PTY stream capabilities. ExecutionId is preserved across Manager/OS/process graph state.</p>
-<h2 id="6-agent-api">6. Agent API<a class="headerlink" href="#6-agent-api" title="Permanent link">&para;</a></h2>
-<p>Agent is event-driven but exposes explicit operations for Control/CLI/Manager:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>agent.event
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>agent.ask / agent.intend
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>agent.memory.search
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>agent.memory.get
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>agent.memory.remember
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>agent.context.compile
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>agent.activity.get/list
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>agent.worker.get/list
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>agent.workflow.get/list
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>agent.worldline.query
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>agent.explain(identity/event/action)
-</code></pre></div>
-<p>Explicit calls become events and use the same worldline/memory semantics as spontaneous/external
-inputs.</p>
-<hr />
+<h2 id="6-harness-agnostic-agent-projections">6. Harness-agnostic agent projections<a class="headerlink" href="#6-harness-agnostic-agent-projections" title="Permanent link">&para;</a></h2>
+<p>There is no AgentService protocol.</p>
+<p><code>docs/AGENT_ACCESS_V0.md</code> and <code>spec/agent_access.toml</code> project the public GraphService, OsService,
+ManagerService and ControlService APIs into:
+- MCP tools/resources via <code>omnis mcp</code>;
+- native plugin methods via <code>@omnis/agent-access</code>.</p>
+<p>Projection parity is mechanical. A tool/plugin operation cannot invent semantics absent from the
+typed core service methods.</p>
 <h2 id="7-control-api">7. Control API<a class="headerlink" href="#7-control-api" title="Permanent link">&para;</a></h2>
 <p>Control exposes structural operations, not simulated input, for first-party automation:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>control.scene.get/list
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>control.materialize(graph_ids, intent)
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>control.focus(node)
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>control.select(nodes)
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>control.lens.set(lens)
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>control.mode.set(2d|3d)
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>control.layout.apply(...)
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>control.tree.transaction(...)
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>control.native_surface.attach(...)
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>control.navigate(address)
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>control.input.submit(...)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>control.scene.get/list
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>control.materialize(graph_ids, intent)
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>control.focus(node)
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>control.select(nodes)
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>control.lens.set(lens)
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>control.mode.set(2d|3d)
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>control.layout.apply(...)
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>control.tree.transaction(...)
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>control.native_surface.attach(...)
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>control.navigate(address)
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>control.input.submit(...)
 </code></pre></div>
-<p>Every successful structural mutation emits a Control event to Agent.</p>
+<p>Every successful structural mutation appends a Control event to the core journal.</p>
 <hr />
 <h2 id="8-artifact-references">8. Artifact references<a class="headerlink" href="#8-artifact-references" title="Permanent link">&para;</a></h2>
 <p>Large immutable data uses content-addressed artifact references:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>ArtifactRef
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  digest (BLAKE3)
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  length
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>  media_type
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>  protection metadata
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>  optional storage locator
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>ArtifactRef
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  digest (BLAKE3)
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  length
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  media_type
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  protection metadata
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  optional storage locator
 </code></pre></div>
 <p>Artifacts may include files, model output, logs, screenshots, patches, traces, large event payloads,
 and historical snapshots.</p>
@@ -479,13 +456,13 @@ and historical snapshots.</p>
 <hr />
 <h2 id="9-protected-values">9. Protected values<a class="headerlink" href="#9-protected-values" title="Permanent link">&para;</a></h2>
 <p>Protocol values can be marked:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>public
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>local-only
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>agent-visible
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>model-local-only
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>model-external-denied
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>control-hidden
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>execution-handle-only
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>public
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>local-only
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>agent-visible
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>model-local-only
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>model-external-denied
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>control-hidden
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>execution-handle-only
 </code></pre></div>
 <p>Protected secret bytes NEVER appear in ordinary protocol Value/Event/Artifact bodies. Cross-component
 references use opaque HandleId/LeaseId identities; serialization endpoints enforce protection labels
@@ -506,47 +483,46 @@ and reject disallowed disclosure rather than relying on caller redaction.</p>
 <h2 id="11-tracing">11. Tracing<a class="headerlink" href="#11-tracing" title="Permanent link">&para;</a></h2>
 <p>One trace may cross all four components.</p>
 <p>Required correlation chain:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>user/control event
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  -&gt; Agent judgement/intention
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  -&gt; Manager resolution
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  -&gt; OS execution/generation
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>  -&gt; resulting graph changes
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  -&gt; Control update
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>  -&gt; Agent events
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>user/control event
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  -&gt; Agent judgement/intention
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  -&gt; Manager resolution
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>  -&gt; OS execution/generation
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>  -&gt; resulting graph changes
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>  -&gt; Control update
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>  -&gt; Agent events
 </code></pre></div>
 <p>Tracing metadata is operational observability. Causal event IDs remain the semantic history.</p>
 <hr />
 <h2 id="12-failure-semantics">12. Failure semantics<a class="headerlink" href="#12-failure-semantics" title="Permanent link">&para;</a></h2>
 <p>Failures are explicit typed results/events.</p>
 <p>Required distinctions:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>unresolved capability
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>ambiguous binding
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>constraint unsatisfied
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>placement unavailable
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>authority denied
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>protected-value denied
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>build failure
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>activation failure
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>execution failure
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>external effect ambiguous
-<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>protocol incompatible
-<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>graph conflict
-<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>Agent/model unavailable
-<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>Control unavailable
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>unresolved capability
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>ambiguous binding
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>constraint unsatisfied
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>placement unavailable
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>authority denied
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>protected-value denied
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>build failure
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>activation failure
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>execution failure
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>external effect ambiguous
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>protocol incompatible
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>graph conflict
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>Agent/model unavailable
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>Control unavailable
 </code></pre></div>
 <p>A model failure must not imply Manager/OS failure. The machine must retain deterministic operation
 without AI availability.</p>
 <hr />
 <h2 id="13-v0-endpoints-and-handshake">13. v0 endpoints and handshake<a class="headerlink" href="#13-v0-endpoints-and-handshake" title="Permanent link">&para;</a></h2>
 <p>System endpoints:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>/run/omnis/graph.sock
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>/run/omnis/os.sock
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>/run/omnis/manager.sock
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>/run/omnis/nix-control.sock
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>/run/omnis/graph.sock
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>/run/omnis/os.sock
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>/run/omnis/manager.sock
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>/run/omnis/nix-control.sock
 </code></pre></div>
 <p>User endpoints:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>$XDG_RUNTIME_DIR/omnis/agent.sock
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>$XDG_RUNTIME_DIR/omnis/control.sock
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>$XDG_RUNTIME_DIR/omnis/control.sock
 </code></pre></div>
 <p>Each connection negotiates protocol major/minor, component identity, build ID and supported
 interfaces. v0 accepts only protocol 1.0 exactly, per <code>DECISION_COMPLETE_V0.md §72</code>.</p>
@@ -557,12 +533,11 @@ remain small; large payloads travel by ArtifactRef through the graphd CAS.</p>
 <h2 id="14-canonical-schema-ownership">14. Canonical schema ownership<a class="headerlink" href="#14-canonical-schema-ownership" title="Permanent link">&para;</a></h2>
 <p>The umbrella repository owns six schema source files. Implementation repositories consume a pinned
 schema revision and generate bindings during their Nix build:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>protocol/common.capnp
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>protocol/graph.capnp
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>protocol/os.capnp
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>protocol/manager.capnp
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>protocol/agent.capnp
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>protocol/control.capnp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>protocol/common.capnp
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>protocol/graph.capnp
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>protocol/os.capnp
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>protocol/manager.capnp
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>protocol/control.capnp
 </code></pre></div>
 <p><code>common.capnp</code> defines UUIDv7 IDs, ArtifactId, protocol/version handshake, TraceContext, provenance,
 protection labels, typed values and typed errors. Domain schemas import it; they may not redefine
@@ -576,17 +551,18 @@ forbidden.</p>
 <p>Wire fields carrying kind/relation/event/capability names must use the first-party identifiers in
 <code>ONTOLOGY_V0.md</code>. Unknown third-party names are transported opaquely; a component must not invent a
 new <code>omnis.*</code> identifier during implementation.</p>
-<p>Domain state strings for Execution, Worker, Activity, Generation and Memory use the exact state
+<p>Domain state strings for Execution and Generation use the exact state
 machines from <code>ONTOLOGY_V0.md</code>.</p>
 <h2 id="16-canonical-inference-protocol">16. Canonical inference protocol<a class="headerlink" href="#16-canonical-inference-protocol" title="Permanent link">&para;</a></h2>
-<p><code>protocol/inference.capnp</code> is the only first-party model request/result semantic IR. The local
-OpenAI/Anthropic gateway and concrete model/provider adapters translate to/from this schema.</p>
+<p><code>protocol/inference.capnp</code> is the only first-party model request/result semantic IR used when a
+Manager model binding needs structured inference. Concrete model/provider adapters translate to/from
+this schema at the Manager foreign boundary; core exposes no agent-specific inference gateway.</p>
 <p><code>model.generate</code> and <code>model.reason</code> use the <code>InferenceRequestInput</code> /
 <code>InferenceResultOutput</code> capability contracts. Tool/message semantics are not provider-specific
 inside Manager.</p>
-<p>The exact HTTP compatibility subset and unsupported-feature behavior are defined in
-<code>HARNESS_ADAPTERS_V0.md</code>. Provider-specific raw request/response bytes are retained only as
-protected provenance artifacts.</p>
+<p>Provider-specific HTTP compatibility and unsupported-feature behavior belong to the corresponding
+Manager provider binding. Provider-specific raw request/response bytes are retained only as protected
+provenance artifacts when policy permits.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_CONTROL/">
@@ -612,7 +588,7 @@ protected provenance artifacts.</p>
           </li>
           <li><a href="#2-graph-api">2. Graph API</a>
           </li>
-          <li><a href="#3-event-api">3. Event API</a>
+          <li><a href="#3-core-event-journal-api">3. Core event journal API</a>
             <ul>
               <li><a href="#31-dense-event-batches">3.1 Dense event batches</a></li>
               <li><a href="#32-event-payload-encoding">3.2 Event payload encoding</a></li>
@@ -631,7 +607,7 @@ protected provenance artifacts.</p>
               <li><a href="#51-physical-launch-ownership">5.1 Physical launch ownership</a></li>
             </ul>
           </li>
-          <li><a href="#6-agent-api">6. Agent API</a>
+          <li><a href="#6-harness-agnostic-agent-projections">6. Harness-agnostic agent projections</a>
           </li>
           <li><a href="#7-control-api">7. Control API</a>
           </li>
