@@ -1,373 +1,317 @@
-# Omnis v0 Harness Adapters and Inference Gateway
+# Omnis v0 Built-in Coding Harness Adapters
 
-**Status: NORMATIVE.** This document freezes the three built-in external coding-agent adapters and
-the model gateway they use. Implementers do not choose alternate CLI modes, model-routing behavior,
-session transport, inner permission modes, or coverage tiers.
+**Status: NORMATIVE.** This document freezes the built-in Claude Code, Codex, and OpenCode adapter
+behavior. Implementers do not choose alternate flags, invocation modes, output formats, gateway
+routes, permission defaults, or context-injection paths.
 
-The exact release fixtures are:
+The authoritative machine-readable companion is `spec/harnesses.toml`.
 
-| Harness | v0 version | Control surface |
-|---|---:|---|
-| Claude Code | 2.1.289 | print mode + stream-json stdin/stdout |
-| Codex | 0.160.0 (`rust-v0.160.0`) | app-server over stdio JSON-RPC |
-| OpenCode | 1.18.34 | `opencode serve` HTTP + SSE |
+## 1. Shared contract
 
-`spec/harnesses.toml` is the machine-readable adapter manifest.
-`spec/inference_gateway.toml` is the machine-readable gateway contract.
-
-## 1. Common execution contract
-
-Every built-in `omnis.capability.code.agent` binding has one hard dependency on
-`omnis.capability.model.reason`.
-
-Manager resolves the code-agent Binding first, then resolves exactly one reason-model Binding under
-the same Activity authority/privacy/locality constraints. If no reason-model Binding is feasible,
-the built-in harness Binding is infeasible. The harness never chooses a provider.
-
-The selected model binding is locked to the harness Execution for its lifetime and is exposed to the
-harness only as virtual model:
+All built-in harnesses provide:
 
 ```text
-omnis-reason
+omnis.capability.code.agent
 ```
 
-A request authenticated by a harness token that names any other model is rejected.
+They run only through OmnisManager and OmnisOS execution envelopes.
 
-## 2. Execution-scoped gateway authentication
-
-Before launching a built-in harness, Manager generates 32 CSPRNG bytes and serializes:
+Every harness execution receives:
 
 ```text
-omnis1.<base64url-without-padding(random32)>
+OMNIS_EXECUTION_ID=<canonical UUID>
+OMNIS_ACTIVITY_ID=<canonical UUID when attached to an Activity>
+OMNIS_INFERENCE_GATEWAY=http://127.0.0.1:7331
 ```
 
-Only BLAKE3-256(token bytes) is retained in Manager memory. The record contains:
+A 256-bit random per-Execution inference token is created by Manager, injected as a protected
+credential, accepted only by the loopback inference gateway, and destroyed at Execution terminal
+state. It is never stored in graph/worldline/model context.
+
+Logical gateway model ID:
 
 ```text
-ExecutionId
-WorkerId
-ActivityId
-selected model BindingId
-protection/provider constraints
-creation monotonic time
+omnis-code
 ```
 
-The plaintext token is injected only as `OMNIS_GATEWAY_TOKEN` and, when a harness requires it, its
-provider-specific bearer-token variable.
-
-HTTP requests must send:
-
-```http
-Authorization: Bearer <OMNIS_GATEWAY_TOKEN>
-```
-
-There is no persistent gateway-token database. Token lifetime equals Execution lifetime. On terminal
-Execution state it is erased immediately. After managerd restart all old tokens are invalid; live
-harness processes are stopped, restarted with new tokens, and resumed through their recorded foreign
-session/thread identity.
-
-A gateway token is never accepted as an upstream provider credential and never leaves the local
-machine.
-
-## 3. Gateway network envelope
-
-A built-in harness does not receive broad network access merely to reach a model.
-
-Its base network requirement is `loopback-gateway`:
+The gateway interprets this as the semantic requirement:
 
 ```text
-PrivateNetwork=no
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-IPAddressDeny=any
-IPAddressAllow=127.0.0.1
-IPAddressAllow=::1
-cgroup connect eBPF: TCP destination port must equal 7331 for loopback gateway traffic
+capability = omnis.capability.model.reason
+profile = code
 ```
 
-If the coding task requires other network access, Manager unions only the destinations already
-granted by the selected code-agent Binding/Activity. Gateway access never implies public network.
+and resolves the concrete model binding using the normal Manager resolver. Harness configuration
+does not name a concrete model provider.
 
-## 4. Canonical inference path
+Working directory is always the assigned Worktree path.
 
-The inference gateway accepts only the endpoint set in `spec/inference_gateway.toml`.
+Input prompt is exactly the fully expanded `prompts/code_worker.md` artifact.
 
-Every request becomes `protocol/inference.capnp::InferenceRequest`. Model provider adapters consume
-that canonical request and emit `InferenceResult` / `StreamEvent`. Provider-specific request
-translation exists only at the Manager adapter boundary.
+stdout and stderr are captured independently except when a harness explicitly requires a PTY; all
+three built-in non-interactive adapters use pipes, not PTY.
 
-The canonical subset supports:
+Exit code 0 plus a valid terminal structured result is success. Any non-zero exit code, malformed
+structured stream, missing terminal result, gateway authentication failure, or harness-reported
+terminal error is `executionFailure`.
 
-- system/developer/user/assistant messages;
-- text, image ArtifactRef and file ArtifactRef content;
-- tool definitions using UTF-8 JSON Schema artifacts;
-- tool results keyed by call ID;
-- automatic/none/required/specific tool choice;
-- max output tokens;
-- finite temperature/top-p;
-- stop sequences;
-- streaming text/tool-call deltas;
-- final usage and finish reason.
+No adapter interprets model reasoning text as a control protocol.
 
-Unsupported hosted-provider-only features are rejected with `InvalidArgument`; they are never
-silently approximated.
+## 2. Compatibility probe
 
-### 4.1 OpenAI Responses mapping
-
-`POST /v1/responses` maps:
-- `instructions` -> first developer Message;
-- input message items -> Message;
-- function-call-output items -> ToolResult;
-- function/custom function tool definitions -> ToolDefinition;
-- function tool choice -> ToolChoice;
-- `max_output_tokens`, `temperature`, `top_p` -> canonical scalar fields;
-- streaming response events -> canonical StreamEvent -> OpenAI-compatible SSE.
-
-Hosted web/file-search/computer/code-interpreter/image tools are rejected for this local gateway.
-The harness must use its own local tools.
-
-### 4.2 OpenAI Chat Completions mapping
-
-`POST /v1/chat/completions` maps system/developer/user/assistant/tool roles, function tools and
-tool-choice directly to the canonical structures. Unknown top-level request fields are rejected
-except metadata fields explicitly documented as nonsemantic and ignored by the compatibility parser.
-
-### 4.3 Anthropic Messages mapping
-
-`POST /anthropic/v1/messages` maps:
-- top-level `system` -> system Message;
-- user/assistant messages -> Message;
-- `tool_use` -> ToolCall;
-- `tool_result` -> ToolResult;
-- `tools[].input_schema` -> ToolDefinition;
-- `tool_choice` -> ToolChoice;
-- `max_tokens`, `temperature`, `top_p`, `stop_sequences` -> canonical fields.
-
-Known Anthropic cache-control annotations are ignored as nonsemantic cache hints after being retained
-in the protected original-request artifact. Unknown beta features that alter semantics are rejected.
-
-`/anthropic/v1/messages/count_tokens` tokenizes the mapped canonical request using the selected
-model Binding tokenizer when advertised; otherwise it uses the same conservative byte estimator as
-Agent context compilation.
-
-## 5. Context injection
-
-For every model request authenticated by a Worker-attached harness token:
-
-1. gateway parses the request;
-2. stores the protected original request artifact;
-3. asks Agent to compile a ContextCapsule for the Worker and current inference call;
-4. caps injected content at `min(25% input budget, 16384 tokens)`;
-5. excludes material prohibited for the selected concrete provider;
-6. adds stable NodeId/EventId evidence citations;
-7. injects exactly one tagged Omnis context segment;
-8. emits `omnis.event.inference.request`;
-9. invokes the locked reason-model Binding;
-10. streams result and emits response/failure event.
-
-Injection representation:
-- Responses: prepend one developer input message;
-- Chat Completions: prepend one developer message;
-- Anthropic Messages: append one `<omnis-context>...</omnis-context>` block to the system content.
-
-The tag is recognized on future interception and is not re-ingested as new source evidence.
-
-## 6. Coverage contract
-
-Coverage is dimensional:
+At discovery, execute in this order:
 
 ```text
-model_interception
-context_injection
-structured_lifecycle
-structured_tool_events
-session_resume
-permission_control
+<binary> --version
+<binary> --help
+<binary> <noninteractive-subcommand> --help
 ```
 
-A built-in adapter is `full` only when all six are true. Claude Code, Codex and OpenCode are all
-`full` for the pinned v0 versions.
+Each probe uses 2 second timeout, no network, read-only filesystem, and 1 MiB combined output cap.
 
-This supersedes the older rule that `full` necessarily required a native pre-model hook. Gateway
-interception plus the harness's structured control/event surface is sufficient. Native hooks may
-supply additional evidence but are not a correctness dependency.
+The adapter is available only if every exact required token from `spec/harnesses.toml` appears in
+the normalized help text.
 
-## 7. Claude Code 2.1.289
+Normalization for feature detection:
+- UTF-8 decode with replacement;
+- CRLF -> LF;
+- collapse runs of ASCII whitespace to one space;
+- ASCII lowercase;
+- flag token match requires ASCII word/flag boundaries.
 
-Discovery requires executable `claude` and exact parsed version `2.1.289`. Any other version is
-reported as a Resource but this built-in Binding is `incompatible`.
+Version strings are recorded as provenance but **feature compatibility, not major-version guessing,
+is authoritative**. This removes implementer judgment while remaining robust to upstream versioning.
 
-Each Agent Worker turn launches one process in the Worker worktree:
+## 3. Claude Code
+
+Official CLI surfaces used by the adapter are non-interactive print mode, JSON/stream-JSON output,
+system-prompt append, model selection and permission controls. citeturn470322search0turn423183search0
+
+Executable discovery name:
 
 ```text
-claude -p
-  --input-format stream-json
-  --output-format stream-json
-  --verbose
-  --dangerously-skip-permissions
-  --model omnis-reason
-  [--resume <foreign_session_id>]
+claude
 ```
 
-Prompt text never appears in argv. Manager writes one NDJSON user envelope from
-`spec/harnesses.toml` to stdin.
-
-Environment is exact:
+Required feature tokens:
 
 ```text
-OMNIS_GATEWAY_TOKEN=<execution token>
+--print
+--output-format
+stream-json
+--append-system-prompt
+--model
+--permission-mode
+```
+
+Invocation:
+
+```text
+claude   --print   --output-format stream-json   --model omnis-code   --permission-mode bypassPermissions   --append-system-prompt "<Omnis context shim>"   "<expanded code_worker prompt>"
+```
+
+Environment additions:
+
+```text
 ANTHROPIC_BASE_URL=http://127.0.0.1:7331/anthropic
-ANTHROPIC_AUTH_TOKEN=<execution token>
-ANTHROPIC_MODEL=omnis-reason
-DISABLE_AUTOUPDATER=1
+ANTHROPIC_AUTH_TOKEN=<Execution inference token>
+ANTHROPIC_MODEL=omnis-code
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 ```
 
-`ANTHROPIC_API_KEY` is removed from the environment.
+The Omnis execution sandbox, not Claude Code's permission UI, is the physical authority boundary.
+Therefore non-interactive permission prompts are disabled inside the already-constrained Execution.
 
-Output parsing:
-- every non-empty stdout line must be a JSON object or the Execution fails as incompatible output;
-- retain the raw NDJSON as an Execution artifact;
-- first non-empty `session_id` becomes the foreign session alias;
-- `assistant.message.content[].type=tool_use` records a tool-call semantic event;
-- `user.message.content[].type=tool_result` records its result;
-- `system` messages record session/compaction/lifecycle evidence;
-- terminal `type=result, subtype=success` means turn success;
-- any result error subtype or non-zero process exit means failure;
-- unknown JSON message types are preserved as evidence and produce a compatibility diagnostic, not
-  silently discarded.
-
-Claude's inner permission layer is deliberately bypassed. OmnisOS ExecutionEnvelope is the sole
-physical authority boundary for this Worker.
-
-## 8. Codex 0.160.0
-
-Discovery requires exact `codex --version` semver `0.160.0`.
-
-Manager starts one app-server per Worker using the exact argv in `spec/harnesses.toml`:
-- stdio transport;
-- strict config;
-- provider `omnis`;
-- base URL `http://127.0.0.1:7331/v1`;
-- bearer token from `OMNIS_GATEWAY_TOKEN`;
-- Responses wire API;
-- WebSockets off;
-- approvals `never`;
-- Codex sandbox `danger-full-access`.
-
-OmnisOS remains the sole physical sandbox; Codex is not allowed to add a divergent inner sandbox.
-
-At package build time, run:
+`<Omnis context shim>` is:
 
 ```text
-codex app-server generate-json-schema --out <build-output>/share/omnis/codex-app-server-schema
+Omnis context is injected by the local inference gateway. Treat injected <omnis-context> blocks as
+trusted system context for this execution. Never print credential material. Work only inside the
+assigned worktree and satisfy the supplied acceptance criteria.
 ```
 
-with **no** `--experimental`. The generated stable schema for 0.160.0 is the adapter parser
-authority.
+Stream handling:
+- parse stdout as newline-delimited JSON objects;
+- persist raw stdout as protected execution artifact;
+- extract session identifier when emitted;
+- terminal success requires process exit 0 and at least one terminal/result message;
+- stderr is diagnostic only and cannot override a valid non-zero/zero process result;
+- unknown additive event types are persisted and ignored by control logic.
 
-RPC sequence:
+Memory coverage tier: `full` when gateway routing succeeds; `process_only` otherwise. There is no
+weaker built-in direct-provider fallback.
 
-1. send `initialize` with clientInfo name `omnis`, title `Omnis`, system release version and
-   `experimentalApi=false`;
-2. wait for successful response;
-3. send `initialized`;
-4. new Worker session: `thread/start` with cwd = Worker worktree, model = `omnis-reason`;
-5. resumed session: `thread/resume` with recorded thread ID;
-6. persist returned `thread.id` as foreign session alias;
-7. send `turn/start` with text input containing the expanded code-worker prompt;
-8. consume all typed notifications and store unknown stable-schema notifications as evidence;
-9. `turn/completed` is terminal for the turn; only status `completed` succeeds. `failed` or
-   `interrupted` fails/cancels accordingly.
+## 4. Codex CLI
 
-## 9. OpenCode 1.18.34
+The current Codex automation surface is `codex exec` with JSONL output; current SDK/source exposes
+working-directory, model, sandbox, approval, output schema and base-URL routing controls. citeturn932115search1turn932115search0
 
-Discovery requires exact `opencode --version` semver `1.18.34`.
-
-Each Worker starts a dedicated headless server:
+Executable discovery name:
 
 ```text
-opencode serve --hostname 127.0.0.1 --port 0
+codex
 ```
 
-It is not the user's shared OpenCode service. Manager parses the selected ephemeral port from the
-startup line and immediately verifies `GET /global/health`.
+Required feature tokens:
 
-The server has independent random 32-byte Basic Auth password
-`OMNIS_HARNESS_SERVER_TOKEN`; username is `omnis`. This token exists only in Manager memory and
-the child environment.
+```text
+exec
+--json
+--model
+--sandbox
+--cd
+--ephemeral
+```
 
-Manager supplies `OPENCODE_CONFIG_CONTENT` as canonical minified JSON:
+Invocation:
+
+```text
+codex exec   --ephemeral   --json   --model omnis-code   --sandbox danger-full-access   --cd "<worktree>"   "<expanded code_worker prompt>"
+```
+
+Environment additions:
+
+```text
+OPENAI_BASE_URL=http://127.0.0.1:7331/v1
+OPENAI_API_KEY=<Execution inference token>
+CODEX_HOME=<private per-Execution temporary directory>
+```
+
+Rationale for `danger-full-access`: Codex's own sandbox is disabled because OmnisOS has already
+created the stricter cgroup/systemd/filesystem/network execution envelope. Double-sandboxing is not
+an authority boundary and can create false failures.
+
+Stream handling:
+- stdout is JSONL and is the only structured control stream;
+- stderr is always treated as unstructured diagnostics, because current Codex builds can place
+  diagnostic/tool text there; it is never parsed as Codex JSON events. citeturn932115search8
+- `thread.started` records thread identity;
+- terminal `turn.completed` plus exit 0 => success unless a terminal failure event was emitted;
+- terminal `turn.failed`, top-level error, malformed JSONL, or non-zero exit => failure;
+- item-level error records are retained as evidence; they become terminal only when the run also
+  terminates unsuccessfully, because current versions may emit non-fatal item errors. citeturn932115search4
+- do not require reasoning items or complete subagent/tool trajectory from `--json`; current Codex
+  streams may omit them. citeturn932115search5turn932115search6
+- the final assistant message and all raw JSONL are persisted as artifacts.
+
+Memory coverage tier: `gateway`. Codex's gateway-mediated model requests are visible, while the
+adapter does not claim that its JSONL is a complete internal trajectory.
+
+## 5. OpenCode
+
+OpenCode provides `opencode run` for non-interactive automation and JSON event output. Current
+documentation exposes `--format json`, `--model`, `--dir`, `--standalone`, and provider
+base-URL configuration. citeturn828219search2turn531674search1
+
+Executable discovery name:
+
+```text
+opencode
+```
+
+Required feature tokens:
+
+```text
+run
+--format
+json
+--model
+--dir
+--standalone
+```
+
+Invocation:
+
+```text
+opencode run   --standalone   --format json   --model omnis/omnis-code   --dir "<worktree>"   "<expanded code_worker prompt>"
+```
+
+Manager writes one private temporary OpenCode config and points the process to it with the current
+supported config environment discovered by feature fixture. The config semantics are fixed:
 
 ```json
 {
-  "$schema":"https://opencode.ai/config.json",
-  "autoupdate":false,
-  "model":"omnis/omnis-reason",
-  "small_model":"omnis/omnis-reason",
-  "permission":"allow",
-  "provider":{
-    "omnis":{
-      "npm":"@ai-sdk/openai",
-      "name":"Omnis",
-      "options":{
-        "baseURL":"http://127.0.0.1:7331/v1",
-        "apiKey":"{env:OMNIS_GATEWAY_TOKEN}"
+  "providers": {
+    "omnis": {
+      "package": "@opencode/ai/providers/openai-compatible/responses",
+      "settings": {
+        "baseURL": "http://127.0.0.1:7331/v1"
       },
-      "models":{
-        "omnis-reason":{
-          "name":"Omnis Reason",
-          "limit":{
-            "context":<selected_binding_context_window>,
-            "output":<selected_binding_max_output>
-          }
+      "models": {
+        "omnis-code": {
+          "name": "Omnis Code"
         }
       }
     }
-  }
+  },
+  "model": "omnis/omnis-code"
 }
 ```
 
-Also set `OPENCODE_DISABLE_AUTOUPDATE=1` and `OPENCODE_DISABLE_MODELS_FETCH=1`.
+The process receives the inference token through the provider's API-key environment/config
+interpolation mechanism, never as literal config-file bytes. The temporary config directory is mode
+0700 and deleted at Execution completion.
 
-Control sequence:
+OpenCode provider policy denies every provider except `omnis`; this prevents ambient saved
+credentials or catalog providers from bypassing the gateway. Current OpenCode supports provider-use
+policy for this purpose. citeturn531674search4
 
-1. open authenticated `GET /event` SSE stream;
-2. `POST /session` to create a session, or reuse the recorded session ID after process restart if
-   the server instance can resolve it;
-3. persist returned session ID as foreign session alias;
-4. `POST /session/<id>/message` with model
-   `{"providerID":"omnis","modelID":"omnis-reason"}` and one text part containing the expanded
-   code-worker prompt;
-5. consume the synchronous response plus SSE lifecycle/tool/message events;
-6. use `GET /session/status` to reconcile after reconnect;
-7. cancel through `POST /session/<id>/abort`;
-8. collect `GET /session/<id>/diff` at terminal state.
+Stream handling:
+- parse stdout as newline-delimited JSON events;
+- persist raw stream;
+- capture session ID when present;
+- process exit 0 plus a final assistant/result event => success;
+- malformed stream or terminal error/non-zero exit => failure.
 
-OpenCode's permission config is `allow` because OmnisOS is the physical authority boundary.
-Its server binds only loopback and is protected by Basic Auth.
+Memory coverage tier: `gateway`.
 
-On Worker terminal state Manager calls `POST /instance/dispose`, terminates the server process,
-erases both local tokens and records the session/diff artifacts.
+## 6. Context injection
 
-## 10. No direct provider escape
+The expanded `code_worker.md` prompt contains task/project context.
 
-For all three built-ins:
-- remove inherited provider API key/token variables not explicitly required by the adapter;
-- physical network policy allows the inference gateway but not provider endpoints unless an unrelated
-  task capability explicitly grants them;
-- model identity presented to the harness is always `omnis-reason`;
-- the concrete provider/model never enters harness configuration;
-- provider credential bytes never enter harness environment, argv, config, graph or Agent context.
+Cross-run/user memory is additionally injected at **each inference call** by the Manager inference
+gateway under `DECISION_COMPLETE_V0.md §43`.
 
-## 11. Adapter upgrade rule
+This is intentional duplication of scopes, not duplicate authority:
+- worker prompt = stable execution/task contract;
+- gateway capsule = dynamically recalled memory/context for that model invocation.
 
-A different harness version is not "close enough."
+The gateway must not inject the code-worker prompt a second time.
 
-To support it:
-1. update `spec/harnesses.toml`;
-2. update version-specific fixtures/schema snapshots;
-3. run adapter conformance tests;
-4. verify gateway routing, structured events, resume and permission behavior;
-5. change this document in the same commit;
-6. only then mark the new version compatible.
+## 7. Permissions and tool authority
 
-There is no best-effort flag guessing.
+Harness-native permission configuration never grants more than the OmnisOS ExecutionEnvelope.
+
+For coding workers the default envelope is:
+- assigned worktree RW;
+- required Nix/store/tool inputs RO;
+- no HOME visibility except private harness state directory;
+- network denied unless task/binding explicitly requires it;
+- credential handles only when the capability requires them.
+
+A harness asking for an operation outside the envelope receives the ordinary OS denial. The adapter
+does not retry with weaker sandboxing or broader permissions.
+
+## 8. Session persistence
+
+Omnis semantic Worker/Activity identity is authoritative.
+
+Harness-native session state is secondary evidence:
+- Claude session ID, Codex thread ID, OpenCode session ID are stored as foreign aliases/properties;
+- they are reused only when the same Omnis Worker explicitly resumes;
+- a new Worker never resumes "last session";
+- `--continue` / implicit latest-session behavior is never used;
+- deleting harness session files does not delete Omnis Worker/worldline identity.
+
+## 9. Upgrade behavior
+
+At each discovery/start:
+1. record executable BLAKE3 + Nix store path/path;
+2. run compatibility probe if executable identity changed;
+3. if required feature token is absent, mark binding incompatible;
+4. do not guess renamed flags;
+5. do not downgrade to interactive mode;
+6. do not bypass the inference gateway;
+7. emit a resource/binding discovery change event.
+
+A spec/fixture update is required to support a new incompatible upstream interface.
