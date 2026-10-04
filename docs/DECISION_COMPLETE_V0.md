@@ -134,6 +134,8 @@ vte                    terminal parser
 rustix                 PTY/process primitives
 glam                   vectors/matrices/transforms
 petgraph               graph traversal/topology
+taffy                  ControlTree flex/box layout
+lyon                   path tessellation
 accesskit + accesskit_unix
                        custom Control accessibility publication
 image                  image decoding
@@ -1099,6 +1101,15 @@ session when recording is enabled.
 
 Kitty graphics and Sixel are not implemented in v0. Unsupported graphics sequences are ignored
 according to parser behavior and emit one rate-limited diagnostic event per terminal/session/minute.
+
+---
+
+## 23.1 Canonical ControlTree/RenderScene
+
+All first-party Control node schemas, layout semantics, render primitives, coordinate/color rules,
+hit testing, clipping, text/path/native-surface lowering and renderer ownership are frozen by
+`docs/CONTROL_RENDER_V0.md`, `protocol/control_scene.capnp`, and `spec/control_render.toml`.
+Those contracts take precedence over descriptive presentation prose below.
 
 ---
 

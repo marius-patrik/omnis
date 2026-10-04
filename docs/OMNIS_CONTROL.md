@@ -133,70 +133,53 @@ The timeline is not merely a log viewer.
 
 ## 7. Control tree
 
-Control builds `ControlTree` from graph projections.
+The v0 ControlTree is exactly the typed structure in
+[`CONTROL_RENDER_V0.md`](CONTROL_RENDER_V0.md) and `protocol/control_scene.capnp`.
 
-Conceptual node classes:
+First-party node kinds are the closed v0 enum:
 
 ```text
-Container/Layout
-GraphProjection
-Text/Glyph content
-Terminal/PTYShell
-Document/Editor
-Table
-Chart/Plot
-2DGraph
-3DGraph
-Media
-Inspector
-NativeSurface
-InputSurface
-Overlay
+container split scroll graphProjection text terminal document editor
+table chart media inspector nativeSurface inputSurface overlay timeline
 ```
 
-These are presentation constructs, not new domain identities.
+Each Control RPC node carries one typed `ControlNodeState`; arbitrary first-party string kinds and
+untyped property maps are not a v0 surface. A node representing shared semantic state retains that
+NodeId separately from its ControlNodeId.
 
-A control representing a graph object stores that `NodeId` directly.
+Layout uses Taffy under the exact constraints/order in `CONTROL_RENDER_V0.md`.
 
 ---
 
 ## 8. Render scene
 
-Control lowers `ControlTree` to a GPU-oriented scene. Initial primitives may include:
+ControlTree lowers to the private `RenderScene` defined in `control_scene.capnp`:
 
 ```text
-quad
-text/glyph run
-path/vector geometry
-texture/render target
-material/3D layer
-native/delegated surface region
+Group Transform Clip Rect RoundedRect Path GlyphRun Image Mesh NativeSurface
 ```
 
-This scene is private render IR and can be aggressively optimized/rebuilt.
+The schema, coordinates, color encoding, paint/depth order, clipping, hit testing, text shaping, path
+tessellation, native-buffer import and frame boundary are all normative in `CONTROL_RENDER_V0.md`.
 
-It must never become the semantic source of truth.
+RenderScene is disposable lowering and never semantic truth.
 
 ---
 
 ## 9. Renderer implementation
 
-OmnisControl v0 uses:
+OmnisControl v0 uses exactly:
 
-- Smithay for Wayland compositor/DRM/input foundations;
-- wgpu for the GPU renderer;
-- a Rust text shaping/font stack pinned by the component lockfile;
-- XWayland compatibility;
-- platform accessibility publication;
-- direct input handling.
+- Smithay/calloop for Wayland, DRM/KMS and input;
+- wgpu for GPU rendering;
+- Taffy for ControlTree box/flex layout;
+- cosmic-text/fontconfig for shaping and font fallback;
+- Lyon for vector path tessellation;
+- VTE for terminal parsing;
+- AccessKit/AT-SPI for custom accessibility;
+- XWayland for X11 compatibility.
 
-Omnis should not fork a full traditional desktop environment because that would import the wrong
-interaction ontology.
-
-`omnis-control` is implemented directly on Smithay; it does not fork a traditional desktop or a
-second compositor framework.
-
----
+There is one renderer. No GTK/Qt/Electron/Tauri/TUI/browser-engine renderer is introduced.
 
 ## 10. Native applications
 

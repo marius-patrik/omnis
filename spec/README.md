@@ -11,6 +11,7 @@ These files are canonical inputs for generated constants/registries.
 - `harnesses.toml` — exact external coding-harness versions, commands, transports and coverage.
 - `inference_gateway.toml` — local gateway listener/auth/model/network/context constants.
 - `nix_control.toml` — exact evaluator/store control transports, configuration roots, fingerprints and recovery.
+- `control_render.toml` — ControlTree layout, render, clipping, hit-test, text/native-surface and animation constants.
 
 Component repositories pin an umbrella commit and generate language-specific constants from these
 files during Nix builds. They must not copy values into independent handwritten registries.

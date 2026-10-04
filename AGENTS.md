@@ -418,6 +418,7 @@ Do not recreate these contracts inside component repositories:
 - NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`;
 - harness adapter manifest/gateway: `spec/harnesses.toml`, `spec/inference_gateway.toml`, `docs/HARNESS_ADAPTERS_V0.md`;
 - canonical inference semantics: `protocol/inference.capnp`;
-- Nix evaluator/store control, provenance and candidate semantics: `protocol/nix_control.capnp`, `spec/nix_control.toml`, `docs/NIX_CONTROL_V0.md`.
+- Nix evaluator/store control, provenance and candidate semantics: `protocol/nix_control.capnp`, `spec/nix_control.toml`, `docs/NIX_CONTROL_V0.md`;
+- ControlTree/RenderScene schemas and renderer policy: `protocol/control_scene.capnp`, `spec/control_render.toml`, `docs/CONTROL_RENDER_V0.md`.
 
 Component builds pin the umbrella revision and generate/consume these sources.

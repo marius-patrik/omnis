@@ -1,6 +1,7 @@
 @0xf18d5c82b0764a45;
 
 using C = import "common.capnp";
+using S = import "control_scene.capnp";
 
 enum SpatialMode { twoD @0; threeD @1; }
 
@@ -11,28 +12,36 @@ struct ProjectionSpec {
   atRevision @3 :UInt64;
 }
 
-struct ControlProperty {
-  key @0 :Text;
-  value @1 :C.Value;
-}
-
 struct ControlNode {
   id @0 :C.Uuid;
-  kind @1 :Text;
-  represents @2 :C.MaybeUuid;
-  parent @3 :C.MaybeUuid;
-  properties @4 :List(ControlProperty);
+  represents @1 :C.MaybeUuid;
+  parent @2 :C.MaybeUuid;
+  state @3 :S.ControlNodeState;
 }
 
 struct TreeMutation {
   union {
-    create @0 :ControlNode;
+    create @0 :Create;
     remove @1 :C.Uuid;
     reparent @2 :Reparent;
-    setProperties @3 :SetProperties;
+    setState @3 :SetState;
   }
-  struct Reparent { node @0 :C.Uuid; parent @1 :C.MaybeUuid; index @2 :UInt32; }
-  struct SetProperties { node @0 :C.Uuid; properties @1 :List(ControlProperty); }
+
+  struct Create {
+    node @0 :ControlNode;
+    index @1 :UInt32; # > child count means append
+  }
+
+  struct Reparent {
+    node @0 :C.Uuid;
+    parent @1 :C.MaybeUuid;
+    index @2 :UInt32;
+  }
+
+  struct SetState {
+    node @0 :C.Uuid;
+    state @1 :S.ControlNodeState;
+  }
 }
 
 struct TreeTransaction {
@@ -51,4 +60,5 @@ interface ControlService {
   setMode @6 (mode :SpatialMode, trace :C.TraceContext) -> (status :C.RpcStatus);
   navigate @7 (address :Text, trace :C.TraceContext) -> (status :C.RpcStatus);
   submitInput @8 (text :Text, trace :C.TraceContext) -> (status :C.RpcStatus);
+  getNode @9 (node :C.Uuid) -> (status :C.RpcStatus, value :ControlNode);
 }

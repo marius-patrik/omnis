@@ -128,6 +128,7 @@ Implementation specifications:
 - [v0 NixOS option contract](docs/NIX_OPTIONS_V0.md)
 - [Harness adapters + inference gateway](docs/HARNESS_ADAPTERS_V0.md)
 - [Nix control + provenance](docs/NIX_CONTROL_V0.md)
+- [ControlTree + RenderScene](docs/CONTROL_RENDER_V0.md)
 - [Shared graph](docs/GRAPH.md)
 - [OmnisOS](docs/OMNIS_OS.md)
 - [OmnisManager](docs/OMNIS_MANAGER.md)

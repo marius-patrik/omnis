@@ -617,3 +617,40 @@ def test_nix_control_contract_is_typed_and_split():
     assert 'using N = import "nix_control.capnp";' in manager_protocol
     assert "explanation :N.NixExplanation" in manager_protocol
     assert "plan :N.RealizationPlan" in manager_protocol
+
+
+def test_control_render_contract_is_typed():
+    """Control must have one typed tree/render schema rather than property-bag renderer choices."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "control_render.toml"), "rb") as handle:
+        spec = tomllib.load(handle)
+
+    assert spec["control_tree"]["layout_engine"] == "taffy"
+    assert spec["renderer"]["backend"] == "wgpu"
+    assert spec["renderer"]["compositor"] == "smithay"
+    assert spec["renderer"]["path_tessellator"] == "lyon"
+    assert spec["renderer"]["text_shaper"] == "cosmic-text"
+    assert spec["hit_test"]["order_2d"] == "reverse-paint"
+    assert spec["native_surface"]["world_mode"] == "composited-texture"
+
+    scene = _read("protocol", "control_scene.capnp")
+    for token in (
+        "struct ControlNodeState",
+        "enum ControlNodeKind",
+        "struct RenderScene",
+        "struct SceneItem",
+        "struct GlyphRunPrimitive",
+        "struct NativeSurfacePrimitive",
+        "struct TableDataset",
+    ):
+        assert token in scene
+
+    control = _read("protocol", "control.capnp")
+    assert 'using S = import "control_scene.capnp";' in control
+    assert "state @3 :S.ControlNodeState" in control
+    assert "ControlProperty" not in control
+    assert "setProperties" not in control

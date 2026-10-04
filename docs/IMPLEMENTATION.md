@@ -685,37 +685,36 @@ Domains communicate with bounded channels. The render loop never waits for Agent
 
 ### 10.2 Control tree and scene
 
+The complete v0 data model/lowering is `docs/CONTROL_RENDER_V0.md`,
+`protocol/control_scene.capnp`, `protocol/control.capnp`, and `spec/control_render.toml`.
+
 Pipeline:
 
 ```text
 shared graph revision
  -> ProjectionSpec + Lens
- -> ControlTree
- -> layout
- -> RenderScene
- -> wgpu render graph
+ -> typed ControlTree
+ -> Taffy / graph layout
+ -> typed RenderScene
+ -> wgpu
  -> DRM/KMS output
 ```
 
-Persistent Control nodes have graph NodeIds in the presentation namespace. Frame-local GPU objects
-use private integer handles and never become semantic identity.
+ControlTree carries semantic/presentation identity and typed interactive state. RenderScene carries
+private frame/render identity only. The public Control mutation API never exposes an untyped
+first-party property bag.
 
-Render primitives are fixed initially:
+Fixed RenderScene primitive union:
 
 ```text
-Group Rect RoundedRect Path GlyphRun Image Mesh NativeSurface Clip Transform
+Group Transform Clip Rect RoundedRect Path GlyphRun Image Mesh NativeSurface
 ```
 
 ### 10.3 2D and 3D desktop
 
-Both modes consume the same selected graph subgraph and interaction state.
-
-2D provides focus+context node/edge editing, hierarchical and force layouts, ports/actions, inline
-inspectors and arbitrary panels. 3D maps the same nodes/edges into a camera-controlled spatial
-layout and may map selected graph dimensions to axes, depth, clustering and trails.
-
-Toggling mode changes only projection/layout state. Focus, selection, NodeIds, active lens and
-timeline frontier are preserved.
+Both modes use the same ControlTree identity/focus/selection/lens/frontier. Only graph layout,
+camera and scene lowering differ. The exact 2D/3D coordinate, camera, hit-test and NativeSurface
+composition behavior is frozen in `CONTROL_RENDER_V0.md` and `spec/control_render.toml`.
 
 ### 10.4 Wayland and legacy apps
 
