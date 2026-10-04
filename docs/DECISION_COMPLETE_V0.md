@@ -2688,3 +2688,113 @@ with ingest time; outbox `created_at_ns` separately records graphd receipt time.
   preconditions.
 
 A precondition failure returns Conflict and performs no writes.
+
+
+---
+
+## 70. Watched-filesystem observation
+
+Filesystem observation exists only for roots explicitly present in
+`omnis.os.observe.watchedFileScopes` or requested by a live Repository/Workspace binding.
+
+v0 mechanism: Linux inotify.
+
+For each watched root:
+
+1. recursively enumerate directories in raw filename-byte lexical order;
+2. install one inotify watch per directory;
+3. watch create/delete/move/modify/attrib/close-write events;
+4. newly created directories receive a watch before their contents are considered reconciled;
+5. symlinks are observed as directory-entry objects and are not followed to extend watch scope;
+6. stay on the root filesystem device unless the binding explicitly registers another root;
+7. normalize kernel records into exact filesystem identity/path events;
+8. batch using the common dense-event limits: 256 records, 16 ms, or 64 KiB;
+9. preserve every ordered kernel record in the batch; do not replace repeated writes with one event.
+
+On `IN_Q_OVERFLOW`:
+1. publish `omnis.event.os.observation_gap`;
+2. pause semantic assertions from the affected watch stream;
+3. recursively rescan the affected root;
+4. reconcile graph state;
+5. reinstall missing watches;
+6. resume incremental observation.
+
+No fanotify or custom filesystem kernel module is used in v0.
+
+---
+
+## 71. Linux enforcement primitives
+
+v0 uses exactly:
+
+- systemd transient-service mount/device/cgroup/system-call properties from §§53–55;
+- cgroup v2;
+- eBPF for process observation and the constrained network connect filter defined by the Execution
+  envelope;
+- ordinary Unix UID/GID and socket peer credentials.
+
+v0 does **not** add a custom LSM policy, SELinux policy, AppArmor profile, or direct Landlock layer.
+The distribution may retain upstream NixOS/kernel security modules, but Omnis execution semantics do
+not depend on them in v0.
+
+Changing this enforcement stack requires an ADR/spec change.
+
+---
+
+## 72. Protocol handshake
+
+v0 protocol is exactly **1.0**.
+
+Handshake rules:
+
+- request major != 1 => `incompatible`;
+- request minor != 0 => `incompatible`;
+- build IDs are informational and do not affect compatibility;
+- no minor-version optional-operation negotiation exists in v0.
+
+Exact interface strings:
+
+```text
+omnis.graph.v1
+omnis.os.v1
+omnis.manager.v1
+omnis.agent.v1
+omnis.control.v1
+```
+
+Each server advertises only its own interface string in v0.
+
+A client must verify the expected interface is present before making any non-handshake RPC.
+
+---
+
+## 73. Voice input
+
+Voice is a first-party Control input path, but v0 has **no hotword and no passive microphone
+recording**.
+
+Desktop shortcut:
+
+```text
+hold Ctrl+Shift+Space   begin push-to-talk
+release                 end recording and submit
+Esc while held          cancel and discard
+```
+
+Algorithm:
+
+1. resolve default microphone PipeWire resource through Manager;
+2. capture 16-bit signed little-endian PCM, mono, 16 kHz;
+3. store the recording as `audio/L16;rate=16000;channels=1`, protection=`localOnly`;
+4. resolve `omnis.capability.model.audio.transcribe`;
+5. if unavailable, show inline unavailable error and retain no semantic submission;
+6. if available, execute transcription locally/remotely only if the artifact protection permits the
+   selected binding;
+7. submit the returned UTF-8 transcript through the **same** primary-input resolver as typed text;
+8. attach the audio ArtifactId and transcription ExecutionId as provenance to the input event.
+
+Raw voice artifact default retention: 24 hours.
+If transcription fails, retain the artifact 24 hours for diagnostics.
+If user explicitly saves/promotes it, ordinary artifact retention applies.
+
+There is no always-listening voice activity detection in v0.

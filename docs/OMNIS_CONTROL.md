@@ -14,7 +14,7 @@ It replaces the old `OmnisGUI` concept because rendering is only one part of its
 Omnis has a desktop, but the desktop is not an application launcher plus windows. It is an
 interactive projection of the shared multidimensional graph.
 
-Everything visible should either:
+Every first-party visible element MUST either:
 
 - represent one or more shared graph identities; or
 - be ephemeral Control structure required to arrange/interact with those identities.
@@ -214,7 +214,7 @@ texture capture when appropriate
 external browser application surface
 ```
 
-Navigation state and web identities are graph-addressable. Exact URL input should bypass broad Agent
+Navigation state and web identities are graph-addressable. Exact URL input bypasses broad Agent
 reasoning.
 
 ---
@@ -319,7 +319,7 @@ Agent can expand/replay it exactly.
 
 Because Control owns custom rendering, native accessibility trees are mandatory, not optional.
 
-Graph semantics should improve accessibility: a rendered identity already has role, label,
+Graph semantics feed accessibility directly: a rendered identity already has role, label,
 relationships, actions, and provenance that can inform AT-SPI and other platform accessibility
 interfaces.
 

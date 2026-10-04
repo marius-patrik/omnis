@@ -304,7 +304,7 @@ Protocols use explicit semantic versioning.
 Rules:
 
 - additive fields are backward compatible within a major version;
-- unknown optional fields are ignored/preserved where forwarding is required;
+- Cap'n Proto unknown fields are preserved according to generated-library behavior; v0 defines no optional RPC feature negotiation;
 - unknown required capability/field produces explicit incompatibility;
 - identity formats cannot be silently reinterpreted;
 - graph relation names are stable compatibility surface;
@@ -379,7 +379,7 @@ $XDG_RUNTIME_DIR/omnis/control.sock
 ```
 
 Each connection negotiates protocol major/minor, component identity, build ID and supported
-interfaces. Major mismatch rejects the connection; minor versions intersect optional features.
+interfaces. v0 accepts only protocol 1.0 exactly, per `DECISION_COMPLETE_V0.md §72`.
 
 Effectful requests carry RequestId, TraceId, actor NodeId, causal EventIds, authority scope, deadline
 and an idempotency key when retry is legal. Execution creation is idempotent on ExecutionId.
@@ -406,8 +406,7 @@ protection labels, typed values and typed errors. Domain schemas import it; they
 identity or error envelopes.
 
 Cap'n Proto field ordinals are append-only. Removed fields are reserved rather than reused. Every
-service interface exposes a `getCapabilities`/handshake feature set so minor-version peers can
-negotiate optional operations without guessing.
+service interface exposes the common handshake and the exact v1 interface string; v0 has no minor-version optional-operation negotiation.
 
 Graph subscriptions resume from GraphRevision. Event delivery resumes from EventId/ingest sequence.
 Streaming APIs must expose backpressure and explicit cancellation; unbounded producer queues are

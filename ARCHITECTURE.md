@@ -680,7 +680,7 @@ identities. The render scene is an optimized lowering, never a semantic source o
 
 User interaction and Agent structural control share the same underlying state.
 
-The user primarily manipulates materialized controls through pointer/keyboard/touch/voice. The Agent
+The user primarily manipulates materialized controls through pointer, keyboard, touch, and explicit push-to-talk voice input. The Agent
 has direct structural access and may:
 
 - create/remove/replace/move views;

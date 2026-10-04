@@ -24,7 +24,7 @@ ordinary downstream NixOS module, especially:
 - Manager/Control/Agent core subsystem composition;
 - event-producing lifecycle integration.
 
-Ordinary packages should remain upstream nixpkgs packages wherever possible.
+Ordinary packages remain upstream nixpkgs packages unless an Omnis-specific patch/package definition is required by a normative contract or failing acceptance test.
 
 ---
 
@@ -184,7 +184,7 @@ The Linux implementation composes existing primitives instead of inventing paral
 - cgroup v2;
 - namespaces;
 - seccomp;
-- LSM/Landlock/eBPF where appropriate;
+- eBPF only for the frozen process-observation and constrained-network filters; no Omnis-specific LSM/Landlock layer in v0;
 - Unix credentials/capabilities;
 - container/VM runtimes when stronger isolation is required.
 
@@ -226,7 +226,7 @@ OS publishes file metadata/events sufficient for Agent/Manager to connect files 
 - artifacts;
 - Control views.
 
-High-volume filesystem observation should be normalized/coalesced at suitable boundaries while
+High-volume watched-filesystem observation uses the exact inotify batching/reconciliation contract in `DECISION_COMPLETE_V0.md §70` while
 retaining enough causal evidence for Agent reconstruction.
 
 ---

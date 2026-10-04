@@ -161,7 +161,7 @@ A context capsule may contain:
 - privacy/disclosure constraints;
 - token/latency budgets.
 
-The compiler should initially include the cheapest sufficient abstraction and retain references that
+The context compiler uses the exact retrieval/budget/allocation order in `DECISION_COMPLETE_V0.md §§18–19` and retains references that
 allow workers to expand details explicitly.
 
 ---
@@ -305,10 +305,10 @@ repeated episodes
   -> durable procedure/skill
 ```
 
-Repeated expensive model-mediated behavior should preferentially compile toward cheaper structured
+Repeated successful model-mediated behavior is eligible for deterministic Procedure induction exactly under `ONTOLOGY_V0.md §12` and `LEARNING_V0.md`; successful eligible traces compile toward cheaper structured
 or deterministic capabilities when possible.
 
-Learning may update retrieval utility, routing estimates, worker selection, competence estimates, or
+`LEARNING_V0.md` defines the only v0 adaptive updates: retrieval utility, binding routing estimates, competence estimates, scoped preferences, Procedure induction, and
 procedural knowledge without rewriting historical events.
 
 ---
@@ -341,7 +341,7 @@ Agent has direct structural capability over presentation state, including:
 - opening delegated native surfaces;
 - selecting 2D/3D representations.
 
-Agent should not resort to screenshot-based clicking for first-party Control content.
+Agent MUST NOT use screenshot-based clicking for first-party Control content when the typed Control API can express the action.
 
 ---
 
