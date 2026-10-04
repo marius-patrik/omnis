@@ -298,19 +298,35 @@ def test_active_specs_forbid_implementer_choice_markers():
         "docs/DECISION_COMPLETE_V0.md",
         "AGENTS.md",
     )
-    forbidden = (
-        "IMPLEMENTER MAY CHOOSE",
-        "IMPLEMENTATION AGENT MAY CHOOSE",
-        "CHOOSE WHICHEVER",
-        "IMPLEMENTATION-SPECIFIC UNTIL",
-        "PICK ANY EQUIVALENT",
-        "USE WHICHEVER",
+    delegation = re.compile(
+        r"\\b(?:the\\s+)?(?:implementer|implementation agent|coding agent|worker)"
+        r"\\s+(?:may|can|should)\\s+(?:choose|select|decide|pick)\\b",
+        re.IGNORECASE,
     )
-    for document in documents:
-        content = _read(*document.split("/")).upper()
-        for marker in forbidden:
-            assert marker not in content, f"{document} contains delegated-choice marker {marker!r}"
+    imperative = re.compile(
+        r"\\b(?:choose whichever|pick any equivalent|use whichever|implementation-specific until)\\b",
+        re.IGNORECASE,
+    )
+    negative_guard = re.compile(
+        r"\\b(?:must not|do not|does not|cannot|can't|forbid(?:den)?|reject|invalid|no\\s+"
+        r"(?:implementation )?(?:agent|worker|implementer))\\b",
+        re.IGNORECASE,
+    )
 
+    for document in documents:
+        in_fence = False
+        for lineno, line in enumerate(_read(*document.split("/")).splitlines(), 1):
+            if line.lstrip().startswith("~~~") or line.lstrip().startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence or negative_guard.search(line):
+                continue
+            assert not delegation.search(line), (
+                f"{document}:{lineno} positively delegates a design decision: {line.strip()!r}"
+            )
+            assert not imperative.search(line), (
+                f"{document}:{lineno} positively delegates a design decision: {line.strip()!r}"
+            )
 
 def test_canonical_v0_source_contracts():
     """Decision-complete implementation inputs must be checked in and addressable."""
