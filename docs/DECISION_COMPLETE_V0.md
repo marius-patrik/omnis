@@ -374,7 +374,18 @@ Mark roots:
 
 - current graph ArtifactRefs;
 - unexpired historical graph refs retained by backup policy;
+- **every ArtifactRef reachable from every retained core EventEnvelope**, including EventArtifact
+  entries and typed payload fields;
 - active Nix candidate metadata.
+
+Graphd extracts event ArtifactRefs transactionally when an event is appended and records them in
+`artifact_refs` with `owner_kind = "event"`, `owner_id = EventId` and the event-declared role.
+Typed payload ArtifactRefs that are not present in `EventEnvelope.artifacts` are added with canonical
+role `payload`. Event append fails atomically if referenced CAS metadata does not exist unless the
+reference explicitly names a non-local/foreign artifact type.
+
+Because core event rows are never automatically deleted in v0, their artifact roots are likewise
+never removed by ordinary CAS GC.
 
 Unmarked objects receive a tombstone timestamp; deletion occurs only on the next GC >=7 days later.
 

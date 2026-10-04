@@ -412,7 +412,7 @@ Do not recreate these contracts inside component repositories:
 
 - database DDL: `schema/*.sql`;
 - cross-component wire schemas: `protocol/*.capnp`;
-- Agent prompts: `prompts/*.md`;
+- external-agent access parity: `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`;
 - first-party ontology/event/state names: `docs/ONTOLOGY_V0.md`;
 - NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`;
 - agent-access parity: `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`;
