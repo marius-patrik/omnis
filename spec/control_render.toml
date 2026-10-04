@@ -1,0 +1,102 @@
+version = 1
+
+[control_tree]
+layout_engine = "taffy"
+layout_units = "logical-px"
+root_origin = "top-left"
+x_direction = "right"
+y_direction = "down"
+default_opacity = 1.0
+default_z_index = 0
+max_depth = 256
+
+[control_tree.split]
+default_ratio = 0.5
+min_ratio = 0.1
+max_ratio = 0.9
+
+[scene]
+coordinate_matrix = "column-major"
+color_encoding = "linear-srgb-premultiplied"
+theme_input_encoding = "srgb"
+layers = ["world", "ui", "overlay"]
+sibling_order = "z-index-ascending-then-control-child-index"
+paint_order = "depth-first-preorder"
+world_coordinates = "right-handed"
+world_x = "right"
+world_y = "up"
+world_z = "toward-viewer"
+camera_looks = "-z"
+
+[renderer]
+backend = "wgpu"
+compositor = "smithay"
+path_tessellator = "lyon"
+text_shaper = "cosmic-text"
+preferred_formats = ["Bgra8UnormSrgb", "Rgba8UnormSrgb"]
+premultiplied_blend_src = "One"
+premultiplied_blend_dst = "OneMinusSrcAlpha"
+world_depth_format = "Depth32Float"
+world_depth_compare = "LessEqual"
+ui_depth_test = false
+mesh_front_face = "Ccw"
+mesh_cull_mode = "Back"
+max_frames_in_flight = 3
+msaa_preferred = 4
+msaa_fallback = 1
+
+[clip]
+axis_aligned = "gpu-scissor"
+non_axis_or_rounded = "r8unorm-mask"
+max_live_mask_depth = 8
+overflow_behavior = "flatten-accumulated-mask"
+
+[hit_test]
+order_2d = "reverse-paint"
+path_fill_rule = "nonzero"
+path_stroke_slop_px = 3.0
+image_uses_alpha = false
+glyph_uses_bounds = true
+mesh = "nearest-ray-triangle"
+tie = "later-paint-order"
+disabled_nodes_hittable = false
+hidden_nodes_hittable = false
+
+[native_surface]
+composition = "import-client-buffer-into-wgpu"
+direct_scanout = "fullscreen-single-native-surface-no-overlay-identity-output-transform-smithay-eligible"
+input_coordinates = "inverse-scene-transform-to-client-local"
+world_mode = "composited-texture"
+client_side_decorations = "preserve"
+
+[text]
+ui_body_px = 14.0
+ui_small_px = 12.0
+ui_heading_px = 18.0
+terminal_px = 14.0
+graph_label_px = 13.0
+graph_metadata_px = 11.0
+ui_line_height = 1.35
+terminal_line_height = 1.20
+font_resolution = "fontconfig-cosmic-text"
+font_identity = "blake3-font-bytes-plus-face-index"
+
+[animation]
+duration_ms = 180
+easing = "cubic-bezier(0.2,0,0,1)"
+reduced_motion_duration_ms = 0
+default_animated_properties = ["position", "size", "opacity", "camera"]
+spring_physics = false
+
+[data]
+table_media_type = "application/vnd.omnis.table.v1+capnp"
+chart_source = "same-table-dataset"
+max_inline_rows = 200
+chart_downsample_threshold = 10000
+chart_downsample_to = 5000
+chart_downsample_algorithm = "LTTB"
+
+[accessibility]
+backend = "accesskit-atspi"
+focused_node_required = true
+native_surface_delegates_subtree = true
