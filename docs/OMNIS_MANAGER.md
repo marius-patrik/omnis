@@ -6,7 +6,7 @@ OmnisManager is the resource, capability, binding, execution, and placement auth
 is implemented as a maintained fork/extension of `NixOS/nix` plus the Rust `omnis-managerd` service.
 
 Nix remains a package/build/store system. OmnisManager extends its reach so the same machine can
-reason uniformly about packages, programs, models, agent harnesses, services, devices, remote hosts,
+reason uniformly about packages, programs, models, services, devices, remote hosts,
 and arbitrary foreign capabilities.
 
 ---
@@ -49,7 +49,6 @@ device
 model artifact
 inference engine
 model provider binding
-agent harness
 MCP server/client
 repository/workspace
 credential handle
@@ -232,32 +231,15 @@ The system may revisit older resources when better tooling/models become availab
 
 ---
 
-## 9. External agent harnesses
+## 9. Agent-runtime neutrality
 
-Agent harnesses are ordinary Resources/Bindings for `omnis.capability.code.agent`.
+Manager does not launch, adapt, pin, supervise or route external agent runtimes.
 
-The three built-in v0 adapters are frozen by
-[`HARNESS_ADAPTERS_V0.md`](HARNESS_ADAPTERS_V0.md) and `spec/harnesses.toml`:
+Agents call Manager as ordinary clients through the core typed API, MCP projection, or native plugin
+SDK. Manager may expose model/inference resources, but an agent is free to ignore them and use its own
+model stack.
 
-```text
-Claude Code 2.1.289
-Codex 0.160.0
-OpenCode 1.18.34
-```
-
-Each built-in `code.agent` Binding has one hard `model.reason` dependency. Manager resolves that
-dependency before launch and presents only virtual model `omnis-reason` to the foreign harness.
-Every model request is forced through Manager's execution-scoped local inference gateway; raw provider
-credentials never enter the harness.
-
-Harness-specific session/protocol state is foreign realization metadata attached to the Omnis Worker
-and Execution. OmnisAgent still reasons only in semantic capabilities, Worker/Activity identities and
-events.
-
-Coverage is the exact six-dimensional contract in `HARNESS_ADAPTERS_V0.md`; all three pinned
-built-ins are `full`. A different installed version is discoverable as a Resource but its built-in
-Binding is `incompatible` until its fixture/spec is updated.
-
+There is no `code.agent` provider class in core v0.
 
 ## 10. Inference engines and models
 
@@ -392,12 +374,11 @@ omnis manager resolve
 omnis manager execute
 omnis manager placement explain
 omnis manager model list/status
-omnis manager harness list/status
 omnis manager protected list
 omnis manager nix explain
 ```
 
-CLI, Agent, Control, and MCP projections must call the same underlying Manager operations.
+CLI, Control, MCP, and plugin projections must call the same underlying Manager operations.
 
 ---
 
@@ -407,7 +388,6 @@ Manager does not:
 
 - own Agent memory/cognition;
 - become another package language;
-- reimplement existing agent harnesses;
 - reimplement model inference engines;
 - replace Nix derivation semantics with learned resolution;
 - own OS-level enforcement;
@@ -457,13 +437,12 @@ ONNX Runtime classifiers/embeddings
 Claude Code
 Codex
 OpenCode
-generic PTY agent harness
 container runtime
 SSH generic remote host
 native Omnis QUIC remote host
 ```
 
-Provider-specific configuration is Manager state/Nix configuration. OmnisAgent asks only for
+Provider-specific configuration is Manager state/Nix configuration. External clients ask only for
 semantic capabilities such as `model.embed` or `code.agent`.
 
 ## 19. v0 protected-handle realization

@@ -439,14 +439,14 @@ A client can subscribe to:
 
 Subscriptions deliver revision-ordered changes.
 
-Control uses subscriptions to update projections. Agent receives the normalized event stream and
-does not need a separate observe call to know what changed.
+Control uses subscriptions to update projections. Any authorized agent client consumes the normalized
+core event journal and does not need a separate observe/screenshot loop.
 
 ---
 
-## 13. Event handoff
+## 13. Core event journal
 
-Every committed graph transaction yields an Agent event containing at least:
+Every committed graph transaction yields a core event containing at least:
 
 ```text
 transaction id
@@ -461,7 +461,7 @@ payload/artifact references where needed
 ```
 
 Subsystem-specific lifecycle/input events that do not correspond to graph mutation are durably
-enqueued through graphd's outbox. Dense event classes may use lossless batch artifacts, but Agent can
+enqueued through graphd's outbox. Dense event classes may use lossless batch artifacts, but any consumer can
 recover every original ordered item without observing the scene.
 
 No first-party component silently mutates durable state without producing an event.
@@ -479,7 +479,7 @@ SQLite WAL + synchronous=FULL
 + revision validity intervals
 + relation/alias indexes
 + graph transaction metadata
-+ durable event outbox
++ append-only core event journal
 + filesystem BLAKE3 CAS for large payloads
 ```
 
@@ -495,8 +495,8 @@ Rationale:
 The protocol must permit later replacement with a distributed implementation without changing graph
 identity or relation semantics.
 
-Vector indexes, search indexes, spatial indexes, and Agent memory indexes are derived accelerators
-outside the graph's canonical state.
+Vector/search/spatial indexes and external-agent memory indexes are derived accelerators outside the
+graph's canonical state.
 
 ---
 
@@ -521,22 +521,14 @@ Ephemeral layout-only nodes use Control-local identity and must not masquerade a
 
 ---
 
-## 16. Agent relationship
+## 16. External-agent relationship
 
-Agent memory may point directly to graph nodes:
+External agents consume graph identities and the core event journal through MCP or the native plugin
+SDK. Agent-owned memory/cognition remains outside core, but it may reference stable NodeIds/EventIds.
 
-```text
-Memory:m1 --cognitive.about--> Repository:r1
-```
-
-Agent memory MUST NOT duplicate an authoritative current operational fact solely as a second source
-of current truth. Derived memories may explain, generalize, predict, associate, or preserve
-historical meaning while linking to the authoritative graph identity.
-
-Agent context compilation may query the graph at a specific revision/frontier and include stable node
-references rather than copied descriptions.
-
----
+An authorized native plugin may publish selected cognitive state into a granted `ext.<client-id>.*`
+namespace. It cannot write core-owned `omnis.*` namespaces except through the owning typed service
+operation.
 
 ## 17. Manager relationship
 
@@ -577,10 +569,10 @@ identity remains the cross-system reference point.
 4. Namespace ownership is enforced.
 5. Provenance is retained when available.
 6. Current graph state is not historical truth.
-7. Agent worldline is not replaced by graph transaction WAL.
+7. External-agent memory/worldlines are not replaced by graph transaction WAL.
 8. Control render state is not graph truth.
 9. Derived indexes are disposable.
-10. Every committed first-party graph mutation emits an Agent event.
+10. Every committed first-party graph mutation appends a core journal event.
 ---
 
 ## 20. v0 storage and delivery binding
@@ -600,8 +592,8 @@ connections, validity intervals for revision reads, and schema migrations owned 
 
 The graph database also contains the durable event outbox. A graph transaction commits graph
 mutations and its normalized event envelopes atomically. Non-graph first-party producers enqueue
-events through graphd before considering publication durable. OmnisAgent drains the outbox into its
-worldline and acknowledges EventId; delivery is at-least-once and deduplicated by EventId.
+events through graphd before considering publication durable. Consumers replay by monotonically
+increasing ingest_seq and maintain independent cursors; there is no global ACK.
 
 Large payloads use the BLAKE3 CAS rather than SQLite/RPC blobs. The graph stores ArtifactId references
 plus media/protection/provenance metadata.

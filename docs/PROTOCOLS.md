@@ -65,57 +65,37 @@ event_payload_ref
 
 ---
 
-## 3. Event API
+## 3. Core event journal API
 
-Components durably enqueue first-party events through the graph substrate. OmnisAgent has no public
-`submitEvent` bypass; graphd outbox is the sole first-party durable event ingress:
-
-```text
-outbox.enqueue(EventEnvelope)
-outbox.enqueue_batch([...])
-artifact.put(...)
-```
-
-Graph transactions enqueue their events atomically with graph mutations. OmnisAgent drains the
-outbox into its worldline and then calls `outbox.ack(event_id)`.
-
-Agent exposes durable subscriptions/query:
+Every first-party OS/Manager/Control producer durably appends typed `EventEnvelope` values through
+graphd. Graph transactions append their events atomically with graph mutations.
 
 ```text
-worldline.tail(filter)
-worldline.query(filter)
-worldline.get(event_id)
-worldline.causes(event_id)
-worldline.effects(event_id)
+events.read(after_ingest_seq, limit)
+events.subscribe(after_ingest_seq)
+events.get(event_id)
+artifact.put/get(...)
 ```
 
-Enqueue success means graphd durably owns the event for lossless delivery. Delivery to Agent is
-at-least-once and Agent deduplicates EventId. Silent event drop is not valid first-party behavior.
+There is no Agent-specific ingress and no global ACK.
 
----
+`ingest_seq` is strictly increasing. Any consumer persists its own cursor and reconnects from that
+sequence. v0 performs no automatic journal deletion, so a newly attached authorized agent can replay
+every core event since initialization.
 
 ### 3.1 Dense event batches
 
-High-rate producers may enqueue an EventEnvelope whose payload is a BLAKE3 artifact containing an
-ordered batch of original events. The batch header carries producer identity, first/last sequence
-and monotonic time range. Each item retains sequence, monotonic timestamp, type and payload.
-
-Lossless batching is permitted; semantic sampling/drop is not permitted for first-party event
-classes declared lossless.
+High-rate producers use `events.capnp::DenseBatch` with the exact lossless limits from the core
+decision contract. Each original ordered item retains producer sequence, monotonic timestamp, type
+and typed payload.
 
 ### 3.2 Event payload encoding
 
 Every first-party event type in `spec/events.toml` maps to exactly one union variant in
-`protocol/events.capnp::Payload`. `EventEnvelope.payload` is that typed union; arbitrary JSON or
-component-private binary payloads are not valid first-party event encoding.
+`protocol/events.capnp::Payload`. Arbitrary component-private JSON/binary payloads are invalid.
 
-Persistent/event-outbox bytes use standard **unpacked Cap'n Proto message serialization** of the full
-EventEnvelope with deterministic field/list ordering supplied by the producer. Worldline stores those
-exact envelope bytes in `events.envelope` while indexing the identity/type/source/time/revision
-columns separately.
-
-Dense-batch item `payload` contains the same unpacked Cap'n Proto serialization of the mapped
-`events.capnp::Payload` variant for that item's event type.
+Persistent journal bytes use standard unpacked Cap'n Proto serialization of the full EventEnvelope.
+Dense-batch item payload contains the same serialization of the mapped Payload variant.
 
 ## 4. Manager API
 
@@ -213,28 +193,17 @@ envelopes without changing system generation unless requested.
 `omnis-osd`. osd validates the envelope, starts the transient systemd service and returns either
 pipe or PTY stream capabilities. ExecutionId is preserved across Manager/OS/process graph state.
 
-## 6. Agent API
+## 6. Harness-agnostic agent projections
 
-Agent is event-driven but exposes explicit operations for Control/CLI/Manager:
+There is no AgentService protocol.
 
-```text
-agent.event
-agent.ask / agent.intend
-agent.memory.search
-agent.memory.get
-agent.memory.remember
-agent.context.compile
-agent.activity.get/list
-agent.worker.get/list
-agent.workflow.get/list
-agent.worldline.query
-agent.explain(identity/event/action)
-```
+`docs/AGENT_ACCESS_V0.md` and `spec/agent_access.toml` project the public GraphService, OsService,
+ManagerService and ControlService APIs into:
+- MCP tools/resources via `omnis mcp`;
+- native plugin methods via `@omnis/agent-access`.
 
-Explicit calls become events and use the same worldline/memory semantics as spontaneous/external
-inputs.
-
----
+Projection parity is mechanical. A tool/plugin operation cannot invent semantics absent from the
+typed core service methods.
 
 ## 7. Control API
 
@@ -254,7 +223,7 @@ control.navigate(address)
 control.input.submit(...)
 ```
 
-Every successful structural mutation emits a Control event to Agent.
+Every successful structural mutation appends a Control event to the core journal.
 
 ---
 
@@ -375,7 +344,6 @@ System endpoints:
 User endpoints:
 
 ```text
-$XDG_RUNTIME_DIR/omnis/agent.sock
 $XDG_RUNTIME_DIR/omnis/control.sock
 ```
 
@@ -398,7 +366,6 @@ protocol/common.capnp
 protocol/graph.capnp
 protocol/os.capnp
 protocol/manager.capnp
-protocol/agent.capnp
 protocol/control.capnp
 ```
 
@@ -420,7 +387,7 @@ Wire fields carrying kind/relation/event/capability names must use the first-par
 `ONTOLOGY_V0.md`. Unknown third-party names are transported opaquely; a component must not invent a
 new `omnis.*` identifier during implementation.
 
-Domain state strings for Execution, Worker, Activity, Generation and Memory use the exact state
+Domain state strings for Execution and Generation use the exact state
 machines from `ONTOLOGY_V0.md`.
 
 

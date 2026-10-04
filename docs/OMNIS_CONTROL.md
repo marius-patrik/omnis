@@ -113,15 +113,15 @@ Collapsed clusters retain stable identity where they correspond to meaningful gr
 
 ---
 
-## 6. Timeline/worldline
+## 6. Timeline/core event journal
 
-Control exposes OmnisAgent's causal worldline as a first-class navigation dimension.
+Control exposes the core event journal as a first-class navigation dimension. An external agent may add its own private/cognitive timeline separately.
 
 Timeline interaction must support:
 
 - chronological browsing;
 - causal branches;
-- worker/activity lanes;
+- external-client/execution lanes;
 - speculative/self-evolution branches;
 - selecting a historical event/frontier;
 - reconstructing available graph/memory projections for that frontier where retained data permits;
@@ -254,7 +254,7 @@ The resolver uses deterministic parsing before classification/LLM reasoning.
 
 ---
 
-## 14. User and Agent authority
+## 14. User and external-agent authority
 
 User and Agent interact with the same Control state but through different affordances.
 
@@ -313,7 +313,7 @@ lifecycle events are emitted directly with stable ordering metadata.
 
 Pointer-motion and other dense streams may be grouped into short lossless batches before durable
 enqueue. Each original item retains producer sequence and monotonic timestamp inside the batch;
-Agent can expand/replay it exactly.
+Any event consumer can expand/replay it exactly.
 
 ## 16. Accessibility
 
@@ -341,7 +341,7 @@ Persistent Control state includes only useful user/system intent such as:
 
 Incidental render/layout cache state remains ephemeral.
 
-Agent may propose/persist useful workspace arrangements through the same Control state APIs.
+Authorized external agents may propose/persist useful workspace arrangements through the same Control state APIs.
 
 ---
 

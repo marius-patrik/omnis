@@ -105,7 +105,7 @@ Generation
 ```
 
 Generation metadata must not require embedding model output into Nix derivations. Model reasoning is
-stored as external Agent/graph provenance; Nix receives deterministic configuration inputs.
+stored as external-client/graph provenance; Nix receives deterministic configuration inputs.
 
 ---
 
@@ -153,7 +153,7 @@ Assertions over current physical state which may require ongoing enforcement/mon
 Examples:
 
 - execution remains inside cgroup resource limits;
-- worker cannot access filesystem outside mounts;
+- execution cannot access filesystem outside mounts;
 - network scope remains restricted;
 - credential handle remains unavailable outside execution scope.
 
@@ -255,7 +255,6 @@ On reboot:
 2. identify active Nix generation;
 3. republish/reconcile physical state;
 4. start Manager;
-5. start Agent and replay/restore Agent worldline state;
 6. start Control;
 7. emit reconciliation events for differences between expected and observed state.
 
@@ -280,6 +279,8 @@ Native surface/compositor prerequisites
 The exact wire protocol is defined in `PROTOCOLS.md`.
 
 ---
+
+Agent runtimes are not started, supervised or recovered by OmnisOS. They attach as ordinary clients.
 
 ## 13. Non-goals
 

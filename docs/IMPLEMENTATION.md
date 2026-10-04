@@ -3,13 +3,13 @@
 **Status: NORMATIVE SUPPORTING SPECIFICATION.** `ARCHITECTURE.md` defines semantic architecture;
 this document freezes the first implementation profile. `DECISION_COMPLETE_V0.md` freezes all v0
 algorithms, constants, defaults and fallback behavior. `ONTOLOGY_V0.md` freezes semantic names/state
-machines and `NIX_OPTIONS_V0.md` freezes the public NixOS option surface. `HARNESS_ADAPTERS_V0.md`
-freezes built-in coding-harness integration. A mechanism changes only through an explicit
+machines, `NIX_OPTIONS_V0.md` freezes the public NixOS option surface, and `AGENT_ACCESS_V0.md`
+freezes harness-agnostic external-agent access. A mechanism changes only through an explicit
 architecture/ADR change.
 
 ## 1. Implementation profile
 
-Omnis v0 is a Linux/NixOS system with four product authorities and one non-semantic shared substrate.
+Omnis v0 is a Linux/NixOS system with exactly three product authorities and one shared graph/event substrate.
 
 | Area | v0 choice |
 |---|---|
@@ -22,9 +22,6 @@ Omnis v0 is a Linux/NixOS system with four product authorities and one non-seman
 | Semantic/event IDs | UUIDv7, 128-bit binary on wire |
 | Immutable artifact IDs | BLAKE3-256 |
 | Graph store | SQLite, WAL mode, single serialized writer |
-| Agent worldline | SQLite, WAL mode, append-only event tables |
-| Lexical retrieval | SQLite FTS5 |
-| Vector retrieval | pinned `sqlite-vec` index, derived/non-canonical |
 | Artifact storage | filesystem BLAKE3 CAS |
 | Service supervision | systemd |
 | Linux compositor | Smithay |
@@ -57,9 +54,6 @@ marius-patrik/omnis-manager
   + dedicated Omnis control socket in nix-daemon
   + Rust omnis-managerd service
 
-marius-patrik/omnis-agent
-  Rust workspace implementing worldline, memory/indexing, context, cognition and workers
-
 marius-patrik/omnis-control
   Rust workspace implementing compositor, graph desktop, shell, rendering and interaction
 ```
@@ -89,15 +83,6 @@ omnis-manager/omnis/
   managerd/inference        local protocol gateway + canonical inference translation
   nix-observer/             C++ observer/control additions to upstream Nix
 
-omnis-agent/
-  crates/agentd             binary/event loop
-  crates/worldline          append/replay storage
-  crates/memory             cognitive graph writes + retrieval indexes
-  crates/context            ContextCapsule compiler
-  crates/cognition          judgement/candidate/budget pipeline
-  crates/workers            durable worker/activity engine
-  crates/replay             deterministic replay/evaluation tooling
-
 omnis-control/
   crates/control            compositor binary
   crates/projection         graph -> ControlTree
@@ -109,7 +94,9 @@ omnis-control/
 
 omnis/
   protocol/                 canonical Cap'n Proto schemas
-  cli/                      thin `omnis` RPC client
+  spec/agent_access.toml    MCP/plugin parity registry
+  cli/                      thin `omnis` RPC client + `omnis mcp`
+  packages/agent-access/    generated typed plugin client
   tests/                    cross-component protocol/NixOS VM tests
 ```
 
@@ -124,13 +111,11 @@ database writes:
 omnis graph ...
 omnis system ...
 omnis manager ...
-omnis agent ...
 omnis control ...
 omnis trace ...
 ```
 
-Each command calls the owning RPC. OmnisControl and OmnisAgent use the same operations through typed
-protocol clients.
+Each command calls the owning RPC. OmnisControl uses typed protocol clients; external agents receive projections of the same operations through MCP or the generated plugin client.
 
 ## 3. Runtime process topology
 
@@ -155,13 +140,11 @@ Each interactive Omnis user gets:
 
 ```text
 systemd --user
- ├─ omnis-agentd              # persistent personal cognitive subsystem
  └─ omnis-control             # Wayland compositor / graph desktop session
 ```
 
-Agent and Control start independently after the user session exists. Neither is required for the
-other to display a deterministic shell or for the machine to boot. If Agent is unavailable, Control
-continues with exact shell, graph, Manager and OS operations.
+Control starts after the user session exists and requires no agent process. External agents may start,
+stop, reconnect or be absent without affecting the deterministic shell, graph, Manager or OS.
 
 ### 3.3 Socket locations
 
@@ -170,7 +153,6 @@ continues with exact shell, graph, Manager and OS operations.
 /run/omnis/os.sock
 /run/omnis/manager.sock
 /run/omnis/nix-control.sock
-$XDG_RUNTIME_DIR/omnis/agent.sock
 $XDG_RUNTIME_DIR/omnis/control.sock
 ```
 
@@ -185,7 +167,7 @@ lowercase hyphenated text when rendered.
 Distinct Rust newtypes are mandatory even though the binary shape is identical:
 
 ```text
-NodeId EdgeId EventId ActivityId ExecutionId WorkerId TransactionId TraceId GenerationId
+NodeId EdgeId EventId ExecutionId TransactionId TraceId GenerationId
 ```
 
 IDs are never derived from PID, pathname, Nix store path, window ID, provider name or host address.
@@ -258,14 +240,14 @@ edges(
 edge_properties(...)
 provenance(...)
 transactions(...)
-outbox_events(...)
+event_log(...)
 artifact_refs(...)
 schema_migrations(...)
 ```
 
 Current-state queries select rows whose `valid_to_revision IS NULL`. Historical revision reads use
 the validity interval. The graph is therefore revision-addressable without treating its internal
-transaction history as the Agent worldline.
+transaction history as cognition or agent memory.
 
 ### 5.4 Transactions
 
@@ -289,18 +271,17 @@ EnqueueEvent
 There is no embedded Cypher/SPARQL language in v0. Queries use typed selectors, traversals and
 projections from the protocol schema.
 
-### 5.5 Event outbox
+### 5.5 Core event journal
 
-Every graph commit inserts its emitted Event envelopes into `outbox_events` in the same SQLite
-transaction. Non-graph first-party producers also call `EventOutbox.enqueue` on graphd before
-reporting a durable transition complete.
+Every graph commit inserts emitted Event envelopes into `event_log` in the same SQLite transaction.
+Non-graph first-party producers call graphd `enqueueEvent` before reporting a durable transition
+complete.
 
-Agent drains the outbox in order, writes each event to its worldline, then acknowledges EventId.
-Delivery is at-least-once. Agent deduplicates by EventId. An event is deleted from the outbox only
-after durable Agent acknowledgement.
+`ingest_seq` is monotonically increasing. Any number of consumers can replay from an arbitrary
+sequence and then subscribe live. Consumers persist their own cursor; graphd has no global ACK.
 
-This mechanism is the reliability bridge for the requirement that Agent receives every meaningful
-first-party event even when Agent is temporarily down.
+v0 performs no automatic event-journal deletion. Event envelopes and event-referenced artifacts remain
+available so an independently installed agent can replay every core event since initialization.
 
 ### 5.6 Artifact CAS
 
@@ -312,18 +293,17 @@ Large immutable payloads are never copied into graph properties or RPC messages.
 ```
 
 Writes go to a temporary file, fsync, verify BLAKE3, then atomic rename. Metadata records media type,
-length, protection class and creator. Garbage collection traces references from graph/worldline
+length, protection class and creator. Garbage collection traces references from graph/event-journal
 roots before deleting an unreferenced object.
 
 ### 5.7 High-rate event streams
 
-Agent never discovers first-party events by inspecting rendered state. Key/button/touch/scroll/focus
+External agents never need to discover first-party events by inspecting rendered state. Key/button/touch/scroll/focus
 and lifecycle events are emitted directly. Dense ordered streams such as pointer motion, audio timing
 or fine telemetry may be losslessly batched for I/O efficiency.
 
 A batch artifact contains each original item with producer sequence, monotonic timestamp, event type
-and payload. The enclosing EventEnvelope carries the batch ArtifactId and sequence range. Agent can
-replay every original item; batching is not semantic sampling or loss.
+and payload. The enclosing EventEnvelope carries the batch ArtifactId and sequence range. Any event consumer can replay every original item; batching is not semantic sampling or loss.
 
 ## 6. Protocol and IPC
 
@@ -333,10 +313,9 @@ Canonical schemas live in `protocol/*.capnp` in the umbrella repository:
 
 ```text
 common.capnp     IDs, values, provenance, errors, traces
-graph.capnp      graph query/transaction/subscription/outbox/CAS
+graph.capnp      graph query/transaction/subscription/event-journal/CAS
 os.capnp         hosts, system generations, enforcement, observation
 manager.capnp    resource/capability/binding/resolution/execution
-agent.capnp      event/worldline/memory/context/activity/worker
 control.capnp    projections, tree mutations, focus/input/navigation
 ```
 
@@ -502,7 +481,7 @@ placement      host/device/runtime selection
 executor       launch/cancel/wait/retry/reconcile
 nix_bridge     dedicated Nix control-socket client
 secrets        protected-handle broker
-adapters       CLI/API/MCP/model/harness binding providers
+adapters       CLI/API/MCP/model/native binding providers
 ```
 
 ### 8.4 Execution
@@ -526,7 +505,7 @@ hard constraint filter
  -> authority/credential availability
  -> locality/privacy filter
  -> runtime/hardware feasibility
- -> explicit user/Agent preferences
+ -> explicit caller preferences
  -> cost/latency/quality score
  -> stable tie-break by BindingId
 ```
@@ -551,124 +530,40 @@ OpenAI-compatible model API
 Anthropic model API
 llama.cpp server/local GGUF
 ONNX Runtime classifier/embedding
-Claude Code
-Codex
-OpenCode
-generic PTY harness
 container runtime
 SSH/remote Omnis host
 ```
 
-## 9. OmnisAgent implementation
+## 9. Harness-agnostic agent-access implementation
 
-### 9.1 State
+Core ships no agent daemon.
 
-Per-user canonical/derived files live under `$XDG_STATE_HOME/omnis/agent/`:
-
-```text
-worldline.sqlite3     canonical immutable event history
-index.sqlite3         rebuildable FTS/vector/retrieval indexes
-checkpoints/          durable worker/activity continuation artifacts
-```
-
-Cognitive current-state objects such as assertions, goals, procedures and memories are canonical
-writes to the Agent-owned dimension of the shared graph. `index.sqlite3` is disposable.
-
-### 9.2 Worldline schema
+Two projections are built from `spec/agent_access.toml`:
 
 ```text
-events(
-  id BLOB(16) PRIMARY KEY,
-  ingest_seq INTEGER UNIQUE,
-  type TEXT, schema_major INTEGER, schema_minor INTEGER,
-  source BLOB(16), actor BLOB(16),
-  observed_wall_ns INTEGER, observed_monotonic_ns INTEGER,
-  graph_revision INTEGER NULL, trace_id BLOB(16),
-  payload_artifact BLOB(32) NULL, inline_payload BLOB NULL
-)
-event_causes(event_id, parent_event_id)
-event_entities(event_id, node_id, role)
-event_artifacts(event_id, artifact_id, role)
+omnis mcp
+  stdio MCP server
+  -> graph/os/manager/control typed clients
+
+@omnis/agent-access
+  generated TypeScript client
+  -> graph/os/manager/control typed clients
 ```
 
-Worldline tables are append-only except administrative migration metadata. Agent ACKs graphd outbox
-only after the event transaction is durably committed.
+The generator introspects the public Cap'n Proto service methods and fails CI if any non-handshake
+public method is missing from MCP or plugin projection.
 
-### 9.3 Event pipeline
+`omnis mcp` opens no network listener. It runs as the invoking user and carries the same Unix
+credential/authority context as the CLI.
 
-Every accepted event runs through:
+Event access uses graphd's append-only journal:
+- replay from `after_ingest_seq`;
+- strictly increasing sequence delivery;
+- live subscription after catch-up;
+- no global ACK;
+- no semantic sampling.
 
-```text
-ingest/deduplicate
- -> deterministic reducers
- -> salience + domain classification
- -> memory activation/retrieval
- -> candidate intention generation (always includes null)
- -> feasibility/Pareto filtering
- -> budget allocation
- -> zero or more worker activations
- -> effects/observations
- -> resulting events
-```
-
-No stage requires a generative model when an exact operation is sufficient.
-
-### 9.4 Model capabilities
-
-Agent requests model semantics from Manager using:
-
-```text
-model.classify
-model.embed
-model.rerank
-model.generate
-model.reason
-model.vision
-model.audio.transcribe
-agent.code
-```
-
-The registry records provider, model identity/version, context limits, modalities, latency, cost,
-privacy/locality and hardware requirements. Model outputs always record the binding that produced
-them.
-
-### 9.5 Memory indexing
-
-FTS5 indexes normalized text from graph memories/events. Vector embeddings are stored in pinned
-`sqlite-vec` virtual tables keyed by NodeId/EventId and embedding-model identity. Because
-`sqlite-vec` is pre-v1 and vector indexes are inherently derived, all vector state is rebuildable
-from graph/worldline data.
-
-Changing embedding model creates a new index namespace rather than rewriting provenance.
-
-### 9.6 Context compiler
-
-A worker receives a `ContextCapsule` with:
-
-```text
-trigger event + causal ancestors
-goal/activity state
-selected graph neighborhood
-retrieved episodic/semantic/procedural memory
-relevant artifacts/code
-previous attempts + negative evidence
-tool/capability descriptors
-authority/protection constraints
-token/byte/time budget
-```
-
-Selection uses deterministic mandatory items first, then lexical/vector/rerank scores. Protected
-items are filtered before model serialization. The final capsule and source references are persisted
-for reproducibility.
-
-### 9.7 Workers
-
-A worker is a durable Agent activation, not a provider session. State includes WorkerId, ActivityId,
-trigger events, context capsule, requested capabilities, budget, status and checkpoint ArtifactId.
-
-External coding-agent CLIs are Manager executions attached to a WorkerId. Native hooks are preferred;
-PTY/process output is the fallback. Every tool/model/harness result returns through the event
-outbox/worldline.
+Agent runtime state, memory, model/provider sessions, tasks and cognition are not stored by core.
 
 ## 10. OmnisControl implementation
 
@@ -679,10 +574,10 @@ outbox/worldline.
 ```text
 main compositor thread   Smithay/calloop, Wayland objects, seats, input, surface lifecycle
 render thread            wgpu Device/Queue, render graph, frame pacing
-Tokio runtime            graph/Agent/Manager RPC, PTYs, browser protocols, background I/O
+Tokio runtime            graph/OS/Manager RPC, PTYs, browser protocols, background I/O
 ```
 
-Domains communicate with bounded channels. The render loop never waits for Agent/model work.
+Domains communicate with bounded channels. The render loop never waits for any external agent/model work.
 
 ### 10.2 Control tree and scene
 
@@ -748,7 +643,7 @@ structured browser interfaces when available (CDP, WebDriver BiDi, accessibility
 materializes browser surfaces like any other NativeSurface while semantic browser state is published
 into the graph.
 
-### 10.7 Agent structural control
+### 10.7 External-agent structural control
 
 Agent calls typed Control operations directly:
 
@@ -773,9 +668,9 @@ reserved for opaque third-party surfaces/testing.
 ### 11.1 Service privilege
 
 `omnis-graphd`, `omnis-osd` and `omnis-managerd` run under dedicated system identities with only the
-Linux capabilities/filesystem access they require. Agent and Control run as the logged-in user.
+Linux capabilities/filesystem access they require. Control runs as the logged-in user. Agent clients are ordinary caller processes.
 
-Manager creates more restricted execution scopes by default; workers do not inherit managerd/root
+Manager creates more restricted execution scopes by default; external clients do not inherit managerd/root
 authority.
 
 ### 11.2 Credentials
@@ -785,7 +680,7 @@ sealing when configured. The graph stores only a protected HandleId and metadata
 
 At execution time Manager materializes a secret into a private credential file/sealed memory handle
 or environment variable only when the target interface requires that form. Secret bytes are never
-placed in graph properties, worldline payloads, model context or logs.
+placed in graph properties, event payloads, MCP/plugin payloads or logs.
 
 ### 11.3 Authorization
 
@@ -799,29 +694,27 @@ Every subscription/RPC stream is bounded. Producers never drop durable semantic 
 
 Rules:
 
-- graph outbox is durable and may grow while Agent is unavailable;
+- the core event journal is durable and append-only regardless of connected consumers;
 - telemetry producers coalesce declared high-rate metric classes before enqueue;
 - Control input/render queues drop obsolete intermediate frames, never input commits;
-- worker/model concurrency is budgeted by Agent and executed under Manager resource limits;
 - overload state itself is published as graph/event state.
 
 ## 13. Crash recovery
 
 ### graphd
-SQLite WAL recovers atomic graph/outbox transactions. On integrity failure, boot recovery follows
+SQLite WAL recovers atomic graph/event-journal transactions. On integrity failure, boot recovery follows
 `DECISION_COMPLETE_V0.md §28` exactly: restore the newest valid graph backup, reconcile OS physical
-state, reconcile Manager executions, reconnect Agent outbox/worldline, and record any recovery gap.
-Agent-derived cognitive state is rebuilt only from its own worldline/index recovery path; graphd does
-not synthesize cognition.
+state, reconcile Manager executions, verify event-journal continuity, and record any recovery gap.
 
 ### Manager
 On restart, osd enumerates `omnis-exec-*.service` units and physical processes, republishes their
 state, and managerd reconciles semantic Executions by ExecutionId. Manager never reconstructs
 physical truth directly from systemd.
 
-### Agent
-On restart, Agent resumes outbox drain after the last acknowledged EventId/sequence, rebuilds derived
-indexes as required, and resumes durable workers from checkpoints. Duplicate events are harmless.
+### External agents
+
+No external agent is part of core crash recovery. A client reconnects using its own persisted
+`ingest_seq` cursor and replays the core event journal.
 
 ### Control
 Control reconstructs its tree from presentation graph state and current native surfaces. GPU caches
@@ -837,11 +730,11 @@ major incompatibility prevents connection; minor versions negotiate the common f
 
 ## 15. Observability
 
-All components use one TraceId across graph, event, Manager, Nix, Agent and Control operations.
+All components use one TraceId across graph, event, Manager, Nix and Control operations.
 Rust services use `tracing`; C++ Nix patches emit matching trace fields. Logs go to journald.
 
 Operational logs/metrics are not the semantic worldline. Any operational transition that matters to
-future cognition is separately emitted as an Event.
+future consumers is separately emitted as an Event.
 
 ## 16. Build and packaging
 
@@ -852,7 +745,6 @@ authority. The umbrella integration flake pins exact component revisions and pro
 packages.<system>.omnis-graphd
 packages.<system>.omnis-osd
 packages.<system>.omnis-managerd
-packages.<system>.omnis-agent
 packages.<system>.omnis-control
 nixosModules.omnis
 nixosConfigurations.<test machines>
@@ -865,40 +757,39 @@ Release identity records the umbrella commit plus exact Nix/nixpkgs/component re
 Required test layers:
 
 ```text
-unit/property        graph mutations, resolver, context selection, layouts
+unit/property        graph mutations, resolver, agent-access parity, layouts
 schema/golden        Cap'n Proto compatibility and canonical value encodings
 fuzz                 protocol decoders, graph transactions, foreign adapter parsing
 integration          real service processes over Unix sockets
 NixOS VM             boot, generations, rollback, system observation, execution isolation
 Wayland              compositor protocol + XWayland/native surface lifecycle
-Agent replay         worldline replay produces stable deterministic reductions
-end-to-end           user input -> Agent/Manager/OS effect -> graph/event -> Control update
+end-to-end           user/MCP/plugin action -> Manager/OS effect -> graph/event -> Control update
 ```
 
 Foundational acceptance scenario:
 
 1. Boot an OmnisOS VM.
-2. Log into OmnisControl with Agent intentionally disabled; run a real shell command.
-3. Start Agent and verify it drains queued first-party events exactly once semantically.
-4. Ask to install/enable a package/service permanently.
-5. Manager produces candidate NixOS generation and semantic/closure diff.
-6. Activate it and observe process/service graph changes.
-7. Launch an unmodified Wayland application and see its NativeSurface graph node.
-8. Toggle the same workspace between 2D and 3D without losing selection/identity.
-9. Restart Agent, Manager and Control independently and recover state.
-10. Roll back the NixOS generation and observe the causal/resulting graph changes.
+2. Log into OmnisControl with no agent installed; run a real shell command.
+3. Start `omnis mcp`, replay the core journal from sequence 0 and verify all prior events are present.
+4. Mutate Control structurally through MCP and verify the same operation exists through the plugin client.
+5. Install/enable a package/service permanently through Manager/OS APIs.
+6. Manager produces candidate NixOS generation and semantic/closure diff.
+7. Activate it and observe process/service graph changes.
+8. Launch an unmodified Wayland application and see its NativeSurface graph node.
+9. Toggle the same workspace between 2D and 3D without losing selection/identity.
+10. Restart Manager and Control, reconnect from the saved event cursor, and roll back the generation.
 
 ## 18. Performance invariants
 
 These are engineering constraints, not benchmark promises:
 
-- Control frame production must never wait synchronously on Agent or a remote model.
+- Control frame production must never wait synchronously on an external agent or remote model.
 - graph reads and subscriptions are usable while the serialized writer is busy;
 - durable event enqueue must remain bounded by local storage, not model latency;
 - no model call occurs in boot, Nix evaluation, Nix build scheduling, compositor frame or Linux
   enforcement critical paths;
 - bulk payloads above the protocol inline threshold use the CAS;
-- high-rate telemetry is normalized/coalesced before entering cognitive event flow.
+- high-rate telemetry is losslessly batched before entering the core event journal.
 
 ## 19. Replaceability boundaries
 
@@ -906,16 +797,14 @@ The following v0 mechanisms are intentionally replaceable without changing seman
 
 ```text
 SQLite graph storage
-SQLite worldline storage
-sqlite-vec derived vector index
 QUIC remote transport
 Smithay/wgpu renderer internals
-specific model/harness providers
+specific model providers
 OmnisOS transient-service executor
 ```
 
-The stable boundaries are IDs, graph semantics, worldline semantics, capability/binding/execution
-model, protocol schemas/versioning, authority boundaries and Control structural API.
+The stable boundaries are IDs, graph/event-journal semantics, capability/binding/execution model,
+protocol schemas/versioning, authority boundaries, agent-access parity and Control structural API.
 
 ## 20. Definition of implementation-ready
 
@@ -933,7 +822,7 @@ without inventing architecture:
 - which integration test proves the contract.
 
 This document supplies those answers for the v0 substrate. Future ADRs refine behavior; they must not
-silently create parallel identity, event, configuration, rendering or cognition systems.
+silently create parallel identity, event, configuration or rendering systems.
 
 
 ## 21. No implementation-design discretion
@@ -946,31 +835,16 @@ layout, routing rule or security policy on their own.
 
 ## 22. Canonical generated/runtime inputs
 
-Database creation/migration v1 begins from the checked-in SQL sources:
+Database creation/migration v1 begins from:
 
 ```text
 schema/graph.sql
-schema/worldline.sql
-schema/index.sql
 ```
 
-Cross-process wire code is generated from `protocol/*.capnp`, including canonical inference and Nix-control IRs.
-Harness adapters consume `spec/harnesses.toml` and `spec/inference_gateway.toml`. Agent generative calls use
-`prompts/*.md`. First-party graph identifiers come from `ONTOLOGY_V0.md`. NixOS modules implement
-`NIX_OPTIONS_V0.md` exactly.
+Cross-process wire code is generated from `protocol/*.capnp`.
+Agent projections are generated/verified from `spec/agent_access.toml`.
+First-party graph identifiers come from `ONTOLOGY_V0.md`.
+NixOS modules implement `NIX_OPTIONS_V0.md` exactly.
 
-These files eliminate local schema/prompt/ontology/config design inside component repos.
+These files eliminate local schema/ontology/config/projection design inside component repositories.
 
-
-## 24. Learning and self-optimization inputs
-
-ROADMAP Phase 10 consumes:
-
-```text
-docs/LEARNING_V0.md
-spec/learning.toml
-```
-
-Derived learning counters/statistics are rebuildable. Implementations do not substitute alternate
-smoothing, decay, competence thresholds, procedure induction rules, replay sampling, or promotion
-metrics.

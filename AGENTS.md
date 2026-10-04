@@ -25,7 +25,7 @@ zero errors — and deploy automatically to GitHub Pages.
 
 ### 3. Architecture Conformance
 `ARCHITECTURE.md` is the normative system architecture. Supporting specifications in `docs/` refine
-the graph, OmnisOS, OmnisManager, OmnisAgent, OmnisControl, and cross-component protocols.
+the graph, OmnisOS, OmnisManager, OmnisControl, agent-access projections, and cross-component protocols.
 `notes/transcript.md` and superseded ADRs are historical source material only. Any implementation
 change that alters a normative architecture contract requires an ADR/architecture update first.
 
@@ -169,7 +169,7 @@ An autonomous AI agent runs containerized in GitHub Actions (`docker/Dockerfile.
   the checkpoint.
 
 ### 15. Conventional Commits & Repository Taxonomy Enforcement
-Repository area labels are delivery metadata retained for the current automation. They do not define Omnis product authority boundaries; architecture ownership is OmnisOS / OmnisManager / OmnisAgent / OmnisControl plus the shared graph substrate.
+Repository area labels are delivery metadata retained for the current automation. They do not define Omnis product authority boundaries; architecture ownership is exactly OmnisOS / OmnisManager / OmnisControl plus the shared graph/event substrate.
 
 - **Format**: `<type>(<scope>): <description>` (e.g. `feat(term): add cell matrix buffer`).
 - **Allowed Types**: `feat`, `fix` (mapped from `bug`), `chore`, `docs`, `refactor`, `test`, `ci`.
@@ -177,9 +177,9 @@ Repository area labels are delivery metadata retained for the current automation
   - `area:core`: OmnisOS, OmnisManager, shared graph/protocol substrate, boot, generations, and cross-component integration.
   - `area:ui`: OmnisControl graph desktop, 2D/3D projections, rendering, interaction, layout, and native surfaces.
   - `area:term`: OmnisControl shell, PTY, terminal/text projections, and cell-grid compatibility.
-  - `area:agents`: OmnisAgent cognition plus Manager-provided models, inference, and external agent-harness bindings.
+  - `area:agents`: external-agent access projections, MCP/plugin parity, and reference-agent integration work; cognition itself lives outside core.
   - `area:browser`: OmnisControl web/navigation projections and browser protocol/native bindings.
-  - `area:data`: Shared graph, OmnisAgent worldline/memory, artifacts, persistence, and indexes.
+  - `area:data`: shared graph, core event journal, artifacts, persistence, and indexes.
   - `area:ext`: OmnisManager foreign capabilities, arbitrary bindings, MCP, and protocol integration.
   - `area:ci`: GitHub Actions workflows, containers, runner scripts, repository automation.
   - `area:docs`: Documentation, ProperDocs configuration, architecture notes.
@@ -203,14 +203,13 @@ them requires an architecture/ADR change first.
 
 Historical ADRs before the architecture reset are source material only where superseded.
 
-### A2. Preserve the four authorities
+### A2. Preserve the three core authorities
 
 Do not move responsibilities across product boundaries casually:
 
 ```text
 OmnisOS      physical/system authority
 OmnisManager resource/capability/binding authority
-OmnisAgent   event/memory/cognitive authority
 OmnisControl interaction/presentation authority
 ```
 
@@ -237,7 +236,7 @@ Graph core must enforce this rule; do not rely only on review convention.
 
 ### A5. Every meaningful transition becomes an event
 
-First-party components must not make durable/meaningful state transitions invisible to OmnisAgent.
+First-party components must not make durable/meaningful state transitions invisible to the shared core event journal.
 
 Do not add polling as the primary integration path when the producer can emit the event directly.
 
@@ -286,12 +285,11 @@ Do not route every runtime action through Nix generations.
 
 Use a generation for persistent structural system state. Use Manager execution for transient work.
 
-### A10. Agent is not an LLM loop
+### A10. Agent runtime is external
 
-Do not introduce a universal `while ask_model` executive loop.
-
-Cognition is event-driven. Models are Manager resources used by workers. Worker outputs re-enter the
-worldline as events.
+Do not implement cognition, memory, worker orchestration or external coding-harness adapters inside
+the three core services. Agents are clients of OS/Manager/Control/graph through the frozen MCP/plugin
+projection. The reference agent lives in `dsh-stack`, outside the core release dependency graph.
 
 ### A11. Control is not a conventional GUI
 
@@ -303,7 +301,7 @@ through Control primitives.
 
 2D and 3D must preserve the same identities/focus/selection/lens/frontier.
 
-### A12. Agent gets structural Control access
+### A12. External agents get structural Control access
 
 If a first-party Control operation can only be performed by synthetic mouse/keyboard input, the API
 is incomplete unless the operation is inherently physical input testing.
@@ -417,8 +415,8 @@ Do not recreate these contracts inside component repositories:
 - Agent prompts: `prompts/*.md`;
 - first-party ontology/event/state names: `docs/ONTOLOGY_V0.md`;
 - NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`;
-- harness adapter manifest/gateway: `spec/harnesses.toml`, `spec/inference_gateway.toml`, `docs/HARNESS_ADAPTERS_V0.md`;
-- canonical inference semantics: `protocol/inference.capnp`;
+- agent-access parity: `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`;
+- canonical generic inference semantics: `protocol/inference.capnp`;
 - Nix evaluator/store control, provenance and candidate semantics: `protocol/nix_control.capnp`, `spec/nix_control.toml`, `docs/NIX_CONTROL_V0.md`;
 - ControlTree/RenderScene schemas and renderer policy: `protocol/control_scene.capnp`, `spec/control_render.toml`, `docs/CONTROL_RENDER_V0.md`.
 
