@@ -1,0 +1,587 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OmnisControl v0 ControlTree and RenderScene Contract · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omniscontrol-v0-controltree-and-renderscene-contract">OmnisControl v0 ControlTree and RenderScene Contract<a class="headerlink" href="#omniscontrol-v0-controltree-and-renderscene-contract" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> This document freezes the presentation data model and one-renderer lowering.
+Implementation agents do not choose a widget toolkit, layout engine, scene primitive model, coordinate
+system, paint order, clipping strategy, text shaper, path tessellator, hit-test algorithm or native
+surface composition path.</p>
+<p>Canonical sources:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>protocol/control_scene.capnp
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>protocol/control.capnp
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>spec/control_render.toml
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>theme/omnis-dark.json
+</code></pre></div>
+<h2 id="1-one-presentation-tree">1. One presentation tree<a class="headerlink" href="#1-one-presentation-tree" title="Permanent link">&para;</a></h2>
+<p>The persistent/interactive presentation structure is the ControlTree. First-party nodes use the
+closed v0 <code>ControlNodeKind</code> enum from <code>control_scene.capnp</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>container
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>split
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>scroll
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>graphProjection
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>text
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>terminal
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>document
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>editor
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>table
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>chart
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>media
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>inspector
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>nativeSurface
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>inputSurface
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>overlay
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>timeline
+</code></pre></div>
+<p>A node can represent a shared semantic graph NodeId, but its presentation identity is a ControlNodeId.
+No first-party v0 code creates ad-hoc string node kinds or untyped property bags.</p>
+<p>Node state is exactly <code>ControlNodeState</code>; public Agent/user mutations replace typed state through
+<code>TreeTransaction</code>.</p>
+<h2 id="2-tree-ownership-and-ordering">2. Tree ownership and ordering<a class="headerlink" href="#2-tree-ownership-and-ordering" title="Permanent link">&para;</a></h2>
+<p>Each node has zero or one parent. The root has none.</p>
+<p>Sibling order is the child index established by <code>create</code>/reparent. A reparent index greater than the
+new parent's child count appends. Reparenting a node under itself or its descendant is Conflict.</p>
+<p>Maximum ControlTree depth is 256. A mutation exceeding it is InvalidArgument.</p>
+<p>Paint/layout sibling order is:
+1. zIndex ascending;
+2. ControlTree child index ascending.</p>
+<p>Equal zIndex therefore remains stable across frames.</p>
+<p>Removing a node recursively removes its presentation descendants in one TreeTransaction but never
+deletes represented semantic graph identities.</p>
+<h2 id="3-layout">3. Layout<a class="headerlink" href="#3-layout" title="Permanent link">&para;</a></h2>
+<p>v0 uses <code>taffy</code> and only the <code>LayoutStyle</code> subset in the schema.</p>
+<p>Coordinates before 3D graph lowering are logical pixels:
+- origin top-left;
+- +x right;
+- +y down.</p>
+<p><code>Dimension</code> semantics:
+- auto: Taffy auto;
+- px: logical pixels, finite &gt;=0;
+- fraction: flex fraction, finite &gt;=0;
+- percent: fraction of containing block in [0,100].</p>
+<p>All dimensions, offsets, opacity and ratios must be finite. Invalid numeric input is InvalidArgument.</p>
+<p><code>split</code> is a two-child container. Exactly two children are required. Ratio is [0.1,0.9], default
+0.5. Horizontal means left/right; vertical means top/bottom.</p>
+<p><code>scroll</code> clips to its layout box and applies the stored logical-pixel scroll offset to its child
+content. Negative offsets are clamped to zero; maximum is content size minus viewport size.</p>
+<p>Other container flow/flex semantics map directly to the pinned Taffy version; no CSS engine or second
+layout implementation exists.</p>
+<h2 id="4-tree-node-bodies">4. Tree node bodies<a class="headerlink" href="#4-tree-node-bodies" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>graphProjection</code>: projection roots/lens/frontier; graph layout rules come from the existing
+  decision-complete graph-layout sections.</li>
+<li><code>text</code>: UTF-8 text + explicit TextStyle.</li>
+<li><code>terminal</code>: references the Terminal semantic/presentation node; VTE cell model lowers into text and
+  rectangle scene leaves.</li>
+<li><code>document/editor</code>: reference a resource/artifact; editor parsing/LSP behavior remains the frozen
+  editor contract.</li>
+<li><code>table/chart</code>: data is one <code>TableDataset</code> serialized as unpacked Cap'n Proto bytes with media type
+  <code>application/vnd.omnis.table.v1+capnp</code>.</li>
+<li><code>media</code>: references a graph Resource; decoded frame/audio handles come from Manager/PipeWire/GStreamer.</li>
+<li><code>inspector</code>: references the inspected graph identity.</li>
+<li><code>nativeSurface</code>: references exactly one Wayland/XWayland surface graph identity.</li>
+<li><code>inputSurface</code>: the primary semantic input or another explicitly materialized text input.</li>
+<li><code>overlay</code>: presentation overlay; modal=true captures input within its subtree.</li>
+<li><code>timeline</code>: references an optional EventId frontier; none means live.</li>
+</ul>
+<h2 id="5-accessibility">5. Accessibility<a class="headerlink" href="#5-accessibility" title="Permanent link">&para;</a></h2>
+<p>Every ControlNode has explicit <code>AccessibilityState</code>.</p>
+<p>Default role when materializer did not override:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>container/split/scroll/overlay -&gt; group
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>graphProjection               -&gt; application
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>text                          -&gt; text
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>terminal                      -&gt; terminal
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>document                      -&gt; document
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>editor/inputSurface           -&gt; textbox
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>table                         -&gt; table
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>chart                         -&gt; chart
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>media                         -&gt; image
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>inspector                     -&gt; group
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>nativeSurface                 -&gt; application
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>timeline                      -&gt; list
+</code></pre></div>
+<p>Name derives from <code>omnis.identity.display_name</code> when the node represents a graph identity; otherwise
+it is the materializer's explicit name. An empty name is valid only for hidden/pure layout groups.</p>
+<p>Focus cannot land on an accessibility-hidden or disabled node.</p>
+<p>Custom Control accessibility is published through AccessKit/AT-SPI. NativeSurface publishes a
+container in the Omnis tree and delegates its child subtree to the client's platform accessibility
+bridge when available.</p>
+<h2 id="6-renderscene-lowering">6. RenderScene lowering<a class="headerlink" href="#6-renderscene-lowering" title="Permanent link">&para;</a></h2>
+<p>RenderScene is private, disposable render IR. It is regenerated from ControlTree/layout and never
+written into the semantic graph.</p>
+<p>Fixed primitive union:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Group
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Transform
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Clip
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Rect
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>RoundedRect
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Path
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>GlyphRun
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>Image
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>Mesh
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>NativeSurface
+</code></pre></div>
+<p>No first-party primitive type can be added in v0 without changing <code>control_scene.capnp</code>.</p>
+<p>Scene items form a tree. Only Group, Transform and Clip may have children; all drawable leaf
+primitives must have zero children.</p>
+<p>Each SceneItem carries:
+- one layer: world/ui/overlay;
+- zIndex;
+- inherited opacity multiplier;
+- optional hit-target ControlNodeId.</p>
+<p>Lowering assigns private scene UInt64 IDs monotonically from 1 for each RenderScene revision in
+depth-first generation order.</p>
+<h2 id="7-coordinates-and-transforms">7. Coordinates and transforms<a class="headerlink" href="#7-coordinates-and-transforms" title="Permanent link">&para;</a></h2>
+<p>Mat4 is 16 finite Float32 values, column-major: <code>m[column*4+row]</code>.</p>
+<p>2D Control layout is embedded in the UI plane with top-left/y-down coordinates.</p>
+<p>3D world is right-handed:
+- +X right;
+- +Y up;
+- +Z toward viewer;
+- camera looks toward -Z.</p>
+<p>Transform composition for a child is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>world = parent_world * local_transform
+</code></pre></div>
+<p>A non-invertible transform makes its subtree non-hittable and emits one diagnostic event per scene
+revision.</p>
+<h2 id="8-color-and-blending">8. Color and blending<a class="headerlink" href="#8-color-and-blending" title="Permanent link">&para;</a></h2>
+<p>Theme files contain sRGB hex colors. Parse channels to [0,1] and convert sRGB to linear with IEC
+61966-2-1:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>c &lt;= 0.04045 : c / 12.92
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>otherwise    : ((c + 0.055) / 1.055) ^ 2.4
+</code></pre></div>
+<p>Scene Color stores <strong>linear-sRGB premultiplied RGBA</strong>.</p>
+<p>Renderer uses premultiplied alpha:
+- source factor One;
+- destination factor OneMinusSrcAlpha.</p>
+<p>Output is SDR sRGB only in v0. Preferred surface formats remain BGRA8UnormSrgb then RGBA8UnormSrgb.</p>
+<h2 id="9-text">9. Text<a class="headerlink" href="#9-text" title="Permanent link">&para;</a></h2>
+<p>Text shaping occurs before RenderScene using <code>cosmic-text</code>. Renderer receives positioned glyph IDs;
+it never shapes text.</p>
+<p>Font lookup uses fontconfig + the NixOS font set. Stable FontKey is:
+- BLAKE3-256 raw font file bytes;
+- face index.</p>
+<p>Variation axes are not exposed in v0. Synthetic bold/italic is not generated: requested weight/style
+uses font fallback; if unavailable, nearest installed face selected by cosmic-text/fontdb ordering.</p>
+<p>Default sizes/line heights are the values in <code>spec/control_render.toml</code>.</p>
+<p>Glyph atlas policy remains the decision-complete 2048→8192 per scale-class LRU contract.</p>
+<h2 id="10-paths">10. Paths<a class="headerlink" href="#10-paths" title="Permanent link">&para;</a></h2>
+<p><code>lyon</code> is the sole v0 path tessellator.</p>
+<p>Commands are Move/Line/Quadratic/Cubic/Close. Fill rule is non-zero. Stroke join is miter, cap is butt,
+miter limit 4.0. Path coordinates are logical pixels before scene transform.</p>
+<p>Tessellation failure omits that Path leaf and emits a diagnostic; it never falls back to another
+library.</p>
+<h2 id="11-rendering-layers">11. Rendering layers<a class="headerlink" href="#11-rendering-layers" title="Permanent link">&para;</a></h2>
+<p>For each output:</p>
+<ol>
+<li>clear to theme <code>editor.background</code>;</li>
+<li>render world layer with <code>Depth32Float</code>, LessEqual depth, CCW front face and back-face culling;</li>
+<li>render UI layer in painter order with depth testing disabled;</li>
+<li>render overlay layer in painter order with depth testing disabled;</li>
+<li>present synchronized to output vblank.</li>
+</ol>
+<p>Within a layer, siblings use zIndex then child index; traversal is depth-first preorder.</p>
+<p>Batching may combine only adjacent items when doing so preserves this exact order.</p>
+<p>MSAA is 4x when target support includes sample count 4, otherwise 1x.</p>
+<h2 id="12-clipping">12. Clipping<a class="headerlink" href="#12-clipping" title="Permanent link">&para;</a></h2>
+<p>Axis-aligned rectangular clips in output space use GPU scissor intersection.</p>
+<p>Rounded or transformed clips use an R8Unorm mask. Nested mask depth up to 8 remains live. At the
+ninth nested mask, renderer rasterizes the accumulated intersection to one new mask and continues
+from depth 1.</p>
+<p>Clip applies to both drawing and hit testing.</p>
+<h2 id="13-images-and-media">13. Images and media<a class="headerlink" href="#13-images-and-media" title="Permanent link">&para;</a></h2>
+<p>Image primitive references a private renderer texture handle and UV rectangle. Hit testing uses its
+geometry, not alpha pixels.</p>
+<p>Decoded static image textures come from the pinned <code>image</code> decoder. Video frames are GStreamer /
+PipeWire resources imported as textures. Decoding is never performed on the render thread.</p>
+<p>Texture-cache budget and LRU are the frozen global values from the decision-complete contract.</p>
+<h2 id="14-native-surfaces">14. Native surfaces<a class="headerlink" href="#14-native-surfaces" title="Permanent link">&para;</a></h2>
+<p>A Wayland/XWayland client's buffer is imported into the same wgpu composition path whenever Control
+must composite it. The client owns pixels; Control owns geometry, transforms, clips, z-order, focus
+and semantic identity.</p>
+<p>In 3D, NativeSurface is always a composited texture plane.</p>
+<p>Direct scan-out is allowed only when:
+- exactly one visible NativeSurface covers the entire physical output;
+- its transform is the identity/output scale transform;
+- no Control UI/overlay/cursor composition is required;
+- Smithay/DRM marks the buffer eligible.</p>
+<p>Any failed condition uses normal composition.</p>
+<p>Pointer coordinates for a NativeSurface are inverse-transformed from output coordinates to
+client-local logical coordinates before Wayland input delivery.</p>
+<h2 id="15-hit-testing">15. Hit testing<a class="headerlink" href="#15-hit-testing" title="Permanent link">&para;</a></h2>
+<p>2D:
+1. traverse visible/enabled leaves in reverse paint order;
+2. apply inverse transform and every clip;
+3. Rect/RoundedRect use exact geometry;
+4. Path fill uses non-zero rule; stroke uses stroke geometry + 3 logical px slop;
+5. GlyphRun uses its shaped bounds;
+6. Image/NativeSurface use rect geometry;
+7. Mesh uses ray/triangle intersection.</p>
+<p>3D:
+- construct camera ray through pointer;
+- test world Mesh/card/native planes;
+- choose smallest positive ray distance;
+- equal distance within 1e-5 chooses later paint order;
+- then test UI/overlay layers in normal reverse-paint 2D order, which wins over world hits.</p>
+<p>The resolved SceneItem's nearest ancestor/self <code>hitTarget</code> is the ControlNodeId receiving the input.
+No screenshot/vision step participates.</p>
+<h2 id="16-animation">16. Animation<a class="headerlink" href="#16-animation" title="Permanent link">&para;</a></h2>
+<p>Default transition:
+- duration 180 ms;
+- cubic-bezier(0.2,0,0,1);
+- properties: position, size, opacity, camera;
+- no spring physics.</p>
+<p>At reduced-motion=true duration is 0.</p>
+<p>Animation samples use the compositor monotonic clock. A new target starts from the exact currently
+sampled value, not the previous target.</p>
+<p>Force-layout iterations are layout computation, not this presentation animation.</p>
+<h2 id="17-tables-and-charts">17. Tables and charts<a class="headerlink" href="#17-tables-and-charts" title="Permanent link">&para;</a></h2>
+<p><code>TableDataset</code> columns are typed and every row must have exactly the column count with matching cell
+types or the dataset is InvalidArgument.</p>
+<p>Table virtualization starts above 200 rows with 20-row overscan, as previously frozen.</p>
+<p>Chart input uses the same dataset. More than 10000 visible points per series is downsampled to 5000
+with Largest-Triangle-Three-Buckets before scene lowering. The selected/rendered point carries its
+source row NodeId when present.</p>
+<h2 id="18-render-thread-boundary">18. Render-thread boundary<a class="headerlink" href="#18-render-thread-boundary" title="Permanent link">&para;</a></h2>
+<p>The compositor/Tokio domains publish immutable RenderScene snapshots to the render thread through the
+capacity-3 newest-wins queue.</p>
+<p>The render thread owns wgpu Device/Queue, texture/glyph/path GPU caches and imported client-buffer GPU
+handles. It performs no graph RPC, filesystem/network I/O, model call, text shaping, image/video
+decode or Nix/Manager operation.</p>
+<p>Dropping an unsubmitted RenderScene snapshot cannot drop ControlTree state; the next snapshot contains
+the latest authoritative presentation state.</p>
+        </article>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/CONTROL_RENDER_V0.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-one-presentation-tree">1. One presentation tree</a>
+          </li>
+          <li><a href="#2-tree-ownership-and-ordering">2. Tree ownership and ordering</a>
+          </li>
+          <li><a href="#3-layout">3. Layout</a>
+          </li>
+          <li><a href="#4-tree-node-bodies">4. Tree node bodies</a>
+          </li>
+          <li><a href="#5-accessibility">5. Accessibility</a>
+          </li>
+          <li><a href="#6-renderscene-lowering">6. RenderScene lowering</a>
+          </li>
+          <li><a href="#7-coordinates-and-transforms">7. Coordinates and transforms</a>
+          </li>
+          <li><a href="#8-color-and-blending">8. Color and blending</a>
+          </li>
+          <li><a href="#9-text">9. Text</a>
+          </li>
+          <li><a href="#10-paths">10. Paths</a>
+          </li>
+          <li><a href="#11-rendering-layers">11. Rendering layers</a>
+          </li>
+          <li><a href="#12-clipping">12. Clipping</a>
+          </li>
+          <li><a href="#13-images-and-media">13. Images and media</a>
+          </li>
+          <li><a href="#14-native-surfaces">14. Native surfaces</a>
+          </li>
+          <li><a href="#15-hit-testing">15. Hit testing</a>
+          </li>
+          <li><a href="#16-animation">16. Animation</a>
+          </li>
+          <li><a href="#17-tables-and-charts">17. Tables and charts</a>
+          </li>
+          <li><a href="#18-render-thread-boundary">18. Render-thread boundary</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>
