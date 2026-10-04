@@ -572,6 +572,15 @@ forbidden.</p>
 new <code>omnis.*</code> identifier during implementation.</p>
 <p>Domain state strings for Execution, Worker, Activity, Generation and Memory use the exact state
 machines from <code>ONTOLOGY_V0.md</code>.</p>
+<h2 id="16-canonical-inference-protocol">16. Canonical inference protocol<a class="headerlink" href="#16-canonical-inference-protocol" title="Permanent link">&para;</a></h2>
+<p><code>protocol/inference.capnp</code> is the only first-party model request/result semantic IR. The local
+OpenAI/Anthropic gateway and concrete model/provider adapters translate to/from this schema.</p>
+<p><code>model.generate</code> and <code>model.reason</code> use the <code>InferenceRequestInput</code> /
+<code>InferenceResultOutput</code> capability contracts. Tool/message semantics are not provider-specific
+inside Manager.</p>
+<p>The exact HTTP compatibility subset and unsupported-feature behavior are defined in
+<code>HARNESS_ADAPTERS_V0.md</code>. Provider-specific raw request/response bytes are retained only as
+protected provenance artifacts.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../OMNIS_CONTROL/">
@@ -634,6 +643,8 @@ machines from <code>ONTOLOGY_V0.md</code>.</p>
           <li><a href="#14-canonical-schema-ownership">14. Canonical schema ownership</a>
           </li>
           <li><a href="#15-canonical-semantic-registries">15. Canonical semantic registries</a>
+          </li>
+          <li><a href="#16-canonical-inference-protocol">16. Canonical inference protocol</a>
           </li>
         </ul>
       </aside>

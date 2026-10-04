@@ -404,23 +404,23 @@ models, and strong reasoning models. There is no mandatory single executive clas
 allow workers to expand details explicitly.</p>
 <hr />
 <h2 id="6-universal-inference-interception">6. Universal inference interception<a class="headerlink" href="#6-universal-inference-interception" title="Permanent link">&para;</a></h2>
-<p>Because Omnis can run arbitrary external harnesses, native hooks are not sufficient for complete
-memory coverage.</p>
-<p>Manager should support an inference-boundary interception binding for common model protocols. Agent
-uses it to:</p>
+<p>Manager exposes the exact local gateway specified by
+<a href="../HARNESS_ADAPTERS_V0/"><code>HARNESS_ADAPTERS_V0.md</code></a>, <code>spec/inference_gateway.toml</code>, and
+<code>protocol/inference.capnp</code>.</p>
+<p>For Worker-attached model traffic the gateway is the mandatory path:</p>
 <ol>
-<li>observe context about to enter inference;</li>
-<li>deduplicate already observed context items;</li>
-<li>record new source events;</li>
-<li>retrieve/compile relevant Agent memory;</li>
-<li>inject a tagged memory projection where configured;</li>
-<li>observe the generated result.</li>
+<li>authenticate the execution-scoped local token;</li>
+<li>parse the foreign OpenAI/Anthropic request into canonical InferenceRequest;</li>
+<li>retain the protected original request artifact;</li>
+<li>ask Agent for the relevant ContextCapsule;</li>
+<li>inject one evidence-cited Omnis context segment;</li>
+<li>invoke the Worker Execution's locked <code>model.reason</code> Binding;</li>
+<li>stream the canonical result back in the foreign protocol;</li>
+<li>emit inference request/response/failure events.</li>
 </ol>
-<p>Native harness hooks enrich this with stronger semantics such as tool calls, file edits, compaction,
-permissions, subagent results, and session transitions.</p>
-<p>Memory projections are tagged so their future retransmission does not become recursive source
-evidence.</p>
-<hr />
+<p>External harness native/structured event surfaces add tool/session/lifecycle evidence. They do not
+replace the gateway and they do not become a second memory path.</p>
+<p>Tagged Omnis context is recognized on retransmission and never re-ingested as new source evidence.</p>
 <h2 id="7-workers">7. Workers<a class="headerlink" href="#7-workers" title="Permanent link">&para;</a></h2>
 <p>Workers are durable cognitive activations, not separate agent identities.</p>
 <p>Initial families:</p>
@@ -591,7 +591,7 @@ the embedding model identity. Vector state is disposable and rebuilt from graph/
 <p>Context compilation persists the selected source references and final ContextCapsule so a model or
 worker result can be traced back to the exact evidence and capability descriptors it received.</p>
 <p>Model roles are Manager capabilities (<code>model.classify</code>, <code>model.embed</code>, <code>model.rerank</code>,
-<code>model.generate</code>, <code>model.reason</code>, <code>model.vision</code>, <code>model.audio.transcribe</code>, <code>agent.code</code>). No provider
+<code>model.generate</code>, <code>model.reason</code>, <code>model.vision</code>, <code>model.audio.transcribe</code>, <code>code.agent</code>). No provider
 name is part of Agent core logic.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">

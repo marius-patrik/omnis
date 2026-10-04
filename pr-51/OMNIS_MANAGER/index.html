@@ -464,29 +464,23 @@ behavior remains the default.</p>
 <p>The system may revisit older resources when better tooling/models become available.</p>
 <hr />
 <h2 id="9-external-agent-harnesses">9. External agent harnesses<a class="headerlink" href="#9-external-agent-harnesses" title="Permanent link">&para;</a></h2>
-<p>Agent harnesses are normal resources that provide capabilities.</p>
-<p>Initial target bindings:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Claude Code
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Codex
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>OpenCode
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Agents-compatible runtimes
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>arbitrary CLI harnesses
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>MCP-capable agents
+<p>Agent harnesses are ordinary Resources/Bindings for <code>omnis.capability.code.agent</code>.</p>
+<p>The three built-in v0 adapters are frozen by
+<a href="../HARNESS_ADAPTERS_V0/"><code>HARNESS_ADAPTERS_V0.md</code></a> and <code>spec/harnesses.toml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Claude Code 2.1.289
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Codex 0.160.0
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>OpenCode 1.18.34
 </code></pre></div>
-<p>A harness binding should expose, when possible:</p>
-<ul>
-<li>binary/package identity;</li>
-<li>supported model/provider configuration;</li>
-<li>tool/permission controls;</li>
-<li>repository/workspace requirements;</li>
-<li>session/resume semantics;</li>
-<li>lifecycle hooks/events;</li>
-<li>context interception endpoint or model proxy integration;</li>
-<li>cost/quota status;</li>
-<li>structured output/protocol capabilities.</li>
-</ul>
-<p>OmnisAgent can use harnesses as workers without encoding harness-specific behavior into its core.</p>
-<hr />
+<p>Each built-in <code>code.agent</code> Binding has one hard <code>model.reason</code> dependency. Manager resolves that
+dependency before launch and presents only virtual model <code>omnis-reason</code> to the foreign harness.
+Every model request is forced through Manager's execution-scoped local inference gateway; raw provider
+credentials never enter the harness.</p>
+<p>Harness-specific session/protocol state is foreign realization metadata attached to the Omnis Worker
+and Execution. OmnisAgent still reasons only in semantic capabilities, Worker/Activity identities and
+events.</p>
+<p>Coverage is the exact six-dimensional contract in <code>HARNESS_ADAPTERS_V0.md</code>; all three pinned
+built-ins are <code>full</code>. A different installed version is discoverable as a Resource but its built-in
+Binding is <code>incompatible</code> until its fixture/spec is updated.</p>
 <h2 id="10-inference-engines-and-models">10. Inference engines and models<a class="headerlink" href="#10-inference-engines-and-models" title="Permanent link">&para;</a></h2>
 <p>Inference is resolved like any other capability.</p>
 <p>Manager graph identities distinguish:</p>

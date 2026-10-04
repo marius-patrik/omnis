@@ -1454,67 +1454,44 @@ Failed candidate generations/artifacts retained 7 days.</p>
 <p>Manager emits planned deletion set before GC and resulting deletion event after GC.</p>
 <hr />
 <h2 id="42-inference-gateway-and-universal-model-event-interception">42. Inference gateway and universal model-event interception<a class="headerlink" href="#42-inference-gateway-and-universal-model-event-interception" title="Permanent link">&para;</a></h2>
-<p><code>omnis-managerd</code> exposes a loopback-only inference gateway:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>127.0.0.1:7331
-<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>[::1]:7331
+<p>The exact gateway, authentication, request translation, context injection and built-in harness
+contracts are normative in:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>docs/HARNESS_ADAPTERS_V0.md
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>spec/inference_gateway.toml
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>spec/harnesses.toml
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>protocol/inference.capnp
 </code></pre></div>
-<p>It serves:</p>
-<ul>
-<li>OpenAI-compatible HTTP endpoints under <code>/v1/*</code>;</li>
-<li>Anthropic-compatible endpoints under <code>/anthropic/v1/*</code>.</li>
-</ul>
-<p>It never listens externally in v0.</p>
-<p>Every gateway request is processed in this order:</p>
-<ol>
-<li>authenticate local execution identity/HandleId;</li>
-<li>parse provider-compatible request;</li>
-<li>create <code>omnis.event.inference.request</code> with metadata + protected ArtifactRef for request body;</li>
-<li>ask Agent context service for injection material when the calling Execution is attached to an
-   Omnis Worker/Activity and injection is enabled;</li>
-<li>inject context using §43;</li>
-<li>resolve concrete model/provider binding through Manager;</li>
-<li>execute upstream request using protected provider credential;</li>
-<li>stream response to caller while recording protected response artifact;</li>
-<li>enqueue <code>omnis.event.inference.response</code> or failure event;</li>
-<li>update invocation cost/token/latency facts.</li>
-</ol>
-<p>Provider request bodies and responses are never written inline to ordinary logs.</p>
-<p>External harness adapters set their supported provider base URL/environment to this gateway. A
-built-in harness binding that can route through this gateway must do so; direct provider access is
-not allowed for that binding.</p>
-<p>If a harness cannot be routed or hooked, its binding is marked
-<code>memory_coverage = process_only</code>, not <code>full</code>.</p>
+<p>Manager listens only on <code>127.0.0.1:7331</code> and <code>[::1]:7331</code>. Built-in harnesses authenticate with
+execution-scoped <code>omnis1.*</code> bearer tokens and see only virtual model <code>omnis-reason</code>. Each token is
+bound to one resolved <code>model.reason</code> Binding and one Execution. Provider credentials never enter a
+harness.</p>
+<p>The accepted HTTP surface is exactly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>POST /v1/responses
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>POST /v1/chat/completions
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>GET  /v1/models
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>POST /anthropic/v1/messages
+<a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a>POST /anthropic/v1/messages/count_tokens
+<a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a>GET  /anthropic/v1/models
+</code></pre></div>
+<p>No arbitrary proxy path exists.</p>
 <hr />
-<h2 id="43-context-injection-into-external-harnesses">43. Context injection into external harnesses<a class="headerlink" href="#43-context-injection-into-external-harnesses" title="Permanent link">&para;</a></h2>
-<p>Coverage tiers are exact:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>full          native pre-model hook + inference gateway
-<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>gateway       inference gateway only
-<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>hook          native harness hook only
-<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>process_only  process/PTY/tool events only
+<h2 id="43-external-harness-context-and-coverage">43. External-harness context and coverage<a class="headerlink" href="#43-external-harness-context-and-coverage" title="Permanent link">&para;</a></h2>
+<p>The gateway performs per-request context injection before invoking the locked reason-model Binding.
+Maximum injected content is <code>min(25% input budget, 16384 tokens)</code>, with NodeId/EventId evidence
+citations and provider protection filtering.</p>
+<p>Coverage dimensions are:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>model_interception
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>context_injection
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>structured_lifecycle
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>structured_tool_events
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>session_resume
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>permission_control
 </code></pre></div>
-<p>Manager exposes this tier in Binding metadata.</p>
-<p>Injection precedence:</p>
-<ol>
-<li>harness-native context/pre-prompt hook when the pinned harness version supports one;</li>
-<li>otherwise inference-gateway injection.</li>
-</ol>
-<p>Gateway injection rules:</p>
-<ul>
-<li>OpenAI chat-compatible request: prepend one system/developer message named logically
-  <code>omnis_context</code> after provider-required system messages and before user conversation;</li>
-<li>Anthropic-compatible request: append an <code>&lt;omnis-context&gt;...&lt;/omnis-context&gt;</code> block to the system
-  field;</li>
-<li>never rewrite tool results or user content;</li>
-<li>inject one context capsule per model request;</li>
-<li>max injected text = min(25% input budget, 16384 tokens);</li>
-<li>include stable NodeId/EventId citations inside the capsule serialization;</li>
-<li>omit protected material disallowed for the resolved provider.</li>
-</ul>
-<p>The Agent context service returns an empty capsule when no relevant memory is activated; Manager does
-not manufacture filler context.</p>
-<p>Built-in Claude Code, Codex and OpenCode adapters must implement the highest coverage tier supported
-by their pinned versions. Their adapter tests assert the tier; implementers do not choose a weaker
-tier for convenience.</p>
+<p><code>full</code> means all six are true. For the exact v0 fixtures Claude Code 2.1.289, Codex 0.160.0 and
+OpenCode 1.18.34 are all <code>full</code>. Native hooks are optional enrichment, not a correctness
+requirement.</p>
+<p>The complete commands, environment, session transports and success/failure parsing rules are frozen
+in <code>HARNESS_ADAPTERS_V0.md</code> and <code>spec/harnesses.toml</code>.</p>
 <hr />
 <h2 id="44-desktop-compatibility-services">44. Desktop compatibility services<a class="headerlink" href="#44-desktop-compatibility-services" title="Permanent link">&para;</a></h2>
 <p>OmnisControl owns compatibility bridges required by ordinary Linux desktop applications rather than
@@ -1523,13 +1500,13 @@ requiring a second desktop shell.</p>
 <p>OmnisOS runs <code>xdg-desktop-portal</code>.
 OmnisControl ships <code>xdg-desktop-portal-omnis</code>.</p>
 <p>v0 portal interfaces:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>OpenURI
-<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>FileChooser
-<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>Screenshot
-<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>ScreenCast
-<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>Settings
-<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>Inhibit
-<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>GlobalShortcuts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>OpenURI
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>FileChooser
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>Screenshot
+<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>ScreenCast
+<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>Settings
+<a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>Inhibit
+<a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>GlobalShortcuts
 </code></pre></div>
 <p>Behavior:</p>
 <ul>
@@ -1578,29 +1555,29 @@ vision/audio model capability and resulting observations enter the normal event 
 <hr />
 <h2 id="46-inputgesture-contract">46. Input/gesture contract<a class="headerlink" href="#46-inputgesture-contract" title="Permanent link">&para;</a></h2>
 <h3 id="461-2d">46.1 2D<a class="headerlink" href="#461-2d" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>left click             select/focus
-<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>shift+left click       toggle selection membership
-<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>left drag node         pin/move selected semantic/control node
-<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>left drag background   pan
-<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>wheel/trackpad scroll  pan
-<a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>ctrl+wheel/pinch       zoom around pointer
-<a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>double click node      focus + semantic inspect level
-<a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>right click            context actions from graph capabilities
-<a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a>Esc                    back one focus/navigation level
-<a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a>Alt+Left/Right         global back/forward
-<a id="__codelineno-56-11" name="__codelineno-56-11" href="#__codelineno-56-11"></a>Ctrl+L                 focus primary input/address surface
-<a id="__codelineno-56-12" name="__codelineno-56-12" href="#__codelineno-56-12"></a>Ctrl+Space             focus primary input/semantic command surface
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>left click             select/focus
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>shift+left click       toggle selection membership
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>left drag node         pin/move selected semantic/control node
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>left drag background   pan
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>wheel/trackpad scroll  pan
+<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>ctrl+wheel/pinch       zoom around pointer
+<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a>double click node      focus + semantic inspect level
+<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a>right click            context actions from graph capabilities
+<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>Esc                    back one focus/navigation level
+<a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a>Alt+Left/Right         global back/forward
+<a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a>Ctrl+L                 focus primary input/address surface
+<a id="__codelineno-57-12" name="__codelineno-57-12" href="#__codelineno-57-12"></a>Ctrl+Space             focus primary input/semantic command surface
 </code></pre></div>
 <h3 id="462-3d">46.2 3D<a class="headerlink" href="#462-3d" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>left click             select/focus
-<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>left drag selected     move/pin in current layout plane/constraint
-<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>right drag             orbit camera
-<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>middle drag            pan camera
-<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>wheel/pinch            dolly/zoom
-<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>double click node      fly/focus on node
-<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a>F                      frame current selection
-<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a>2                      switch same workspace to 2D
-<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>3                      switch same workspace to 3D
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>left click             select/focus
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>left drag selected     move/pin in current layout plane/constraint
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>right drag             orbit camera
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>middle drag            pan camera
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>wheel/pinch            dolly/zoom
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>double click node      fly/focus on node
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>F                      frame current selection
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>2                      switch same workspace to 2D
+<a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a>3                      switch same workspace to 3D
 </code></pre></div>
 <p>Touch maps one-finger to select/pan contextually, two-finger to pan/zoom, and three-finger horizontal
 swipe to back/forward.</p>
@@ -1611,14 +1588,14 @@ swipe to back/forward.</p>
 with the reset.</p>
 <p>Built-in default theme name: <code>Omnis Dark</code>.</p>
 <p>Default appearance:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>dark background
-<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>font UI: system sans through fontconfig/cosmic-text
-<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>font monospace: system monospace through fontconfig/cosmic-text
-<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>base UI scale: compositor output scale
-<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>animation duration: 180 ms
-<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>reduced-motion: follows portal/system setting; when true durations = 0
-<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>corner radius: 8 logical px
-<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>spacing unit: 4 logical px
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>dark background
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>font UI: system sans through fontconfig/cosmic-text
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>font monospace: system monospace through fontconfig/cosmic-text
+<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a>base UI scale: compositor output scale
+<a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>animation duration: 180 ms
+<a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a>reduced-motion: follows portal/system setting; when true durations = 0
+<a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a>corner radius: 8 logical px
+<a id="__codelineno-59-8" name="__codelineno-59-8" href="#__codelineno-59-8"></a>spacing unit: 4 logical px
 </code></pre></div>
 <p>Do not hard-code font family names; fontconfig result is deterministic for installed system
 configuration.</p>
@@ -1729,28 +1706,28 @@ shell/exec method outside the typed Manager-only launch API.</p>
 <hr />
 <h2 id="54-execution-sandbox-systemd-properties">54. Execution sandbox systemd properties<a class="headerlink" href="#54-execution-sandbox-systemd-properties" title="Permanent link">&para;</a></h2>
 <p>Every non-interactive restricted Execution transient service starts from these properties:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>Type=exec
-<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>UMask=0077
-<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>NoNewPrivileges=yes
-<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a>PrivateTmp=yes
-<a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>ProtectSystem=strict
-<a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a>ProtectHome=tmpfs
-<a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a>ProtectKernelTunables=yes
-<a id="__codelineno-59-8" name="__codelineno-59-8" href="#__codelineno-59-8"></a>ProtectKernelModules=yes
-<a id="__codelineno-59-9" name="__codelineno-59-9" href="#__codelineno-59-9"></a>ProtectKernelLogs=yes
-<a id="__codelineno-59-10" name="__codelineno-59-10" href="#__codelineno-59-10"></a>ProtectControlGroups=yes
-<a id="__codelineno-59-11" name="__codelineno-59-11" href="#__codelineno-59-11"></a>ProtectClock=yes
-<a id="__codelineno-59-12" name="__codelineno-59-12" href="#__codelineno-59-12"></a>RestrictRealtime=yes
-<a id="__codelineno-59-13" name="__codelineno-59-13" href="#__codelineno-59-13"></a>LockPersonality=yes
-<a id="__codelineno-59-14" name="__codelineno-59-14" href="#__codelineno-59-14"></a>RestrictSUIDSGID=yes
-<a id="__codelineno-59-15" name="__codelineno-59-15" href="#__codelineno-59-15"></a>RemoveIPC=yes
-<a id="__codelineno-59-16" name="__codelineno-59-16" href="#__codelineno-59-16"></a>CapabilityBoundingSet=
-<a id="__codelineno-59-17" name="__codelineno-59-17" href="#__codelineno-59-17"></a>AmbientCapabilities=
-<a id="__codelineno-59-18" name="__codelineno-59-18" href="#__codelineno-59-18"></a>KillMode=control-group
-<a id="__codelineno-59-19" name="__codelineno-59-19" href="#__codelineno-59-19"></a>TimeoutStopSec=5s
-<a id="__codelineno-59-20" name="__codelineno-59-20" href="#__codelineno-59-20"></a>TasksMax=512
-<a id="__codelineno-59-21" name="__codelineno-59-21" href="#__codelineno-59-21"></a>MemoryMax=2G
-<a id="__codelineno-59-22" name="__codelineno-59-22" href="#__codelineno-59-22"></a>CPUQuota=100%
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>Type=exec
+<a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>UMask=0077
+<a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>NoNewPrivileges=yes
+<a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>PrivateTmp=yes
+<a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>ProtectSystem=strict
+<a id="__codelineno-60-6" name="__codelineno-60-6" href="#__codelineno-60-6"></a>ProtectHome=tmpfs
+<a id="__codelineno-60-7" name="__codelineno-60-7" href="#__codelineno-60-7"></a>ProtectKernelTunables=yes
+<a id="__codelineno-60-8" name="__codelineno-60-8" href="#__codelineno-60-8"></a>ProtectKernelModules=yes
+<a id="__codelineno-60-9" name="__codelineno-60-9" href="#__codelineno-60-9"></a>ProtectKernelLogs=yes
+<a id="__codelineno-60-10" name="__codelineno-60-10" href="#__codelineno-60-10"></a>ProtectControlGroups=yes
+<a id="__codelineno-60-11" name="__codelineno-60-11" href="#__codelineno-60-11"></a>ProtectClock=yes
+<a id="__codelineno-60-12" name="__codelineno-60-12" href="#__codelineno-60-12"></a>RestrictRealtime=yes
+<a id="__codelineno-60-13" name="__codelineno-60-13" href="#__codelineno-60-13"></a>LockPersonality=yes
+<a id="__codelineno-60-14" name="__codelineno-60-14" href="#__codelineno-60-14"></a>RestrictSUIDSGID=yes
+<a id="__codelineno-60-15" name="__codelineno-60-15" href="#__codelineno-60-15"></a>RemoveIPC=yes
+<a id="__codelineno-60-16" name="__codelineno-60-16" href="#__codelineno-60-16"></a>CapabilityBoundingSet=
+<a id="__codelineno-60-17" name="__codelineno-60-17" href="#__codelineno-60-17"></a>AmbientCapabilities=
+<a id="__codelineno-60-18" name="__codelineno-60-18" href="#__codelineno-60-18"></a>KillMode=control-group
+<a id="__codelineno-60-19" name="__codelineno-60-19" href="#__codelineno-60-19"></a>TimeoutStopSec=5s
+<a id="__codelineno-60-20" name="__codelineno-60-20" href="#__codelineno-60-20"></a>TasksMax=512
+<a id="__codelineno-60-21" name="__codelineno-60-21" href="#__codelineno-60-21"></a>MemoryMax=2G
+<a id="__codelineno-60-22" name="__codelineno-60-22" href="#__codelineno-60-22"></a>CPUQuota=100%
 </code></pre></div>
 <p>Filesystem grants are translated to:</p>
 <ul>
@@ -1776,7 +1753,7 @@ Long-running bindings that declare DNS refresh update the allow map every 60 sec
 <li>GPU binding adds only the selected DRM/render or accelerator device nodes.</li>
 </ul>
 <p>System calls:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>SystemCallFilter=~@mount @reboot @raw-io @swap
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>SystemCallFilter=~@mount @reboot @raw-io @swap
 </code></pre></div>
 <p>A Binding requiring a syscall in those denied groups must declare it as a hard execution requirement;
 OmnisOS then records the exact exception in the envelope and event provenance.</p>
@@ -1787,9 +1764,9 @@ ontology by a spec change.</p>
 <h2 id="55-physical-process-io">55. Physical process I/O<a class="headerlink" href="#55-physical-process-io" title="Permanent link">&para;</a></h2>
 <p>OmnisOS creates pipes or a PTY before launching the transient service.</p>
 <p>Typed OS stream interfaces:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>ByteSource.read(max &lt;= 65536)
-<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>ByteSink.write(chunk &lt;= 65536)
-<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>PtyStream.read/write/resize/close
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>ByteSource.read(max &lt;= 65536)
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>ByteSink.write(chunk &lt;= 65536)
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>PtyStream.read/write/resize/close
 </code></pre></div>
 <p>PTY resize uses rows/columns + pixel width/height.</p>
 <p>Backpressure:
@@ -1823,13 +1800,13 @@ semantic graph NodeId.</p>
 <h2 id="57-default-boot-workspace">57. Default boot workspace<a class="headerlink" href="#57-default-boot-workspace" title="Permanent link">&para;</a></h2>
 <p>First interactive login creates exactly one persistent Workspace when none exists.</p>
 <p>Initial workspace:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>mode = 2d
-<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>lens = ["physical","activity","presentation"]
-<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>focus = local Host NodeId
-<a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>central view = Terminal/InputSurface
-<a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>terminal = user's configured login shell
-<a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>graph context = local Host + Omnis core services + active Agent/Activity nodes, depth 1
-<a id="__codelineno-62-7" name="__codelineno-62-7" href="#__codelineno-62-7"></a>timeline frontier = live
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>mode = 2d
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>lens = ["physical","activity","presentation"]
+<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>focus = local Host NodeId
+<a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>central view = Terminal/InputSurface
+<a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a>terminal = user's configured login shell
+<a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a>graph context = local Host + Omnis core services + active Agent/Activity nodes, depth 1
+<a id="__codelineno-63-7" name="__codelineno-63-7" href="#__codelineno-63-7"></a>timeline frontier = live
 </code></pre></div>
 <p>The Terminal view occupies 70% width and full height initially.
 The graph context occupies the remaining 30% on the right.
@@ -1845,51 +1822,51 @@ split algorithm:</p>
 <hr />
 <h2 id="58-cli-grammar">58. CLI grammar<a class="headerlink" href="#58-cli-grammar" title="Permanent link">&para;</a></h2>
 <p>The <code>omnis</code> CLI is exact:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>omnis graph get &lt;omnis-uri&gt;
-<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>omnis graph query --root &lt;uri&gt; [--relation &lt;name&gt;] [--depth N] [--limit N]
-<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>omnis graph watch [--root &lt;uri&gt;]
-<a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>
-<a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a>omnis system status
-<a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a>omnis system diff &lt;generation&gt;
-<a id="__codelineno-63-7" name="__codelineno-63-7" href="#__codelineno-63-7"></a>omnis system plan &lt;nix-option-assignment&gt;...
-<a id="__codelineno-63-8" name="__codelineno-63-8" href="#__codelineno-63-8"></a>omnis system build &lt;generation&gt;
-<a id="__codelineno-63-9" name="__codelineno-63-9" href="#__codelineno-63-9"></a>omnis system activate &lt;generation&gt;
-<a id="__codelineno-63-10" name="__codelineno-63-10" href="#__codelineno-63-10"></a>omnis system rollback &lt;generation&gt;
-<a id="__codelineno-63-11" name="__codelineno-63-11" href="#__codelineno-63-11"></a>omnis system update
-<a id="__codelineno-63-12" name="__codelineno-63-12" href="#__codelineno-63-12"></a>
-<a id="__codelineno-63-13" name="__codelineno-63-13" href="#__codelineno-63-13"></a>omnis manager resources [query]
-<a id="__codelineno-63-14" name="__codelineno-63-14" href="#__codelineno-63-14"></a>omnis manager capabilities [query]
-<a id="__codelineno-63-15" name="__codelineno-63-15" href="#__codelineno-63-15"></a>omnis manager discover &lt;uri&gt;
-<a id="__codelineno-63-16" name="__codelineno-63-16" href="#__codelineno-63-16"></a>omnis manager resolve &lt;capability&gt; [--constraint key=value]...
-<a id="__codelineno-63-17" name="__codelineno-63-17" href="#__codelineno-63-17"></a>omnis manager run &lt;capability&gt; [--input &lt;path-or-json&gt;]
-<a id="__codelineno-63-18" name="__codelineno-63-18" href="#__codelineno-63-18"></a>omnis manager executions [--active]
-<a id="__codelineno-63-19" name="__codelineno-63-19" href="#__codelineno-63-19"></a>omnis manager models
-<a id="__codelineno-63-20" name="__codelineno-63-20" href="#__codelineno-63-20"></a>omnis manager harnesses
-<a id="__codelineno-63-21" name="__codelineno-63-21" href="#__codelineno-63-21"></a>omnis manager host pairing-code
-<a id="__codelineno-63-22" name="__codelineno-63-22" href="#__codelineno-63-22"></a>omnis manager host pair &lt;host-or-ip&gt; --code &lt;base64url&gt;
-<a id="__codelineno-63-23" name="__codelineno-63-23" href="#__codelineno-63-23"></a>omnis manager host unpair &lt;host-uuid&gt;
-<a id="__codelineno-63-24" name="__codelineno-63-24" href="#__codelineno-63-24"></a>
-<a id="__codelineno-63-25" name="__codelineno-63-25" href="#__codelineno-63-25"></a>omnis agent ask &lt;text...&gt;
-<a id="__codelineno-63-26" name="__codelineno-63-26" href="#__codelineno-63-26"></a>omnis agent memory search &lt;text...&gt;
-<a id="__codelineno-63-27" name="__codelineno-63-27" href="#__codelineno-63-27"></a>omnis agent events [--after &lt;event-uri&gt;]
-<a id="__codelineno-63-28" name="__codelineno-63-28" href="#__codelineno-63-28"></a>omnis agent activities
-<a id="__codelineno-63-29" name="__codelineno-63-29" href="#__codelineno-63-29"></a>omnis agent workers
-<a id="__codelineno-63-30" name="__codelineno-63-30" href="#__codelineno-63-30"></a>omnis agent explain &lt;omnis-uri&gt;
-<a id="__codelineno-63-31" name="__codelineno-63-31" href="#__codelineno-63-31"></a>
-<a id="__codelineno-63-32" name="__codelineno-63-32" href="#__codelineno-63-32"></a>omnis control open &lt;address-or-uri&gt;
-<a id="__codelineno-63-33" name="__codelineno-63-33" href="#__codelineno-63-33"></a>omnis control focus &lt;omnis-uri&gt;
-<a id="__codelineno-63-34" name="__codelineno-63-34" href="#__codelineno-63-34"></a>omnis control mode &lt;2d|3d&gt;
-<a id="__codelineno-63-35" name="__codelineno-63-35" href="#__codelineno-63-35"></a>omnis control lens &lt;name&gt;...
-<a id="__codelineno-63-36" name="__codelineno-63-36" href="#__codelineno-63-36"></a>omnis control workspace
-<a id="__codelineno-63-37" name="__codelineno-63-37" href="#__codelineno-63-37"></a>
-<a id="__codelineno-63-38" name="__codelineno-63-38" href="#__codelineno-63-38"></a>omnis ingest &lt;path&gt;...
-<a id="__codelineno-63-39" name="__codelineno-63-39" href="#__codelineno-63-39"></a>omnis trace &lt;trace-uri&gt;
-<a id="__codelineno-63-40" name="__codelineno-63-40" href="#__codelineno-63-40"></a>omnis spec check
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>omnis graph get &lt;omnis-uri&gt;
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>omnis graph query --root &lt;uri&gt; [--relation &lt;name&gt;] [--depth N] [--limit N]
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>omnis graph watch [--root &lt;uri&gt;]
+<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>
+<a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>omnis system status
+<a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>omnis system diff &lt;generation&gt;
+<a id="__codelineno-64-7" name="__codelineno-64-7" href="#__codelineno-64-7"></a>omnis system plan &lt;nix-option-assignment&gt;...
+<a id="__codelineno-64-8" name="__codelineno-64-8" href="#__codelineno-64-8"></a>omnis system build &lt;generation&gt;
+<a id="__codelineno-64-9" name="__codelineno-64-9" href="#__codelineno-64-9"></a>omnis system activate &lt;generation&gt;
+<a id="__codelineno-64-10" name="__codelineno-64-10" href="#__codelineno-64-10"></a>omnis system rollback &lt;generation&gt;
+<a id="__codelineno-64-11" name="__codelineno-64-11" href="#__codelineno-64-11"></a>omnis system update
+<a id="__codelineno-64-12" name="__codelineno-64-12" href="#__codelineno-64-12"></a>
+<a id="__codelineno-64-13" name="__codelineno-64-13" href="#__codelineno-64-13"></a>omnis manager resources [query]
+<a id="__codelineno-64-14" name="__codelineno-64-14" href="#__codelineno-64-14"></a>omnis manager capabilities [query]
+<a id="__codelineno-64-15" name="__codelineno-64-15" href="#__codelineno-64-15"></a>omnis manager discover &lt;uri&gt;
+<a id="__codelineno-64-16" name="__codelineno-64-16" href="#__codelineno-64-16"></a>omnis manager resolve &lt;capability&gt; [--constraint key=value]...
+<a id="__codelineno-64-17" name="__codelineno-64-17" href="#__codelineno-64-17"></a>omnis manager run &lt;capability&gt; [--input &lt;path-or-json&gt;]
+<a id="__codelineno-64-18" name="__codelineno-64-18" href="#__codelineno-64-18"></a>omnis manager executions [--active]
+<a id="__codelineno-64-19" name="__codelineno-64-19" href="#__codelineno-64-19"></a>omnis manager models
+<a id="__codelineno-64-20" name="__codelineno-64-20" href="#__codelineno-64-20"></a>omnis manager harnesses
+<a id="__codelineno-64-21" name="__codelineno-64-21" href="#__codelineno-64-21"></a>omnis manager host pairing-code
+<a id="__codelineno-64-22" name="__codelineno-64-22" href="#__codelineno-64-22"></a>omnis manager host pair &lt;host-or-ip&gt; --code &lt;base64url&gt;
+<a id="__codelineno-64-23" name="__codelineno-64-23" href="#__codelineno-64-23"></a>omnis manager host unpair &lt;host-uuid&gt;
+<a id="__codelineno-64-24" name="__codelineno-64-24" href="#__codelineno-64-24"></a>
+<a id="__codelineno-64-25" name="__codelineno-64-25" href="#__codelineno-64-25"></a>omnis agent ask &lt;text...&gt;
+<a id="__codelineno-64-26" name="__codelineno-64-26" href="#__codelineno-64-26"></a>omnis agent memory search &lt;text...&gt;
+<a id="__codelineno-64-27" name="__codelineno-64-27" href="#__codelineno-64-27"></a>omnis agent events [--after &lt;event-uri&gt;]
+<a id="__codelineno-64-28" name="__codelineno-64-28" href="#__codelineno-64-28"></a>omnis agent activities
+<a id="__codelineno-64-29" name="__codelineno-64-29" href="#__codelineno-64-29"></a>omnis agent workers
+<a id="__codelineno-64-30" name="__codelineno-64-30" href="#__codelineno-64-30"></a>omnis agent explain &lt;omnis-uri&gt;
+<a id="__codelineno-64-31" name="__codelineno-64-31" href="#__codelineno-64-31"></a>
+<a id="__codelineno-64-32" name="__codelineno-64-32" href="#__codelineno-64-32"></a>omnis control open &lt;address-or-uri&gt;
+<a id="__codelineno-64-33" name="__codelineno-64-33" href="#__codelineno-64-33"></a>omnis control focus &lt;omnis-uri&gt;
+<a id="__codelineno-64-34" name="__codelineno-64-34" href="#__codelineno-64-34"></a>omnis control mode &lt;2d|3d&gt;
+<a id="__codelineno-64-35" name="__codelineno-64-35" href="#__codelineno-64-35"></a>omnis control lens &lt;name&gt;...
+<a id="__codelineno-64-36" name="__codelineno-64-36" href="#__codelineno-64-36"></a>omnis control workspace
+<a id="__codelineno-64-37" name="__codelineno-64-37" href="#__codelineno-64-37"></a>
+<a id="__codelineno-64-38" name="__codelineno-64-38" href="#__codelineno-64-38"></a>omnis ingest &lt;path&gt;...
+<a id="__codelineno-64-39" name="__codelineno-64-39" href="#__codelineno-64-39"></a>omnis trace &lt;trace-uri&gt;
+<a id="__codelineno-64-40" name="__codelineno-64-40" href="#__codelineno-64-40"></a>omnis spec check
 </code></pre></div>
 <p>Global flags:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>--json        canonical JSON debug/export form
-<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>--timeout     override finite query timeout only
-<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>--socket      explicit endpoint for debugging; not persisted
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>--json        canonical JSON debug/export form
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>--timeout     override finite query timeout only
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>--socket      explicit endpoint for debugging; not persisted
 </code></pre></div>
 <p>Human output is concise tables/text. <code>--json</code> emits UTF-8 JSON with stable snake_case field names
 derived from protocol fields. Exit status: 0 success, 2 invalid input, 3 not found, 4 conflict,
@@ -1899,11 +1876,11 @@ derived from protocol fields. Exit status: 0 success, 2 invalid input, 3 not fou
 <hr />
 <h2 id="59-additional-controleditormedia-dependency-families">59. Additional Control/editor/media dependency families<a class="headerlink" href="#59-additional-controleditormedia-dependency-families" title="Permanent link">&para;</a></h2>
 <p>Add to the frozen dependency policy where used:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>ropey                 text rope
-<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>tree-sitter           syntax trees
-<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>pulldown-cmark        Markdown
-<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>gstreamer             video/audio playback bindings
-<a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a>mime_guess            deterministic MIME hinting before libmagic binding
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>ropey                 text rope
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>tree-sitter           syntax trees
+<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>pulldown-cmark        Markdown
+<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>gstreamer             video/audio playback bindings
+<a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>mime_guess            deterministic MIME hinting before libmagic binding
 </code></pre></div>
 <p>System libraries come from the pinned nixpkgs revision.</p>
 <p>For MIME detection, order is:
@@ -1914,21 +1891,20 @@ derived from protocol fields. Exit status: 0 success, 2 invalid input, 3 not fou
 5. application/octet-stream.</p>
 <hr />
 <h2 id="60-external-harness-versionpackage-policy">60. External harness version/package policy<a class="headerlink" href="#60-external-harness-versionpackage-policy" title="Permanent link">&para;</a></h2>
-<p>Omnis does not vendor or silently download proprietary/external coding harnesses.</p>
-<p>Built-in harness adapters bind an executable resource discovered from:</p>
-<ol>
-<li>an existing Nix store/profile resource;</li>
-<li>PATH;</li>
-<li>an explicitly declared executable path.</li>
-</ol>
-<p>The adapter records <code>--version</code> output and refuses unsupported major versions with
-<code>incompatible</code>, rather than guessing flags.</p>
-<p>Installing a harness is a normal package/resource operation under §40. If pinned nixpkgs contains the
-requested package, use it. Otherwise a package definition with exact source version/hash must be added
-to OmnisManager/OmnisOS in a reviewed change before installation; runtime curl-to-shell installers are
-forbidden.</p>
-<p>Adapters are tested against explicit supported version fixtures. A new harness major version requires
-updating the adapter compatibility fixture before it can claim full/hook/gateway coverage.</p>
+<p>Built-in adapter compatibility is exact, not major-version-based:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>Claude Code 2.1.289
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>Codex 0.160.0
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>OpenCode 1.18.34
+</code></pre></div>
+<p>Discovery can represent other versions as Resources, but the built-in <code>code.agent</code> Binding is
+<code>incompatible</code> until <code>HARNESS_ADAPTERS_V0.md</code>, <code>spec/harnesses.toml</code>, fixtures and conformance
+tests are updated.</p>
+<p>Omnis does not vendor or silently curl-install harnesses. Binding lookup order is existing Nix
+store/profile Resource, PATH, then explicitly declared executable. Installing a missing exact
+fixture is a normal package operation; if the pinned Nix universe does not contain that exact
+version, its package definition/source hash must be added in a reviewed specification/package change
+before use.</p>
+<p>Runtime curl-to-shell installers and CLI flag guessing are forbidden.</p>
 <hr />
 <h2 id="61-omnis-spec-check">61. <code>omnis spec check</code><a class="headerlink" href="#61-omnis-spec-check" title="Permanent link">&para;</a></h2>
 <p><code>omnis spec check</code> is required in the first umbrella CLI implementation.</p>
@@ -1954,12 +1930,12 @@ updating the adapter compatibility fixture before it can claim full/hook/gateway
 <p>Registry-defined immutable concept nodes use deterministic UUIDv5 so all hosts refer to the same
 concept NodeId without prior synchronization.</p>
 <p>UUIDv5 algorithm:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>namespace = UUID namespace URL = 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>name = UTF-8 bytes of "urn:omnis:v0:" + canonical_identifier
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>namespace = UUID namespace URL = 6ba7b811-9dad-11d1-80b4-00c04fd430c8
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>name = UTF-8 bytes of "urn:omnis:v0:" + canonical_identifier
 </code></pre></div>
 <p>Use this only for registry concepts that are materialized as nodes, including first-party Capability
 nodes. Example conceptual input:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>urn:omnis:v0:omnis.capability.model.embed
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>urn:omnis:v0:omnis.capability.model.embed
 </code></pre></div>
 <p>Kinds, relations, event type names and property keys remain canonical strings and do not need NodeIds
 unless explicitly materialized as graph resources.</p>
@@ -1978,13 +1954,13 @@ Restoring a full machine clone to become a distinct machine requires <code>omnis
 which generates a new HostId and host key before network participation.</p>
 <h3 id="622-agent-identity">62.2 Agent identity<a class="headerlink" href="#622-agent-identity" title="Permanent link">&para;</a></h3>
 <p>Each enabled Omnis Agent user has:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>$XDG_STATE_HOME/omnis/agent/identity
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>$XDG_STATE_HOME/omnis/agent/identity
 </code></pre></div>
 <p>containing one UUIDv7, mode 0600, created atomically on first Agent start. It survives Agent/provider
 replacement.</p>
 <h3 id="623-foreign-identity-reuse">62.3 Foreign identity reuse<a class="headerlink" href="#623-foreign-identity-reuse" title="Permanent link">&para;</a></h3>
 <p>For a foreign object with stable foreign identity, Manager exact alias namespace is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>foreign:&lt;lowercase-provider-or-protocol-name&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>foreign:&lt;lowercase-provider-or-protocol-name&gt;
 </code></pre></div>
 <p>alias bytes are the provider's canonical textual identifier.</p>
 <p>Rediscovery performs exact alias lookup first:
@@ -1995,18 +1971,18 @@ replacement.</p>
 <hr />
 <h2 id="63-component-repository-bootstrap">63. Component repository bootstrap<a class="headerlink" href="#63-component-repository-bootstrap" title="Permanent link">&para;</a></h2>
 <p>The v0 implementation repositories are exactly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>marius-patrik/omnis
-<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>marius-patrik/omnis-os
-<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>marius-patrik/omnis-manager
-<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>marius-patrik/omnis-agent
-<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>marius-patrik/omnis-control
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>marius-patrik/omnis
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>marius-patrik/omnis-os
+<a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>marius-patrik/omnis-manager
+<a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a>marius-patrik/omnis-agent
+<a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a>marius-patrik/omnis-control
 </code></pre></div>
 <p>All are private during v0 development.</p>
 <h3 id="631-omnis-os">63.1 omnis-os<a class="headerlink" href="#631-omnis-os" title="Permanent link">&para;</a></h3>
 <p>Create by forking/importing the complete <code>NixOS/nixpkgs</code> history at the frozen baseline.</p>
 <p>Remotes:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>origin   git@github.com:marius-patrik/omnis-os.git
-<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>upstream https://github.com/NixOS/nixpkgs.git
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>origin   git@github.com:marius-patrik/omnis-os.git
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>upstream https://github.com/NixOS/nixpkgs.git
 </code></pre></div>
 <p>Default branch: <code>main</code>.
 <code>main</code> begins at the frozen nixpkgs commit with one Omnis bootstrap commit on top.</p>
@@ -2015,8 +1991,8 @@ MIT license to avoid file-level license ambiguity.</p>
 <h3 id="632-omnis-manager">63.2 omnis-manager<a class="headerlink" href="#632-omnis-manager" title="Permanent link">&para;</a></h3>
 <p>Create from the complete <code>NixOS/nix</code> history at the frozen baseline.</p>
 <p>Remotes:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>origin   git@github.com:marius-patrik/omnis-manager.git
-<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>upstream https://github.com/NixOS/nix.git
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>origin   git@github.com:marius-patrik/omnis-manager.git
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>upstream https://github.com/NixOS/nix.git
 </code></pre></div>
 <p>Default branch: <code>main</code>.</p>
 <p>Existing Nix LGPL-2.1-or-later licensing remains intact; Omnis derivative changes inside the fork use
@@ -2073,19 +2049,19 @@ for Agent catch-up.</p>
 <h2 id="65-system-release-provenance">65. System release provenance<a class="headerlink" href="#65-system-release-provenance" title="Permanent link">&para;</a></h2>
 <p>Every Omnis system closure embeds a generated read-only
 <code>/etc/omnis/release.json</code> containing:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="p">{</span>
-<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.MINOR.PATCH"</span><span class="p">,</span>
-<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a><span class="w">  </span><span class="nt">"umbrella_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-4" name="__codelineno-73-4" href="#__codelineno-73-4"></a><span class="w">  </span><span class="nt">"omnis_os_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-5" name="__codelineno-73-5" href="#__codelineno-73-5"></a><span class="w">  </span><span class="nt">"omnis_manager_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-6" name="__codelineno-73-6" href="#__codelineno-73-6"></a><span class="w">  </span><span class="nt">"omnis_agent_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-7" name="__codelineno-73-7" href="#__codelineno-73-7"></a><span class="w">  </span><span class="nt">"omnis_control_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-8" name="__codelineno-73-8" href="#__codelineno-73-8"></a><span class="w">  </span><span class="nt">"nixpkgs_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-9" name="__codelineno-73-9" href="#__codelineno-73-9"></a><span class="w">  </span><span class="nt">"nix_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
-<a id="__codelineno-73-10" name="__codelineno-73-10" href="#__codelineno-73-10"></a><span class="w">  </span><span class="nt">"protocol_major"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-73-11" name="__codelineno-73-11" href="#__codelineno-73-11"></a><span class="w">  </span><span class="nt">"protocol_minor"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-73-12" name="__codelineno-73-12" href="#__codelineno-73-12"></a><span class="w">  </span><span class="nt">"spec_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-<a id="__codelineno-73-13" name="__codelineno-73-13" href="#__codelineno-73-13"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a><span class="p">{</span>
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.MINOR.PATCH"</span><span class="p">,</span>
+<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a><span class="w">  </span><span class="nt">"umbrella_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-4" name="__codelineno-75-4" href="#__codelineno-75-4"></a><span class="w">  </span><span class="nt">"omnis_os_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-5" name="__codelineno-75-5" href="#__codelineno-75-5"></a><span class="w">  </span><span class="nt">"omnis_manager_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-6" name="__codelineno-75-6" href="#__codelineno-75-6"></a><span class="w">  </span><span class="nt">"omnis_agent_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-7" name="__codelineno-75-7" href="#__codelineno-75-7"></a><span class="w">  </span><span class="nt">"omnis_control_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-8" name="__codelineno-75-8" href="#__codelineno-75-8"></a><span class="w">  </span><span class="nt">"nixpkgs_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-9" name="__codelineno-75-9" href="#__codelineno-75-9"></a><span class="w">  </span><span class="nt">"nix_commit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;40 hex&gt;"</span><span class="p">,</span>
+<a id="__codelineno-75-10" name="__codelineno-75-10" href="#__codelineno-75-10"></a><span class="w">  </span><span class="nt">"protocol_major"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-75-11" name="__codelineno-75-11" href="#__codelineno-75-11"></a><span class="w">  </span><span class="nt">"protocol_minor"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-75-12" name="__codelineno-75-12" href="#__codelineno-75-12"></a><span class="w">  </span><span class="nt">"spec_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-75-13" name="__codelineno-75-13" href="#__codelineno-75-13"></a><span class="p">}</span>
 </code></pre></div>
 <p>Keys are emitted in the exact order above, UTF-8, LF newline, two-space JSON indentation.
 The file is generated by Nix from pinned inputs; no runtime mutation is permitted.</p>
@@ -2137,32 +2113,32 @@ Vector/mesh MSAA: 4x when adapter supports sample-count 4 for the target; otherw
 Text glyph masks are rendered without MSAA through the glyph atlas.</p>
 <h3 id="672-text">67.2 text<a class="headerlink" href="#672-text" title="Permanent link">&para;</a></h3>
 <p>Default sizes in logical pixels:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>UI body          14
-<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>UI small         12
-<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>UI heading       18
-<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a>terminal         14
-<a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>graph label      13
-<a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>graph metadata   11
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>UI body          14
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>UI small         12
+<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>UI heading       18
+<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a>terminal         14
+<a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a>graph label      13
+<a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a>graph metadata   11
 </code></pre></div>
 <p>Default line-height multiplier: 1.35 UI/document, 1.20 terminal.
 Font fallback comes exclusively from fontconfig/cosmic-text against the NixOS font set.</p>
 <h3 id="673-graph-geometry">67.3 graph geometry<a class="headerlink" href="#673-graph-geometry" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>default node card width       180 logical px
-<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>default node card min height   56 logical px
-<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>node corner radius              8 logical px
-<a id="__codelineno-75-4" name="__codelineno-75-4" href="#__codelineno-75-4"></a>normal edge width             1.5 logical px
-<a id="__codelineno-75-5" name="__codelineno-75-5" href="#__codelineno-75-5"></a>selected edge width           2.5 logical px
-<a id="__codelineno-75-6" name="__codelineno-75-6" href="#__codelineno-75-6"></a>selected node border          2.0 logical px
-<a id="__codelineno-75-7" name="__codelineno-75-7" href="#__codelineno-75-7"></a>port diameter                   8 logical px
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>default node card width       180 logical px
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>default node card min height   56 logical px
+<a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>node corner radius              8 logical px
+<a id="__codelineno-77-4" name="__codelineno-77-4" href="#__codelineno-77-4"></a>normal edge width             1.5 logical px
+<a id="__codelineno-77-5" name="__codelineno-77-5" href="#__codelineno-77-5"></a>selected edge width           2.5 logical px
+<a id="__codelineno-77-6" name="__codelineno-77-6" href="#__codelineno-77-6"></a>selected node border          2.0 logical px
+<a id="__codelineno-77-7" name="__codelineno-77-7" href="#__codelineno-77-7"></a>port diameter                   8 logical px
 </code></pre></div>
 <h3 id="674-3d-camera">67.4 3D camera<a class="headerlink" href="#674-3d-camera" title="Permanent link">&para;</a></h3>
 <p>Perspective camera:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>vertical FOV        60 degrees
-<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>near plane          0.1 world units
-<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>far plane           100000 world units
-<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a>orbit sensitivity   0.005 radians / pointer px
-<a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a>wheel dolly factor  exp(-wheel_delta * 0.001)
-<a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a>keyboard move       5 world units/s, Shift = 4x
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>vertical FOV        60 degrees
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>near plane          0.1 world units
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>far plane           100000 world units
+<a id="__codelineno-78-4" name="__codelineno-78-4" href="#__codelineno-78-4"></a>orbit sensitivity   0.005 radians / pointer px
+<a id="__codelineno-78-5" name="__codelineno-78-5" href="#__codelineno-78-5"></a>wheel dolly factor  exp(-wheel_delta * 0.001)
+<a id="__codelineno-78-6" name="__codelineno-78-6" href="#__codelineno-78-6"></a>keyboard move       5 world units/s, Shift = 4x
 </code></pre></div>
 <p>Camera starts looking at focused node from +Z at distance that fits the focused cluster in 70% of
 vertical FOV. If only one node exists, start distance = 10 world units.</p>
@@ -2175,7 +2151,7 @@ not recreate or approximate it.</p>
 <h2 id="68-native-remote-host-pairing">68. Native remote-host pairing<a class="headerlink" href="#68-native-remote-host-pairing" title="Permanent link">&para;</a></h2>
 <p>Pairing is an explicit capability; there is no trust-on-first-use.</p>
 <p>Server command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>omnis manager host pairing-code
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>omnis manager host pairing-code
 </code></pre></div>
 <p>creates:
 - 32 random bytes from kernel CSPRNG;
@@ -2184,7 +2160,7 @@ not recreate or approximate it.</p>
 - TTL 10 minutes;
 - single use.</p>
 <p>Client:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>omnis manager host pair &lt;host-or-ip&gt; --code &lt;base64url&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>omnis manager host pair &lt;host-or-ip&gt; --code &lt;base64url&gt;
 </code></pre></div>
 <p>Pair protocol over QUIC/TLS:</p>
 <ol>
@@ -2201,7 +2177,7 @@ not recreate or approximate it.</p>
 <p>Pair failure consumes no token except after 5 failed attempts from any peers, when token is revoked.
 Only one active pairing token exists per host.</p>
 <p>Unpair:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>omnis manager host unpair &lt;host-uuid&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>omnis manager host unpair &lt;host-uuid&gt;
 </code></pre></div>
 <p>removes authority grants/cache roots and marks peer binding unavailable; it does not delete historical
 Host identity/worldline events.</p>
@@ -2460,7 +2436,7 @@ with ingest time; outbox <code>created_at_ns</code> separately records graphd re
           </li>
           <li><a href="#42-inference-gateway-and-universal-model-event-interception">42. Inference gateway and universal model-event interception</a>
           </li>
-          <li><a href="#43-context-injection-into-external-harnesses">43. Context injection into external harnesses</a>
+          <li><a href="#43-external-harness-context-and-coverage">43. External-harness context and coverage</a>
           </li>
           <li><a href="#44-desktop-compatibility-services">44. Desktop compatibility services</a>
             <ul>

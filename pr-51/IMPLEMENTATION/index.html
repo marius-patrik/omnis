@@ -416,30 +416,31 @@ dependencies do not grow ad hoc.</p>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  managerd/resolver         deterministic resolver/placement
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  managerd/executor         systemd execution broker
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  managerd/adapters         subprocess adapter host
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  nix-observer/             C++ observer/control additions to upstream Nix
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>omnis-agent/
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>  crates/agentd             binary/event loop
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>  crates/worldline          append/replay storage
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>  crates/memory             cognitive graph writes + retrieval indexes
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>  crates/context            ContextCapsule compiler
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  crates/cognition          judgement/candidate/budget pipeline
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  crates/workers            durable worker/activity engine
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>  crates/replay             deterministic replay/evaluation tooling
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>omnis-control/
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>  crates/control            compositor binary
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  crates/projection         graph -&gt; ControlTree
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  crates/scene              ControlTree -&gt; RenderScene
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>  crates/render             wgpu renderer
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  crates/wayland            Smithay/XWayland integration
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>  crates/shell              PTY/vte terminal source
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  crates/input              deterministic resolver + event normalization
-<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>
-<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>omnis/
-<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>  protocol/                 canonical Cap'n Proto schemas
-<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>  cli/                      thin `omnis` RPC client
-<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>  tests/                    cross-component protocol/NixOS VM tests
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  managerd/inference        local protocol gateway + canonical inference translation
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  nix-observer/             C++ observer/control additions to upstream Nix
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>omnis-agent/
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>  crates/agentd             binary/event loop
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>  crates/worldline          append/replay storage
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>  crates/memory             cognitive graph writes + retrieval indexes
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  crates/context            ContextCapsule compiler
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  crates/cognition          judgement/candidate/budget pipeline
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>  crates/workers            durable worker/activity engine
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>  crates/replay             deterministic replay/evaluation tooling
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>omnis-control/
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  crates/control            compositor binary
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  crates/projection         graph -&gt; ControlTree
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>  crates/scene              ControlTree -&gt; RenderScene
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  crates/render             wgpu renderer
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>  crates/wayland            Smithay/XWayland integration
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  crates/shell              PTY/vte terminal source
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>  crates/input              deterministic resolver + event normalization
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>omnis/
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>  protocol/                 canonical Cap'n Proto schemas
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>  cli/                      thin `omnis` RPC client
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>  tests/                    cross-component protocol/NixOS VM tests
 </code></pre></div>
 <p>Generated protocol bindings come from the pinned umbrella schema revision rather than copied source.</p>
 <h2 id="22-cli">2.2 CLI<a class="headerlink" href="#22-cli" title="Permanent link">&para;</a></h2>
@@ -1038,7 +1039,8 @@ layout, routing rule or security policy on their own.</p>
 <a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>schema/worldline.sql
 <a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>schema/index.sql
 </code></pre></div>
-<p>Cross-process wire code is generated from <code>protocol/*.capnp</code>. Agent generative calls use
+<p>Cross-process wire code is generated from <code>protocol/*.capnp</code>, including the canonical inference IR.
+Harness adapters consume <code>spec/harnesses.toml</code> and <code>spec/inference_gateway.toml</code>. Agent generative calls use
 <code>prompts/*.md</code>. First-party graph identifiers come from <code>ONTOLOGY_V0.md</code>. NixOS modules implement
 <code>NIX_OPTIONS_V0.md</code> exactly.</p>
 <p>These files eliminate local schema/prompt/ontology/config design inside component repos.</p>
