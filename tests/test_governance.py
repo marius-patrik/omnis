@@ -725,7 +725,12 @@ def test_generic_harness_schema_is_closed_and_required():
     assert schema["additionalProperties"] is False
     assert schema["properties"]["schema"]["const"] == "omnis.harness.v1"
     assert set(schema["required"]) == {
-        "schema", "name", "executable", "probe", "invoke", "coverage"
+        "schema",
+        "name",
+        "executable",
+        "probe",
+        "invoke",
+        "coverage",
     }
     assert "descriptor-driven generic harness" in _read("ROADMAP.md")
 
