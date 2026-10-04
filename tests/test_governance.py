@@ -293,6 +293,7 @@ def test_decision_complete_v0_contract():
     ):
         assert token in spec, f"decision-complete spec must freeze {token!r}"
 
+
 def test_active_specs_forbid_implementer_choice_markers():
     """Active v0 specs must not positively delegate observable design decisions."""
     documents = (
@@ -638,6 +639,7 @@ def test_permanent_events_keep_cas_artifacts_alive():
     assert 'owner_kind = "event"' in decision
     assert "every ArtifactRef reachable from every retained core EventEnvelope" in decision
     assert "never removed by ordinary CAS GC" in decision
+
 
 def test_three_authority_adr_supersedes_four_authority_reset():
     old = _read("notes", "adr", "0023-graph-native-os-architecture-reset.md")
