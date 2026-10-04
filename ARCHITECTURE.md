@@ -7,23 +7,21 @@ constants, defaults and fallback behavior are frozen by
 [`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025. Canonical first-party
 kind/relation/capability/event names and lifecycle states are frozen by
 [`docs/ONTOLOGY_V0.md`](docs/ONTOLOGY_V0.md); public NixOS configuration is frozen by
-[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md). Built-in coding harness integration is frozen by
-[`docs/HARNESS_ADAPTERS_V0.md`](docs/HARNESS_ADAPTERS_V0.md). Learning, routing adaptation,
-competence modeling, procedure induction and self-optimization are frozen by
-[`docs/LEARNING_V0.md`](docs/LEARNING_V0.md).
+[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md). Harness-agnostic agent access is frozen by
+[`docs/AGENT_ACCESS_V0.md`](docs/AGENT_ACCESS_V0.md) and `spec/agent_access.toml`.
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.
 
-The system has four first-class authorities:
+The system has exactly three first-class authorities:
 
 1. **OmnisOS** — physical/system authority.
-2. **OmnisManager** — resource/capability authority.
-3. **OmnisAgent** — cognitive/event/memory authority.
-4. **OmnisControl** — interaction/presentation authority.
+2. **OmnisManager** — resource/capability/execution authority.
+3. **OmnisControl** — interaction/presentation authority.
 
-They share one multidimensional graph and one stable identity space. They do not maintain competing
-models of the same object.
+They share one multidimensional graph, one durable core event journal, and one stable identity space.
+No agent implementation is part of the core authority model. Agents are replaceable clients of these
+three surfaces.
 
 ---
 
@@ -39,18 +37,19 @@ generation is not copied into four subsystem-specific databases and reconciled l
 
 Different components contribute different dimensions and relations over the same identities.
 
-### 1.2 One worldline
+### 1.2 One core event journal; agent-owned memory
 
-OmnisAgent stores the immutable causal worldline of experience. The graph is current structured
-state; the worldline is what happened.
+Every meaningful first-party OS/Manager/Control transition enters the shared append-only core event
+journal. The journal is system history, not cognition.
 
-The graph may be rebuilt, reinterpreted, reindexed, or projected differently. Historical events are
-not silently rewritten to match newer interpretations.
+An attached agent consumes this journal and may maintain its own richer causal worldline, memory,
+goals, workers, model state, or learned procedures. Those structures belong to the agent
+implementation and are not required for OmnisOS, OmnisManager, or OmnisControl to boot or operate.
 
 ### 1.3 Bind reality; do not require it to become Omnis
 
-Existing applications, CLIs, services, libraries, models, agent harnesses, containers, VMs, package
-managers, protocols, and devices remain real external systems. Omnis discovers, binds, controls, and
+Existing applications, CLIs, services, libraries, models, containers, VMs, package managers,
+protocols, agents, and devices remain real external systems. Omnis discovers, binds, controls, and
 progressively understands them.
 
 Reimplementation requires a material reason. Integration is preferred to replacement.
@@ -59,8 +58,9 @@ Reimplementation requires a material reason. Integration is preferred to replace
 
 AI never becomes part of Nix evaluation or another deterministic build primitive.
 
-OmnisAgent may form an intention. OmnisManager resolves resources, capabilities, bindings, and
-placement. OmnisOS deterministically realizes persistent state and enforces physical constraints.
+An attached agent may form an intention, but the core never depends on one. OmnisManager resolves
+resources, capabilities, bindings, execution and placement. OmnisOS deterministically realizes
+persistent state and enforces physical constraints.
 
 ### 1.5 The interface is the graph made interactive
 
@@ -68,44 +68,50 @@ OmnisControl does not maintain a separate semantic UI universe. It projects grap
 control tree, lowers that tree into render state, and emits interactions back as graph mutations and
 events.
 
-The Agent receives events directly and can structurally mutate Control state. It does not need to
-observe screenshots or simulate clicks for first-party surfaces.
+Authorized agent clients receive the same first-party event journal directly and can structurally
+mutate Control state through its typed API. They do not need to observe screenshots or simulate
+clicks for first-party surfaces.
 
 ---
 
 ## 2. System topology
 
 ```text
-                                    USER
-                                      │
-                                      ▼
-                               ┌──────────────┐
-                               │ OmnisControl │
-                               └──────┬───────┘
-                                      │
-                                      ▼
-                        SHARED MULTIDIMENSIONAL GRAPH
-                                      │
-            ┌─────────────────────────┼─────────────────────────┐
-            │                         │                         │
-            ▼                         ▼                         ▼
-       ┌─────────┐              ┌──────────────┐           ┌────────────┐
-       │ OmnisOS │              │ OmnisManager │           │ OmnisAgent │
-       └────┬────┘              └──────┬───────┘           └─────┬──────┘
-            │                          │                         │
-            │ physical realization     │ capability execution    │ cognition
-            └──────────────┬───────────┴───────────────┬─────────┘
-                           ▼                           ▼
-                        Linux                      external reality
+                                     USER
+                                       │
+                                       ▼
+                                ┌──────────────┐
+                                │ OmnisControl │
+                                └──────┬───────┘
+                                       │
+                                       ▼
+                         SHARED MULTIDIMENSIONAL GRAPH
+                         + APPEND-ONLY CORE EVENT JOURNAL
+                                       │
+                 ┌─────────────────────┴─────────────────────┐
+                 │                                           │
+                 ▼                                           ▼
+            ┌─────────┐                                ┌──────────────┐
+            │ OmnisOS │                                │ OmnisManager │
+            └────┬────┘                                └──────┬───────┘
+                 │                                            │
+                 ▼                                            ▼
+               Linux                                  external reality
+
+        optional/replacable agent clients
+           │               │
+           ├── MCP ─────────┤
+           └── native plugin/SDK adapters
+                 │
+                 ▼
+       OS + Manager + Control + graph/events
 ```
 
-Every meaningful transition produced by OS, Manager, Control, external integrations, or Agent
-workers enters OmnisAgent's event gateway.
+The graph substrate is **not a fourth product authority**. It is a shared system ABI and current-state
+substrate supplied by OmnisOS and used by all three authorities.
 
-The graph substrate is **not a fifth product or semantic authority**. It is a shared system ABI and
-current-state substrate supplied by OmnisOS and used by all four components.
-
----
+Agent access is also **not a fourth authority**. MCP and plugin adapters are projections over the same
+typed APIs and event journal. Removing every agent integration leaves a fully usable Omnis machine.
 
 ## 3. Shared multidimensional graph
 
@@ -221,71 +227,50 @@ remains replaceable behind the graph contract.
 
 ---
 
-## 4. Worldline and events
+## 4. Core events and external agent worldlines
 
-### 4.1 Ownership
+### 4.1 Core ownership
 
-OmnisAgent owns the canonical event worldline.
+The shared graph substrate owns one append-only, revision-addressable **core event journal** for every
+first-party OS, Manager and Control event.
 
-Every meaningful transition from a first-party component must be represented as an event. Components
-do not require Agent polling to discover their state transitions.
+The journal exists so any authorized agent can attach at any time, replay from an ingest sequence,
+then follow the live stream without polling any subsystem.
+
+No global Agent ACK exists. One consumer can never delete or advance another consumer's history.
 
 ### 4.2 Event shape
 
-```text
-Event
-  id
-  type
-  schema
-  source
-  actor
-  timestamp
-  causal_parents[]
-  graph_revision
-  entities[]
-  artifact_refs[]
-  payload_ref
-  provenance
-  correlation/trace
-```
-
-Events form an append sequence for replay and a causal DAG for meaning.
+Every event carries stable EventId, type, producer identity, graph revision where applicable,
+monotonic/wall time, TraceId, referenced NodeIds/ArtifactIds and one typed payload from
+`protocol/events.capnp`.
 
 ### 4.3 Event coverage
 
-Required event producers include:
+The core journal includes:
+- graph commits;
+- process/service/device/network/generation transitions;
+- Manager discovery/resolution/execution/credential/inference transitions;
+- every Control input, focus, selection, mode, lens, tree, native-surface, terminal, navigation and
+  notification transition;
+- dense lossless batches for high-rate input/telemetry classes.
 
-- graph transactions;
-- keyboard, pointer, focus, selection, navigation, and control interactions;
-- scene/control-tree changes;
-- process/service lifecycle;
-- filesystem/repository changes;
-- package/build/generation activity;
-- device/network/resource changes;
-- Manager discovery/resolution/execution;
-- model and inference requests/results;
-- external agent harness lifecycle/tool results;
-- Agent worker lifecycle/results;
-- memory/context/consolidation events;
-- internally generated Agent events.
+An agent does not infer these transitions from screenshots or periodically scrape current state.
 
-High-frequency physical telemetry may be represented through lossless aggregation windows or
-referenced artifacts, but causal identity and provenance must not disappear merely because the Agent
-cannot process each raw sample synchronously.
+### 4.4 Agent-owned continuity
 
-### 4.4 Graph versus worldline
+A specific agent may store:
+- its own causal worldline;
+- memory and retrieval indexes;
+- goals/commitments;
+- model conversations;
+- worker/task state;
+- learned procedures;
+- preferences and self-model.
 
-```text
-worldline = historical causal truth
-shared graph = current structured state
-indexes = derived query accelerators
-Control tree = interactive projection
-render scene = GPU-oriented lowering
-```
-
-No derived layer becomes canonical merely because it is convenient to query.
-
----
+Those are agent implementation details. They may reference core NodeIds/EventIds, and an authorized
+plugin may project agent-owned semantic dimensions into extension graph namespaces, but none becomes
+a core Omnis authority.
 
 ## 5. OmnisOS
 
@@ -450,23 +435,17 @@ The initial Manager must support resources for:
 - model artifacts;
 - inference engines;
 - model/API providers;
-- external agent harnesses;
 - MCP servers/clients;
 - protocol/API endpoints;
 - repositories/workspaces;
 - credential/protected-value handles;
 - arbitrary native/foreign handles.
 
-### 6.5 Agent harnesses and inference
+### 6.5 Models and inference
 
-External harnesses and inference engines belong in Manager, not Agent.
-
-Examples:
+Models and inference engines are ordinary Manager resources when the machine chooses to expose them.
 
 ```text
-Capability: code.agent
-  bindings -> Claude Code, Codex, OpenCode, future harnesses
-
 Capability: model.embed
   bindings -> local embedding runtime, ONNX, remote endpoint
 
@@ -474,8 +453,8 @@ Capability: model.reason
   bindings -> local LLM, remote API, specialist service
 ```
 
-OmnisAgent requests capabilities; it does not embed provider-specific integration into its cognitive
-core.
+An external agent may use these Manager capabilities or its own model stack. Omnis does not embed,
+launch, adapt, version-pin, or depend on external coding-agent harnesses.
 
 ### 6.6 Discovery
 
@@ -543,90 +522,54 @@ realization unless the caller requests a specific implementation.
 
 ---
 
-## 7. OmnisAgent
+## 7. Harness-agnostic agent access
 
-OmnisAgent is a core subsystem and the persistent cognitive identity of the machine. It is not a
-single model and has no privileged universal LLM loop.
+There is no core OmnisAgent service.
 
-### 7.1 Responsibilities
-
-OmnisAgent owns:
-
-- event ingestion and causal worldline;
-- episodic/semantic/procedural/project memory;
-- entity and relation interpretation;
-- judgement/routing;
-- context compilation;
-- working-memory activation;
-- goals, commitments, hypotheses, expectations;
-- worker/workflow orchestration;
-- reflection and consolidation;
-- learned procedures and routing;
-- endogenous events/internal dynamics;
-- self-model and candidate self-evolution.
-
-### 7.2 Event-driven cognition
-
-The basic cognitive unit is an event:
+Any authorized agent can consume Omnis through the **same three semantic surfaces**:
 
 ```text
-event
-  -> judgement
-  -> context compilation
-  -> worker/workflow dispatch or null action
-  -> observations/effects
-  -> new events
+OmnisOS       -> physical/system inspection and mutation
+OmnisManager  -> resources/capabilities/executions
+OmnisControl  -> interaction tree, graph desktop and renderer structure
 ```
 
-External user requests are one event source among many. There is no semantic `IDLE` state. A living
-Agent may be busy, waiting, consolidating, exploring, sleeping, or doing nothing.
+The shared graph and core event journal provide common state and observation.
 
-### 7.3 Memory
+### 7.1 Two projections, one semantics
 
-The event worldline is historical ground truth. Derived memory is revisable.
+v0 ships two agent-access projections:
 
-Required memory forms include:
+1. **MCP** — `omnis mcp` exposes the exact public OS/Manager/Control/graph operations as MCP
+   tools/resources and exposes the core event journal as a replayable/subscribable resource.
+2. **Plugin SDK** — typed generated clients expose the exact same operations/events to native agent
+   plugins without MCP serialization.
 
-- events;
-- episodes;
-- assertions/facts with temporal validity;
-- entities and relationships;
-- decisions;
-- goals and commitments;
-- preferences with scope;
-- project state;
-- procedures/skills;
-- expectations/predictive memory;
-- artifacts and provenance.
+Neither path owns additional semantics. `spec/agent_access.toml` is the parity registry and CI fails
+when a public core operation/event exists without both projections.
 
-Embeddings, summaries, graphs, and indexes are representations, not canonical truth.
+### 7.2 No harness dependency
 
-### 7.4 Context
+The core does not know Claude Code, Codex, OpenCode, DeepSeek Harness, or any other agent runtime.
+There are no built-in harness adapters, harness version pins, harness routing chains, or provider
+credentials injected into foreign agent processes.
 
-Context is compiled for a specific event, worker, and purpose. It is not an ever-growing transcript.
+An agent is simply a client with authority.
 
-The context compiler may combine causal ancestors, graph neighborhoods, activated memories, project
-state, code structure, artifacts, prior attempts, negative evidence, and protected-information
-constraints under token/latency/privacy budgets.
+### 7.3 Direct Control authority
 
-### 7.5 Models and workers
+Authorized agents receive more structural interface access than ordinary pointer/keyboard interaction
+exposes. They can create/remove/reparent Control nodes, materialize graph projections, bind semantic
+identities, change representation/lens/mode, navigate/focus/select, attach actions and build
+visualizations directly.
 
-Models are Manager resources. Workers are Agent cognitive roles/activations that can use one or more
-Manager capabilities.
+This is typed tree mutation, not screenshot observation or synthetic input.
 
-Initial worker families include judgement, retrieval, reasoning, research, code, verification,
-simulation, memory/reflection, learning, and evolution.
+### 7.4 Reference agent
 
-Every worker result re-enters the event stream. No worker maintains a hidden alternate history.
-
-### 7.6 External agents
-
-Claude Code, Codex, OpenCode, and descriptor-driven future harnesses are Manager resources that
-OmnisAgent may invoke as workers. Their exact v0 adapters are defined by `HARNESS_ADAPTERS_V0.md`.
-All model-bound built-in harness traffic routes through the Manager inference gateway; available
-native hooks add lifecycle evidence but never replace that gateway boundary.
-
----
+The reference agent environment is developed separately by evolving `marius-patrik/dsh-stack`.
+That project owns cognition, memory, model/provider use, tasks/workers and agent UX. Its Omnis
+integration is an ordinary plugin/MCP client and is not required by an Omnis system release.
 
 ## 8. OmnisControl
 
@@ -683,8 +626,7 @@ identities. The render scene is an optimized lowering, never a semantic source o
 
 User interaction and Agent structural control share the same underlying state.
 
-The user primarily manipulates materialized controls through pointer, keyboard, touch, and explicit push-to-talk voice input. The Agent
-has direct structural access and may:
+The user primarily manipulates materialized controls through pointer, keyboard, touch, and explicit push-to-talk voice input. An authorized agent client has direct structural access and may:
 
 - create/remove/replace/move views;
 - bind a view to another graph identity;
@@ -720,7 +662,7 @@ valid shell syntax / executable -> real shell execution
 known URI/path/graph identity    -> navigate/open
 known capability                -> invoke
 known structured query          -> query graph
-otherwise                       -> OmnisAgent semantic interpretation
+otherwise                       -> unresolved semantic input event / registered agent client
 ```
 
 No explicit switch between "terminal" and "AI chat" is required.
@@ -752,12 +694,13 @@ descriptive text.
 
 ### 10.1 Shared semantics
 
-There must not be separate GUI, CLI, Agent, or MCP semantics for the same capability. Different
-surfaces may expose different representations of one operation.
+There must not be separate GUI, CLI, MCP, or plugin semantics for the same capability. All are
+projections of the same typed core operation.
 
 ### 10.2 Event-first integration
 
-First-party components publish events; Agent does not depend on scraping/polling them.
+First-party components publish every meaningful transition to the core event journal; agents consume
+that journal rather than scraping/polling subsystems.
 
 ### 10.3 Deterministic-first operation
 
@@ -771,54 +714,36 @@ silently degrading behavior.
 
 ### 10.5 Provenance
 
-Resources, bindings, graph relations, memories, and generated views retain enough provenance to
+Resources, bindings, graph relations, events, and generated views retain enough provenance to
 explain where they came from and how strongly they are known.
 
 ---
 
 ## 11. Security model
 
-Security belongs at the physical boundary rather than as a semantic censor of cognition.
-
-The cognitive plane may formulate arbitrary hypotheses/plans within model capability. The effect
-plane grants only the physical handles and authorities available to that execution.
+Security belongs at the physical/core API boundary, not inside one privileged agent.
 
 Required principles:
+- agents receive only the OS/Manager/Control authorities granted to their caller/session;
+- secrets are protected handles, not MCP/plugin payload text;
+- one agent client never inherits another client's cursor/state/credentials;
+- graph visibility and extension-namespace writes follow granted authority;
+- external effects retain caller, TraceId and causal identity;
+- persistent system changes remain inspectable generations and reversible where the physical
+  operation permits it.
 
-- secrets are handles, not prompt text;
-- no worker inherits broad user authority by default;
-- host/graph visibility follows granted authority;
-- protected data carries disclosure constraints into model/Control projections;
-- external effects retain causal and actor identity;
-- candidate self-modification is isolated from the active system until realization/promotion;
-- persistent system changes remain representable as generations and reversible where the underlying
-  physical operation permits it.
+## 12. Core optimization and external cognition
 
----
-
-## 12. Self-modification and optimization
-
-Omnis may optimize itself at several levels.
-
-### 12.1 Runtime optimization
-
-Manager may change placement, runtime implementation, batching, caching, model routing, or resource
+OmnisManager may optimize placement, runtime implementation, batching, caching and resource
 allocation when semantics permit it.
 
-### 12.2 Cognitive adaptation
+Cognitive adaptation, memory learning, worker strategies, self-modeling and agent self-modification
+are outside the three core authorities. A connected agent may propose Control mutations, Manager
+executions or OmnisOS generation changes, but those proposals cross the same typed boundaries as any
+other client.
 
-Agent may learn memories, procedures, retrieval policies, routing preferences, competence estimates,
-and worker strategies.
-
-### 12.3 Structural evolution
-
-Changes to Omnis components themselves are candidate implementations/generations. They are built and
-evaluated outside the currently active implementation before promotion.
-
-For OmnisOS and Manager, Nix derivations/generations provide the realization boundary. Agent and
-Control variants are built as pinned Nix artifacts with explicit lineage before promotion.
-
----
+Changes to OmnisOS, OmnisManager or OmnisControl themselves are candidate builds/generations evaluated
+outside the active implementation before promotion.
 
 ## 13. Host independence
 
@@ -857,8 +782,8 @@ opaque executable/surface
   -> semantically rich Manager binding
 ```
 
-The Agent can initially interact through weak interfaces and later compile repeated successful
-behavior into stronger deterministic capabilities.
+An external agent can initially interact through weaker foreign interfaces and may later propose
+stronger deterministic Manager bindings.
 
 Vision + synthetic mouse/keyboard is a compatibility fallback, not the preferred first-party
 interaction mechanism.
@@ -867,52 +792,49 @@ interaction mechanism.
 
 ## 15. Repository/product topology
 
-The intended project split is:
+The core project split is:
 
 ```text
-omnis/             umbrella architecture, integration, compatibility tests
+omnis/             umbrella architecture, shared contracts, MCP/plugin projection, integration tests
 omnis-os/          NixOS/nixpkgs-derived operating system
-omnis-manager/     Nix-derived manager
-omnis-agent/       event/memory/cognition subsystem
+omnis-manager/     Nix-derived resource/capability/execution manager
 omnis-control/     graph desktop/compositor/control subsystem
 ```
 
-A future organization may host maintained upstream forks separately, but the product boundaries above
-remain.
+The reference agent is **not** a core repository boundary:
+
+```text
+dsh-stack/         separately released reference agent environment + Omnis integration plugin
+```
 
 The umbrella repository owns cross-component protocol versions, architecture, end-to-end tests,
-reference configuration, release composition, and compatibility matrices.
-
----
+agent-access parity, reference configuration, release composition and compatibility matrices.
+A core release does not pin a DSH/agent version.
 
 ## 16. Implementation invariants
 
 The following are hard architectural constraints:
 
-1. **One stable identity space across OS, Manager, Agent, and Control.**
-2. **One shared multidimensional current-state graph.**
-3. **OmnisAgent owns the immutable causal worldline and memory.**
-4. **Every meaningful first-party transition reaches Agent as an event; Agent does not poll the UI.**
-5. **Graph dimensions have explicit write ownership.**
-6. **Control tree is derived from/shared with graph state; render scene is only a lowering.**
-7. **2D and 3D Control modes represent the same identities and interaction state.**
-8. **Agent may structurally mutate Control state directly.**
-9. **Models, inference engines, and external agent harnesses are Manager resources.**
-10. **Nix evaluation/build remains deterministic and model-free.**
-11. **Persistent structural system changes are realized as inspectable generations.**
-12. **Transient execution does not require rewriting persistent Nix configuration.**
-13. **Capabilities describe meaning; bindings describe concrete realizations.**
-14. **Existing mature tools are bound before equivalent functionality is reimplemented.**
-15. **Discovery is deterministic-first and preserves foreign provenance.**
-16. **Protected values remain handles unless explicit authorized disclosure is required.**
-17. **Semantic identity survives version, host, path, process, and provider changes.**
-18. **External effects are accounted for honestly; opaque effects are not falsely rolled back.**
-19. **Agent context is compiled per event/worker, never a global ever-growing transcript.**
-20. **No LLM or provider is the identity of OmnisAgent.**
-21. **There is no semantic idle state; null/no work is valid.**
-22. **No component creates a parallel authoritative world model for objects already in the shared graph.**
-
----
+1. **Exactly three core authorities: OmnisOS, OmnisManager, OmnisControl.**
+2. **One stable identity space and one shared multidimensional current-state graph.**
+3. **One append-only core event journal contains every meaningful first-party transition.**
+4. **No agent implementation is required for boot, Control, package management, execution or recovery.**
+5. **Every public OS/Manager/Control/graph operation has MCP and native-plugin projection parity.**
+6. **No MCP/plugin projection invents semantics absent from the typed core APIs.**
+7. **Graph dimensions have explicit write ownership; external agents use granted extension namespaces.**
+8. **Control tree is derived from/shared with graph state; render scene is only a lowering.**
+9. **2D and 3D Control modes represent the same identities and interaction state.**
+10. **Authorized agents may structurally mutate Control directly without screenshot observation.**
+11. **Nix evaluation/build remains deterministic and model-free.**
+12. **Persistent structural system changes are inspectable generations.**
+13. **Transient execution does not require rewriting persistent Nix configuration.**
+14. **Capabilities describe meaning; bindings describe concrete realizations.**
+15. **Existing mature tools are bound before equivalent functionality is reimplemented.**
+16. **Discovery is deterministic-first and preserves foreign provenance.**
+17. **Protected values remain handles unless explicit authorized disclosure is required.**
+18. **Semantic identity survives version, host, path, process, provider and agent changes.**
+19. **External effects are accounted for honestly; opaque effects are not falsely rolled back.**
+20. **The core contains no built-in external-agent harness integration or harness-specific version policy.**
 
 ## 17. Non-goals
 
@@ -924,7 +846,7 @@ The initial architecture explicitly does not require:
 - replacement of existing applications;
 - a new model-provider API standard;
 - a traditional desktop shell/dock/application launcher model;
-- a monolithic executive LLM;
+- a built-in agent runtime or monolithic executive LLM;
 - forcing all software into Omnis-native UI;
 - representing every kernel interrupt/syscall as a high-level cognitive event.
 
@@ -935,28 +857,26 @@ semantics, security, or performance.
 
 ## 18. Completion criterion
 
-A first complete Omnis implementation exists when one machine can:
+A first complete **core Omnis** implementation exists when one machine can:
 
 1. boot OmnisOS from its NixOS-derived configuration;
 2. expose authoritative physical/system state into the shared graph;
-3. use OmnisManager to install/discover/resolve arbitrary packages and resource bindings;
-4. run local/remote inference engines and external agent harnesses as Manager resources;
-5. maintain OmnisAgent's causal event worldline and structured memory;
-6. compile task-specific context and dispatch heterogeneous workers;
-7. boot OmnisControl as the primary environment;
-8. present the same graph desktop in interactive 2D and 3D modes;
-9. execute real Linux shell commands and unmodified Wayland/XWayland applications;
-10. allow Agent and user actions to operate on the same graph identities;
-11. allow Agent direct structural mutation of Control projections;
-12. apply persistent system changes through candidate Nix generations and roll them back;
-13. preserve events/provenance across restart;
-14. continue functioning when any particular model/provider/harness is replaced or unavailable.
+3. durably journal every first-party OS/Manager/Control event;
+4. use OmnisManager to install/discover/resolve arbitrary packages and resource bindings;
+5. run generic model/inference resources without requiring any agent runtime;
+6. boot OmnisControl as the primary environment;
+7. present the same graph desktop in interactive 2D and 3D modes;
+8. execute real Linux shell commands and unmodified Wayland/XWayland applications;
+9. apply persistent system changes through candidate Nix generations and roll them back;
+10. expose **all** public OS/Manager/Control/graph operations and the complete event journal through
+    MCP;
+11. expose the same operation/event set through the native plugin SDK with automated parity tests;
+12. permit an independently installed agent, including the DSH reference agent, to inspect state,
+    receive every event and structurally mutate Control without any core change;
+13. continue functioning identically when that agent is absent, replaced or disconnected.
 
-At that point Omnis is not merely an AI-enabled Linux distribution. It is a machine whose operating
-state, available actions, cognition, and interface are all different projections of one persistent,
-addressable system.
-
----
+At that point Omnis is an agent-ready operating environment rather than an operating system whose
+identity depends on a particular agent implementation.
 
 ### 18.1 Decision completeness
 
@@ -972,10 +892,9 @@ The following are normative v0 implementation inputs, not examples:
 
 ```text
 schema/graph.sql
-schema/worldline.sql
-schema/index.sql
 protocol/*.capnp
-prompts/*.md
+spec/agent_access.toml
+docs/AGENT_ACCESS_V0.md
 docs/ONTOLOGY_V0.md
 docs/NIX_OPTIONS_V0.md
 ```

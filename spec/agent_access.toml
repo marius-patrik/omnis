@@ -1,0 +1,39 @@
+version = 1
+profile = "omnis-agent-access-v0"
+mcp_command = "omnis mcp"
+mcp_transport = "stdio"
+plugin_package = "@omnis/agent-access"
+event_resource = "omnis://events/core"
+event_delivery = "lossless-cursor"
+event_retention = "indefinite-v0"
+
+[surfaces.os]
+protocol = "protocol/os.capnp"
+interface = "OsService"
+mcp_prefix = "omnis.os"
+plugin_client = "os"
+
+[surfaces.manager]
+protocol = "protocol/manager.capnp"
+interface = "ManagerService"
+mcp_prefix = "omnis.manager"
+plugin_client = "manager"
+
+[surfaces.control]
+protocol = "protocol/control.capnp"
+interface = "ControlService"
+mcp_prefix = "omnis.control"
+plugin_client = "control"
+
+[substrates.graph]
+protocol = "protocol/graph.capnp"
+interface = "GraphService"
+mcp_prefix = "omnis.graph"
+plugin_client = "graph"
+
+[parity]
+exclude_methods = ["handshake"]
+require_mcp = true
+require_plugin = true
+require_all_events = true
+allow_projection_only_semantics = false
