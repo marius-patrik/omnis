@@ -473,7 +473,7 @@ Foreign provenance must record how each capability/relationship was learned.
 
 Credentials and sensitive data are protected resources/handles.
 
-The Agent may know that a credential exists and what capabilities it can authorize without receiving
+An authorized caller may know that a credential exists and what capabilities it can authorize without receiving
 its plaintext value. Manager resolves authorized handles at execution time; OmnisOS enforces the
 physical access boundary.
 
@@ -619,9 +619,9 @@ shared graph
 The Control tree may contain ephemeral layout nodes, but semantic leaves reference shared graph
 identities. The render scene is an optimized lowering, never a semantic source of truth.
 
-### 8.4 Agent access
+### 8.4 External-agent access
 
-User interaction and Agent structural control share the same underlying state.
+User interaction and external-agent structural control share the same underlying state.
 
 The user primarily manipulates materialized controls through pointer, keyboard, touch, and explicit push-to-talk voice input. An authorized agent client has direct structural access and may:
 
@@ -632,7 +632,7 @@ The user primarily manipulates materialized controls through pointer, keyboard, 
 - split or reorganize the workspace;
 - create live visualizations;
 - attach actions/interactions;
-- persist a Control arrangement only when the user explicitly requests persistence, an existing durable presentation preference requires it, or the Agent-selected action has a persistence postcondition; otherwise the arrangement remains transient.
+- persist a Control arrangement only when the user explicitly requests persistence, an existing durable presentation preference requires it, or the caller-selected action has a persistence postcondition; otherwise the arrangement remains transient.
 
 These mutations emit events like user interactions do.
 
@@ -678,7 +678,6 @@ omnis://event/<id>
 omnis://resource/<id>
 omnis://capability/<id>
 omnis://scene/<id>
-omnis://memory/<id>
 ```
 
 Protocol v0 uses `omnis://` stable-reference URIs as defined by `docs/PROTOCOLS.md`; first-party
@@ -744,7 +743,7 @@ outside the active implementation before promotion.
 
 ## 13. Host independence
 
-A semantic resource or activity is not identified by the machine currently executing it.
+A semantic resource or execution is not identified by the machine currently executing it.
 
 Manager may place execution on:
 
@@ -756,7 +755,7 @@ Manager may place execution on:
 - cloud resource;
 - GPU/accelerator host.
 
-Placement preserves graph/resource/activity identity and emits causal events describing the physical
+Placement preserves graph/resource/execution identity and emits causal events describing the physical
 realization.
 
 The long-term system may span laptop, workstation, phone, and server without treating one device as
@@ -831,7 +830,7 @@ The following are hard architectural constraints:
 17. **Protected values remain handles unless explicit authorized disclosure is required.**
 18. **Semantic identity survives version, host, path, process, provider and agent changes.**
 19. **External effects are accounted for honestly; opaque effects are not falsely rolled back.**
-20. **The core contains no built-in external-agent agent-runtime integration or agent-runtime-specific version policy.**
+20. **The core contains no built-in agent runtime or agent-runtime-specific policy.**
 
 ## 17. Non-goals
 
@@ -896,5 +895,5 @@ docs/ONTOLOGY_V0.md
 docs/NIX_OPTIONS_V0.md
 ```
 
-An implementation worker copies/uses these contracts; it does not redesign their schema, prompt,
-identifier or option surfaces.
+An implementation worker copies/uses these contracts; it does not redesign their schema,
+identifier, projection or option surfaces.

@@ -164,20 +164,14 @@ The agent operates the tree directly and receives resulting Control events from 
 First-party automation MUST NOT use screenshots/synthetic input when the typed Control operation
 exists.
 
-## 8. No external harness architecture
+## 8. Agent-runtime neutrality
 
-Omnis core contains no:
-- Claude Code adapter;
-- Codex adapter;
-- OpenCode adapter;
-- DeepSeek Harness adapter;
-- generic PTY coding-agent-runtime adapter;
-- harness version pin;
-- harness failover chain;
-- agent-runtime-specific model gateway.
+Omnis core defines no agent runtime, agent-runtime adapter, runtime version policy, cognitive worker
+model, or agent-specific inference gateway.
 
-An external agent runtime may itself use any models/providers/harness machinery it wants. From Omnis'
-perspective it is still only a client of the same three surfaces.
+An external agent is free to use its own models, providers, memory, execution engine and internal
+tooling. From Omnis' perspective it remains a caller of the same three typed surfaces and the same
+core event journal.
 
 ## 9. DSH reference direction
 
