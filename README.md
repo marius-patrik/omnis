@@ -17,7 +17,7 @@ space.
 ## Agents are clients, not a core subsystem
 
 Omnis does **not** ship or depend on an OmnisAgent daemon, Claude Code, Codex, OpenCode, DeepSeek
-Harness, or another coding-agent harness.
+Harness, or another agent runtime.
 
 Any authorized agent can use the same three core surfaces through:
 - `omnis mcp` — stdio MCP projection;

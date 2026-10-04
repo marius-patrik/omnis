@@ -4,7 +4,7 @@
 this document freezes the first implementation profile. `DECISION_COMPLETE_V0.md` freezes all v0
 algorithms, constants, defaults and fallback behavior. `ONTOLOGY_V0.md` freezes semantic names/state
 machines, `NIX_OPTIONS_V0.md` freezes the public NixOS option surface, and `AGENT_ACCESS_V0.md`
-freezes harness-agnostic external-agent access. A mechanism changes only through an explicit
+freezes agent-runtime-agnostic external-agent access. A mechanism changes only through an explicit
 architecture/ADR change.
 
 ## 1. Implementation profile
@@ -534,7 +534,7 @@ container runtime
 SSH/remote Omnis host
 ```
 
-## 9. Harness-agnostic agent-access implementation
+## 9. Agent-runtime-agnostic agent-access implementation
 
 Core ships no agent daemon.
 

@@ -8,7 +8,7 @@ constants, defaults and fallback behavior are frozen by
 [`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025. Canonical first-party
 kind/relation/capability/event names and lifecycle states are frozen by
 [`docs/ONTOLOGY_V0.md`](docs/ONTOLOGY_V0.md); public NixOS configuration is frozen by
-[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md). Harness-agnostic agent access is frozen by
+[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md). Agent-runtime-agnostic agent access is frozen by
 [`docs/AGENT_ACCESS_V0.md`](docs/AGENT_ACCESS_V0.md) and `spec/agent_access.toml`.
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
@@ -384,7 +384,7 @@ Execution    one concrete use of a binding
 Constraint   a condition on resolution, placement, or execution
 ```
 
-Packages, models, harnesses, GPUs, services, CLIs, APIs, libraries, devices, containers, VMs,
+Packages, models, GPUs, services, CLIs, APIs, libraries, devices, containers, VMs,
 credentials, and remote hosts are resources rather than separate architecture families.
 
 ### 6.2 Nix integration
@@ -451,7 +451,7 @@ Capability: model.reason
 ```
 
 An external agent may use these Manager capabilities or its own model stack. Omnis does not embed,
-launch, adapt, version-pin, or depend on external coding-agent harnesses.
+launch, adapt, version-pin, or depend on external agent runtimes.
 
 ### 6.6 Discovery
 
@@ -519,7 +519,7 @@ realization unless the caller requests a specific implementation.
 
 ---
 
-## 7. Harness-agnostic agent access
+## 7. Agent-runtime-agnostic agent access
 
 There is no core OmnisAgent service.
 
@@ -547,8 +547,8 @@ when a public core operation/event exists without both projections.
 
 ### 7.2 No harness dependency
 
-The core does not know Claude Code, Codex, OpenCode, DeepSeek Harness, or any other agent runtime.
-There are no built-in harness adapters, harness version pins, harness routing chains, or provider
+The core does not know any particular external agent runtime.
+There are no built-in agent-runtime adapters, agent-runtime version pins, agent-runtime routing chains, or provider
 credentials injected into foreign agent processes.
 
 An agent is simply a client with authority.
@@ -831,7 +831,7 @@ The following are hard architectural constraints:
 17. **Protected values remain handles unless explicit authorized disclosure is required.**
 18. **Semantic identity survives version, host, path, process, provider and agent changes.**
 19. **External effects are accounted for honestly; opaque effects are not falsely rolled back.**
-20. **The core contains no built-in external-agent harness integration or harness-specific version policy.**
+20. **The core contains no built-in external-agent agent-runtime integration or agent-runtime-specific version policy.**
 
 ## 17. Non-goals
 

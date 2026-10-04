@@ -193,7 +193,7 @@ envelopes without changing system generation unless requested.
 `omnis-osd`. osd validates the envelope, starts the transient systemd service and returns either
 pipe or PTY stream capabilities. ExecutionId is preserved across Manager/OS/process graph state.
 
-## 6. Harness-agnostic agent projections
+## 6. Agent-runtime-agnostic agent projections
 
 There is no AgentService protocol.
 

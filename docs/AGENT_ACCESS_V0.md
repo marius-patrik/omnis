@@ -2,7 +2,7 @@
 
 **Status: NORMATIVE.** Omnis core has no built-in agent runtime. This document defines how arbitrary
 agents access OmnisOS, OmnisManager, OmnisControl, the shared graph, and the complete core event
-journal without harness-specific integration.
+journal without agent-runtime-specific integration.
 
 ## 1. Principle
 
@@ -171,10 +171,10 @@ Omnis core contains no:
 - Codex adapter;
 - OpenCode adapter;
 - DeepSeek Harness adapter;
-- generic PTY coding-harness adapter;
+- generic PTY coding-agent-runtime adapter;
 - harness version pin;
 - harness failover chain;
-- harness-specific model gateway.
+- agent-runtime-specific model gateway.
 
 An external agent runtime may itself use any models/providers/harness machinery it wants. From Omnis'
 perspective it is still only a client of the same three surfaces.

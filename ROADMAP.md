@@ -1,7 +1,7 @@
 # Omnis — Core Implementation Roadmap
 
 This roadmap implements the three core authorities only: OmnisOS, OmnisManager and OmnisControl.
-No agent runtime or external coding harness is a core dependency. Concrete behavior is frozen by the
+No agent runtime or external agent runtime is a core dependency. Concrete behavior is frozen by the
 normative contracts and `spec/contract.toml`; workers report SpecificationDefect instead of designing
 missing behavior.
 
@@ -11,7 +11,7 @@ missing behavior.
 - maintain `omnis-os`, `omnis-manager`, `omnis-control`;
 - keep shared protocol/spec ownership in `omnis`;
 - establish upstream NixOS/nixpkgs and Nix tracking;
-- remove core OmnisAgent/harness assumptions;
+- remove core built-in agent-runtime assumptions;
 - establish end-to-end compatibility CI.
 
 Exit: all core implementation work has one owner and no fourth core authority remains normative.
@@ -74,7 +74,7 @@ Implement:
 
 Exit: boot lands in Control and works fully with no agent installed.
 
-## Phase 5 — Harness-agnostic agent access
+## Phase 5 — Agent-runtime-agnostic agent access
 
 Implement exactly `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`:
 - `omnis mcp` stdio server;
@@ -98,7 +98,7 @@ Manager:
 - MCP foreign endpoints;
 - repository/VCS/LSP/tooling discovery.
 
-These are semantic resources, not external agent harnesses.
+These are semantic resources, not external agent runtimes.
 
 Exit: agents can use Manager's generic capabilities or their own stack interchangeably.
 
