@@ -1,0 +1,146 @@
+version = 1
+
+virtual_model = "omnis-reason"
+gateway_base_url = "http://127.0.0.1:7331"
+gateway_token_env = "OMNIS_GATEWAY_TOKEN"
+required_capability = "omnis.capability.model.reason"
+
+[coverage]
+full_requires = ["model_interception", "context_injection", "structured_lifecycle", "structured_tool_events", "session_resume", "permission_control"]
+
+[harnesses.claude]
+display_name = "Claude Code"
+version = "2.1.289"
+executable = "claude"
+version_argv = ["claude", "--version"]
+version_regex = '(?i)(?:claude(?: code)?\s*)?v?(\d+\.\d+\.\d+)'
+execution_mode = "process-per-turn"
+transport = "ndjson-stdio"
+coverage = "full"
+model_interception = true
+context_injection = true
+structured_lifecycle = true
+structured_tool_events = true
+session_resume = true
+permission_control = true
+network_profile = "loopback-gateway"
+working_directory = "worker-worktree"
+stdin_format = "claude-stream-json-user-v1"
+stdout_format = "claude-stream-json-v1"
+
+[harnesses.claude.command]
+argv = [
+  "claude",
+  "-p",
+  "--input-format", "stream-json",
+  "--output-format", "stream-json",
+  "--verbose",
+  "--dangerously-skip-permissions",
+  "--model", "omnis-reason"
+]
+resume_suffix = ["--resume", "{foreign_session_id}"]
+
+[harnesses.claude.env]
+ANTHROPIC_BASE_URL = "http://127.0.0.1:7331/anthropic"
+ANTHROPIC_AUTH_TOKEN = "{OMNIS_GATEWAY_TOKEN}"
+ANTHROPIC_MODEL = "omnis-reason"
+DISABLE_AUTOUPDATER = "1"
+
+[harnesses.claude.input]
+json = '{"type":"user","message":{"role":"user","content":[{"type":"text","text":"{expanded_code_worker_prompt}"}]},"parent_tool_use_id":null}'
+
+[harnesses.claude.output]
+session_id_field = "session_id"
+success_type = "result"
+success_subtype = "success"
+error_subtypes = ["error", "error_max_turns", "error_during_execution"]
+known_message_types = ["system", "assistant", "user", "result", "stream_event"]
+
+[harnesses.codex]
+display_name = "Codex"
+version = "0.160.0"
+release_tag = "rust-v0.160.0"
+executable = "codex"
+version_argv = ["codex", "--version"]
+version_regex = '(?i)(?:codex(?:-cli)?\s*)?v?(\d+\.\d+\.\d+)'
+execution_mode = "app-server-per-worker"
+transport = "ndjson-jsonrpc-stdio"
+coverage = "full"
+model_interception = true
+context_injection = true
+structured_lifecycle = true
+structured_tool_events = true
+session_resume = true
+permission_control = true
+network_profile = "loopback-gateway"
+working_directory = "worker-worktree"
+
+[harnesses.codex.command]
+argv = [
+  "codex", "app-server", "--strict-config", "--listen", "stdio://",
+  "-c", 'model_provider="omnis"',
+  "-c", 'model_providers.omnis.name="Omnis"',
+  "-c", 'model_providers.omnis.base_url="http://127.0.0.1:7331/v1"',
+  "-c", 'model_providers.omnis.env_key="OMNIS_GATEWAY_TOKEN"',
+  "-c", 'model_providers.omnis.wire_api="responses"',
+  "-c", 'model_providers.omnis.requires_openai_auth=false',
+  "-c", 'model_providers.omnis.supports_websockets=false',
+  "-c", 'approval_policy="never"',
+  "-c", 'sandbox_mode="danger-full-access"'
+]
+schema_argv = ["codex", "app-server", "generate-json-schema", "--out", "{output_dir}"]
+
+[harnesses.codex.env]
+OMNIS_GATEWAY_TOKEN = "{OMNIS_GATEWAY_TOKEN}"
+
+[harnesses.codex.rpc]
+initialize_name = "omnis"
+initialize_title = "Omnis"
+experimental_api = false
+thread_start_method = "thread/start"
+thread_resume_method = "thread/resume"
+turn_start_method = "turn/start"
+turn_completed_method = "turn/completed"
+model = "omnis-reason"
+
+[harnesses.opencode]
+display_name = "OpenCode"
+version = "1.18.34"
+release_tag = "v1.18.34"
+executable = "opencode"
+version_argv = ["opencode", "--version"]
+version_regex = '(?i)(?:opencode\s*)?v?(\d+\.\d+\.\d+)'
+execution_mode = "headless-server-per-worker"
+transport = "http-sse"
+coverage = "full"
+model_interception = true
+context_injection = true
+structured_lifecycle = true
+structured_tool_events = true
+session_resume = true
+permission_control = true
+network_profile = "loopback-gateway"
+working_directory = "worker-worktree"
+
+[harnesses.opencode.command]
+argv = ["opencode", "serve", "--hostname", "127.0.0.1", "--port", "0"]
+
+[harnesses.opencode.env]
+OMNIS_GATEWAY_TOKEN = "{OMNIS_GATEWAY_TOKEN}"
+OPENCODE_SERVER_USERNAME = "omnis"
+OPENCODE_SERVER_PASSWORD = "{OMNIS_HARNESS_SERVER_TOKEN}"
+OPENCODE_DISABLE_AUTOUPDATE = "1"
+OPENCODE_DISABLE_MODELS_FETCH = "1"
+OPENCODE_CONFIG_CONTENT = "{generated_opencode_config_json}"
+
+[harnesses.opencode.http]
+health = "GET /global/health"
+events = "GET /event"
+create_session = "POST /session"
+session_status = "GET /session/status"
+prompt = "POST /session/{session_id}/message"
+abort = "POST /session/{session_id}/abort"
+messages = "GET /session/{session_id}/message"
+diff = "GET /session/{session_id}/diff"
+provider = "omnis"
+model = "omnis-reason"

@@ -1,0 +1,48 @@
+version = 1
+
+[listener]
+ipv4 = "127.0.0.1"
+ipv6 = "::1"
+port = 7331
+external_listen = false
+
+[auth]
+scheme = "Bearer"
+token_prefix = "omnis1."
+token_random_bytes = 32
+token_encoding = "base64url-no-padding"
+stored_digest = "blake3-256"
+scope = "execution"
+persistence = "memory-only"
+destroy_on_terminal_execution = true
+restart_behavior = "invalidate-and-restart-resume-harness"
+
+[model]
+virtual_id = "omnis-reason"
+required_capability = "omnis.capability.model.reason"
+one_binding_per_harness_execution = true
+reject_other_model_ids = true
+
+[openai]
+responses_path = "/v1/responses"
+chat_completions_path = "/v1/chat/completions"
+models_path = "/v1/models"
+
+[anthropic]
+messages_path = "/anthropic/v1/messages"
+count_tokens_path = "/anthropic/v1/messages/count_tokens"
+models_path = "/anthropic/v1/models"
+
+[context]
+max_fraction_input_budget = 0.25
+max_tokens = 16384
+citation_ids = true
+empty_when_no_relevant_memory = true
+
+[network_profile.loopback_gateway]
+private_network = false
+address_families = ["AF_UNIX", "AF_INET", "AF_INET6"]
+ip_address_deny = "any"
+ip_address_allow = ["127.0.0.1/32", "::1/128"]
+allowed_tcp_ports = [7331]
+enforcement = "systemd-ip-filter-plus-cgroup-connect-ebpf"
