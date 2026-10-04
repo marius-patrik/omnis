@@ -1,6 +1,5 @@
 # OmnisOS v0 reference configuration.
-# This file demonstrates the frozen option families from docs/IMPLEMENTATION.md.
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   omnis = {
     enable = true;
@@ -9,9 +8,11 @@
       enable = true;
       dataDir = "/var/lib/omnis/graph";
       socket = "/run/omnis/graph.sock";
-      sqlite = {
-        journalMode = "wal";
-        synchronous = "full";
+      writerQueue = 4096;
+      query = {
+        defaultLimit = 1000;
+        hardLimit = 10000;
+        maxDepth = 8;
       };
     };
 
@@ -22,6 +23,8 @@
         udev = true;
         rtnetlink = true;
         processes = true;
+        sessions = true;
+        cgroups = true;
         watchedFileScopes = [ ];
       };
     };
@@ -42,19 +45,13 @@
         models.anthropic.enable = false;
         models.llamaCpp.enable = false;
         models.onnx.enable = false;
-        harnesses.claude.enable = false;
-        harnesses.codex.enable = false;
-        harnesses.opencode.enable = false;
       };
     };
 
-    agent.users.alice = {
+    agentAccess = {
       enable = true;
-      # Defaults below $XDG_STATE_HOME/omnis/agent for the user.
-      memory = {
-        fts5 = true;
-        vectorIndex = "sqlite-vec";
-      };
+      mcp.enable = true;
+      pluginSdk.enable = true;
     };
 
     control.users.alice = {
@@ -75,7 +72,7 @@
       protectedHandles.enable = true;
       systemdCredentials.enable = true;
       executionIsolation.enable = true;
-      defaultWorkerNetwork = "deny";
+      defaultExecutionNetwork = "deny";
     };
   };
 }

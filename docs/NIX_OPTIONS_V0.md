@@ -3,7 +3,7 @@
 **Status: NORMATIVE.** These are the exact public v0 NixOS option paths, types and defaults.
 Implementers must not rename, duplicate or invent competing configuration surfaces.
 
-Unless stated otherwise, options are declared under `options.omnis`.
+Unless stated otherwise, options are under `options.omnis`.
 
 ## 1. Root
 
@@ -11,9 +11,7 @@ Unless stated otherwise, options are declared under `options.omnis`.
 |---|---|---|
 | `omnis.enable` | bool | `false` |
 
-When false, no Omnis service/module side effect is enabled.
-
-## 2. Graph
+## 2. Graph and core event journal
 
 | Option | Type | Default |
 |---|---|---|
@@ -28,7 +26,7 @@ When false, no Omnis service/module side effect is enabled.
 | `omnis.graph.casDir` | path | `/var/lib/omnis/cas/blake3` |
 | `omnis.graph.backupDir` | path | `/var/lib/omnis/backups/graph` |
 
-SQLite journal/synchronous modes are not public options in v0: WAL/FULL are fixed contracts.
+SQLite WAL/FULL and indefinite v0 core-event retention are fixed contracts, not options.
 
 ## 3. OS observation
 
@@ -53,12 +51,10 @@ SQLite journal/synchronous modes are not public options in v0: WAL/FULL are fixe
 | `omnis.manager.nixControlSocket` | str | `/run/omnis/nix-control.sock` |
 | `omnis.manager.discovery.enable` | bool | `true` |
 | `omnis.manager.discovery.concurrency` | unsigned int | `16` |
-| `omnis.manager.inferenceGateway.enable` | bool | `true` |
-| `omnis.manager.inferenceGateway.port` | port | `7331` |
 | `omnis.manager.remote.listen` | bool | `false` |
 | `omnis.manager.remote.port` | port | `7443` |
 
-Provider toggles all default false except exact local-system providers:
+Built-in provider defaults:
 
 ```text
 omnis.manager.providers.nix.enable = true
@@ -71,32 +67,20 @@ omnis.manager.providers.models.openaiCompatible.enable = false
 omnis.manager.providers.models.anthropic.enable = false
 omnis.manager.providers.models.llamaCpp.enable = false
 omnis.manager.providers.models.onnx.enable = false
-
-omnis.manager.providers.harnesses.claude.enable = false
-omnis.manager.providers.harnesses.codex.enable = false
-omnis.manager.providers.harnesses.opencode.enable = false
 ```
 
-A provider can additionally become available through deterministic discovery even when its built-in
-adapter toggle is false; the toggle controls the first-party adapter, not resource visibility.
+There are no external-agent/harness provider options.
 
-## 5. Agent users
-
-`omnis.agent.users` is an attrsOf submodule keyed by existing NixOS username. No users are generated.
-
-Per user:
+## 5. Agent access
 
 | Option | Type | Default |
 |---|---|---|
-| `enable` | bool | `false` |
-| `memory.fts5` | bool | `true` |
-| `memory.vectorIndex` | enum `none|sqlite-vec` | `sqlite-vec` |
-| `models.providers` | list of strings | `[]` |
-| `retention.modelContextDays` | unsigned int | `30` |
-| `retention.modelOutputDays` | unsigned int | `30` |
+| `omnis.agentAccess.enable` | bool | `config.omnis.enable` |
+| `omnis.agentAccess.mcp.enable` | bool | `true` |
+| `omnis.agentAccess.pluginSdk.enable` | bool | `true` |
 
-If `vectorIndex=sqlite-vec` and no `model.embed` binding exists, the extension/index remains
-available but contains no vectors; retrieval falls back exactly as specified.
+`omnis mcp` is stdio-only and starts on demand; these options install/permit the projection rather
+than starting a daemon.
 
 ## 6. Control users
 
@@ -120,15 +104,7 @@ available but contains no vectors; retrieval falls back exactly as specified.
 | `omnis.hosts.quic.port` | port | `7443` |
 | `omnis.hosts.peers` | attrsOf peer submodule | `{}` |
 
-Peer:
-
-```text
-hostId         UUID string, required
-publicKey      string, required
-fingerprint    string, required
-address        string, required
-grants         list of strings, default []
-```
+Peer fields: `hostId`, `publicKey`, `fingerprint`, `address`, `grants`.
 
 ## 8. Security
 
@@ -137,15 +113,9 @@ grants         list of strings, default []
 | `omnis.security.protectedHandles.enable` | bool | `true` |
 | `omnis.security.systemdCredentials.enable` | bool | `true` |
 | `omnis.security.executionIsolation.enable` | bool | `true` |
-| `omnis.security.defaultWorkerNetwork` | enum `deny|user` | `deny` |
-| `omnis.security.selfModification.agentProceduresAutoPromote` | bool | `true` |
-| `omnis.security.selfModification.agentConfigAutoPromote` | bool | `true` |
-| `omnis.security.selfModification.codeAutoPromote` | bool | `false` |
-| `omnis.security.selfModification.systemAutoPromote` | bool | `false` |
+| `omnis.security.defaultExecutionNetwork` | enum `deny|user` | `deny` |
 
 ## 9. Generated service dependencies
-
-Exact system ordering:
 
 ```text
 omnis-graphd.service
@@ -160,29 +130,19 @@ omnis-managerd.service
   requires = omnis-graphd.service nix-daemon.service
   after = omnis-graphd.service nix-daemon.service
 
-user omnis-agentd.service
-  after = graphical-session-pre.target
-  wants network-online.target only when a configured binding needs it
-  requires no Control service
-
 user omnis-control.service
   after = graphical-session-pre.target
-  requires no Agent service
 ```
 
-Agent and Control both reconnect indefinitely with the fixed retry schedule; neither creates a hard
-boot dependency on the other.
+No agent service is generated by OmnisOS.
 
 ## 10. Invalid combinations
 
 Evaluation fails for:
-
 - `omnis.enable=false` with any child `enable=true`;
-- Agent/Control user key that does not exist in `users.users`;
+- Control user key not present in `users.users`;
 - remote listen=true while nativeRemote/quic=false;
-- security protected handles disabled while any configured provider references a credential handle;
+- protected handles disabled while a configured provider references a credential handle;
 - writerQueue < 64;
 - graph hardLimit < defaultLimit;
 - port collisions among configured Omnis listeners.
-
-These are NixOS module assertions, not runtime warnings.
