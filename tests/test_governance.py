@@ -746,6 +746,7 @@ def test_contract_manifest_references_existing_files():
     }
     assert required_normative <= set(contract["normative"].values())
 
+
 def test_generic_harness_contract_has_no_undefined_hook_mode():
     import json
 
