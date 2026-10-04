@@ -638,3 +638,13 @@ def test_permanent_events_keep_cas_artifacts_alive():
     assert 'owner_kind = "event"' in decision
     assert "every ArtifactRef reachable from every retained core EventEnvelope" in decision
     assert "never removed by ordinary CAS GC" in decision
+
+def test_three_authority_adr_supersedes_four_authority_reset():
+    old = _read("notes", "adr", "0023-graph-native-os-architecture-reset.md")
+    substrate = _read("notes", "adr", "0024-freeze-v0-implementation-substrate.md")
+    current = _read("notes", "adr", "0026-three-core-authorities-external-agents.md")
+    assert "Superseded by ADR-0026" in old
+    assert "Superseded in part by ADR-0026" in substrate
+    assert "Status**: Accepted" in current
+    assert "exactly three core semantic authorities" in current
+    assert "no core `OmnisAgent` service" in current

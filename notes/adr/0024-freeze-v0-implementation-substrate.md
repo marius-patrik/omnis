@@ -1,6 +1,6 @@
 # ADR-0024 — Freeze the Omnis v0 implementation substrate
 
-- **Status**: Accepted · **Date**: 2026-10-03
+- **Status**: Superseded in part by ADR-0026 · **Date**: 2026-10-03
 - **Depends on**: ADR-0023
 
 ## Context

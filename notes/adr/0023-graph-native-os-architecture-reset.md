@@ -1,6 +1,6 @@
 # ADR-0023 — Reset Omnis around a graph-native four-authority operating system
 
-- **Status**: Accepted · **Date**: 2026-10-03
+- **Status**: Superseded by ADR-0026 · **Date**: 2026-10-03
 - **Supersedes:** the previous `omnisd`-centred product topology and every earlier ADR where it
   conflicts with this record or the rewritten `ARCHITECTURE.md`.
 

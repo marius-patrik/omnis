@@ -1,8 +1,9 @@
 # Omnis — Architecture
 
 **Status: NORMATIVE.** This document defines the system architecture. Supporting documents may
-expand implementation detail but must not contradict it. The concrete v0 substrate is frozen in
-[`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and ADR-0024. All remaining v0 algorithms,
+expand implementation detail but must not contradict it. The three-authority/external-agent boundary
+is frozen by ADR-0026. The remaining concrete v0 substrate is frozen in
+[`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and ADR-0024 where not superseded by ADR-0026. All remaining v0 algorithms,
 constants, defaults and fallback behavior are frozen by
 [`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025. Canonical first-party
 kind/relation/capability/event names and lifecycle states are frozen by
