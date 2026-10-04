@@ -21,7 +21,7 @@ ordinary downstream NixOS module, especially:
 - generation metadata and semantic diffs;
 - Omnis boot/session integration;
 - capability/authority enforcement hooks;
-- Manager/Control/Agent core subsystem composition;
+- Manager/Control core subsystem composition;
 - event-producing lifecycle integration.
 
 Ordinary packages remain upstream nixpkgs packages unless an Omnis-specific patch/package definition is required by a normative contract or failing acceptance test.

@@ -52,7 +52,7 @@ The helper exits after its EvaluationStream is drained/cancelled. It has:
 - no network;
 - `LANG=C.UTF-8`;
 - `TZ=UTC`;
-- no model/provider/harness credentials.
+- no model/provider/external-agent credentials.
 
 ## 2. Canonical machine configuration files
 
