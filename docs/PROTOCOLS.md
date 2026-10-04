@@ -134,7 +134,7 @@ execution.get
 placement.explain
 protected.resolve_handle
 nix.explain
-nix.plan
+nix.plan_realization
 ```
 
 ### 4.1 Resolve request
@@ -174,6 +174,15 @@ whose declared capability does not match the mapped type.
 
 Provider-specific adapters translate only at the foreign boundary; they do not redefine the Omnis
 capability schema.
+
+### 4.4 Nix control projection
+
+The low-level Nix protocol is `protocol/nix_control.capnp`. Manager's public `nixExplain` returns
+one unpacked Cap'n Proto `NixExplanation` artifact. `nixPlanRealization` returns the exact typed
+`RealizationPlan` produced by the store control surface.
+
+The evaluator/store split, ordering and provenance rules are normative in `NIX_CONTROL_V0.md`.
+Callers never receive scraped Nix CLI text as structured evidence.
 
 ## 5. OmnisOS API
 

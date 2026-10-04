@@ -158,29 +158,28 @@ Callers can request a specific binding when implementation identity is semantica
 
 ## 6. Nix extensions
 
-The maintained Nix fork exposes structured observer/query APIs for:
+The v0 Nix boundary is frozen by
+[`NIX_CONTROL_V0.md`](NIX_CONTROL_V0.md), `protocol/nix_control.capnp`, and
+`spec/nix_control.toml`.
 
-- derivation/resource identity mapping;
-- why a package/store path exists;
-- dependency/closure provenance;
-- what a candidate configuration changes;
-- build/download/rebuild plans;
-- generation/store realization events;
-- graph publication hooks;
-- resource metadata discovery;
-- execution environment realization.
+It has exactly two model-free surfaces:
 
-Omnis-specific semantic metadata lives alongside, not inside, core derivation semantics. The normal
-Nix daemon/client worker protocol remains compatible. Omnis-specific control and observation use the
-separate `/run/omnis/nix-control.sock` Cap'n Proto endpoint.
+- patched `nix-daemon` exposes `NixStoreControl` on `/run/omnis/nix-control.sock` for typed
+  store/derivation/closure/realization/GC queries plus lifecycle observation;
+- the companion C++ `omnis-nix-eval` process exposes `NixEvalService` over an inherited Unix
+  socketpair for one pure system evaluation.
 
-The fork patches the current upstream evaluator/store boundaries rather than creating another Nix
-implementation. Required hook points include `EvalState::forceValue` in `src/libexpr`, derivation
-creation, `src/libstore` realization/substitution/closure operations, build lifecycle code under
-`src/libstore/build`, and daemon-operation correlation in `src/libstore/daemon.cc`. Upstream-compatible
-behavior remains the default.
+The normal upstream Nix client/daemon protocol remains unchanged.
 
----
+Option provenance consumes the pinned NixOS module system's own
+`declarationPositions`, `definitionsWithLocations`, `highestPrio`, `valueMeta`, type metadata
+and final values. Omnis does not recreate Nix module merge semantics.
+
+Evaluator tracing instruments `EvalState::forceValue` only while the companion evaluator is active.
+Store/build observation hooks cover normal Nix clients as well as Omnis calls. All explanation/diff
+ordering, fingerprints, recovery and candidate-generation behavior is normative in
+`NIX_CONTROL_V0.md`.
+
 
 ## 7. Arbitrary bindings
 

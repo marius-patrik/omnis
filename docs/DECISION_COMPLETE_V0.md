@@ -155,6 +155,7 @@ These paths/names are exact v0 contracts.
 /var/lib/omnis/candidates/
 /var/lib/omnis/backups/graph/
 /var/lib/omnis/backups/config/
+/etc/omnis/base.nix
 /etc/omnis/configuration.nix
 /etc/omnis/managed.nix
 /run/omnis/graph.sock
@@ -539,6 +540,8 @@ No CRDT is implemented in v0.
 ---
 
 ## 10. Nix and persistent mutation
+
+The evaluator/store/provenance boundary is fixed by `docs/NIX_CONTROL_V0.md`, `protocol/nix_control.capnp`, and `spec/nix_control.toml`.
 
 ### 10.1 generated module ownership
 

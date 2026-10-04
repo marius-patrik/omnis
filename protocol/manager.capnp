@@ -1,6 +1,7 @@
 @0xc426f3120e4d7809;
 
 using C = import "common.capnp";
+using N = import "nix_control.capnp";
 
 struct ResourceRef { id @0 :C.Uuid; kind @1 :Text; name @2 :Text; }
 
@@ -86,5 +87,6 @@ interface ManagerService {
   discover @7 (resource :C.Uuid, trace :C.TraceContext) -> (status :C.RpcStatus);
   explainPlacement @8 (binding :C.Uuid, placement :C.Uuid) -> (status :C.RpcStatus, evidence :C.ArtifactRef);
   resolveProtected @9 (handle :C.Uuid, execution :C.Uuid) -> (status :C.RpcStatus, lease :C.Uuid);
-  nixExplain @10 (identity :C.Uuid) -> (status :C.RpcStatus, evidence :C.ArtifactRef);
+  nixExplain @10 (identity :C.Uuid) -> (status :C.RpcStatus, explanation :N.NixExplanation);
+  nixPlanRealization @11 (paths :List(Text), trace :C.TraceContext) -> (status :C.RpcStatus, plan :N.RealizationPlan);
 }

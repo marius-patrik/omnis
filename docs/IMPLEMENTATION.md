@@ -460,30 +460,34 @@ and graph rebuild tooling.
 
 ### 8.1 Nix fork boundary
 
-`omnis-manager` tracks `NixOS/nix`. Existing Nix CLI/daemon/store protocols remain compatible.
-Omnis adds a separate `/run/omnis/nix-control.sock`; it does not overload the stable Nix daemon
-protocol.
+The complete v0 boundary is `docs/NIX_CONTROL_V0.md`.
 
-Minimal C++ patches add observer hooks at:
+`omnis-manager` tracks the frozen Nix revision. Upstream CLI/daemon/store protocols remain
+compatible. The fork adds:
+- `NixStoreControl` Cap'n Proto RPC on `/run/omnis/nix-control.sock`;
+- C++ companion binary `omnis-nix-eval` with one-evaluation socketpair RPC;
+- `EvalState::forceValue` source-position tracing while that helper is active;
+- store/build/substitution/GC observation with daemon boot identity + ordered sequence.
 
-- evaluator value forcing and source positions;
-- derivation creation;
-- store path realization/substitution;
-- build start/log/result;
-- closure queries and garbage collection;
-- daemon operation correlation.
-
-The observer interface emits structured events/query results to `omnis-managerd`. No model code is
-linked into Nix.
+There is no text parsing of Nix CLI output and no model code inside either surface.
 
 ### 8.2 NixOS option provenance
 
-The OmnisOS fork instruments the NixOS module system so each final option can be related to its
-declaration, all contributing definitions, priority/merge operation, source span and evaluator
-trace. Manager joins these records with Nix derivations/store paths.
+Pinned nixpkgs already exposes module-system provenance fields consumed by the evaluator. Active and
+candidate configuration use exactly:
 
-This is what powers `why is this installed?`, `what will rebuild?`, `which definition enabled this
-service?`, and generation semantic diffs.
+```text
+/etc/omnis/base.nix
+/etc/omnis/managed.nix
+/etc/omnis/configuration.nix
+/var/lib/omnis/candidates/<GenerationId>/{managed.nix,configuration.nix}
+```
+
+`base.nix` is user/admin-owned; `managed.nix` and the wrapper are Omnis-owned. Candidate evaluation
+uses the same base module plus candidate managed module without modifying active state.
+
+Option records, value fingerprints, evaluator trace, derivation/closure plans and four-part system
+diff are specified by `NIX_CONTROL_V0.md` and `nix_control.capnp`.
 
 ### 8.3 Manager core
 
@@ -948,7 +952,7 @@ schema/worldline.sql
 schema/index.sql
 ```
 
-Cross-process wire code is generated from `protocol/*.capnp`, including the canonical inference IR.
+Cross-process wire code is generated from `protocol/*.capnp`, including canonical inference and Nix-control IRs.
 Harness adapters consume `spec/harnesses.toml` and `spec/inference_gateway.toml`. Agent generative calls use
 `prompts/*.md`. First-party graph identifiers come from `ONTOLOGY_V0.md`. NixOS modules implement
 `NIX_OPTIONS_V0.md` exactly.

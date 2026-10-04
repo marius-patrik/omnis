@@ -582,3 +582,38 @@ def test_code_agent_requires_reason_model_and_canonical_inference():
     assert "struct InferenceRequest" in inference
     assert "struct InferenceResult" in inference
     assert "struct StreamEvent" in inference
+
+
+def test_nix_control_contract_is_typed_and_split():
+    """AI-visible Nix behavior must use the frozen typed evaluator/store surfaces."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "nix_control.toml"), "rb") as handle:
+        spec = tomllib.load(handle)
+
+    assert spec["transport"]["store"]["path"] == "/run/omnis/nix-control.sock"
+    assert spec["transport"]["eval"]["process"] == "omnis-nix-eval"
+    assert spec["transport"]["eval"]["fd"] == 3
+    assert spec["evaluation"]["pure"] is True
+    assert spec["evaluation"]["network"] is False
+    assert spec["evaluation"]["base_module"] == "/etc/omnis/base.nix"
+    assert spec["store"]["event_buffer"] == 100000
+
+    protocol = _read("protocol", "nix_control.capnp")
+    for token in (
+        "interface NixEvalService",
+        "interface NixStoreControl",
+        "struct OptionRecord",
+        "struct RealizationPlan",
+        "struct GcPlan",
+        "struct NixExplanation",
+    ):
+        assert token in protocol
+
+    manager_protocol = _read("protocol", "manager.capnp")
+    assert 'using N = import "nix_control.capnp";' in manager_protocol
+    assert "explanation :N.NixExplanation" in manager_protocol
+    assert "plan :N.RealizationPlan" in manager_protocol

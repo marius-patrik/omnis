@@ -230,3 +230,12 @@ interface NixStoreControl {
   snapshot @8 () -> (status :C.RpcStatus, snapshot :StoreSnapshot);
   subscribe @9 (daemonBootId :C.MaybeUuid, afterSequence :UInt64) -> (status :C.RpcStatus, subscription :StoreSubscription);
 }
+
+
+struct NixExplanation {
+  identity @0 :C.Uuid;
+  options @1 :List(OptionRecord);
+  storePaths @2 :List(StorePathInfo);
+  derivations @3 :List(DerivationInfo);
+  evaluationTrace @4 :C.MaybeArtifactRef;
+}

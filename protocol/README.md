@@ -9,6 +9,7 @@ Rules:
 - `events.capnp` is the only first-party event-payload type registry;
 - `capabilities.capnp` is the only first-party capability input/output type registry;
 - `inference.capnp` is the only first-party model request/result/stream semantic IR;
+- `nix_control.capnp` is the only first-party Nix evaluation/store/provenance control IR;
 - field ordinals are append-only and never reused;
 - UUID values are exactly 16 bytes; ArtifactId values are exactly 32 BLAKE3 bytes;
 - protocol major mismatch fails the handshake;
