@@ -767,6 +767,7 @@ def test_learning_preference_retraction_is_reachable():
     assert "floor 0.00" in doc
     assert "below 0.50" in doc
 
+
 def test_generic_gateway_cannot_escape_manager_resolution():
     import json
 
