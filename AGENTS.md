@@ -1,6 +1,6 @@
 # Omnis — Contributor and Agent Rules
 
-These rules bind human and automated contributors. Repository delivery governance and product architecture are separate concerns: the GitHub approval pipeline governs changes to this repository; it does not define OmnisAgent cognition or universal machine policy.
+These rules bind human and automated contributors. Repository delivery governance and product architecture are separate concerns: the GitHub approval pipeline governs changes to this repository; it does not define external-agent cognition or universal machine policy.
 
 ---
 

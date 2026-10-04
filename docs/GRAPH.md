@@ -3,7 +3,7 @@
 **Status: normative supporting specification.**
 
 The shared graph is the current structured state substrate of Omnis. It is used directly by
-OmnisOS, OmnisManager, OmnisAgent, and OmnisControl.
+OmnisOS, OmnisManager, and OmnisControl.
 
 It is not a fifth product, not an agent memory database, and not a rendering scene graph.
 
@@ -14,7 +14,7 @@ It is not a fifth product, not an agent memory database, and not a rendering sce
 The graph must provide:
 
 - one stable identity space across the whole system;
-- simultaneous physical, semantic, cognitive, resource, causal, and presentation relations;
+- simultaneous physical, system, resource, capability, causal, authority, and presentation relations;
 - explicit write ownership;
 - atomic graph transactions;
 - versioned current state;
@@ -23,10 +23,9 @@ The graph must provide:
 - provenance on facts and relations;
 - temporal validity where state changes over time;
 - enough structure for OmnisControl to derive interactive projections;
-- enough structure for OmnisAgent to reason without scraping subsystem-specific stores.
+- enough structure for arbitrary external clients to inspect the machine without scraping subsystem-specific stores.
 
-The graph is optimized for **shared identity and current state**, not for preserving the complete
-causal past. The causal past belongs to OmnisAgent's worldline.
+The graph is optimized for **shared identity and current state**. Complete first-party transition history lives in the append-only core event journal; richer cognitive history, if any, belongs to an external agent.
 
 ---
 
@@ -198,34 +197,16 @@ foreign.*
 Examples:
 
 - package provides executable;
-- harness provides `code.agent`;
 - model runtime can execute model artifact;
 - resource requires credential;
 - execution placed on host;
 - capability discovered from D-Bus/CLI/API.
 
-### 5.3 OmnisAgent namespaces
+### 5.3 External extension namespaces
 
-OmnisAgent owns:
-
-```text
-cognitive.*
-memory.*
-goal.*
-context.*
-judgement.*
-worker.*
-learning.*
-```
-
-Examples:
-
-- memory about repository;
-- hypothesis supported by events;
-- active project goal;
-- worker context activation;
-- learned procedure;
-- expectation/prediction.
+Core assigns no cognitive namespace to an agent. Authorized plugins may publish optional agent-owned
+state only under `ext.<client-id>.*`; those namespaces are not interpreted by the core and never
+become first-party `omnis.*` truth.
 
 ### 5.4 OmnisControl namespaces
 
@@ -295,7 +276,7 @@ valid_until
 confidence
 ```
 
-Deleting current graph state does not delete historical worldline events.
+Deleting current graph state does not delete historical core journal events.
 
 Example:
 
@@ -304,8 +285,7 @@ Project --resource.framework--> React   valid T1..T2
 Project --resource.framework--> Svelte  valid T2..present
 ```
 
-Agent memory may interpret both while current graph queries select the valid present edge by
-default.
+An external consumer may interpret both while current graph queries select the valid present edge by default.
 
 ---
 
@@ -400,7 +380,7 @@ Authority ownership is an unconditional graphd check, not a caller-selectable pr
 realization guard is expressed by propertyEquals against its exact foreign identity/locator.
 
 Graph predicates are operational consistency checks, not a replacement for OmnisOS system
-invariants or OmnisAgent reasoning.
+invariants or external-agent reasoning.
 
 ---
 
@@ -535,7 +515,7 @@ operation.
 Manager expresses possibility through graph structure:
 
 ```text
-Resource:ClaudeCode --capability.provides--> Capability:code.agent
+Resource:Git       --capability.provides--> Capability:vcs.status
 Resource:RTX5090    --capability.provides--> Capability:cuda.compute
 Model:Qwen          --resource.runnable_by--> Runtime:vLLM
 ```

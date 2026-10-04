@@ -733,7 +733,7 @@ major incompatibility prevents connection; minor versions negotiate the common f
 All components use one TraceId across graph, event, Manager, Nix and Control operations.
 Rust services use `tracing`; C++ Nix patches emit matching trace fields. Logs go to journald.
 
-Operational logs/metrics are not the semantic worldline. Any operational transition that matters to
+Operational logs/metrics are not the core event journal. Any operational transition that matters to
 future consumers is separately emitted as an Event.
 
 ## 16. Build and packaging

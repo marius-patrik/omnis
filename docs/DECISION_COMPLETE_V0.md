@@ -1781,7 +1781,6 @@ omnis manager resolve <capability> [--constraint key=value]...
 omnis manager run <capability> [--input <path-or-json>]
 omnis manager executions [--active]
 omnis manager models
-omnis manager harnesses
 omnis manager host pairing-code
 omnis manager host pair <host-or-ip> --code <base64url>
 omnis manager host unpair <host-uuid>

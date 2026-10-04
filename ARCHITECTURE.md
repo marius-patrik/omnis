@@ -166,8 +166,6 @@ causal         caused_by, emitted, derived_from, observed
 provenance     source, version, hash, discovery method, evidence
 authority      may_access, may_invoke, protected_by, credential handle
 temporal       valid_from, valid_until, created_at, active interval
-activity       project, goal, task, worker, execution membership
-cognitive      memory, belief, hypothesis, context, attention, procedure
 presentation   scene, view, focus, selection, lens, layout, surface
 ```
 
@@ -182,7 +180,6 @@ Each authority owns canonical writes to particular dimensions:
 |---|---|
 | OmnisOS | physical, system, enforcement facts, graph substrate state |
 | OmnisManager | resource, capability, binding, placement, execution facts |
-| OmnisAgent | cognitive, memory, goal, context, learned semantic relations |
 | OmnisControl | presentation, focus, selection, interactive layout/control state |
 
 Cross-authority references are normal. Cross-authority mutation must go through the owning API or a
@@ -201,11 +198,10 @@ provenance
 authority namespace
 ```
 
-A committed transaction increments graph revision and emits one or more normalized events to
-OmnisAgent.
+A committed transaction increments graph revision and appends one or more normalized events to
+the core event journal.
 
-The graph service may keep an implementation WAL for crash recovery. That WAL is not a replacement
-for OmnisAgent's causal worldline.
+The graph service may keep an implementation WAL for crash recovery. That WAL is not the core event journal and is not an external agent's cognitive worldline.
 
 ### 3.6 Internal graph service
 
