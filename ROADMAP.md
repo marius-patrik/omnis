@@ -1,104 +1,152 @@
-# Omnis — Roadmap
+# Omnis — Core Implementation Roadmap
 
-Authoritative list of epics and their sequencing. Every `epic`-labelled GitHub issue corresponds to
-exactly one row here. Epics are containers: never implemented directly, only their child `Request`
-issues are. Update this file whenever an epic is added, split, completed, or dropped
-(`AGENTS.md` rule 13).
+This roadmap implements the three core authorities only: OmnisOS, OmnisManager and OmnisControl.
+No agent runtime or external agent runtime is a core dependency. Concrete behavior is frozen by the
+normative contracts and `spec/contract.toml`; workers report SpecificationDefect instead of designing
+missing behavior.
 
-**Gate**: what must be true before the epic may leave `Backlog`.
+## Phase 0 — Architecture reset and repository split
 
----
+- land the three-authority architecture;
+- maintain `omnis-os`, `omnis-manager`, `omnis-control`;
+- keep shared protocol/spec ownership in `omnis`;
+- establish upstream NixOS/nixpkgs and Nix tracking;
+- remove core built-in agent-runtime assumptions;
+- establish end-to-end compatibility CI.
 
-## Phase 0 — Foundations
+Exit: all core implementation work has one owner and no fourth core authority remains normative.
 
-| # | Epic | Area | Gate | Scope |
-|---|---|---|---|---|
-| E0 | Repository, governance, autonomous pipeline | `area:ci` | — | Done. Everything else is produced by this pipeline. |
-| D∗ | Architecture decisions D1–D15 (D2, D8, D13, D15 resolved) | `area:docs` | — | Fifteen open decisions in `ARCHITECTURE.md` §8. Each is resolved by an ADR before its dependent epic leaves `Backlog` — and by rule 13, none of them becomes an issue until it is settled. |
+## Phase 1 — Shared graph and core event journal
 
-## Phase 1 — The spine
+Implement in OmnisOS/shared substrate:
+- stable NodeId/EdgeId/EventId identity;
+- graph namespace/dimension ownership;
+- SQLite/WAL graph store with serialized writer and revision validity;
+- BLAKE3 artifact CAS;
+- append-only core event journal with monotonic ingest_seq;
+- atomic graph mutation + event commit;
+- query/path/alias/provenance APIs;
+- graph subscriptions;
+- event replay/live subscription from any cursor;
+- CLI inspector.
 
-| # | Epic | Area | Gate | Scope |
-|---|---|---|---|---|
-| E1 | Substrate Bus, daemon, process topology | `area:core` | D1, D9 | `omnis-proto` wire schema; control socket (JSON-RPC 2.0) and data socket (9-byte framed binary, opcodes `0x01`–`0x05`); additive versioning; `omnisd` conditional subsystem bootloader; the `Subsystem` trait; surface attach/detach; crash isolation. |
-| E9 | Capability matrix and settings switchboard | `area:core` | E1 | Five orthogonal axes; layered resolution (`defaults → profile → user → workspace → runtime`); JSON schema; the `features` block that decides which subsystems initialize; live IPC updates; layer introspection; the lint enforcing no branching on profile names. |
-| E10 | Scene tree — the renderer-agnostic view model | `area:core` | E9 | Panes, focus, buffers, selections, decorations, and the primitive vocabulary of `ARCHITECTURE.md` §9.2. The single input to the compositor, and what keeps sources out of rendering — a source emits primitives and knows nothing about how they are drawn. **Must land before E3.** |
-| E3 | GPU compositor (`omnis-render`) | `area:term` | D4, D7, D11, D12, E10 | **The** renderer. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer, native surface), shared glyph atlas and shaping, damage tracking, device-loss handling, the material-layer pass that 3D and particles ride on, and the delegated-region path DRM playback and guest windows depend on (§9.4). Accessibility (UIA/AX/AT-SPI) is acceptance criteria, not a follow-up. |
-| E2 | Tauri shell and window chrome engine | `area:ui` | D4 | The five pillars: frame styles, drag regions, traffic-light insets, vibrancy (`NSVisualEffectView`, Mica, Acrylic), corner radius and border metrics, menu-bar paradigms; dynamic dock/tray icon state machine. |
-| E6 | Local-first persistence | `area:data` | D2 | PGlite store, schema, migrations, the config/data boundary, the sync boundary. |
+Exit: independent clients can create/query allowed graph state and replay every first-party event.
 
-## Phase 2 — The developer substrate
+## Phase 2 — OmnisManager foundation
 
-The subsystems that make Omnis a workspace rather than a shell. Each is independently omittable
-(`ARCHITECTURE.md` §2.2) and each must pass D9's admission criteria.
+Implement:
+- Resource/Capability/Binding/Execution graph model;
+- Nix derivation/store-path resource publication;
+- deterministic discovery/resolution;
+- arbitrary CLI/API/MCP/model/container/VM/native bindings;
+- protected handles;
+- placement;
+- execution lifecycle;
+- Nix explain/realization planning.
 
-| # | Epic | Area | Gate | Scope |
-|---|---|---|---|---|
-| E11 | Vault, SSH/GPG agent, secure process spawn | `area:core` | D4, D10, E1 | Argon2id KEK in `Zeroizing` with `mlock`; OS keychain bridging (Keychain, DPAPI, Secret Service); `omnis-ssh-agent` on `~/.omnis/ssh.sock`; `.env` injection into child memory maps, never disk and never agent context. |
-| E12 | Terminals, PTY, containers | `area:core` | E1 | Native PTY manager, tmux control server, Bollard Docker pipes, resource supervisor; `PTY_STREAM` / `PTY_RESIZE` / `DOCKER_LOG` opcodes end to end. |
-| E13 | Content-addressed storage and VFS | `area:data` | E6 | `omnis-cas`: FastCDC chunking, BLAKE3 keys, convergent encryption, reflink deduplication, multi-provider VFS mounts, central inotify watcher. |
-| E14 | Universal VCS and stacked PRs (`ovcs`) | `area:core` | E1 | Dual Git/Sapling engine, atomic operation log, automated `absorb`, 3-way AST merge, stacked PRs across GitHub/GitLab/Forgejo, git alternates manager. |
-| E15 | Task and build DAG engine | `area:core` | E13 | Manifest parsing (`package.json`, `Cargo.toml`, `Makefile`, `Taskfile.yaml`), cross-repository graph, CAS-timestamp skipping, parallel execution. |
-| E16 | Packages and extensions — the binary substrate | `area:ext` | D5, E1 | The two universes kept separate: `omnis pkg` (project and system dependencies) versus `omnis ext` (client, editor, agent capabilities). Install, resolve, cache, grant. |
-| E17 | LSP hub and DAP | `area:core` | E1, E12 | `omnis-lsp` multiplexer, `omnis-dap` implementation. |
+Exit: Manager resolves and executes interchangeable semantic bindings without any agent dependency.
 
-## Phase 3 — Sources, presentation, and the second backend
+## Phase 3 — OmnisOS vertical system integration
 
-Sources emit into the scene tree; the compositor consumes it. Only E3 is a renderer.
+Implement:
+- NixOS/nixpkgs fork/patch stack;
+- boot of graph + Manager services;
+- hardware/device/process/service observation;
+- generation metadata/semantic diff;
+- evaluate/build/activate/rollback;
+- cgroup/systemd/eBPF execution envelopes;
+- host identity, pairing and physical capability publication.
 
-| # | Epic | Area | Gate | Scope |
-|---|---|---|---|---|
-| E20 | Layout modes — cell-grid and widget | `area:term` | E3, E10 | `omnis-layout`: the cell-grid mode (fixed advance, 24-bit TrueColor with SGR attributes, 256-colour ANSI palettes, cursor shapes, pane-grid keyboard navigation, command-palette-first interaction, inline inspector strips) and the widget mode, both emitting scene-tree primitives. `hybrid` mixes them per pane. |
-| E4 | Profiles as pure data | `area:ui` | D3, E9, E20 | Profile file format, token sets, asset packs, `lucide-animated` default icon set, typography and density profiles, keymap profiles, audio packs, material-layer backdrops; and the proof that adding a profile requires zero code changes. |
-| E7 | Browser as a source | `area:browser` | E3, E20, D7, D13 | `omnis-browser` Chromium/CDP worker and `omnis-web-source`: semantic mode (AXTree → layout → primitives, keyboard-navigable) and raster mode (screencast → texture), `auto`/`hybrid` selection, FPS budget, and webview compositing per D13. |
-| E21 | 3D, shaders, and particles | `area:ui` | E3, D11, D14 | The material-layer pass in anger: scene layer with camera and depth buffer, GPU-instanced particle systems, custom shader materials with declared inputs, and — if D14 opens it to users and extensions — sandboxing, resource limits, and GPU-hang recovery. |
+Exit: a booted machine can inspect and mutate system state entirely through graph/OS/Manager APIs.
 
-## Phase 4 — Agents, extensibility, mesh
+## Phase 4 — OmnisControl minimum usable environment
 
-| # | Epic | Area | Gate | Scope |
-|---|---|---|---|---|
-| E5 | Agent harness, audit stream, approval escrow | `area:agents` | D6, E1, E11 | Provider adapter contract; `omnis-agent` and the `@omnis/agent` MCP bridge; session supervision; immutable append-only audit stream with a one-click killswitch; escrow tickets with expiry. Decoupled from profiles by `ARCHITECTURE.md` §3. |
-| E8 | Extension host | `area:ext` | D5, E16 | `exthost-node` sandboxed runtime, plugin API surface, capability grants, VS Code compatibility shims. |
-| E18 | Universal context fabric | `area:core` | E13, E1 | `ContextFragment` harvesting from code selections, terminal buffers, browser pages, and container logs; persistent sidebar shelf; `omnis://context/<id>` URIs. |
-| E19 | Sync mesh and CRDT change log | `area:data` | E6, E13, D10 | Tailscale mesh sync, CRDT with hybrid logical clocks, P2P WebRTC mesh, cloud storage VFS, serialized PGlite mailbox. |
+Implement:
+- Smithay compositor;
+- wgpu renderer;
+- typed ControlTree/RenderScene;
+- graph projection/focus/selection/lens;
+- PTY/shell default surface;
+- native Wayland/XWayland surfaces;
+- unified deterministic input resolver;
+- 2D graph desktop;
+- complete Control event publication.
 
-## Not scheduled
+Exit: boot lands in Control and works fully with no agent installed.
 
-- Chat and social bridges (Matrix, iMessage). Present in the source `features` block; no gate, no
-  demand, and every one is a third-party protocol commitment.
-- Reproducing any third-party product's full feature set.
-- Live renderer hot-swap without restart — a goal, gated behind D8 and a measured spike.
-- Cloud accounts or multi-user collaboration. The mesh in E19 syncs *one user's* devices.
+## Phase 5 — Agent-runtime-agnostic agent access
 
----
+Implement exactly `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`:
+- `omnis mcp` stdio server;
+- `@omnis/agent-access` typed client package;
+- complete OS/Manager/Control/graph operation projection;
+- core event journal replay/subscription;
+- parity generator/checker;
+- authority propagation;
+- extension graph namespaces.
 
-## Sequencing rationale
+Exit: an arbitrary external agent can inspect/control all three core surfaces and receive every event
+without core changes.
 
-1. **E10 before E3, and E3 before everything visible.** Terminal, widget, browser, and 3D are
-   sources that emit into the scene tree; only E3 is a renderer (`ARCHITECTURE.md` §9). That
-   makes the scene tree the one thing every source agrees on, and the compositor
-   foundational rather than a Phase 3 flourish. Building a source before the compositor produces a
-   private renderer with a different name.
-2. **E1 and E9 before every subsystem.** Subsystems are conditionally initialized from settings and
-   speak only over the bus. Both mechanisms have to exist before there is anything to plug in, or the
-   first three subsystems will hard-wire themselves to each other.
-3. **D9 before Phase 2.** Seventeen subsystems is a lot of surface. Admission criteria — bus-only
-   communication, independent omission, a resource budget, failure isolation — need to be a written
-   gate, not a habit that erodes under deadline.
-4. **E11 early.** The vault is not a feature bolted on later: terminals, VCS pushes, package
-   installs, and agents all need secrets. Building them first means retrofitting secret handling into
-   four subsystems.
-5. **E13 before E15.** The task engine's whole caching claim rests on CAS timestamps.
-6. **E9 before E4.** Presets are coordinates in the matrix; without the matrix they become the
-   per-profile bolt-ons the design exists to reject.
-7. **Accessibility is E3's problem, and now non-negotiable.** A custom-rendered UI publishes no
-   native accessibility tree unless built to (`ARCHITECTURE.md` §9.5). With the TUI dropped
-   (ADR-0017) the published tree is the *only* path to text-addressable output, and retrofitting
-   UIA/AX/AT-SPI onto a shipped compositor costs far more than designing for it.
-8. **A native surface is a last resort, not a shortcut.** Every delegated region (§9.4) is a piece
-   of the interface we no longer control — unstyleable, uncapturable, and awkward to layer. It is
-   correct for DRM playback and heavy platform-composited content, and wrong for anything that
-   could have been a texture.
-7. **D1 is a slice, not a thesis.** The architecture already says what Omnis does. What it does not
-   say is which path gets built first — and that choice determines which bus messages, which
-   subsystem, and which surface come into existence first.
+## Phase 6 — Generic inference and foreign capability depth
+
+Manager:
+- classifier/embed/rerank/generate/reason/vision/audio bindings;
+- local inference engines;
+- remote model APIs;
+- HTTP/OpenAPI;
+- MCP foreign endpoints;
+- repository/VCS/LSP/tooling discovery.
+
+These are semantic resources, not external agent runtimes.
+
+Exit: agents can use Manager's generic capabilities or their own stack interchangeably.
+
+## Phase 7 — OmnisControl full graph desktop
+
+Implement:
+- clustering/LOD;
+- core event-journal timeline;
+- causal/resource/provenance lenses;
+- inspectors;
+- graph mutation affordances;
+- 3D mode;
+- lossless 2D/3D toggle;
+- direct external-agent tree mutation;
+- tables/charts/editors/media/web semantics;
+- accessibility.
+
+Exit: core system operation is fully graph-native and externally agent-controllable.
+
+## Phase 8 — Distributed multi-host core
+
+Implement:
+- host pairing;
+- remote typed RPC;
+- capability advertisement;
+- remote execution;
+- artifact transfer/cache;
+- placement;
+- federated graph queries with shared identities;
+- event/provenance continuity.
+
+Exit: OS/Manager/Control can span multiple Omnis hosts without an agent runtime.
+
+## Phase 9 — Hardening and first core release
+
+- recovery/backup/migration;
+- protocol conformance;
+- authority/security tests;
+- event losslessness tests;
+- MCP/plugin parity tests;
+- performance budgets;
+- release provenance;
+- real-machine/VM acceptance suite.
+
+Exit: every criterion in `ARCHITECTURE.md §18` passes.
+
+## Separate reference-agent track
+
+`marius-patrik/dsh-stack` evolves independently into the reference Omnis agent environment. It is
+not in the dependency chain above and never blocks a core release. Its Omnis integration must consume
+the same MCP/plugin surface available to any other agent.

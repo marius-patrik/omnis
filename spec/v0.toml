@@ -1,0 +1,212 @@
+version = 1
+profile = "omnis-v0"
+rust_toolchain = "1.99.0"
+nixpkgs_revision = "be5021eb406d32e8df6462a1c0986a70bdf03e02"
+nix_revision = "2ab29c63d3273d4e2b4d1346b1aefede9b5af350"
+crates_index_revision = "cddab5f1c359539147959163142ff95a24995f6a"
+
+[paths]
+graph_db = "/var/lib/omnis/graph/graph.sqlite3"
+cas = "/var/lib/omnis/cas/blake3"
+candidates = "/var/lib/omnis/candidates"
+graph_backups = "/var/lib/omnis/backups/graph"
+config_backups = "/var/lib/omnis/backups/config"
+configuration_nix = "/etc/omnis/configuration.nix"
+managed_nix = "/etc/omnis/managed.nix"
+graph_socket = "/run/omnis/graph.sock"
+os_socket = "/run/omnis/os.sock"
+manager_socket = "/run/omnis/manager.sock"
+nix_control_socket = "/run/omnis/nix-control.sock"
+remote_quic_port = 7443
+
+[graph]
+writer_queue = 4096
+max_mutations = 4096
+max_preconditions = 1024
+max_causal_parents = 256
+inline_payload_max_bytes = 65536
+default_query_nodes = 1000
+hard_query_nodes = 10000
+default_depth = 2
+hard_depth = 8
+hard_edges = 50000
+subscription_replay_window_revisions = 100000
+busy_timeout_ms = 5000
+wal_autocheckpoint_pages = 1000
+event_journal_retention = "indefinite-v0"
+
+[artifact]
+chunk_bytes = 1048576
+cas_tombstone_days = 7
+gc_weekday = "Sunday"
+gc_time_local = "04:17"
+
+[event_batch]
+max_items = 256
+max_age_ms = 16
+max_uncompressed_bytes = 65536
+
+[rpc]
+connect_timeout_ms = 2000
+handshake_timeout_ms = 2000
+query_deadline_ms = 30000
+discovery_deadline_ms = 30000
+retry_ms = [100, 250, 500, 1000, 2000]
+
+[queues]
+graph_subscription = 4096
+manager_execution_events = 4096
+control_semantic_input = 4096
+control_graph_deltas = 4096
+control_render_snapshots = 3
+
+[remote]
+alpn = "omnis/1"
+live_cache_stale_seconds = 30
+
+[system]
+post_activation_reconcile_seconds = 30
+process_ebpf_ring_bytes = 16777216
+graceful_stop_seconds = 15
+
+[security.execution]
+network = "deny"
+cpu_quota_percent_of_one_cpu = 100
+memory_max_bytes = 2147483648
+pids_max = 512
+credential_lease_seconds = 300
+
+[manager.discovery]
+global_concurrency = 16
+per_resource_concurrency = 1
+help_timeout_ms = 2000
+man_timeout_ms = 2000
+probe_timeout_ms = 5000
+specialist_model_timeout_ms = 30000
+reasoning_model_timeout_ms = 60000
+
+[manager.weights]
+quality = 0.30
+latency = 0.20
+cost = 0.15
+locality = 0.15
+warmth = 0.10
+preference = 0.10
+tie_epsilon = 1e-9
+
+[manager.locality]
+same_process = 1.00
+same_host = 0.90
+paired_remote = 0.70
+generic_remote = 0.50
+public_remote = 0.30
+
+[manager.warmth]
+running = 1.00
+installed_cold = 0.60
+local_store = 0.40
+build_or_download = 0.20
+
+
+[control]
+max_materialized_nodes = 5000
+scrollback_lines = 100000
+animation_ms = 180
+corner_radius_px = 8
+spacing_px = 4
+notification_seconds = 5
+max_notifications = 3
+frames_in_flight = 3
+
+[control.lod]
+cluster_below_px = 6
+summary_below_px = 20
+card_below_px = 80
+label_overlap_fraction = 0.20
+
+[control.sugiyama]
+barycentric_sweeps = 8
+node_gap_px = 32
+layer_gap_px = 64
+
+[control.forceatlas2]
+scaling = 2.0
+gravity = 1.0
+strong_gravity = false
+lin_log = true
+edge_weight_influence = 1.0
+barnes_hut_min_nodes = 512
+barnes_hut_theta = 1.2
+initial_iterations = 300
+iterations_per_frame = 4
+stop_mean_displacement_px = 0.01
+stop_consecutive_iterations = 30
+
+[control.cache]
+texture_min_bytes = 134217728
+texture_max_bytes = 1073741824
+texture_fraction_gpu = 0.25
+glyph_atlas_initial = 2048
+glyph_atlas_max = 8192
+
+[retention]
+failed_candidate_days = 7
+system_generations = 10
+graph_daily_backups = 7
+graph_weekly_backups = 4
+
+[schedules]
+graph_backup = "03:17"
+artifact_retention = "04:47"
+nix_gc = "Sunday 05:17"
+
+
+[control.cluster]
+direct_node_limit = 5000
+louvain_resolution = 1.0
+move_gain_epsilon = 1e-9
+stop_modularity_gain = 1e-6
+
+[control.boot]
+terminal_width_fraction = 0.70
+graph_width_fraction = 0.30
+collapse_graph_below_width_px = 900
+
+[execution.stream]
+buffer_bytes = 1048576
+chunk_bytes = 65536
+flush_ms = 100
+
+[execution.stop]
+sigterm_grace_seconds = 5
+
+
+[protocol]
+major = 1
+minor = 0
+event_schema_major = 1
+event_schema_minor = 0
+artifact_chunk_bytes = 1048576
+
+
+[identity]
+static_namespace_uuid = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
+static_name_prefix = "urn:omnis:v0:"
+host_id_path = "/var/lib/omnis/host-id"
+
+
+[voice]
+sample_rate_hz = 16000
+channels = 1
+sample_format = "s16le"
+retention_hours = 24
+push_to_talk = "Ctrl+Shift+Space"
+
+
+[filesystem_watch]
+mechanism = "inotify"
+batch_max_items = 256
+batch_max_age_ms = 16
+batch_max_bytes = 65536
+follow_symlinks = false
+cross_filesystems = false

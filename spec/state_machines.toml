@@ -1,0 +1,21 @@
+version = 1
+
+[state_machines.execution]
+initial = "created"
+terminal = ["succeeded","failed","cancelled","lost"]
+transitions = [
+  "created->starting","starting->running","running->waiting","waiting->running",
+  "running->succeeded","waiting->succeeded","running->failed","waiting->failed",
+  "starting->failed","created->cancelling","starting->cancelling","running->cancelling",
+  "waiting->cancelling","cancelling->cancelled","running->lost","waiting->lost"
+]
+
+[state_machines.generation]
+initial = "proposed"
+terminal = ["rolled_back"]
+transitions = [
+  "proposed->evaluated","evaluated->building","building->built","built->activating",
+  "activating->active","proposed->failed","evaluated->failed","building->failed",
+  "built->failed","activating->failed","active->rolling_back","failed->rolling_back",
+  "rolling_back->rolled_back"
+]

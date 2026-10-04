@@ -1,0 +1,100 @@
+version = 1
+namespace = "omnis"
+
+dimensions = [
+  "physical","system","enforcement","resource","capability","binding","execution","placement",
+  "foreign","presentation","interaction","scene","navigation","provenance","causal","authority"
+]
+
+kinds = [
+  "omnis.kind.host","omnis.kind.cpu","omnis.kind.gpu","omnis.kind.memory_device",
+  "omnis.kind.storage_device","omnis.kind.network_device","omnis.kind.input_device",
+  "omnis.kind.output_device","omnis.kind.process","omnis.kind.service","omnis.kind.user",
+  "omnis.kind.session","omnis.kind.filesystem","omnis.kind.mount","omnis.kind.network_interface",
+  "omnis.kind.network_route","omnis.kind.network_listener","omnis.kind.cgroup",
+  "omnis.kind.nix_generation","omnis.kind.nix_store_path","omnis.kind.system_invariant",
+  "omnis.kind.resource","omnis.kind.package","omnis.kind.derivation","omnis.kind.executable",
+  "omnis.kind.library","omnis.kind.endpoint","omnis.kind.container","omnis.kind.vm",
+  "omnis.kind.model","omnis.kind.inference_runtime","omnis.kind.mcp_server",
+  "omnis.kind.repository","omnis.kind.worktree","omnis.kind.capability","omnis.kind.binding",
+  "omnis.kind.execution","omnis.kind.credential_handle","omnis.kind.credential_lease",
+  "omnis.kind.remote_host_binding","omnis.kind.workspace","omnis.kind.view",
+  "omnis.kind.projection","omnis.kind.lens","omnis.kind.control_node",
+  "omnis.kind.native_surface","omnis.kind.terminal","omnis.kind.notification",
+  "omnis.kind.input_surface","omnis.kind.chart","omnis.kind.table","omnis.kind.document",
+  "omnis.kind.editor"
+]
+
+relations = [
+  "omnis.relation.physical.attached_to","omnis.relation.physical.runs_on",
+  "omnis.relation.physical.parent_process","omnis.relation.physical.member_of_cgroup",
+  "omnis.relation.physical.mounts","omnis.relation.physical.listens_on",
+  "omnis.relation.system.active_generation","omnis.relation.system.parent_generation",
+  "omnis.relation.system.realized_as","omnis.relation.system.declares",
+  "omnis.relation.system.satisfies","omnis.relation.system.violates",
+  "omnis.relation.resource.installed_on","omnis.relation.resource.realized_as",
+  "omnis.relation.resource.depends_on","omnis.relation.resource.contains",
+  "omnis.relation.capability.provides","omnis.relation.capability.requires",
+  "omnis.relation.binding.resource","omnis.relation.binding.capability",
+  "omnis.relation.binding.requires","omnis.relation.execution.binding",
+  "omnis.relation.execution.placed_on","omnis.relation.execution.uses",
+  "omnis.relation.execution.produced","omnis.relation.execution.consumed",
+  "omnis.relation.execution.spawned","omnis.relation.execution.authorized_by",
+  "omnis.relation.foreign.identity","omnis.relation.presentation.contains",
+  "omnis.relation.presentation.represents","omnis.relation.presentation.focus",
+  "omnis.relation.presentation.selection","omnis.relation.presentation.lens",
+  "omnis.relation.presentation.native_surface","omnis.relation.presentation.terminal_execution",
+  "omnis.relation.presentation.notification_source","omnis.relation.navigation.previous",
+  "omnis.relation.navigation.next","omnis.relation.provenance.source",
+  "omnis.relation.provenance.derived_from","omnis.relation.causal.parent",
+  "omnis.relation.authority.may_read","omnis.relation.authority.may_write",
+  "omnis.relation.authority.may_invoke","omnis.relation.authority.protected_by"
+]
+
+capabilities = [
+  "omnis.capability.shell.execute","omnis.capability.process.execute",
+  "omnis.capability.package.realize","omnis.capability.package.install.user",
+  "omnis.capability.package.install.system","omnis.capability.system.generation.plan",
+  "omnis.capability.system.generation.build","omnis.capability.system.generation.activate",
+  "omnis.capability.system.generation.rollback","omnis.capability.vcs.status",
+  "omnis.capability.vcs.diff","omnis.capability.vcs.commit","omnis.capability.vcs.push",
+  "omnis.capability.code.format","omnis.capability.code.test",
+  "omnis.capability.model.classify","omnis.capability.model.embed","omnis.capability.model.rerank",
+  "omnis.capability.model.generate","omnis.capability.model.reason","omnis.capability.model.vision",
+  "omnis.capability.model.audio.transcribe","omnis.capability.browser.navigate",
+  "omnis.capability.browser.inspect","omnis.capability.browser.interact",
+  "omnis.capability.http.request","omnis.capability.mcp.invoke","omnis.capability.container.run",
+  "omnis.capability.vm.run","omnis.capability.graph.query","omnis.capability.control.materialize",
+  "omnis.capability.control.mutate","omnis.capability.ingest","omnis.capability.host.pairing_code",
+  "omnis.capability.host.pair","omnis.capability.host.unpair"
+]
+
+events = [
+  "omnis.event.graph.committed","omnis.event.os.reconciled","omnis.event.os.observation_gap",
+  "omnis.event.os.process.started","omnis.event.os.process.exec","omnis.event.os.process.exited",
+  "omnis.event.os.service.changed","omnis.event.os.device.added","omnis.event.os.device.removed",
+  "omnis.event.os.network.changed","omnis.event.os.invariant.violated",
+  "omnis.event.os.generation.proposed","omnis.event.os.generation.evaluated",
+  "omnis.event.os.generation.built","omnis.event.os.generation.activating",
+  "omnis.event.os.generation.activated","omnis.event.os.generation.failed",
+  "omnis.event.os.generation.rolled_back","omnis.event.manager.resource.discovered",
+  "omnis.event.manager.binding.discovered","omnis.event.manager.resolution.completed",
+  "omnis.event.manager.execution.created","omnis.event.manager.execution.started",
+  "omnis.event.manager.execution.waiting","omnis.event.manager.execution.succeeded",
+  "omnis.event.manager.execution.failed","omnis.event.manager.execution.cancelled",
+  "omnis.event.manager.execution.lost","omnis.event.inference.request",
+  "omnis.event.inference.response","omnis.event.inference.failed",
+  "omnis.event.manager.credential.lease.created","omnis.event.manager.credential.lease.expired",
+  "omnis.event.control.input.submitted","omnis.event.control.focus.changed",
+  "omnis.event.control.selection.changed","omnis.event.control.mode.changed",
+  "omnis.event.control.lens.changed","omnis.event.control.tree.mutated",
+  "omnis.event.control.native_surface.created","omnis.event.control.native_surface.closed",
+  "omnis.event.control.terminal.created","omnis.event.control.terminal.closed",
+  "omnis.event.control.navigation","omnis.event.control.notification.created",
+  "omnis.event.control.notification.dismissed","omnis.event.manager.host.paired",
+  "omnis.event.manager.host.unpaired","omnis.event.timer.minute","omnis.event.timer.hour"
+]
+
+[states]
+execution = ["created","starting","running","waiting","cancelling","succeeded","failed","cancelled","lost"]
+generation = ["proposed","evaluated","building","built","activating","active","failed","rolling_back","rolled_back"]

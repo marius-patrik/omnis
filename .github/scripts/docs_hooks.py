@@ -1,14 +1,12 @@
 """ProperDocs hooks that publish the repository's canonical markdown without duplicating it.
 
-`AGENTS.md` rule 2 forbids storing a static documentation mirror and forbids a manually maintained
-index. The canonical documents live at the repository root (`README.md`, `ARCHITECTURE.md`,
-`ROADMAP.md`, `AGENTS.md`) and under `notes/`, with one file per decision in
-`notes/adr/`. Committing copies of them under `docs/` would create two sources of truth that drift.
+`AGENTS.md` forbids static mirrors of canonical root documents and manually maintained ADR indexes.
+The root documents remain canonical at their repository paths, while `docs/` contains genuine
+supporting architecture specifications rather than copies.
 
 These hooks therefore:
 
-- map each canonical file to a virtual page at build time, so the site is generated from the
-  originals and `docs/` stays empty of duplicated prose;
+- map each canonical root/note file to a virtual page at build time without duplicating it;
 - discover `notes/adr/*.md`, generate the decision index table from each record's title and status,
   and inject the navigation entries - so adding an ADR needs no configuration change;
 - rewrite links written for GitHub (``ARCHITECTURE.md``) to their site paths, so
@@ -40,6 +38,18 @@ LINK_REWRITES: Dict[str, str] = {
     "ARCHITECTURE.md": "architecture/index.md",
     "ROADMAP.md": "roadmap.md",
     "AGENTS.md": "agents.md",
+    "docs/IMPLEMENTATION.md": "IMPLEMENTATION.md",
+    "docs/DECISION_COMPLETE_V0.md": "DECISION_COMPLETE_V0.md",
+    "docs/ONTOLOGY_V0.md": "ONTOLOGY_V0.md",
+    "docs/NIX_OPTIONS_V0.md": "NIX_OPTIONS_V0.md",
+    "docs/NIX_CONTROL_V0.md": "NIX_CONTROL_V0.md",
+    "docs/CONTROL_RENDER_V0.md": "CONTROL_RENDER_V0.md",
+    "docs/AGENT_ACCESS_V0.md": "AGENT_ACCESS_V0.md",
+    "docs/GRAPH.md": "GRAPH.md",
+    "docs/OMNIS_OS.md": "OMNIS_OS.md",
+    "docs/OMNIS_MANAGER.md": "OMNIS_MANAGER.md",
+    "docs/OMNIS_CONTROL.md": "OMNIS_CONTROL.md",
+    "docs/PROTOCOLS.md": "PROTOCOLS.md",
     "CONTRIBUTING.md": "agents.md",
     "CLAUDE.md": "agents.md",
     "notes/pipeline.md": "pipeline.md",
@@ -198,8 +208,8 @@ def _render_declaration_page(body: str) -> str:
             f"[`{DECLARATION_SOURCE}`]({source_url}) at build time — this page and the file cannot",
             "disagree.",
             "",
-            "See [Architecture §4](architecture/index.md) for what a declaration is, how generations",
-            "work, and why runtime changes are written back into it.",
+            "See [Architecture](architecture/index.md) and [OmnisOS](OMNIS_OS.md) for persistent",
+            "generation semantics. This declaration is illustrative until the OmnisOS module schema is implemented.",
             "",
             "```nix",
             body.rstrip("\n"),
@@ -267,6 +277,13 @@ def on_config(config: Any) -> Any:
         {
             "Architecture": [
                 {"Overview": "architecture/index.md"},
+                {"Implementation": "IMPLEMENTATION.md"},
+                {"Decision-complete v0": "DECISION_COMPLETE_V0.md"},
+                {"Shared graph": "GRAPH.md"},
+                {"OmnisOS": "OMNIS_OS.md"},
+                {"OmnisManager": "OMNIS_MANAGER.md"},
+                {"OmnisControl": "OMNIS_CONTROL.md"},
+                {"Protocols": "PROTOCOLS.md"},
                 {"Decisions": decisions},
             ]
         },

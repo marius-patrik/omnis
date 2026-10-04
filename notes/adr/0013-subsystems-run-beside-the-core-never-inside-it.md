@@ -1,6 +1,6 @@
 # ADR-0013 — Subsystems run beside the core, never inside it
 
-- **Status**: Accepted · **Date**: 2026-09-06
+- **Status**: Superseded by ADR-0023 · **Date**: 2026-09-06
 - **Supersedes**: the in-process subsystem model in `ARCHITECTURE.md` §2.2
 - **Depends on**: ADR-0011, ADR-0012
 

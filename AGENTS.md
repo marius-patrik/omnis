@@ -1,8 +1,6 @@
-# Repository Development Guidelines & Agent Rules
+# Omnis — Contributor and Agent Rules
 
-Omnis is developed by an autonomous agent pipeline under human approval gates. These rules are
-binding on every contributor — human or agent. They are enforced by CI, by branch protection, and
-by the tests in `tests/`.
+These rules bind human and automated contributors. Repository delivery governance and product architecture are separate concerns: the GitHub approval pipeline governs changes to this repository; it does not define external-agent cognition or universal machine policy.
 
 ---
 
@@ -26,11 +24,10 @@ repository. All documentation builds must succeed with `properdocs build --stric
 zero errors — and deploy automatically to GitHub Pages.
 
 ### 3. Architecture Conformance
-The system architecture is defined by `ARCHITECTURE.md`, which is the single normative source for
-process topology, crate boundaries, IPC contracts, and renderer separation. `notes/transcript.md` is
-**non-normative reference material** captured from scoping conversations; it never overrides
-`ARCHITECTURE.md`. Any deviation from `ARCHITECTURE.md` must be explicitly approved by the user and
-recorded in `notes/architecture_decisions.md` as a numbered ADR before it is implemented.
+`ARCHITECTURE.md` is the normative system architecture. Supporting specifications in `docs/` refine
+the graph, OmnisOS, OmnisManager, OmnisControl, agent-access projections, and cross-component protocols.
+`notes/transcript.md` and superseded ADRs are historical source material only. Any implementation
+change that alters a normative architecture contract requires an ADR/architecture update first.
 
 ### 4. Language Consistency
 All code, identifiers, comments, docstrings, commit messages, issues, and documentation must be
@@ -130,25 +127,16 @@ issues labeled `Request` before any planning, branching, or code changes begin.
   plan. All subsequent branches and pull requests bind to the plan issue.
 
 ### 13. Specification Sequence & When Issues May Exist
-Specification proceeds in one direction, and each stage is locked before the next begins:
+Specification proceeds from normative architecture to implementable work:
 
 ```
-notes/transcript.md  →  ARCHITECTURE.md  →  ADRs (notes/architecture_decisions.md)  →  ROADMAP.md  →  issues
+ARCHITECTURE.md → docs/* supporting specs → ADRs → ROADMAP.md → issues/plans → implementation
 ```
 
-- **An issue may only be filed for work that is settled.** Settled means one of two things: an
-  approved ADR resolving the decision the work depends on, or a concrete mechanical task whose
-  outcome is not in question (for example, "create the Bun workspace and add these named
-  dependencies").
-- **Speculative epic and decision issues are prohibited.** Filing an issue for an unanswered
-  question moves the argument into the tracker, where it fragments across comment threads instead of
-  converging in the document that owns it. Open questions live in `ARCHITECTURE.md` §8 until an ADR
-  closes them; planned work lives in `ROADMAP.md` until its gate opens.
-- **Large settled bodies of work** are tracked as `epic`-labelled issues: a container carrying the
-  scope statement, the acceptance criteria for the area, and a checklist of child `Request` issues.
-  Epics are never implemented directly — only their children are.
-- `ROADMAP.md` is the authoritative list of epics and their sequencing, and is updated whenever an
-  epic is added, split, completed, or dropped.
+- Issues may only be filed for settled implementation work or concrete mechanical investigation.
+- Architectural questions stay in the architecture/specification layer until resolved.
+- Large settled bodies of work may be represented by epics with child Requests.
+- `ROADMAP.md` is the authoritative implementation sequencing document.
 
 ### 14. Harness-Agnostic Containerized Agent & Conversational CI Lifecycle
 An autonomous AI agent runs containerized in GitHub Actions (`docker/Dockerfile.agent`). It is
@@ -180,17 +168,19 @@ An autonomous AI agent runs containerized in GitHub Actions (`docker/Dockerfile.
   `Blocked`, comments the resume instructions, and exits cleanly. Commenting `resume` continues from
   the checkpoint.
 
-### 15. Conventional Commits & Taxonomy Enforcement
+### 15. Conventional Commits & Repository Taxonomy Enforcement
+Repository area labels are delivery metadata retained for the current automation. They do not define Omnis product authority boundaries; architecture ownership is exactly OmnisOS / OmnisManager / OmnisControl plus the shared graph/event substrate.
+
 - **Format**: `<type>(<scope>): <description>` (e.g. `feat(term): add cell matrix buffer`).
 - **Allowed Types**: `feat`, `fix` (mapped from `bug`), `chore`, `docs`, `refactor`, `test`, `ci`.
 - **Allowed Area Scopes & Labels**:
-  - `area:core`: Microkernel, process topology, IPC/substrate bus, daemon lifecycle, config.
-  - `area:ui`: DOM renderer, layout topology, theming, profiles, settings surfaces.
-  - `area:term`: Terminal cell-grid renderer, ANSI/TrueColor pipeline, PTY integration.
-  - `area:agents`: Harness orchestration, provider adapters, personas, approvals.
-  - `area:browser`: Embedded browser engine, CDP bridge, semantic and pixel render modes.
-  - `area:data`: Schema, persistence, migrations, sync, local-first storage.
-  - `area:ext`: Extension host, plugin API, compatibility shims.
+  - `area:core`: OmnisOS, OmnisManager, shared graph/protocol substrate, boot, generations, and cross-component integration.
+  - `area:ui`: OmnisControl graph desktop, 2D/3D projections, rendering, interaction, layout, and native surfaces.
+  - `area:term`: OmnisControl shell, PTY, terminal/text projections, and cell-grid compatibility.
+  - `area:agents`: external-agent access projections, MCP/plugin parity, and reference-agent integration work; cognition itself lives outside core.
+  - `area:browser`: OmnisControl web/navigation projections and browser protocol/native bindings.
+  - `area:data`: shared graph, core event journal, artifacts, persistence, and indexes.
+  - `area:ext`: OmnisManager foreign capabilities, arbitrary bindings, MCP, and protocol integration.
   - `area:ci`: GitHub Actions workflows, containers, runner scripts, repository automation.
   - `area:docs`: Documentation, ProperDocs configuration, architecture notes.
 
@@ -198,3 +188,236 @@ An autonomous AI agent runs containerized in GitHub Actions (`docker/Dockerfile.
 No credential, token, refresh token, cookie, or private key is ever committed, echoed into workflow
 logs, or written into issue or PR bodies. All secrets live in GitHub repository secrets or the local
 OS keychain. Workflow logs must be assumed public.
+
+
+---
+
+## Product architecture invariants
+
+The following architecture-specific rules apply in addition to the repository delivery rules above.
+
+### A1. Architecture authority
+
+`ARCHITECTURE.md` is normative. Supporting specs under `docs/` refine it. A change that contradicts
+them requires an architecture/ADR change first.
+
+Historical ADRs before the architecture reset are source material only where superseded.
+
+### A2. Preserve the three core authorities
+
+Do not move responsibilities across product boundaries casually:
+
+```text
+OmnisOS      physical/system authority
+OmnisManager resource/capability/binding authority
+OmnisControl interaction/presentation authority
+```
+
+The shared graph is a substrate, not a fifth semantic authority.
+
+### A3. One identity, one graph
+
+Never create a component-local canonical shadow object for something already represented in the
+shared graph.
+
+Local caches/views are allowed only when:
+
+- they retain the shared NodeId/EdgeId;
+- they are explicitly derived;
+- they can be rebuilt;
+- they do not become a second source of truth.
+
+### A4. Respect graph namespace ownership
+
+A component writes canonical graph state only in its owned namespaces. Cross-authority changes go
+through the owning API.
+
+Graph core must enforce this rule; do not rely only on review convention.
+
+### A5. Every meaningful transition becomes an event
+
+First-party components must not make durable/meaningful state transitions invisible to the shared core event journal.
+
+Do not add polling as the primary integration path when the producer can emit the event directly.
+
+### A6. Bind before rebuilding
+
+Before implementing a tool/runtime/service, ask whether a mature implementation already exists.
+Prefer:
+
+```text
+bind existing tool
++ add graph identity
++ expose capabilities
++ preserve provenance
+```
+
+over a new Omnis implementation.
+
+### A7. Deterministic first
+
+Prefer exact mechanisms in this order where applicable:
+
+```text
+existing graph metadata
+native APIs/reflection
+protocol schemas
+compiler/runtime/LSP metadata
+CLI structured metadata
+source/static analysis
+deterministic probing
+specialist learned model
+general reasoning model
+```
+
+Do not use an LLM to rediscover information an exact interface already supplies.
+
+### A8. Nix remains deterministic
+
+Never call models from Nix evaluation/build semantics.
+
+Agent reasoning may produce candidate inputs/configuration. Once candidate inputs are fixed, Nix
+realization must be deterministic according to Nix semantics.
+
+### A9. Persistent versus transient actions
+
+Do not route every runtime action through Nix generations.
+
+Use a generation for persistent structural system state. Use Manager execution for transient work.
+
+### A10. Agent runtime is external
+
+Do not implement cognition, memory, worker orchestration or external coding-harness adapters inside
+the three core services. Agents are clients of OS/Manager/Control/graph through the frozen MCP/plugin
+projection. The reference agent lives in `dsh-stack`, outside the core release dependency graph.
+
+### A11. Control is not a conventional GUI
+
+Do not build separate application architectures for terminal, browser, graph, 3D, or AI output.
+
+Control derives projections from the shared graph into one Control tree and renderer. Existing
+Wayland/XWayland clients are NativeSurface leaves; first-party semantic content is rendered directly
+through Control primitives.
+
+2D and 3D must preserve the same identities/focus/selection/lens/frontier.
+
+### A12. External agents get structural Control access
+
+If a first-party Control operation can only be performed by synthetic mouse/keyboard input, the API
+is incomplete unless the operation is inherently physical input testing.
+
+Agent must be able to manipulate Control structure directly.
+
+### A13. Protected values are handles
+
+Do not serialize credentials into:
+
+- Agent model context;
+- event payloads/history;
+- graph properties visible outside allowed scope;
+- Control output;
+- logs.
+
+Use protected handles and execution-time injection/brokering.
+
+### A14. Effects must be honest
+
+Unknown foreign operations are opaque/effectful.
+
+Do not claim rollback of an external effect that already happened. Use idempotency, reconciliation,
+compensation, or explicit failure state where supported.
+
+### A15. Identity is not location
+
+Do not use path, PID, store path, host, provider, window ID, or current version as semantic identity.
+They are locators/properties/realizations.
+
+### A16. Provenance is required
+
+Discovered/inferred capabilities, graph relations, memories, and generated artifacts retain source,
+method, version/hash, and confidence where available.
+
+### A17. No compatibility baggage before compatibility exists
+
+The new architecture supersedes the unimplemented old Omnis daemon architecture. Do not preserve
+obsolete APIs, schemas, or package structures merely because they appeared in historical docs.
+
+Compatibility work requires a real deployed contract/user dependency.
+
+### A18. Upstream fork discipline
+
+For Nix/nixpkgs-derived repositories:
+
+- keep upstream remote and provenance;
+- prefer patch stacks/small deltas;
+- isolate Omnis-specific changes;
+- regularly merge/rebase upstream according to repo policy;
+- do not copy packages unnecessarily;
+- preserve upstream license requirements.
+
+### A19. Implementation quality
+
+Every architectural guarantee MUST be enforced by at least one of:
+
+- a type/property boundary;
+- protocol validation;
+- test;
+- lint;
+- process/authority boundary;
+- integration test.
+
+A principle enforced only by prose is unfinished.
+
+### A20. Cross-component testing
+
+Any change touching a shared protocol or graph semantic requires umbrella integration tests covering
+all affected authorities.
+
+Prefer real protocol/process tests over mocks once implementations exist.
+
+### A21. Documentation changes
+
+When implementation changes semantics, update the normative docs in the same change. Do not allow
+README, architecture, protocol docs, and implementation to drift.
+
+### A22. Completion behavior for coding agents
+
+Before declaring work complete, an implementation agent must:
+
+1. read applicable architecture/supporting specs;
+2. identify the owning authority and graph namespaces;
+3. preserve stable identities/provenance/events;
+4. run unit/integration tests;
+5. inspect the diff for duplicate semantic authorities;
+6. update docs/contracts if behavior changed;
+7. state any remaining incompatibility or unimplemented contract explicitly.
+
+
+### A23. No v0 design discretion
+
+For Omnis v0, coding agents implement the frozen design; they do not finish it.
+
+Before implementation, load `spec/contract.toml`, then read the normative/shared and owning-component sources it names, including `docs/DECISION_COMPLETE_V0.md`. If an observable behavior remains
+unspecified, stop that item and report a `SpecificationDefect`. Do not introduce a reasonable
+default, equivalent dependency, substitute algorithm, temporary fallback, or locally convenient
+policy without updating the normative specification/ADR first.
+
+Private helper decomposition, variable names and semantics-preserving refactors remain ordinary
+implementation choices.
+
+
+### A24. Canonical source files
+
+Do not recreate these contracts inside component repositories:
+
+- database DDL: `schema/*.sql`;
+- cross-component wire schemas: `protocol/*.capnp`;
+- external-agent access parity: `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`;
+- first-party ontology/event/state names: `docs/ONTOLOGY_V0.md`;
+- NixOS option paths/types/defaults: `docs/NIX_OPTIONS_V0.md`;
+- agent-access parity: `docs/AGENT_ACCESS_V0.md` + `spec/agent_access.toml`;
+- canonical generic inference semantics: `protocol/inference.capnp`;
+- Nix evaluator/store control, provenance and candidate semantics: `protocol/nix_control.capnp`, `spec/nix_control.toml`, `docs/NIX_CONTROL_V0.md`;
+- ControlTree/RenderScene schemas and renderer policy: `protocol/control_scene.capnp`, `spec/control_render.toml`, `docs/CONTROL_RENDER_V0.md`.
+
+Component builds pin the umbrella revision and generate/consume these sources.

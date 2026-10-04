@@ -1,8 +1,6 @@
 # The automation pipeline
 
-Omnis is built by an autonomous agent pipeline under human approval gates. This documents how it
-works, what each part is for, and where it can fail. The binding rules are in `AGENTS.md`; this is
-the explanation behind them.
+This repository is developed by an autonomous delivery pipeline under repository-specific human approval gates. This document explains that delivery automation and its failure modes. The gates here are **repository governance**, not the cognitive architecture of OmnisAgent and not a universal semantic governor for the operating system. Binding contributor rules are in `AGENTS.md`.
 
 ---
 
@@ -203,13 +201,22 @@ The pipeline currently executes plans a human has approved. It should also help 
 The constraint is the same as everywhere else: it **proposes**, a human disposes. An agent that files
 its own work items is an agent that sets its own scope.
 
-### The pipeline becomes an Omnis automation
+### Mapping this repository pipeline into Omnis
 
-`ARCHITECTURE.md` §7.3 defines automations as declared graphs with triggers, gates, checkpoints, and
-a termination condition. This pipeline — request, interpretation gate, plan, approval gate,
-implement, self-review loop, merge gate, checkpoint-and-resume on quota exhaustion — *is* one of
-those, currently expressed in GitHub Actions and Python because the product does not exist.
+When the product is capable of hosting its own delivery workflow, this repository pipeline is a
+useful integration workload, but it must map onto the new architecture rather than resurrect the
+old daemon/automation model:
 
-When it does, this pipeline should be declared as an Omnis automation and run by it. That is the
-honest test of the abstraction: it was derived from a real workload rather than an imagined one, and
-the workload is this repository.
+```text
+GitHub/issue/comment changes -> OmnisAgent events
+coding-agent CLIs             -> OmnisManager `code.agent` resources/bindings
+Git/GitHub operations         -> Manager capabilities and external effects
+durable plan/review execution -> Agent workflow/worker state
+repository approval gates     -> workflow-specific constraints
+artifacts/checkpoints         -> graph identities + artifact references + worldline events
+```
+
+The repository's human approval gates remain valid for this repository. They do **not** imply that
+all OmnisAgent thought or all OmnisControl mutations require a human approval gate. Physical
+authority is enforced by OmnisOS/Manager capability boundaries; workflow-specific approvals are
+ordinary constraints layered above those capabilities.

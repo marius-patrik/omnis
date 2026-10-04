@@ -1,0 +1,64 @@
+version = 1
+
+[transport.store]
+path = "/run/omnis/nix-control.sock"
+kind = "unix-stream-capnp-rpc"
+owner = "root"
+group = "omnis"
+mode = "0660"
+service = "nix-daemon"
+
+[transport.eval]
+kind = "unix-socketpair-capnp-rpc"
+fd = 3
+process = "omnis-nix-eval"
+lifetime = "one-evaluation"
+
+[evaluation]
+nixpkgs_revision = "be5021eb406d32e8df6462a1c0986a70bdf03e02"
+nix_revision = "2ab29c63d3273d4e2b4d1346b1aefede9b5af350"
+base_module = "/etc/omnis/base.nix"
+active_managed_module = "/etc/omnis/managed.nix"
+active_wrapper = "/etc/omnis/configuration.nix"
+candidate_dir = "/var/lib/omnis/candidates"
+candidate_managed = "managed.nix"
+candidate_wrapper = "configuration.nix"
+system_argument_source = "host-nix-system"
+pure = true
+network = false
+locale = "C.UTF-8"
+timezone = "UTC"
+
+[evaluation.option]
+source = "nixpkgs-lib-modules"
+declarations_field = "declarationPositions"
+definitions_field = "definitionsWithLocations"
+priority_field = "highestPrio"
+value_meta_field = "valueMeta"
+merge_api = "type.merge.v2-presence"
+json_fingerprint = "blake3-builtins-toJSON-utf8"
+opaque_fingerprint = "blake3-kind-source-file-digest-contributor-digests"
+file_digest = "blake3-raw-file-bytes"
+
+[evaluation.trace]
+hook = "EvalState::forceValue"
+records = "source-position-parent-expression-kind"
+buffering = "streamed"
+memory_accumulation = false
+
+[store]
+event_buffer = 100000
+sequence_scope = "daemon-boot"
+snapshot_on_boot_id_mismatch = true
+snapshot_on_event_gap = true
+closure_order = "store-path-byte-lexical"
+plan_order = "dependency-topological-then-store-path-byte-lexical"
+gc_candidate_order = "store-path-byte-lexical"
+build_mode = "normal"
+
+[configuration]
+base_owner = "user"
+managed_owner = "omnis"
+wrapper_owner = "omnis"
+candidate_evaluation_modifies_active = false
+promotion = "atomic-managed-module-replace-after-activation-success"
