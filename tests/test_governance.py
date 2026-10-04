@@ -233,7 +233,17 @@ def test_v0_implementation_profile_is_concrete():
 
 def test_protocol_schema_sources_exist():
     """The frozen wire contract must exist as schema source, not prose only."""
-    for name in ("common", "events", "capabilities", "inference", "graph", "os", "manager", "agent", "control"):
+    for name in (
+        "common",
+        "events",
+        "capabilities",
+        "inference",
+        "graph",
+        "os",
+        "manager",
+        "agent",
+        "control",
+    ):
         path = os.path.join(REPO_ROOT, "protocol", f"{name}.capnp")
         assert os.path.isfile(path), f"missing canonical protocol schema {name}.capnp"
         content = _read("protocol", f"{name}.capnp")
