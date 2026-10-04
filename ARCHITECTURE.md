@@ -693,7 +693,7 @@ has direct structural access and may:
 - split or reorganize the workspace;
 - create live visualizations;
 - attach actions/interactions;
-- persist a useful control arrangement where appropriate.
+- persist a Control arrangement only when the user explicitly requests persistence, an existing durable presentation preference requires it, or the Agent-selected action has a persistence postcondition; otherwise the arrangement remains transient.
 
 These mutations emit events like user interactions do.
 
