@@ -321,12 +321,13 @@ def test_active_specs_forbid_implementer_choice_markers():
                 continue
             if in_fence or negative_guard.search(line):
                 continue
-            assert not delegation.search(line), (
-                f"{document}:{lineno} positively delegates a design decision: {line.strip()!r}"
-            )
-            assert not imperative.search(line), (
-                f"{document}:{lineno} positively delegates a design decision: {line.strip()!r}"
-            )
+            assert not delegation.search(
+                line
+            ), f"{document}:{lineno} positively delegates a design decision: {line.strip()!r}"
+            assert not imperative.search(
+                line
+            ), f"{document}:{lineno} positively delegates a design decision: {line.strip()!r}"
+
 
 def test_canonical_v0_source_contracts():
     """Decision-complete implementation inputs must be checked in and addressable."""
