@@ -39,11 +39,11 @@ UEFI/firmware
   -> omnis-graphd
   -> {omnis-osd, nix-daemon, omnis-managerd}
   -> user session
-  -> {omnis-agentd, omnis-control}
+  -> omnis-control
 ```
 
 OmnisControl is the default local interactive environment. A headless target may omit Control while
-retaining OS, Manager, Agent, graph, and remote-control capability.
+retaining OS, Manager, graph, agent-access APIs, and remote-control capability.
 
 systemd is the v0 service supervisor and transient-service execution mechanism. `omnis-osd` is the
 only Omnis component allowed to create restricted `omnis-exec-*.service` units. It is a physical
@@ -300,8 +300,8 @@ A future custom kernel is only justified by measured limitations of Linux agains
 
 ## 14. v0 process and persistence binding
 
-`omnis-graphd`, `omnis-osd` and `omnis-managerd` are system services. `omnis-agentd` and
-`omnis-control` are per-user services/session processes. Agent and Control are never boot-critical.
+`omnis-graphd`, `omnis-osd` and `omnis-managerd` are system services. `omnis-control` is the per-user
+session process. No agent daemon is generated or boot-critical; external agents attach as clients.
 
 OmnisOS adds the `omnis.*` NixOS module family and two concrete configuration files:
 

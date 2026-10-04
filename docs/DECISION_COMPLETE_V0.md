@@ -1189,10 +1189,6 @@ omnis.manager.discovery.concurrency = 16
 omnis.manager.remote.listen = false
 omnis.manager.remote.port = 7443
 
-omnis.agent default = enabled per explicitly declared Omnis interactive user
-omnis.agent.modelProviders = []
-omnis.agent.maxWorkers = formula in §17.1
-
 omnis.control default = enabled per explicitly declared local interactive Omnis user
 omnis.control.defaultMode = 2d
 omnis.control.xwayland.enable = true
@@ -1200,7 +1196,7 @@ omnis.control.scrollbackLines = 100000
 
 omnis.security.protectedHandles.enable = true
 omnis.security.executionIsolation.enable = true
-omnis.security.defaultWorkerNetwork = deny
+omnis.security.defaultExecutionNetwork = deny
 ```
 
 No undeclared user automatically gets external agent/Control state.
@@ -2343,7 +2339,6 @@ Exact interface strings:
 omnis.graph.v1
 omnis.os.v1
 omnis.manager.v1
-omnis.agent.v1
 omnis.control.v1
 ```
 

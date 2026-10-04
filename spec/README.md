@@ -12,7 +12,6 @@ implementation agents begin there rather than discovering authority ad hoc.
 - `capabilities.toml` — capability name -> input/output Cap'n Proto types + effect class.
 - `properties.toml` — first-party property key types/constraints.
 - `state_machines.toml` — legal lifecycle transitions.
-- `inference_gateway.toml` — local gateway listener/auth/model/network/context constants.
 - `nix_control.toml` — exact evaluator/store control transports, configuration roots, fingerprints and recovery.
 - `agent_access.toml` — exact MCP/native-plugin projection and parity contract.
 - `control_render.toml` — ControlTree layout, render, clipping, hit-test, text/native-surface and animation constants.

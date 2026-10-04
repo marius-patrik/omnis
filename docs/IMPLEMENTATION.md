@@ -126,7 +126,7 @@ OmnisOS starts these system services:
 ```text
 systemd
  ├─ nix-daemon                 # OmnisManager Nix fork; normal Nix client compatibility
- ├─ omnis-graphd              # shared graph, CAS, durable event outbox
+ ├─ omnis-graphd              # shared graph, CAS, append-only core event journal
  ├─ omnis-osd                 # physical/system observation + enforcement adapter
  └─ omnis-managerd            # capabilities, bindings, placement and execution broker
 ```
@@ -367,7 +367,7 @@ omnis.enable
 omnis.graph.*
 omnis.os.*
 omnis.manager.*
-omnis.agent.users.<name>.*
+omnis.agentAccess.*
 omnis.control.users.<name>.*
 omnis.hosts.*
 omnis.security.*

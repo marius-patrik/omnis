@@ -71,7 +71,6 @@ Examples:
 shell.execute
 vcs.commit
 vcs.push
-code.agent
 code.format
 model.classify
 model.embed
@@ -314,8 +313,7 @@ resource use
 external effects
 ```
 
-Execution lifecycle state is reflected in the graph and durably enqueued through graphd's event
-outbox for Agent delivery.
+Execution lifecycle state is reflected in the graph and durably enqueued through graphd's core event journal for all consumers.
 
 ---
 
@@ -434,16 +432,13 @@ OpenAI-compatible model APIs
 Anthropic model APIs
 llama.cpp/local GGUF
 ONNX Runtime classifiers/embeddings
-Claude Code
-Codex
-OpenCode
 container runtime
 SSH generic remote host
 native Omnis QUIC remote host
 ```
 
 Provider-specific configuration is Manager state/Nix configuration. External clients ask only for
-semantic capabilities such as `model.embed` or `code.agent`.
+semantic capabilities such as `model.embed`, `vcs.status`, or `process.execute`.
 
 ## 19. v0 protected-handle realization
 

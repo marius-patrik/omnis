@@ -218,7 +218,7 @@ OmnisOS provides the internal service `omnis-graphd`, responsible only for:
 It contains no cognition, capability policy, UI logic, package semantics, or memory semantics.
 
 Omnis v0 uses SQLite in WAL mode with one serialized writer, revision-addressable validity rows, a
-durable event outbox, and a filesystem BLAKE3 CAS as specified in `docs/IMPLEMENTATION.md`. Storage
+append-only core event journal, and a filesystem BLAKE3 CAS as specified in `docs/IMPLEMENTATION.md`. Storage
 remains replaceable behind the graph contract.
 
 ---

@@ -441,7 +441,7 @@ payload/artifact references where needed
 ```
 
 Subsystem-specific lifecycle/input events that do not correspond to graph mutation are durably
-enqueued through graphd's outbox. Dense event classes may use lossless batch artifacts, but any consumer can
+appended through graphd's core event journal. Dense event classes may use lossless batch artifacts, but any consumer can
 recover every original ordered item without observing the scene.
 
 No first-party component silently mutates durable state without producing an event.
@@ -570,7 +570,7 @@ Canonical locations:
 `graph.sqlite3` uses SQLite WAL, `synchronous=FULL`, one serialized writer task, independent reader
 connections, validity intervals for revision reads, and schema migrations owned by graphd.
 
-The graph database also contains the durable event outbox. A graph transaction commits graph
+The graph database also contains the append-only core event journal. A graph transaction commits graph
 mutations and its normalized event envelopes atomically. Non-graph first-party producers enqueue
 events through graphd before considering publication durable. Consumers replay by monotonically
 increasing ingest_seq and maintain independent cursors; there is no global ACK.
