@@ -654,3 +654,39 @@ def test_control_render_contract_is_typed():
     assert "state @3 :S.ControlNodeState" in control
     assert "ControlProperty" not in control
     assert "setProperties" not in control
+
+
+def test_harness_adapter_manifest_is_complete():
+    """Built-in coding harnesses must have exact machine-readable adapter contracts."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "harnesses.toml"), "rb") as handle:
+        spec = tomllib.load(handle)
+
+    assert spec["version"] == 1
+    assert spec["shared"]["capability"] == "omnis.capability.code.agent"
+    assert spec["shared"]["logical_model"] == "omnis-code"
+
+    expected = {"claude", "codex", "opencode"}
+    assert set(spec["harnesses"]) == expected
+
+    for name, contract in spec["harnesses"].items():
+        assert contract["executable"]
+        assert contract["required_tokens"]
+        assert contract["output"] == "jsonl"
+        assert contract["coverage"] in {"full", "gateway", "hook", "process_only"}
+
+    assert "--print" in spec["harnesses"]["claude"]["required_tokens"]
+    assert "--json" in spec["harnesses"]["codex"]["required_tokens"]
+    assert "--standalone" in spec["harnesses"]["opencode"]["required_tokens"]
+
+
+def test_harness_adapters_do_not_bypass_inference_gateway():
+    doc = _read("docs", "HARNESS_ADAPTERS_V0.md")
+    assert "ANTHROPIC_BASE_URL=http://127.0.0.1:7331/anthropic" in doc
+    assert "OPENAI_BASE_URL=http://127.0.0.1:7331/v1" in doc
+    assert "http://127.0.0.1:7331/v1" in doc
+    assert "There is no weaker built-in direct-provider fallback." in doc

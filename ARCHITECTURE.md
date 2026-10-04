@@ -7,7 +7,8 @@ constants, defaults and fallback behavior are frozen by
 [`docs/DECISION_COMPLETE_V0.md`](docs/DECISION_COMPLETE_V0.md) and ADR-0025. Canonical first-party
 kind/relation/capability/event names and lifecycle states are frozen by
 [`docs/ONTOLOGY_V0.md`](docs/ONTOLOGY_V0.md); public NixOS configuration is frozen by
-[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md).
+[`docs/NIX_OPTIONS_V0.md`](docs/NIX_OPTIONS_V0.md). Built-in coding harness integration is frozen by
+[`docs/HARNESS_ADAPTERS_V0.md`](docs/HARNESS_ADAPTERS_V0.md).
 
 Omnis is a graph-native, agentic operating system built initially on Linux, Nix, and NixOS. It is
 not a desktop application, an AI assistant, a shell wrapper, or a new programming language.
@@ -696,8 +697,8 @@ These mutations emit events like user interactions do.
 Terminal, browser semantics, widgets, code, graphs, media, 2D, and 3D do not require independent
 renderer architectures.
 
-Control lowers them into one GPU-oriented render scene. The initial compositor implementation should
-be Wayland-native, built using Smithay-class compositor primitives and wgpu-class GPU rendering.
+Control lowers them into one GPU-oriented render scene. The v0 compositor is Wayland-native, built
+with Smithay and wgpu according to `docs/CONTROL_RENDER_V0.md`.
 
 Existing applications remain existing applications. Wayland/XWayland surfaces are delegated/native
 regions where direct semantic rendering is unavailable or undesirable.

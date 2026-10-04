@@ -3,8 +3,9 @@
 **Status: NORMATIVE SUPPORTING SPECIFICATION.** `ARCHITECTURE.md` defines semantic architecture;
 this document freezes the first implementation profile. `DECISION_COMPLETE_V0.md` freezes all v0
 algorithms, constants, defaults and fallback behavior. `ONTOLOGY_V0.md` freezes semantic names/state
-machines and `NIX_OPTIONS_V0.md` freezes the public NixOS option surface. Implementations may replace a mechanism later
-only through an explicit architecture/ADR change.
+machines and `NIX_OPTIONS_V0.md` freezes the public NixOS option surface. `HARNESS_ADAPTERS_V0.md`
+freezes built-in coding-harness integration. A mechanism changes only through an explicit
+architecture/ADR change.
 
 ## 1. Implementation profile
 
