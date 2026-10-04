@@ -439,6 +439,9 @@ omnis.event.agent.context.compiled
 omnis.event.agent.procedure.promoted
   procedure, evidence[]
 
+omnis.event.agent.competence_gap
+  candidate=capability, target=worker-class identity, evidence[]=last terminal attempts
+
 omnis.event.agent.candidate.proposed
 omnis.event.agent.candidate.evaluated
 omnis.event.agent.candidate.promoted

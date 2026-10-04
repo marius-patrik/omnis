@@ -126,13 +126,13 @@ Manager bindings:
 - embedding model;
 - reranker;
 - reasoning model;
-- vision/audio where useful;
+- vision/audio capability bindings according to the frozen model-role fallback/stream rules;
 - local inference engines;
 - remote model APIs;
 - Claude Code;
 - Codex;
 - OpenCode;
-- generic harness;
+- descriptor-driven generic harness using `spec/generic_harness.schema.json`;
 - MCP.
 
 Agent integration:
@@ -172,7 +172,7 @@ Implement:
 - remote execution envelopes;
 - artifact transfer/cache;
 - GPU/CPU placement;
-- remote graph synchronization required for shared identities;
+- federated remote graph queries/cache with shared NodeIds and authority rules from `DECISION_COMPLETE_V0.md`;
 - QUIC/TLS remote RPC with the same EventId/TraceId/NodeId contracts.
 
 Exit: one Agent activity can use local Control, remote GPU, local repository, and remote worker while
@@ -180,7 +180,7 @@ preserving shared graph/activity/event identity.
 
 ## Phase 10 — Learning and self-optimization
 
-Implement:
+Implement exactly `docs/LEARNING_V0.md` and `spec/learning.toml`:
 
 - memory utility learning;
 - procedure induction;

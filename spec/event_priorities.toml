@@ -75,3 +75,5 @@ unknown = 0.40
 
 "omnis.event.manager.host.paired" = 0.75
 "omnis.event.manager.host.unpaired" = 0.75
+
+"omnis.event.agent.competence_gap" = 0.55

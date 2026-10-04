@@ -72,3 +72,5 @@ version = 1
 
 "omnis.event.manager.host.paired" = "identityOnly"
 "omnis.event.manager.host.unpaired" = "identityOnly"
+
+"omnis.event.agent.competence_gap" = "candidateEvent"

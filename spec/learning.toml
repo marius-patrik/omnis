@@ -1,0 +1,68 @@
+version = 1
+
+[memory_utility]
+prior_success = 1.0
+prior_total = 2.0
+multiplier_min = 0.75
+multiplier_span = 0.50
+rerank_candidates = 32
+
+[binding_quality]
+prior_success = 2.0
+prior_total = 4.0
+learned_min_attempts = 3
+advertised_weight_after_min = 0.25
+learned_weight_after_min = 0.75
+ewma_alpha = 0.20
+
+[competence]
+prior_success = 2.0
+prior_total = 4.0
+label_min_attempts = 5
+weak_below = 0.60
+competent_at = 0.80
+cost_adjust_unknown = 0.00
+cost_adjust_weak = 0.20
+cost_adjust_developing = 0.10
+cost_adjust_competent = -0.05
+
+[competence_gap]
+failure_window = 10
+failures_trigger = 3
+min_attempts_low_competence = 5
+low_competence_below = 0.60
+close_consecutive_successes = 5
+close_competence_at = 0.80
+
+[improvement_candidate]
+goal_progress = 0.50
+information_gain = 0.70
+urgency = 0.20
+risk_reduction = 0.50
+novelty = 0.50
+user_relevance = 0.30
+normalized_cost = 0.70
+
+[replay]
+ordinary_fixture_max = 1000
+
+[cost_weights]
+wall_time = 0.25
+cpu_time = 0.20
+peak_memory = 0.15
+model_tokens = 0.15
+provider_cost = 0.15
+network_bytes = 0.10
+
+[preference]
+explicit_initial = 0.90
+explicit_corrected = 1.00
+behavioral_min_activities = 3
+behavioral_initial = 0.60
+behavioral_increment = 0.05
+behavioral_max = 0.85
+contradiction_decrement = 0.10
+retract_below = 0.50
+
+[prediction]
+minimum_confidence = 0.60

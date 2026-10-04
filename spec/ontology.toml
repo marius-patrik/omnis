@@ -105,7 +105,7 @@ events = [
   "omnis.event.agent.worker.cancelled","omnis.event.agent.memory.created",
   "omnis.event.agent.memory.updated","omnis.event.agent.memory.superseded",
   "omnis.event.agent.memory.retracted","omnis.event.agent.memory.erased",
-  "omnis.event.agent.context.compiled","omnis.event.agent.procedure.promoted",
+  "omnis.event.agent.context.compiled","omnis.event.agent.procedure.promoted","omnis.event.agent.competence_gap",
   "omnis.event.agent.candidate.proposed","omnis.event.agent.candidate.evaluated",
   "omnis.event.agent.candidate.promoted","omnis.event.agent.candidate.rejected",
   "omnis.event.control.input.submitted","omnis.event.control.focus.changed",
