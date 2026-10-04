@@ -845,27 +845,27 @@ outbox/worldline.</p>
 </code></pre></div>
 <p>Domains communicate with bounded channels. The render loop never waits for Agent/model work.</p>
 <h3 id="102-control-tree-and-scene">10.2 Control tree and scene<a class="headerlink" href="#102-control-tree-and-scene" title="Permanent link">&para;</a></h3>
+<p>The complete v0 data model/lowering is <code>docs/CONTROL_RENDER_V0.md</code>,
+<code>protocol/control_scene.capnp</code>, <code>protocol/control.capnp</code>, and <code>spec/control_render.toml</code>.</p>
 <p>Pipeline:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>shared graph revision
 <a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a> -&gt; ProjectionSpec + Lens
-<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a> -&gt; ControlTree
-<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a> -&gt; layout
-<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a> -&gt; RenderScene
-<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a> -&gt; wgpu render graph
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a> -&gt; typed ControlTree
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a> -&gt; Taffy / graph layout
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a> -&gt; typed RenderScene
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a> -&gt; wgpu
 <a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a> -&gt; DRM/KMS output
 </code></pre></div>
-<p>Persistent Control nodes have graph NodeIds in the presentation namespace. Frame-local GPU objects
-use private integer handles and never become semantic identity.</p>
-<p>Render primitives are fixed initially:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>Group Rect RoundedRect Path GlyphRun Image Mesh NativeSurface Clip Transform
+<p>ControlTree carries semantic/presentation identity and typed interactive state. RenderScene carries
+private frame/render identity only. The public Control mutation API never exposes an untyped
+first-party property bag.</p>
+<p>Fixed RenderScene primitive union:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>Group Transform Clip Rect RoundedRect Path GlyphRun Image Mesh NativeSurface
 </code></pre></div>
 <h3 id="103-2d-and-3d-desktop">10.3 2D and 3D desktop<a class="headerlink" href="#103-2d-and-3d-desktop" title="Permanent link">&para;</a></h3>
-<p>Both modes consume the same selected graph subgraph and interaction state.</p>
-<p>2D provides focus+context node/edge editing, hierarchical and force layouts, ports/actions, inline
-inspectors and arbitrary panels. 3D maps the same nodes/edges into a camera-controlled spatial
-layout and may map selected graph dimensions to axes, depth, clustering and trails.</p>
-<p>Toggling mode changes only projection/layout state. Focus, selection, NodeIds, active lens and
-timeline frontier are preserved.</p>
+<p>Both modes use the same ControlTree identity/focus/selection/lens/frontier. Only graph layout,
+camera and scene lowering differ. The exact 2D/3D coordinate, camera, hit-test and NativeSurface
+composition behavior is frozen in <code>CONTROL_RENDER_V0.md</code> and <code>spec/control_render.toml</code>.</p>
 <h3 id="104-wayland-and-legacy-apps">10.4 Wayland and legacy apps<a class="headerlink" href="#104-wayland-and-legacy-apps" title="Permanent link">&para;</a></h3>
 <p>Smithay owns Wayland compositor protocol handling and DRM/input integration. XWayland is launched as
 a managed child for X11 compatibility.</p>

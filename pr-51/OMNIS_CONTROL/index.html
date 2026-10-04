@@ -379,53 +379,38 @@ change graph identity.</p>
 <p>The timeline is not merely a log viewer.</p>
 <hr />
 <h2 id="7-control-tree">7. Control tree<a class="headerlink" href="#7-control-tree" title="Permanent link">&para;</a></h2>
-<p>Control builds <code>ControlTree</code> from graph projections.</p>
-<p>Conceptual node classes:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Container/Layout
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>GraphProjection
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Text/Glyph content
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Terminal/PTYShell
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Document/Editor
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>Table
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>Chart/Plot
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>2DGraph
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>3DGraph
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>Media
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>Inspector
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>NativeSurface
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>InputSurface
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>Overlay
+<p>The v0 ControlTree is exactly the typed structure in
+<a href="../CONTROL_RENDER_V0/"><code>CONTROL_RENDER_V0.md</code></a> and <code>protocol/control_scene.capnp</code>.</p>
+<p>First-party node kinds are the closed v0 enum:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>container split scroll graphProjection text terminal document editor
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>table chart media inspector nativeSurface inputSurface overlay timeline
 </code></pre></div>
-<p>These are presentation constructs, not new domain identities.</p>
-<p>A control representing a graph object stores that <code>NodeId</code> directly.</p>
+<p>Each Control RPC node carries one typed <code>ControlNodeState</code>; arbitrary first-party string kinds and
+untyped property maps are not a v0 surface. A node representing shared semantic state retains that
+NodeId separately from its ControlNodeId.</p>
+<p>Layout uses Taffy under the exact constraints/order in <code>CONTROL_RENDER_V0.md</code>.</p>
 <hr />
 <h2 id="8-render-scene">8. Render scene<a class="headerlink" href="#8-render-scene" title="Permanent link">&para;</a></h2>
-<p>Control lowers <code>ControlTree</code> to a GPU-oriented scene. Initial primitives may include:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>quad
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>text/glyph run
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>path/vector geometry
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>texture/render target
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>material/3D layer
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>native/delegated surface region
+<p>ControlTree lowers to the private <code>RenderScene</code> defined in <code>control_scene.capnp</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Group Transform Clip Rect RoundedRect Path GlyphRun Image Mesh NativeSurface
 </code></pre></div>
-<p>This scene is private render IR and can be aggressively optimized/rebuilt.</p>
-<p>It must never become the semantic source of truth.</p>
+<p>The schema, coordinates, color encoding, paint/depth order, clipping, hit testing, text shaping, path
+tessellation, native-buffer import and frame boundary are all normative in <code>CONTROL_RENDER_V0.md</code>.</p>
+<p>RenderScene is disposable lowering and never semantic truth.</p>
 <hr />
 <h2 id="9-renderer-implementation">9. Renderer implementation<a class="headerlink" href="#9-renderer-implementation" title="Permanent link">&para;</a></h2>
-<p>OmnisControl v0 uses:</p>
+<p>OmnisControl v0 uses exactly:</p>
 <ul>
-<li>Smithay for Wayland compositor/DRM/input foundations;</li>
-<li>wgpu for the GPU renderer;</li>
-<li>a Rust text shaping/font stack pinned by the component lockfile;</li>
-<li>XWayland compatibility;</li>
-<li>platform accessibility publication;</li>
-<li>direct input handling.</li>
+<li>Smithay/calloop for Wayland, DRM/KMS and input;</li>
+<li>wgpu for GPU rendering;</li>
+<li>Taffy for ControlTree box/flex layout;</li>
+<li>cosmic-text/fontconfig for shaping and font fallback;</li>
+<li>Lyon for vector path tessellation;</li>
+<li>VTE for terminal parsing;</li>
+<li>AccessKit/AT-SPI for custom accessibility;</li>
+<li>XWayland for X11 compatibility.</li>
 </ul>
-<p>Omnis should not fork a full traditional desktop environment because that would import the wrong
-interaction ontology.</p>
-<p><code>omnis-control</code> is implemented directly on Smithay; it does not fork a traditional desktop or a
-second compositor framework.</p>
-<hr />
+<p>There is one renderer. No GTK/Qt/Electron/Tauri/TUI/browser-engine renderer is introduced.</p>
 <h2 id="10-native-applications">10. Native applications<a class="headerlink" href="#10-native-applications" title="Permanent link">&para;</a></h2>
 <p>Existing Wayland/XWayland applications run unmodified.</p>
 <p>A native application surface is represented in the graph and delegated to the compositor in a

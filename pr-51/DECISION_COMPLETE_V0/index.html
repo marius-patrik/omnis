@@ -384,9 +384,11 @@ explicit dependency-update change.</p>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>rustix                 PTY/process primitives
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>glam                   vectors/matrices/transforms
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>petgraph               graph traversal/topology
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>accesskit + accesskit_unix
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>                       custom Control accessibility publication
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>image                  image decoding
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>taffy                  ControlTree flex/box layout
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>lyon                   path tessellation
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>accesskit + accesskit_unix
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>                       custom Control accessibility publication
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>image                  image decoding
 </code></pre></div>
 <p>Control does not use egui, iced, GTK, Qt, Electron, Tauri or a browser engine as its primary UI.</p>
 <hr />
@@ -1074,6 +1076,12 @@ Memory scrollback beyond 100000 is discarded oldest-first; PTY byte-stream artif
 session when recording is enabled.</p>
 <p>Kitty graphics and Sixel are not implemented in v0. Unsupported graphics sequences are ignored
 according to parser behavior and emit one rate-limited diagnostic event per terminal/session/minute.</p>
+<hr />
+<h2 id="231-canonical-controltreerenderscene">23.1 Canonical ControlTree/RenderScene<a class="headerlink" href="#231-canonical-controltreerenderscene" title="Permanent link">&para;</a></h2>
+<p>All first-party Control node schemas, layout semantics, render primitives, coordinate/color rules,
+hit testing, clipping, text/path/native-surface lowering and renderer ownership are frozen by
+<code>docs/CONTROL_RENDER_V0.md</code>, <code>protocol/control_scene.capnp</code>, and <code>spec/control_render.toml</code>.
+Those contracts take precedence over descriptive presentation prose below.</p>
 <hr />
 <h2 id="24-control-render-scheduling">24. Control render scheduling<a class="headerlink" href="#24-control-render-scheduling" title="Permanent link">&para;</a></h2>
 <p>Compositor/input thread never blocks on graph RPC, Agent or model work.</p>
@@ -2388,6 +2396,8 @@ with ingest time; outbox <code>created_at_ns</code> separately records graphd re
           <li><a href="#22-control-input-routing">22. Control input routing</a>
           </li>
           <li><a href="#23-terminal-contract">23. Terminal contract</a>
+          </li>
+          <li><a href="#231-canonical-controltreerenderscene">23.1 Canonical ControlTree/RenderScene</a>
           </li>
           <li><a href="#24-control-render-scheduling">24. Control render scheduling</a>
           </li>
