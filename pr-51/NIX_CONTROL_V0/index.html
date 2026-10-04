@@ -1,0 +1,552 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Omnis v0 Nix Control and Provenance Contract · Omnis</title>
+    <meta name="description" content="Graph-native agentic operating system built on Linux and Nix, with one shared multidimensional graph.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="../assets/theme.css"><script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("docs-theme");
+          if (stored) document.documentElement.setAttribute("data-theme", stored);
+          else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+            document.documentElement.setAttribute("data-theme", "light");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="header">
+      <div class="header__inner">
+        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a class="header__brand" href="..">
+          <span class="header__mark" aria-hidden="true"></span>
+          <span class="header__name">Omnis</span>
+        </a>
+
+        <div class="header__search">
+          <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input type="search" id="search-input" placeholder="Search documentation…"
+                 autocomplete="off" spellcheck="false" aria-label="Search documentation">
+          <kbd class="header__kbd">/</kbd>
+          <div class="search-results" id="search-results" hidden></div>
+        </div>
+
+        <div class="header__actions">
+          <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+            </svg>
+          </button>
+          <a class="icon-button" href="https://github.com/marius-patrik/omnis" aria-label="marius-patrik/omnis">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.2 4.9 4.9 0 0 0 19.9 1.6S18.7 1.2 16 3a13.4 13.4 0 0 0-7 0C6.3 1.2 5.1 1.6 5.1 1.6A4.9 4.9 0 0 0 5 5.2 5.2 5.2 0 0 0 3.6 8.8c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav><div class="switcher" data-switcher hidden>
+  <label class="switcher__group">
+    <span class="switcher__label">Version</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Documentation version"></select>
+  </label>
+  <label class="switcher__group" data-switcher-projects-group hidden>
+    <span class="switcher__label">Project</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Project"></select>
+  </label>
+</div><nav aria-label="Documentation">
+
+
+<ul class="nav nav--depth-0">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="..">Overview</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Architecture</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../IMPLEMENTATION/">Implementation</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../DECISION_COMPLETE_V0/">Decision-complete v0</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../GRAPH/">Shared graph</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_OS/">OmnisOS</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_MANAGER/">OmnisManager</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_AGENT/">OmnisAgent</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../OMNIS_CONTROL/">OmnisControl</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../PROTOCOLS/">Protocols</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Decisions</span>
+      
+<ul class="nav nav--depth-2">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/">Overview</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0001-one-scene-tree-two-renderer-backends/">ADR-0001 — One scene tree, two renderer backends</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0002-themes-are-vs-code-colour-themes-profiles-bundle-them/">ADR-0002 — Themes are VS Code colour themes; profiles bundle them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0003-the-modification-surface-is-one-api-for-every-caller/">ADR-0003 — The modification surface is one API for every caller</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0004-the-agent-pipeline-is-harness-agnostic/">ADR-0004 — The agent pipeline is harness-agnostic</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0005-configuration-lives-in-files-data-lives-in-pglite/">ADR-0005 — Configuration lives in files, data lives in PGlite</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0006-one-context-fragment-normal-form-addressed-by-uri/">ADR-0006 — One context fragment normal form, addressed by URI</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0007-every-mutating-vcs-operation-is-invertible-from-an-operation-log/">ADR-0007 — Every mutating VCS operation is invertible from an operation log</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0008-task-identity-is-the-hash-of-its-inputs/">ADR-0008 — Task identity is the hash of its inputs</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0009-content-addressed-storage-blake3-fastcdc-convergent-encryption/">ADR-0009 — Content-addressed storage: BLAKE3, FastCDC, convergent encryption</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0010-secrets-never-touch-disk-in-plaintext-and-never-enter-agent-context/">ADR-0010 — Secrets never touch disk in plaintext, and never enter agent context</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0011-omnis-is-a-kernel-bind-existing-services-rather-than-reimplement-them/">ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0012-the-system-is-one-declarative-configuration-applied-as-generations/">ADR-0012 — The system is one declarative configuration, applied as generations</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0013-subsystems-run-beside-the-core-never-inside-it/">ADR-0013 — Subsystems run beside the core, never inside it</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0014-guest-environments-are-host-level-siblings-of-the-core/">ADR-0014 — Guest environments are host-level siblings of the core</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0015-remote-access-is-a-web-surface-over-tailscale/">ADR-0015 — Remote access is a web surface over Tailscale</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0016-hosts-are-declared-execution-targets-and-processes-are-placed-on-them/">ADR-0016 — Hosts are declared execution targets, and processes are placed on them</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0017-the-tui-is-dropped-as-a-surface/">ADR-0017 — The TUI is dropped as a surface</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0018-services-are-backends-of-domain-subsystems/">ADR-0018 — Services are backends of domain subsystems</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own/">ADR-0019 — Native surfaces are delegated regions the compositor does not own</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0020-documentation-is-generated-from-the-option-schema-and-lives-in-the-product/">ADR-0020 — Documentation is generated from the option schema and lives in the product</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0021-one-input-bar-one-navigation-model-everything-addressable/">ADR-0021 — One input bar, one navigation model, everything addressable</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0022-self-optimisation-is-the-system-proposing-generations-against-itself/">ADR-0022 — Self-optimisation is the system proposing generations against itself</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0023-graph-native-os-architecture-reset/">ADR-0023 — Reset Omnis around a graph-native four-authority operating system</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0024-freeze-v0-implementation-substrate/">ADR-0024 — Freeze the Omnis v0 implementation substrate</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/0025-decision-complete-v0/">ADR-0025 — Make Omnis v0 decision-complete</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../architecture/decisions/process/">Process</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../declaration/">The declaration</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../roadmap/">Roadmap</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../pipeline/">Automation pipeline</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../agents/">Contributing & Agent Rules</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">Notes</span>
+      
+<ul class="nav nav--depth-1">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/bootstrap/">Bootstrap runbook</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/transcript/">Source transcript</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../notes/vision_capture/">Capture provenance</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+</nav>
+      </aside>
+
+      <main class="content" id="content">
+        <article class="prose">
+          <h1 id="omnis-v0-nix-control-and-provenance-contract">Omnis v0 Nix Control and Provenance Contract<a class="headerlink" href="#omnis-v0-nix-control-and-provenance-contract" title="Permanent link">&para;</a></h1>
+<p><strong>Status: NORMATIVE.</strong> This document freezes the exact Nix/NixOS boundary used by OmnisManager and
+OmnisOS. Nix remains deterministic and model-free. Implementation agents do not choose an alternate
+evaluation path, text parser, provenance representation, store observer, or candidate-build flow.</p>
+<p>Canonical sources:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>protocol/nix_control.capnp
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>spec/nix_control.toml
+</code></pre></div>
+<h2 id="1-two-deterministic-surfaces">1. Two deterministic surfaces<a class="headerlink" href="#1-two-deterministic-surfaces" title="Permanent link">&para;</a></h2>
+<p>The Nix fork exposes two different surfaces because evaluation and privileged store mutation have
+different lifetimes/authority.</p>
+<h3 id="11-storecontrol-surface">1.1 Store/control surface<a class="headerlink" href="#11-storecontrol-surface" title="Permanent link">&para;</a></h3>
+<p>The patched <code>nix-daemon</code> retains its normal upstream protocol unchanged and additionally listens on:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/run/omnis/nix-control.sock
+</code></pre></div>
+<p>The socket is Unix <code>SOCK_STREAM</code>, Cap'n Proto RPC, owner <code>root:omnis</code>, mode <code>0660</code>.</p>
+<p>It exposes exactly <code>NixStoreControl</code> from <code>protocol/nix_control.capnp</code>:
+- path/derivation metadata;
+- closure;
+- realization plan;
+- realization;
+- GC plan;
+- exact-path GC execution;
+- full store/root snapshot;
+- store/build lifecycle subscription.</p>
+<p>No evaluator runs inside nix-daemon and no model code links into Nix.</p>
+<h3 id="12-evaluation-surface">1.2 Evaluation surface<a class="headerlink" href="#12-evaluation-surface" title="Permanent link">&para;</a></h3>
+<p>System evaluation runs in the companion C++ binary <code>omnis-nix-eval</code> built from the same pinned
+OmnisManager/Nix source tree.</p>
+<p>Manager starts one process per EvaluationId and passes one Unix <code>SOCK_STREAM</code> socketpair endpoint as
+fd 3. Cap'n Proto RPC over fd 3 exposes <code>NixEvalService</code>. stdin/stdout/stderr are not an API.</p>
+<p>The helper exits after its EvaluationStream is drained/cancelled. It has:
+- read-only access to the pinned nixpkgs store path, <code>/etc/omnis/base.nix</code>, and the candidate dir;
+- Nix daemon access for store queries;
+- no network;
+- <code>LANG=C.UTF-8</code>;
+- <code>TZ=UTC</code>;
+- no model/provider/harness credentials.</p>
+<h2 id="2-canonical-machine-configuration-files">2. Canonical machine configuration files<a class="headerlink" href="#2-canonical-machine-configuration-files" title="Permanent link">&para;</a></h2>
+<p>v0 uses exactly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/etc/omnis/base.nix
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>/etc/omnis/managed.nix
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>/etc/omnis/configuration.nix
+</code></pre></div>
+<p>Ownership:
+- <code>base.nix</code>: user/admin-owned NixOS module. Omnis never rewrites it.
+- <code>managed.nix</code>: fully generated from Omnis system graph state. Users do not edit it.
+- <code>configuration.nix</code>: Omnis-owned stable wrapper.</p>
+<p>The wrapper content is semantically exactly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span> <span class="o">...</span> <span class="p">}:</span> <span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="ss">imports</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="l">/etc/omnis/base.nix</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="l">/etc/omnis/managed.nix</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  <span class="p">];</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>Formatting is generated by the Nix AST printer; string substitution/regex editing is forbidden.</p>
+<p>The initial installer creates <code>base.nix</code>; hardware/user custom modules are imported from there.</p>
+<h2 id="3-candidate-evaluation">3. Candidate evaluation<a class="headerlink" href="#3-candidate-evaluation" title="Permanent link">&para;</a></h2>
+<p>For GenerationId G:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>/var/lib/omnis/candidates/&lt;G&gt;/
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  managed.nix
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  configuration.nix
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  evaluation/
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  build/
+</code></pre></div>
+<p>Candidate <code>configuration.nix</code> imports the same absolute <code>/etc/omnis/base.nix</code> plus its sibling
+<code>./managed.nix</code>. Evaluation never edits the active files.</p>
+<p>Manager sends:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>EvaluateSystemRequest
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  evaluationId
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  exact pinned nixpkgs store path
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  baseModule=/etc/omnis/base.nix
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  managedModule=/var/lib/omnis/candidates/&lt;G&gt;/managed.nix
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  system=&lt;host Nix system string&gt;
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  TraceContext
+</code></pre></div>
+<p><code>omnis-nix-eval</code> evaluates the pinned nixpkgs NixOS <code>lib/eval-config.nix</code> with exactly those two
+modules and no <code>NIX_PATH</code>/environment source lookup. Evaluation is pure. If a module requires an
+unrealized impure fetch, evaluation fails; Manager does not enable network as a fallback.</p>
+<h2 id="4-option-provenance">4. Option provenance<a class="headerlink" href="#4-option-provenance" title="Permanent link">&para;</a></h2>
+<p>Pinned nixpkgs already publishes option metadata from <code>lib/modules.nix</code>, including
+<code>declarationPositions</code>, <code>definitionsWithLocations</code>, <code>highestPrio</code>, <code>valueMeta</code>, type metadata
+and final value. Omnis consumes those fields; it does not reimplement module merging.</p>
+<p>Each declared option becomes one <code>OptionRecord</code>, ordered by option path UTF-8 bytes.</p>
+<p>Definitions are the final contributing definitions from <code>definitionsWithLocations</code>, in their
+post-<code>mkOverride</code>/post-<code>mkOrder</code> merge order. Each records:
+- source file/optional line/column;
+- BLAKE3 of the raw source file bytes;
+- zero-based final order;
+- the option's <code>highestPrio</code>;
+- deterministic value fingerprint.</p>
+<p>Declarations come from <code>declarationPositions</code> and preserve list order.</p>
+<p><code>mergeApi</code> is:
+- <code>v2</code> when the option type's merge has <code>v2</code>;
+- <code>legacy</code> otherwise.</p>
+<p>Suppressed lower-priority definitions are not called contributors. Their source remains discoverable
+from module source; v0 explain answers why the <strong>final</strong> value exists, not a hypothetical alternate
+merge.</p>
+<h2 id="5-option-value-fingerprint">5. Option value fingerprint<a class="headerlink" href="#5-option-value-fingerprint" title="Permanent link">&para;</a></h2>
+<p>First try to force <code>builtins.toJSON option.value</code>.</p>
+<p>On success:
+- encoding = <code>json</code>;
+- JSON bytes are the exact UTF-8 result from pinned Nix;
+- digest = BLAKE3(JSON bytes);
+- store-path string contexts are extracted, deduplicated and UTF-8-byte sorted.</p>
+<p>If JSON conversion cannot represent the final value:
+- encoding is <code>opaque-function</code> for functions, otherwise <code>opaque-external</code>;
+- digest input is the NUL-delimited concatenation:
+  <code>encoding</code>, option type name, each declaration source tuple, each contributing source-file
+  BLAKE3, and each contributing definition fingerprint;
+- the final BLAKE3-256 is the ValueFingerprint digest;
+- JSON is absent.</p>
+<p>A source tuple serializes as UTF-8 file path, decimal line or empty, decimal column or empty.</p>
+<p>This fallback is for diff identity/provenance, not value reconstruction.</p>
+<h2 id="6-evaluator-trace">6. Evaluator trace<a class="headerlink" href="#6-evaluator-trace" title="Permanent link">&para;</a></h2>
+<p>The OmnisManager fork instruments <code>EvalState::forceValue</code> only while <code>omnis-nix-eval</code> has an
+active evaluation trace.</p>
+<p>Each forced expression with a valid source position emits:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>EvalTraceRecord
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  monotonically increasing id starting at 1
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  parent id (0 = evaluation root)
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  file/line/column
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  expression kind
+</code></pre></div>
+<p>Parent is the currently forcing expression on the evaluator's thread-local force stack.</p>
+<p>Records stream immediately through <code>EvaluationStream</code>; the helper does not accumulate the full DAG
+in RAM. Manager writes the ordered records to a CAS artifact and records that ArtifactId on the
+Generation/Evaluation provenance.</p>
+<p>Expressions without source positions are still evaluated normally but do not create trace nodes.
+The trace cannot change evaluation semantics.</p>
+<h2 id="7-derivationstore-records">7. Derivation/store records<a class="headerlink" href="#7-derivationstore-records" title="Permanent link">&para;</a></h2>
+<p><code>StorePathInfo</code> is sourced from Nix store path info. Reference lists are UTF-8-byte sorted.
+<code>DerivationInfo</code> is sourced from parsed derivations; input derivations and sources are sorted by
+store-path bytes, output names by UTF-8 bytes, args preserve order.</p>
+<p>The environment map is serialized as canonical JSON with keys sorted by UTF-8 bytes and stored as a
+protected/local ArtifactRef; it is not copied into Agent context by default because derivation
+environments can contain large/sensitive material.</p>
+<h2 id="8-realization-planning">8. Realization planning<a class="headerlink" href="#8-realization-planning" title="Permanent link">&para;</a></h2>
+<p><code>planRealization</code> snapshots the current store validity and configured substituter availability.</p>
+<p>Every required path is classified exactly:
+- <code>alreadyValid</code> if valid locally;
+- <code>substitute</code> if Nix reports an available valid substitute at plan time;
+- <code>build</code> otherwise.</p>
+<p>The plan contains the complete transitive realization closure. Order is dependency-topological; ties
+use store-path UTF-8 byte order. Totals sum the plan-time download/NAR sizes reported by Nix.</p>
+<p>Plan state is evidence, not a promise: availability can change before realization. <code>realize</code>
+returns the actual final plan classification/evidence after completion.</p>
+<p>Only upstream Nix build mode <code>normal</code> is used in v0.</p>
+<h2 id="9-store-observer">9. Store observer<a class="headerlink" href="#9-store-observer" title="Permanent link">&para;</a></h2>
+<p>Each nix-daemon start allocates a UUIDv7 <code>daemonBootId</code>; event sequence starts at 1.</p>
+<p>The control surface keeps the newest 100000 <code>StoreEvent</code> records in memory. Events cover:
+- build start/completion;
+- substitution;
+- path registration/deletion;
+- GC start/completion.</p>
+<p>If Manager reconnects with a different boot ID or an unavailable sequence, subscription returns a
+Conflict requiring <code>snapshot()</code> before resubscription.</p>
+<p>Snapshot streams:
+1. all valid store paths sorted by store-path bytes;
+2. all GC roots sorted by root path bytes.</p>
+<p>Manager reconciles Resources/derivations/realizations into the shared graph and emits ordinary graph
+transactions/events. Nix observer records themselves are deterministic physical evidence, not a
+second semantic graph.</p>
+<p>Normal non-Omnis Nix client operations are observed too. Their TraceContext gets:
+- UUIDv7 RequestId/TraceId allocated by nix-daemon;
+- actor mapped from peer UID;
+- no causal parents.</p>
+<p>Omnis-originated control calls preserve the supplied TraceContext.</p>
+<h2 id="10-gc">10. GC<a class="headerlink" href="#10-gc" title="Permanent link">&para;</a></h2>
+<p><code>planGc</code> receives the complete root set assembled by Manager under the retention policy. Nix computes
+the unreachable set; returned candidates are store-path-byte sorted.</p>
+<p><code>gc</code> accepts the exact candidate path list from the previously surfaced plan and deletes only those
+paths that remain unreachable. If reachability changed, Nix skips the now-live path and reports it as
+not deleted; it never expands deletion beyond the request.</p>
+<p>Manager records planned and actual deletion sets.</p>
+<h2 id="11-system-diff">11. System diff<a class="headerlink" href="#11-system-diff" title="Permanent link">&para;</a></h2>
+<p>Manager compares active Evaluation A and candidate Evaluation B deterministically.</p>
+<p>Option diff:
+- union option paths, UTF-8 sorted;
+- added/removed/changed by final ValueFingerprint digest.</p>
+<p>Derivation diff:
+- compare system derivation paths and recursively compare derivation input/output records.</p>
+<p>Closure diff:
+- set difference of store closures;
+- added/removed paths sorted by store-path bytes;
+- aggregate NAR/download sizes from StorePathInfo/plan.</p>
+<p>Service impact:
+- compare the canonical systemd unit derivation/resource graph produced by the NixOS generation;
+- unit names sorted lexically;
+- classify <code>added|removed|restart|reload|unchanged</code> from NixOS switch metadata;
+- omit <code>unchanged</code> from the rendered diff artifact but retain it in the typed internal result.</p>
+<p>Semantic diff:
+- map changed options and realized Resources to shared graph identities;
+- no model call participates.</p>
+<p>All four diff forms are serialized as Cap'n Proto-derived canonical artifacts and attached to
+GenerationDiff.</p>
+<h2 id="12-build-and-activation-split">12. Build and activation split<a class="headerlink" href="#12-build-and-activation-split" title="Permanent link">&para;</a></h2>
+<p>Nix control can evaluate/plan/realize. OmnisOS owns system activation.</p>
+<p>Exact generation flow:
+1. Manager creates candidate files.
+2. evaluator returns candidate system derivation/toplevel + provenance stream.
+3. Manager asks store control for realization plan.
+4. Manager realizes the candidate closure through Nix.
+5. Manager constructs GenerationDiff.
+6. OmnisOS runs deterministic preflight invariants.
+7. OmnisOS invokes candidate <code>switch-to-configuration switch</code>.
+8. OS reconciliation verifies required state for 30 seconds.
+9. failure invokes previous generation's switch script.
+10. only successful activation atomically promotes candidate <code>managed.nix</code>.</p>
+<p>Neither <code>omnis-nix-eval</code> nor nix-daemon activates the running system.</p>
+<h2 id="13-hard-failure-rules">13. Hard failure rules<a class="headerlink" href="#13-hard-failure-rules" title="Permanent link">&para;</a></h2>
+<p>The implementation returns <code>SpecificationDefect</code> rather than inventing behavior when:
+- a promised option provenance field is absent from the pinned module-system result;
+- a store/control operation cannot be represented by <code>nix_control.capnp</code>;
+- a candidate needs impure/network evaluation;
+- a diff cannot preserve exact store/option identities.</p>
+<p>Text scraping of <code>nix-env</code>, <code>nix-store</code>, <code>nixos-rebuild</code>, evaluator diagnostics, or
+<code>nix store diff-closures</code> output is not a v0 implementation path.</p>
+        </article>
+
+        <footer class="footer">
+          <span>Omnis</span>
+          <a href="https://github.com/marius-patrik/omnis/edit/main/docs/NIX_CONTROL_V0.md">Edit this page</a>
+        </footer>
+      </main>
+
+      <aside class="toc">
+        <div class="toc__title">On this page</div>
+        <ul class="toc__list">
+          <li><a href="#1-two-deterministic-surfaces">1. Two deterministic surfaces</a>
+            <ul>
+              <li><a href="#11-storecontrol-surface">1.1 Store/control surface</a></li>
+              <li><a href="#12-evaluation-surface">1.2 Evaluation surface</a></li>
+            </ul>
+          </li>
+          <li><a href="#2-canonical-machine-configuration-files">2. Canonical machine configuration files</a>
+          </li>
+          <li><a href="#3-candidate-evaluation">3. Candidate evaluation</a>
+          </li>
+          <li><a href="#4-option-provenance">4. Option provenance</a>
+          </li>
+          <li><a href="#5-option-value-fingerprint">5. Option value fingerprint</a>
+          </li>
+          <li><a href="#6-evaluator-trace">6. Evaluator trace</a>
+          </li>
+          <li><a href="#7-derivationstore-records">7. Derivation/store records</a>
+          </li>
+          <li><a href="#8-realization-planning">8. Realization planning</a>
+          </li>
+          <li><a href="#9-store-observer">9. Store observer</a>
+          </li>
+          <li><a href="#10-gc">10. GC</a>
+          </li>
+          <li><a href="#11-system-diff">11. System diff</a>
+          </li>
+          <li><a href="#12-build-and-activation-split">12. Build and activation split</a>
+          </li>
+          <li><a href="#13-hard-failure-rules">13. Hard failure rules</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <script id="search-base" type="application/json">".."</script>
+    <script src="../assets/theme.js" defer></script>
+    <script src="../search/main.js" defer></script>
+  </body>
+</html>

@@ -375,7 +375,7 @@ columns separately.</p>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>placement.explain
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>protected.resolve_handle
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>nix.explain
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>nix.plan
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>nix.plan_realization
 </code></pre></div>
 <h3 id="41-resolve-request">4.1 Resolve request<a class="headerlink" href="#41-resolve-request" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ResolveRequest
@@ -404,6 +404,12 @@ the <strong>unpacked Cap'n Proto message bytes</strong> for those mapped structs
 whose declared capability does not match the mapped type.</p>
 <p>Provider-specific adapters translate only at the foreign boundary; they do not redefine the Omnis
 capability schema.</p>
+<h3 id="44-nix-control-projection">4.4 Nix control projection<a class="headerlink" href="#44-nix-control-projection" title="Permanent link">&para;</a></h3>
+<p>The low-level Nix protocol is <code>protocol/nix_control.capnp</code>. Manager's public <code>nixExplain</code> returns
+one unpacked Cap'n Proto <code>NixExplanation</code> artifact. <code>nixPlanRealization</code> returns the exact typed
+<code>RealizationPlan</code> produced by the store control surface.</p>
+<p>The evaluator/store split, ordering and provenance rules are normative in <code>NIX_CONTROL_V0.md</code>.
+Callers never receive scraped Nix CLI text as structured evidence.</p>
 <h2 id="5-omnisos-api">5. OmnisOS API<a class="headerlink" href="#5-omnisos-api" title="Permanent link">&para;</a></h2>
 <p>Minimum operations:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>host.inventory
@@ -617,6 +623,7 @@ protected provenance artifacts.</p>
               <li><a href="#41-resolve-request">4.1 Resolve request</a></li>
               <li><a href="#42-resolve-result">4.2 Resolve result</a></li>
               <li><a href="#43-capability-payload-encoding">4.3 Capability payload encoding</a></li>
+              <li><a href="#44-nix-control-projection">4.4 Nix control projection</a></li>
             </ul>
           </li>
           <li><a href="#5-omnisos-api">5. OmnisOS API</a>

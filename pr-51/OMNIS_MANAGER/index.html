@@ -406,27 +406,24 @@ and estimates, resolution should be reproducible.</p>
 <p>Callers can request a specific binding when implementation identity is semantically relevant.</p>
 <hr />
 <h2 id="6-nix-extensions">6. Nix extensions<a class="headerlink" href="#6-nix-extensions" title="Permanent link">&para;</a></h2>
-<p>The maintained Nix fork exposes structured observer/query APIs for:</p>
+<p>The v0 Nix boundary is frozen by
+<a href="../NIX_CONTROL_V0/"><code>NIX_CONTROL_V0.md</code></a>, <code>protocol/nix_control.capnp</code>, and
+<code>spec/nix_control.toml</code>.</p>
+<p>It has exactly two model-free surfaces:</p>
 <ul>
-<li>derivation/resource identity mapping;</li>
-<li>why a package/store path exists;</li>
-<li>dependency/closure provenance;</li>
-<li>what a candidate configuration changes;</li>
-<li>build/download/rebuild plans;</li>
-<li>generation/store realization events;</li>
-<li>graph publication hooks;</li>
-<li>resource metadata discovery;</li>
-<li>execution environment realization.</li>
+<li>patched <code>nix-daemon</code> exposes <code>NixStoreControl</code> on <code>/run/omnis/nix-control.sock</code> for typed
+  store/derivation/closure/realization/GC queries plus lifecycle observation;</li>
+<li>the companion C++ <code>omnis-nix-eval</code> process exposes <code>NixEvalService</code> over an inherited Unix
+  socketpair for one pure system evaluation.</li>
 </ul>
-<p>Omnis-specific semantic metadata lives alongside, not inside, core derivation semantics. The normal
-Nix daemon/client worker protocol remains compatible. Omnis-specific control and observation use the
-separate <code>/run/omnis/nix-control.sock</code> Cap'n Proto endpoint.</p>
-<p>The fork patches the current upstream evaluator/store boundaries rather than creating another Nix
-implementation. Required hook points include <code>EvalState::forceValue</code> in <code>src/libexpr</code>, derivation
-creation, <code>src/libstore</code> realization/substitution/closure operations, build lifecycle code under
-<code>src/libstore/build</code>, and daemon-operation correlation in <code>src/libstore/daemon.cc</code>. Upstream-compatible
-behavior remains the default.</p>
-<hr />
+<p>The normal upstream Nix client/daemon protocol remains unchanged.</p>
+<p>Option provenance consumes the pinned NixOS module system's own
+<code>declarationPositions</code>, <code>definitionsWithLocations</code>, <code>highestPrio</code>, <code>valueMeta</code>, type metadata
+and final values. Omnis does not recreate Nix module merge semantics.</p>
+<p>Evaluator tracing instruments <code>EvalState::forceValue</code> only while the companion evaluator is active.
+Store/build observation hooks cover normal Nix clients as well as Omnis calls. All explanation/diff
+ordering, fingerprints, recovery and candidate-generation behavior is normative in
+<code>NIX_CONTROL_V0.md</code>.</p>
 <h2 id="7-arbitrary-bindings">7. Arbitrary bindings<a class="headerlink" href="#7-arbitrary-bindings" title="Permanent link">&para;</a></h2>
 <p>Manager must make it easy to bind things it has never seen before.</p>
 <p>Minimum generic binding locators:</p>

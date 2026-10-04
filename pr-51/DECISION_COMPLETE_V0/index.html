@@ -398,12 +398,13 @@ explicit dependency-update change.</p>
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>/var/lib/omnis/candidates/
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>/var/lib/omnis/backups/graph/
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>/var/lib/omnis/backups/config/
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>/etc/omnis/configuration.nix
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>/etc/omnis/managed.nix
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>/run/omnis/graph.sock
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>/run/omnis/os.sock
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>/run/omnis/manager.sock
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>/run/omnis/nix-control.sock
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>/etc/omnis/base.nix
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>/etc/omnis/configuration.nix
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>/etc/omnis/managed.nix
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>/run/omnis/graph.sock
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>/run/omnis/os.sock
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>/run/omnis/manager.sock
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>/run/omnis/nix-control.sock
 </code></pre></div>
 <h3 id="32-per-user-state">3.2 Per-user state<a class="headerlink" href="#32-per-user-state" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>$XDG_STATE_HOME/omnis/agent/worldline.sqlite3
@@ -658,6 +659,7 @@ Tailscale/VPN is transport only.</p>
 <p>No CRDT is implemented in v0.</p>
 <hr />
 <h2 id="10-nix-and-persistent-mutation">10. Nix and persistent mutation<a class="headerlink" href="#10-nix-and-persistent-mutation" title="Permanent link">&para;</a></h2>
+<p>The evaluator/store/provenance boundary is fixed by <code>docs/NIX_CONTROL_V0.md</code>, <code>protocol/nix_control.capnp</code>, and <code>spec/nix_control.toml</code>.</p>
 <h3 id="101-generated-module-ownership">10.1 generated module ownership<a class="headerlink" href="#101-generated-module-ownership" title="Permanent link">&para;</a></h3>
 <p><code>/etc/omnis/managed.nix</code> is <strong>fully machine generated</strong>. Users do not edit it.</p>
 <p>Canonical desired Omnis-managed option assignments live as system.* graph facts.
