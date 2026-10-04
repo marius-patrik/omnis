@@ -88,7 +88,7 @@ def test_architecture_is_the_normative_root():
     transcript = _read("notes", "transcript.md")
 
     assert "Status: NORMATIVE" in architecture
-    for term in ("OmnisOS", "OmnisManager", "OmnisAgent", "OmnisControl"):
+    for term in ("OmnisOS", "OmnisManager", "OmnisControl"):
         assert term in architecture, f"architecture must define {term}"
     assert "shared multidimensional graph" in architecture.lower()
 
@@ -111,32 +111,33 @@ def test_architecture_states_implementation_invariants():
     for phrase in (
         "One stable identity space",
         "shared multidimensional current-state graph",
-        "OmnisAgent owns the immutable causal worldline",
+        "Exactly three core authorities",
+        "append-only core event journal",
         "Nix evaluation/build remains deterministic",
     ):
         assert phrase in section
 
 
-def test_architecture_defines_graph_worldline_and_authority_boundaries():
-    """The reset must explicitly separate current state, causal history, and four authorities."""
+def test_architecture_defines_three_core_authorities_and_external_agents():
+    """Core authority stops at OS/Manager/Control; agents are replaceable clients."""
     architecture = _read("ARCHITECTURE.md")
     for phrase in (
-        "worldline = historical causal truth",
-        "shared graph = current structured state",
+        "exactly three first-class authorities",
         "OmnisOS",
         "OmnisManager",
-        "OmnisAgent",
         "OmnisControl",
-        "write ownership",
+        "There is no core OmnisAgent service",
+        "omnis mcp",
+        "@omnis/agent-access",
     ):
         assert phrase.lower() in architecture.lower()
-
+    assert "OmnisAgent — cognitive/event/memory authority" not in architecture
 
 def test_roadmap_phases_are_addressable():
     """The implementation roadmap must expose a concrete dependency-ordered phase sequence."""
     roadmap = _read("ROADMAP.md")
     phases = set(re.findall(r"^## Phase (\d+) ", roadmap, re.MULTILINE))
-    assert {str(i) for i in range(0, 11)} <= phases, f"missing roadmap phases: {sorted(phases)}"
+    assert {str(i) for i in range(0, 10)} <= phases, f"missing roadmap phases: {sorted(phases)}"
 
 
 def test_transcript_declares_its_provenance():
@@ -179,12 +180,11 @@ def test_reference_declaration_exists_and_matches_new_component_split():
     for token in (
         "graph = {",
         "manager = {",
-        "agent.users.alice",
+        "agentAccess = {",
         "control.users.alice",
         "security = {",
         'dataDir = "/var/lib/omnis/graph"',
         'nixControlSocket = "/run/omnis/nix-control.sock"',
-        'vectorIndex = "sqlite-vec"',
         'defaultMode = "2d"',
         "quic.enable = true",
         "systemdCredentials.enable = true",
@@ -216,19 +216,17 @@ def test_v0_implementation_profile_is_concrete():
         "UUIDv7",
         "BLAKE3",
         "SQLite",
-        "FTS5",
         "Smithay",
         "wgpu",
         "systemd",
         "QUIC",
         "omnis-graphd",
         "omnis-managerd",
-        "omnis-agentd",
         "omnis-control",
     ):
         assert term in implementation, f"v0 implementation profile must freeze {term}"
-    assert "durable event outbox" in implementation.lower()
-    assert "at-least-once" in implementation
+    assert "core event journal" in implementation.lower()
+    assert "no global ack" in implementation.lower()
 
 
 def test_protocol_schema_sources_exist():
@@ -241,7 +239,6 @@ def test_protocol_schema_sources_exist():
         "graph",
         "os",
         "manager",
-        "agent",
         "control",
     ):
         path = os.path.join(REPO_ROOT, "protocol", f"{name}.capnp")
@@ -330,70 +327,44 @@ def test_active_specs_forbid_implementer_choice_markers():
 
 
 def test_canonical_v0_source_contracts():
-    """Decision-complete implementation inputs must be checked in and addressable."""
+    """Decision-complete core inputs must be checked in and addressable."""
     required = (
         "docs/ONTOLOGY_V0.md",
         "docs/NIX_OPTIONS_V0.md",
+        "docs/AGENT_ACCESS_V0.md",
         "schema/graph.sql",
-        "schema/worldline.sql",
-        "schema/index.sql",
-        "prompts/judgement.md",
-        "prompts/intention.md",
-        "prompts/memory_extract.md",
-        "prompts/reason.md",
-        "prompts/code_worker.md",
-        "prompts/candidate_evaluate.md",
+        "spec/agent_access.toml",
     )
     for rel in required:
         assert os.path.isfile(os.path.join(REPO_ROOT, rel)), f"missing canonical v0 source {rel}"
 
     ontology = _read("docs", "ONTOLOGY_V0.md")
-    for token in (
-        "omnis.capability.ingest",
-        "omnis.event.graph.committed",
-        "Execution state machine",
-        "Worker state machine",
-        "Memory ontology",
-    ):
-        assert token in ontology
+    assert "exactly three core authorities" in _read("ARCHITECTURE.md").lower()
+    assert "omnis.capability.ingest" in _read("spec", "ontology.toml")
+    assert "omnis.event.graph.committed" in _read("spec", "ontology.toml")
+    assert "no `omnis.capability.code.agent`" in ontology
 
     nix_options = _read("docs", "NIX_OPTIONS_V0.md")
     for token in (
         "omnis.graph.writerQueue",
-        "omnis.manager.inferenceGateway.port",
-        "omnis.agent.users",
+        "omnis.agentAccess.mcp.enable",
         "omnis.control.users",
-        "omnis.security.defaultWorkerNetwork",
+        "omnis.security.defaultExecutionNetwork",
     ):
         assert token in nix_options
 
-
 def test_sql_v1_schemas_parse_with_sqlite():
-    """The canonical SQLite v1 schemas must execute on the runtime SQLite parser."""
+    """The canonical core graph schema must execute on SQLite."""
     import sqlite3
 
-    for name in ("graph", "worldline", "index"):
-        sql = _read("schema", f"{name}.sql")
-        db = sqlite3.connect(":memory:")
-        try:
-            db.executescript(sql)
-        finally:
-            db.close()
-
-
-def test_agent_prompt_registry_is_versioned_and_structured():
-    """First-party generative calls must use checked-in prompts with structured outputs."""
-    for name in (
-        "judgement",
-        "intention",
-        "memory_extract",
-        "reason",
-        "candidate_evaluate",
-    ):
-        prompt = _read("prompts", f"{name}.md")
-        assert f"omnis.prompt.{name}.v1" in prompt
-        assert "Return JSON only" in prompt
-
+    sql = _read("schema", "graph.sql")
+    db = sqlite3.connect(":memory:")
+    try:
+        db.executescript(sql)
+    finally:
+        db.close()
+    assert "CREATE TABLE event_log" in sql
+    assert "acked_at_ns" not in sql
 
 def test_machine_readable_v0_manifests_parse_and_are_unique():
     """Scalar and ontology manifests must be valid TOML with unique canonical identifiers."""
@@ -408,7 +379,7 @@ def test_machine_readable_v0_manifests_parse_and_are_unique():
     assert v0["profile"] == "omnis-v0"
     assert v0["rust_toolchain"] == "1.99.0"
     assert v0["paths"]["graph_socket"] == "/run/omnis/graph.sock"
-    assert v0["paths"]["inference_port"] == 7331
+    assert v0["graph"]["event_journal_retention"] == "indefinite-v0"
     assert v0["paths"]["remote_quic_port"] == 7443
 
     with open(os.path.join(REPO_ROOT, "spec", "ontology.toml"), "rb") as handle:
@@ -467,30 +438,6 @@ def test_v0_registries_cross_check():
         assert schema["output"]
 
 
-def test_worldline_stores_exact_event_envelope_bytes():
-    worldline = _read("schema", "worldline.sql")
-    assert "envelope BLOB NOT NULL" in worldline
-    assert "inline_payload" not in worldline
-    assert "payload_artifact" not in worldline
-
-
-def test_event_priorities_cover_every_registered_event():
-    """Every registered first-party event must have an explicit base priority."""
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib
-
-    def load(name):
-        with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
-            return tomllib.load(handle)
-
-    ontology = load("ontology.toml")
-    priorities = load("event_priorities.toml")["events"]
-    assert set(priorities) == set(ontology["events"])
-    assert all(0.0 <= float(value) <= 1.0 for value in priorities.values())
-
-
 def test_capability_registry_has_wire_schema_mapping():
     """Every first-party capability must map to fixed input/output/effect contracts."""
     try:
@@ -509,79 +456,6 @@ def test_capability_registry_has_wire_schema_mapping():
     for contract in capabilities.values():
         assert f"struct {contract['input']}" in capnp or contract["input"] == "Empty"
         assert f"struct {contract['output']}" in capnp or contract["output"] == "Empty"
-
-
-def test_harness_adapter_contracts_are_exact():
-    """Built-in coding harnesses must have exact versions, transport and full coverage."""
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib
-
-    with open(os.path.join(REPO_ROOT, "spec", "harnesses.toml"), "rb") as handle:
-        spec = tomllib.load(handle)
-    assert spec["virtual_model"] == "omnis-reason"
-    assert spec["gateway_base_url"] == "http://127.0.0.1:7331"
-
-    expected = {
-        "claude": "2.1.289",
-        "codex": "0.160.0",
-        "opencode": "1.18.34",
-    }
-    dimensions = spec["coverage"]["full_requires"]
-    assert len(dimensions) == 6
-    for name, version in expected.items():
-        harness = spec["harnesses"][name]
-        assert harness["version"] == version
-        assert harness["coverage"] == "full"
-        assert harness["network_profile"] == "loopback-gateway"
-        for dimension in dimensions:
-            assert harness[dimension] is True
-
-    assert "stream-json" in spec["harnesses"]["claude"]["command"]["argv"]
-    assert "app-server" in spec["harnesses"]["codex"]["command"]["argv"]
-    assert spec["harnesses"]["opencode"]["command"]["argv"][:2] == ["opencode", "serve"]
-
-
-def test_inference_gateway_contract_is_scoped_and_local():
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib
-
-    with open(os.path.join(REPO_ROOT, "spec", "inference_gateway.toml"), "rb") as handle:
-        gateway = tomllib.load(handle)
-
-    assert gateway["listener"]["ipv4"] == "127.0.0.1"
-    assert gateway["listener"]["port"] == 7331
-    assert gateway["listener"]["external_listen"] is False
-    assert gateway["auth"]["token_random_bytes"] == 32
-    assert gateway["auth"]["persistence"] == "memory-only"
-    assert gateway["model"]["virtual_id"] == "omnis-reason"
-    assert gateway["model"]["required_capability"] == "omnis.capability.model.reason"
-    assert gateway["network_profile"]["loopback_gateway"]["allowed_tcp_ports"] == [7331]
-
-
-def test_code_agent_requires_reason_model_and_canonical_inference():
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib
-
-    with open(os.path.join(REPO_ROOT, "spec", "capabilities.toml"), "rb") as handle:
-        capabilities = tomllib.load(handle)["capabilities"]
-
-    code = capabilities["omnis.capability.code.agent"]
-    assert code["requires"] == ["omnis.capability.model.reason"]
-    for name in ("omnis.capability.model.generate", "omnis.capability.model.reason"):
-        contract = capabilities[name]
-        assert contract["input"] == "InferenceRequestInput"
-        assert contract["output"] == "InferenceResultOutput"
-
-    inference = _read("protocol", "inference.capnp")
-    assert "struct InferenceRequest" in inference
-    assert "struct InferenceResult" in inference
-    assert "struct StreamEvent" in inference
 
 
 def test_nix_control_contract_is_typed_and_split():
@@ -656,68 +530,8 @@ def test_control_render_contract_is_typed():
     assert "setProperties" not in control
 
 
-def test_learning_manifest_and_roadmap_are_frozen():
-    """Phase 10 must point to exact learning constants instead of delegating algorithms."""
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib
-
-    with open(os.path.join(REPO_ROOT, "spec", "learning.toml"), "rb") as handle:
-        learning = tomllib.load(handle)
-
-    assert learning["version"] == 1
-    assert learning["binding_quality"]["ewma_alpha"] == 0.20
-    assert learning["competence_gap"]["failures_trigger"] == 3
-    assert learning["replay"]["ordinary_fixture_max"] == 1000
-
-    roadmap = _read("ROADMAP.md")
-    assert "docs/LEARNING_V0.md" in roadmap
-    assert "where useful" not in roadmap
-    assert "remote graph synchronization required for shared identities" not in roadmap
-
-
-def test_generic_harness_schema_is_closed_and_required():
-    import json
-
-    with open(
-        os.path.join(REPO_ROOT, "spec", "generic_harness.schema.json"),
-        encoding="utf-8",
-    ) as handle:
-        schema = json.load(handle)
-
-    assert schema["additionalProperties"] is False
-    assert schema["properties"]["schema"]["const"] == "omnis.harness.v1"
-    assert set(schema["required"]) == {
-        "schema",
-        "name",
-        "executable",
-        "probe",
-        "invoke",
-        "coverage",
-    }
-    assert "descriptor-driven generic harness" in _read("ROADMAP.md")
-
-
-def test_competence_gap_event_is_fully_registered():
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib
-
-    def load(name):
-        with open(os.path.join(REPO_ROOT, "spec", name), "rb") as handle:
-            return tomllib.load(handle)
-
-    event = "omnis.event.agent.competence_gap"
-    assert event in load("ontology.toml")["events"]
-    assert event in load("events.toml")["events"]
-    assert event in load("event_priorities.toml")["events"]
-    assert event in _read("docs", "ONTOLOGY_V0.md")
-
-
 def test_contract_manifest_references_existing_files():
-    """One machine-readable root must enumerate every authoritative v0 contract source."""
+    """One machine-readable root enumerates the complete core contract."""
     try:
         import tomllib
     except ModuleNotFoundError:
@@ -729,56 +543,80 @@ def test_contract_manifest_references_existing_files():
     assert contract["version"] == 1
     assert contract["profile"] == "omnis-v0"
 
-    for section in ("normative", "machine", "protocol", "database", "prompts", "assets"):
+    for section in ("normative", "machine", "protocol", "database", "assets"):
         for _, rel in contract[section].items():
-            assert os.path.isfile(
-                os.path.join(REPO_ROOT, rel)
-            ), f"contract manifest references missing {section} source {rel}"
+            assert os.path.isfile(os.path.join(REPO_ROOT, rel)), (
+                f"contract manifest references missing {section} source {rel}"
+            )
 
     required_normative = {
         "ARCHITECTURE.md",
         "docs/DECISION_COMPLETE_V0.md",
         "docs/IMPLEMENTATION.md",
-        "docs/HARNESS_ADAPTERS_V0.md",
-        "docs/LEARNING_V0.md",
+        "docs/AGENT_ACCESS_V0.md",
         "docs/CONTROL_RENDER_V0.md",
         "docs/NIX_CONTROL_V0.md",
     }
     assert required_normative <= set(contract["normative"].values())
+    assert "agent" not in contract.get("ownership", {})
 
 
-def test_generic_harness_contract_has_no_undefined_hook_mode():
-    import json
+def test_core_has_no_builtin_agent_or_harness_contracts():
+    """External agents are clients; no harness-specific core architecture may remain."""
+    ontology = _read("spec", "ontology.toml")
+    assert "omnis.kind.agent_harness" not in ontology
+    assert "omnis.capability.code.agent" not in ontology
+    assert "omnis.event.agent." not in ontology
 
-    with open(
-        os.path.join(REPO_ROOT, "spec", "generic_harness.schema.json"),
-        encoding="utf-8",
-    ) as handle:
-        schema = json.load(handle)
-
-    assert schema["properties"]["coverage"]["enum"] == ["gateway", "process_only"]
-    doc = _read("docs", "HARNESS_ADAPTERS_V0.md")
-    assert "generic adapters expose process lifecycle only" in doc
-    assert "cannot claim `full` or `hook` coverage" in doc
-
-
-def test_learning_preference_retraction_is_reachable():
-    doc = _read("docs", "LEARNING_V0.md")
-    assert "floor 0.00" in doc
-    assert "below 0.50" in doc
+    for rel in (
+        "docs/OMNIS_AGENT.md",
+        "docs/HARNESS_ADAPTERS_V0.md",
+        "docs/LEARNING_V0.md",
+        "protocol/agent.capnp",
+        "spec/harnesses.toml",
+        "spec/inference_gateway.toml",
+        "spec/generic_harness.schema.json",
+        "spec/learning.toml",
+        "spec/event_priorities.toml",
+        "schema/worldline.sql",
+        "schema/index.sql",
+    ):
+        assert not os.path.exists(os.path.join(REPO_ROOT, rel)), f"obsolete core agent artifact: {rel}"
 
 
-def test_generic_gateway_cannot_escape_manager_resolution():
-    import json
+def test_event_journal_is_permanent_multi_consumer():
+    graph = _read("protocol", "graph.capnp")
+    sql = _read("schema", "graph.sql")
+    access = _read("docs", "AGENT_ACCESS_V0.md")
+    assert "interface EventSubscription" in graph
+    assert "readEvents @6" in graph
+    assert "subscribeEvents @7" in graph
+    assert " ack @" not in graph
+    assert "CREATE TABLE event_log" in sql
+    assert "acked_at_ns" not in sql
+    assert "no global ACK" in access
+    assert "no automatic deletion" in access
 
-    with open(
-        os.path.join(REPO_ROOT, "spec", "generic_harness.schema.json"),
-        encoding="utf-8",
-    ) as handle:
-        schema = json.load(handle)
 
-    invoke = schema["properties"]["invoke"]["properties"]
-    assert invoke["gatewayBaseUrl"]["enum"] == ["http://127.0.0.1:7331/v1", None]
-    assert invoke["modelValue"]["enum"] == ["omnis-reason", None]
-    doc = _read("docs", "HARNESS_ADAPTERS_V0.md")
-    assert "cannot select a concrete provider" in doc
+def test_agent_access_projects_all_three_core_surfaces():
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    with open(os.path.join(REPO_ROOT, "spec", "agent_access.toml"), "rb") as handle:
+        access = tomllib.load(handle)
+    assert set(access["surfaces"]) == {"os", "manager", "control"}
+    assert access["substrates"]["graph"]["interface"] == "GraphService"
+    assert access["mcp_transport"] == "stdio"
+    assert access["plugin_package"] == "@omnis/agent-access"
+    assert access["parity"]["require_mcp"] is True
+    assert access["parity"]["require_plugin"] is True
+    assert access["parity"]["require_all_events"] is True
+
+
+def test_reference_configuration_has_no_agent_service():
+    declaration = _read("examples", "omnis.nix")
+    assert "agent.users" not in declaration
+    assert "harnesses." not in declaration
+    assert "agentAccess = {" in declaration
