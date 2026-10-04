@@ -514,7 +514,7 @@ Relevant constraints may include:
 - warm caches/state;
 - user/system policy.
 
-Agent asks for semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
+Callers request semantic outcomes and hard constraints. Manager chooses the weakest/cheapest adequate
 realization unless the caller requests a specific implementation.
 
 ---
@@ -539,13 +539,13 @@ v0 ships two agent-access projections:
 
 1. **MCP** — `omnis mcp` exposes the exact public OS/Manager/Control/graph operations as MCP
    tools/resources and exposes the core event journal as a replayable/subscribable resource.
-2. **Plugin SDK** — typed generated clients expose the exact same operations/events to native agent
-   plugins without MCP serialization.
+2. **Plugin SDK** — `@omnis/agent-access` exposes typed generated clients for the exact same
+   operations/events to native agent plugins without MCP serialization.
 
 Neither path owns additional semantics. `spec/agent_access.toml` is the parity registry and CI fails
 when a public core operation/event exists without both projections.
 
-### 7.2 No harness dependency
+### 7.2 No agent-runtime dependency
 
 The core does not know any particular external agent runtime.
 There are no built-in agent-runtime adapters, agent-runtime version pins, agent-runtime routing chains, or provider
