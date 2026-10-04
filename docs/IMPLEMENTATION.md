@@ -808,9 +808,11 @@ Rules:
 ## 13. Crash recovery
 
 ### graphd
-SQLite WAL recovers atomic graph/outbox transactions. On integrity failure, boot recovery can restore
-the most recent backup and replay authoritative OS/Manager observations plus Agent worldline-derived
-cognitive state where appropriate.
+SQLite WAL recovers atomic graph/outbox transactions. On integrity failure, boot recovery follows
+`DECISION_COMPLETE_V0.md §28` exactly: restore the newest valid graph backup, reconcile OS physical
+state, reconcile Manager executions, reconnect Agent outbox/worldline, and record any recovery gap.
+Agent-derived cognitive state is rebuilt only from its own worldline/index recovery path; graphd does
+not synthesize cognition.
 
 ### Manager
 On restart, osd enumerates `omnis-exec-*.service` units and physical processes, republishes their

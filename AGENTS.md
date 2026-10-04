@@ -297,8 +297,9 @@ worldline as events.
 
 Do not build separate application architectures for terminal, browser, graph, 3D, or AI output.
 
-Control derives projections from the shared graph into one Control tree and renderer. Native apps are
-delegated surfaces where appropriate.
+Control derives projections from the shared graph into one Control tree and renderer. Existing
+Wayland/XWayland clients are NativeSurface leaves; first-party semantic content is rendered directly
+through Control primitives.
 
 2D and 3D must preserve the same identities/focus/selection/lens/frontier.
 
@@ -358,7 +359,7 @@ For Nix/nixpkgs-derived repositories:
 
 ### A19. Implementation quality
 
-Every architectural guarantee should become at least one of:
+Every architectural guarantee MUST be enforced by at least one of:
 
 - a type/property boundary;
 - protocol validation;

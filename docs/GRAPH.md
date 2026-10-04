@@ -311,7 +311,9 @@ default.
 
 ## 8. Provenance
 
-Every nontrivial discovered/inferred graph fact should record provenance quality.
+Every discovered or inferred graph fact that is not a native identity/lifecycle primitive MUST carry
+a Provenance record. Native identity/lifecycle primitives carry their authoritative producer as
+source even when no additional evidence artifact exists.
 
 Required provenance categories:
 
@@ -527,8 +529,9 @@ Agent memory may point directly to graph nodes:
 Memory:m1 --cognitive.about--> Repository:r1
 ```
 
-It should not duplicate current operational facts when the graph already contains authoritative
-state. Derived memories explain, generalize, predict, associate, or preserve historical meaning.
+Agent memory MUST NOT duplicate an authoritative current operational fact solely as a second source
+of current truth. Derived memories may explain, generalize, predict, associate, or preserve
+historical meaning while linking to the authoritative graph identity.
 
 Agent context compilation may query the graph at a specific revision/frontier and include stable node
 references rather than copied descriptions.

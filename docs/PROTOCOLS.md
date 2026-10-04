@@ -292,8 +292,9 @@ control-hidden
 execution-handle-only
 ```
 
-Protected values should normally travel as opaque handles. Serialization endpoints must enforce
-disclosure metadata rather than rely on callers to remember redaction.
+Protected secret bytes NEVER appear in ordinary protocol Value/Event/Artifact bodies. Cross-component
+references use opaque HandleId/LeaseId identities; serialization endpoints enforce protection labels
+and reject disallowed disclosure rather than relying on caller redaction.
 
 ---
 

@@ -150,7 +150,8 @@ Hard constraints eliminate candidates. Remaining candidates can be ordered by ex
 - Agent learned performance estimates.
 
 Learned estimates are input data, not hidden control flow. Given the same graph revision, policy,
-and estimates, resolution should be reproducible.
+constraints, placement state, preferences, and learned estimates, resolution MUST return the exact
+score/order/tie-break result in `DECISION_COMPLETE_V0.md §14`.
 
 Callers can request a specific binding when implementation identity is semantically relevant.
 

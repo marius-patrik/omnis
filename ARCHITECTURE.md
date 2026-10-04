@@ -317,8 +317,8 @@ OmnisOS must remain compatible with nixpkgs packages and as much upstream NixOS 
 possible. The fork exists to add deep graph/event/control integration, not to gratuitously diverge
 from the package ecosystem.
 
-Upstream changes should be carried as a minimal reviewable patch stack until a permanent divergence
-is justified.
+Upstream changes MUST remain a minimal reviewable patch stack. A permanent divergence requires an
+explicit ADR naming the upstream behavior being replaced.
 
 ### 5.3 Desired and actual state
 
@@ -344,14 +344,16 @@ Examples include:
 - a host must provide a required capability before placement;
 - a persistent package/service relationship remains satisfied.
 
-Pure configuration invariants should be checked before activation where possible. Runtime invariants
-may be continuously evaluated from current graph state and enforced by physical mechanisms.
+An invariant whose inputs are entirely candidate Nix/graph state is checked before activation.
+An invariant depending on live physical state is evaluated after activation and continuously from
+authoritative OS observations. The invariant kind therefore determines the evaluation phase; an
+implementation does not choose ad hoc timing.
 
 ### 5.5 Physical enforcement
 
-Semantic authority must compile into real physical authority. Depending on the operation, OmnisOS may
-use Linux mechanisms such as namespaces, cgroups, seccomp, LSM/Landlock/eBPF hooks, UID/GID
-boundaries, mount/network namespaces, device isolation, and credential brokers.
+Semantic authority compiles into the fixed v0 enforcement stack in `DECISION_COMPLETE_V0.md §§53–55,71`:
+systemd transient services, mount/device/cgroup/system-call restrictions, cgroup v2, eBPF process and
+network filters, UID/GID boundaries, and protected credential injection.
 
 The Agent may reason freely; execution receives only the capabilities physically granted to it.
 
@@ -501,7 +503,8 @@ physical access boundary.
 
 ### 6.8 Effect metadata
 
-Bindings should declare or infer execution properties where known:
+Every Binding declares exactly one effect class from `manager.capnp::EffectClass`; discovery may
+infer the class only when deterministic evidence supports it, otherwise the class is `opaque`:
 
 ```text
 pure/deterministic
@@ -618,10 +621,10 @@ Every worker result re-enters the event stream. No worker maintains a hidden alt
 
 ### 7.6 External agents
 
-Claude Code, Codex, OpenCode, and future harnesses are Manager resources that OmnisAgent may invoke as
-workers. Native harness hooks should emit events. Inference interception may provide a universal
-fallback so model-bound contexts can still participate in Omnis memory even when a harness exposes
-little semantic lifecycle information.
+Claude Code, Codex, OpenCode, and descriptor-driven future harnesses are Manager resources that
+OmnisAgent may invoke as workers. Their exact v0 adapters are defined by `HARNESS_ADAPTERS_V0.md`.
+All model-bound built-in harness traffic routes through the Manager inference gateway; available
+native hooks add lifecycle evidence but never replace that gateway boundary.
 
 ---
 

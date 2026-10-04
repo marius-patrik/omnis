@@ -71,7 +71,9 @@ Initial producers:
 - cgroups/resource envelopes;
 - isolation/authority metadata.
 
-OS facts should reference Manager resource identities whenever those identities are known.
+OS facts MUST reference an existing Manager Resource NodeId when exact foreign/realization identity
+resolves uniquely. If none exists yet, OS publishes the physical identity and Manager later attaches
+its Resource through the normal exact-alias/provenance path; OS never guesses a fuzzy match.
 
 Example:
 
