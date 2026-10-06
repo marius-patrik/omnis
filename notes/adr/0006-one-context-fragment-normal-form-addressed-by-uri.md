@@ -12,7 +12,7 @@ the count multiplies.
 
 All captured context normalises to one `ContextFragment` envelope regardless of origin: origin,
 title, payload hash into the CAS, a snippet for display, and creation time. Every fragment is
-addressable as `omnis://context/<id>`, resolvable by any surface, agent, or extension. Payload bytes
+addressable as `omnix://context/<id>`, resolvable by any surface, agent, or extension. Payload bytes
 live in the CAS; the fragment row is metadata.
 
 ## Alternatives rejected
@@ -27,5 +27,5 @@ live in the CAS; the fragment row is metadata.
 ## Consequences
 
 A fragment must resolve to the same content after a restart, which makes CAS retention a correctness
-requirement rather than an optimisation. `omnis://` needs a resolver in every surface. Fragments
+requirement rather than an optimisation. `omnix://` needs a resolver in every surface. Fragments
 captured from a page or a repository can contain secrets, so redaction is a real obligation.

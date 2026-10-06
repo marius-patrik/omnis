@@ -14,7 +14,7 @@ How this repository was brought up, what still needs a human, and how to reprodu
 | Workflows: CI, auto-format, docs deploy, bound-issue check, board automation, open-PR, approval auto-merge, agent | committed, green on `main` |
 | Automation scripts and their test suite | committed, passing |
 | Labels (32), merge settings, topics, Actions write + PR-approval permission, Pages | applied |
-| Project board **Omnis** (`#15`), all seven Status options | created |
+| Project board **Omnix** (`#15`), all seven Status options | created |
 | Repository variables `PROJECT_NUMBER=15` | set |
 | Branch protection on `main`: 8 required checks, strict, 1 review, conversation resolution | applied |
 | `GH_PROJECT_TOKEN` | set |
@@ -44,7 +44,7 @@ a fine-grained PAT limited to this repository plus projects has a far smaller bl
 ### 3. Answer the open decisions
 
 `ARCHITECTURE.md` §8 lists the open decisions; ten are resolved in `notes/adr/`. **D1 gates the
-most**: not "what does Omnis do" — the architecture answers that — but which vertical slice is built
+most**: not "what does Omnix do" — the architecture answers that — but which vertical slice is built
 first, which determines the first bus messages, the first subsystem, and the first surface.
 
 By `AGENTS.md` rule 13 none of these becomes an issue until it is settled: specification runs
@@ -58,8 +58,8 @@ already decided.
 Order matters. Branch protection goes on **after** the first push, or the initial commit cannot land.
 
 ```bash
-gh repo create omnis --public
-git init -b main && git remote add origin https://github.com/<owner>/omnis.git
+gh repo create omnix --public
+git init -b main && git remote add origin https://github.com/<owner>/omnix.git
 
 # 1. Commit the scaffold and push while `main` is still unprotected.
 git add -A && git commit -m "feat(ci): scaffold repository, governance, and pipeline"
@@ -84,7 +84,7 @@ Lift protection, push, restore it — and say so in the commit or the PR. A boot
 hatch, not a way around the rules:
 
 ```bash
-gh api -X DELETE repos/<owner>/omnis/branches/main/protection
+gh api -X DELETE repos/<owner>/omnix/branches/main/protection
 git push origin main
 python .github/scripts/repo_settings.py --apply
 ```

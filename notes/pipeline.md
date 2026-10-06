@@ -1,6 +1,6 @@
 # The automation pipeline
 
-Omnis is built by an autonomous agent pipeline under human approval gates. This documents how it
+Omnix is built by an autonomous agent pipeline under human approval gates. This documents how it
 works, what each part is for, and where it can fail. The binding rules are in `AGENTS.md`; this is
 the explanation behind them.
 
@@ -150,7 +150,7 @@ It also requires the repository's `can_approve_pull_request_reviews` permission,
 | PR stuck at `REVIEW_REQUIRED` with auto-merge armed | Proxy approval failed. Check `BOT_TOKEN` is set. |
 | Every merge blocked forever | A required status check names a job that can be *skipped*. Required checks may only name jobs that always report. |
 | Agent does nothing on a new issue | `AGENT_ENABLED` is not `"true"`, or no harness has credentials. |
-| Agent replies to itself in a loop | Bot-comment detection. Agent comments carry an `<!-- omnis-agent -->` marker and are ignored on the way back in. |
+| Agent replies to itself in a loop | Bot-comment detection. Agent comments carry an `<!-- omnix-agent -->` marker and are ignored on the way back in. |
 
 ## Running it locally
 
@@ -203,13 +203,13 @@ The pipeline currently executes plans a human has approved. It should also help 
 The constraint is the same as everywhere else: it **proposes**, a human disposes. An agent that files
 its own work items is an agent that sets its own scope.
 
-### The pipeline becomes an Omnis automation
+### The pipeline becomes an Omnix automation
 
 `ARCHITECTURE.md` §7.3 defines automations as declared graphs with triggers, gates, checkpoints, and
 a termination condition. This pipeline — request, interpretation gate, plan, approval gate,
 implement, self-review loop, merge gate, checkpoint-and-resume on quota exhaustion — *is* one of
 those, currently expressed in GitHub Actions and Python because the product does not exist.
 
-When it does, this pipeline should be declared as an Omnis automation and run by it. That is the
+When it does, this pipeline should be declared as an Omnix automation and run by it. That is the
 honest test of the abstraction: it was derived from a real workload rather than an imagined one, and
 the workload is this repository.

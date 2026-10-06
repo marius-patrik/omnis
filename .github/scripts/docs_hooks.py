@@ -47,7 +47,7 @@ LINK_REWRITES: Dict[str, str] = {
     "notes/vision_capture.md": "notes/vision_capture.md",
     "notes/transcript.md": "notes/transcript.md",
     "transcript.md": "notes/transcript.md",
-    "examples/omnis.nix": "declaration.md",
+    "examples/omnix.nix": "declaration.md",
     "notes/bootstrap.md": "notes/bootstrap.md",
     "pipeline.md": "pipeline.md",
     "bootstrap.md": "notes/bootstrap.md",
@@ -58,7 +58,7 @@ LINK_REWRITES: Dict[str, str] = {
 
 #: The reference declaration, published as a page wrapped in a code fence so the documentation and
 #: the file can never disagree.
-DECLARATION_SOURCE = "examples/omnis.nix"
+DECLARATION_SOURCE = "examples/omnix.nix"
 DECLARATION_DEST = "declaration.md"
 
 #: Where ADR records live, and where they are published.

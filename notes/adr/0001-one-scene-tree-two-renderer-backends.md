@@ -22,8 +22,8 @@ contradictory while "renderer" is one concept.
 ## Decision
 
 One **scene tree**. Cell-grid layout, widget layout, web content, and 3D are **sources** that emit
-into it. Two **renderer backends** consume it: `omnis-render` (GPU compositor, desktop window) and
-`omnis-tui` (ANSI, a real terminal, local or over SSH).
+into it. Two **renderer backends** consume it: `omnix-render` (GPU compositor, desktop window) and
+`omnix-tui` (ANSI, a real terminal, local or over SSH).
 
 Five primitive classes only — quad, glyph run, texture, path, material layer. Adding a source must
 not add a primitive class. **Every primitive declares a terminal fallback**, enforced at the type

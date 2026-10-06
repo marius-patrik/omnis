@@ -7,7 +7,7 @@
 
 A power user's day runs through services they do not own: ChatGPT, DeepSeek, Google, YouTube,
 Netflix, and a hundred others. Each has its own interface, its own conventions, and no relationship
-to any of the others. Omnis should be able to present them through interfaces we control, and to
+to any of the others. Omnix should be able to present them through interfaces we control, and to
 present *several* of them through **one** interface — a single streaming view over YouTube, Netflix,
 and whatever else, the way a single VCS view already spans Git and Sapling.
 
@@ -39,7 +39,7 @@ Only the third is new. Presentation and action are the scene tree and the bus, u
 
 ### The universal translator already exists
 
-`omnis-web-source`'s semantic mode — AXTree to layout to primitives — *is* the "show anything"
+`omnix-web-source`'s semantic mode — AXTree to layout to primitives — *is* the "show anything"
 translator. Any service with a web interface is renderable today, as real primitives rather than a
 rectangle of pixels: keyboard-navigable, themeable, and legible to an agent. No new machinery.
 

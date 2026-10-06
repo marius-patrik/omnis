@@ -34,7 +34,7 @@ NixOS sense: you describe the desired state, evaluation produces a system, and a
 ## Why this completes two earlier records
 
 **ADR-0003's reversibility becomes a mechanism.** "Any change an agent makes can be inspected,
-diffed, and rolled back" stops being a design intention and becomes `omnis rollback` — the same
+diffed, and rolled back" stops being a design intention and becomes `omnix rollback` — the same
 operation for a typo, a bad profile, and a misbehaving agent.
 
 **ADR-0006's attribution gets a natural unit.** A generation has an author. An agent reconfiguring

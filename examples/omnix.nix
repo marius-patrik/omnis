@@ -1,6 +1,6 @@
 # The whole system, declared.
 #
-# This is the reference declaration: every subsystem, environment, host, and surface Omnis manages,
+# This is the reference declaration: every subsystem, environment, host, and surface Omnix manages,
 # in one file. Evaluating it produces a generation (ADR-0012); applying that generation converges the
 # running system toward it. Removing something here removes it entirely — the processes, the
 # packages, the files, and everything it contributed to the rest of the system (ADR-0013).
@@ -10,7 +10,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  omnis = {
+  omnix = {
 
     # ─────────────────────────────────────────────────────────────────────────
     # Hosts — where things are allowed to run (ADR-0016)
@@ -81,7 +81,7 @@
       cas = {
         enable = true;
         chunking = "fastcdc";
-        store = "/var/lib/omnis/cas";
+        store = "/var/lib/omnix/cas";
       };
 
       tasks.enable = true;
@@ -112,7 +112,7 @@
       windows = {
         kind = "vm";
         # We cannot ship Windows. The image and the licence are the user's.
-        image = "/var/lib/omnis/images/win11.qcow2";
+        image = "/var/lib/omnix/images/win11.qcow2";
         resources = { cpus = 4; memory = "8G"; };
         apps = {
           # Individual applications as ordinary windows, rather than a desktop in a box.
@@ -171,8 +171,8 @@
     # secret by name and can never read it.
     # ─────────────────────────────────────────────────────────────────────────
     secrets = {
-      github.ref    = "keychain:omnis/github";
-      anthropic.ref = "keychain:omnis/anthropic";
+      github.ref    = "keychain:omnix/github";
+      anthropic.ref = "keychain:omnix/anthropic";
     };
   };
 }

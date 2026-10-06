@@ -1,6 +1,6 @@
 # Vision capture — provenance
 
-`notes/transcript.md` is a transcript of the scoping conversation that produced Omnis. This note records where
+`notes/transcript.md` is a transcript of the scoping conversation that produced Omnix. This note records where
 it came from and how it was captured.
 
 ## Source
@@ -43,12 +43,12 @@ profile, which worked in one pass:
 ```bash
 # 1. Open the conversation in a named session so the tabs stay grouped.
 {"action":"navigate","args":{"url":"<conversation url>","newTab":true,
- "group_title":"Omnis vision capture"},"session":"omnis-vision-capture"}
+ "group_title":"Omnix vision capture"},"session":"omnix-vision-capture"}
 
 # 2. Extract every turn as JSON, writing curl's output straight to a file.
 {"action":"evaluate","args":{"code":"(() => { const els = [...document.querySelectorAll(
  'user-query, model-response')]; return JSON.stringify(els.map((e,i) => ({i,
- role: e.tagName.toLowerCase(), text: e.innerText}))); })()"},"session":"omnis-vision-capture"}
+ role: e.tagName.toLowerCase(), text: e.innerText}))); })()"},"session":"omnix-vision-capture"}
 ```
 
 **The lesson worth keeping:** route bulk extraction to a file on disk, never through a tool result.

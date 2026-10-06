@@ -1,5 +1,5 @@
 /*
- * Omnis documentation theme behaviour.
+ * Omnix documentation theme behaviour.
  *
  * Three small things, no dependencies: the colour-scheme toggle, the mobile navigation, and search
  * over the index the search plugin already emits. Search is a scored substring match rather than a
@@ -239,7 +239,7 @@
  *     {
  *       "current": "",
  *       "versions": [{"name": "main", "path": ""}, {"name": "PR #27", "path": "pr-27"}],
- *       "projects": [{"name": "Omnis", "url": "https://marius-patrik.github.io/omnis/"}]
+ *       "projects": [{"name": "Omnix", "url": "https://marius-patrik.github.io/omnix/"}]
  *     }
  *
  * A site without the file simply keeps the control hidden.

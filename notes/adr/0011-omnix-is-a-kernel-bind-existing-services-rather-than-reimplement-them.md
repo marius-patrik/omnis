@@ -1,4 +1,4 @@
-# ADR-0011 — Omnis is a kernel: bind existing services rather than reimplement them
+# ADR-0011 — Omnix is a kernel: bind existing services rather than reimplement them
 
 - **Status**: Accepted · **Date**: 2026-09-06
 - **Underpins**: ADR-0012, ADR-0013, ADR-0014, ADR-0015
@@ -20,7 +20,7 @@ each one raw. That is not a product, and composition is exactly what it fails to
 
 ## Decision
 
-**Omnis is a kernel.** It owns the seams, not the organs.
+**Omnix is a kernel.** It owns the seams, not the organs.
 
 We **bind** — never reimplement — anything that already exists and works:
 
@@ -43,7 +43,7 @@ We **own** the abstractions that make them compose, and only those:
 - the scene tree, its primitive vocabulary, and the parity contract
 - the capability matrix and layered configuration resolution
 - the modification surface: introspection, escrow, attribution
-- the `ContextFragment` normal form and `omnis://` resolution
+- the `ContextFragment` normal form and `omnix://` resolution
 - the operation log over whichever VCS backend is running
 - the cross-repository task graph over whichever runner executes it
 

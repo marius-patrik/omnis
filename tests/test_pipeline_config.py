@@ -217,7 +217,7 @@ def test_the_declared_areas_are_this_projects_own():
     """
     declared = set(_manifest().get("areas", {})) - {"$comment", "$default"}
     assert declared, "this repository must declare its own areas"
-    assert {"core", "term", "ui", "agents"} <= declared, "omnis's own domains must be present"
+    assert {"core", "term", "ui", "agents"} <= declared, "omnix's own domains must be present"
     assert "quests" not in declared, "that taxonomy belongs to a different repository"
 
 

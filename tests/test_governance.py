@@ -155,10 +155,10 @@ def test_transcript_carries_review_notes():
 
 def test_reference_declaration_exists_and_is_documented():
     """The declaration is the product's central artifact; a stale example is worse than none."""
-    declaration = _read("examples", "omnis.nix")
+    declaration = _read("examples", "omnix.nix")
     architecture = _read("ARCHITECTURE.md")
 
-    assert "examples/omnis.nix" in architecture, "the architecture must point at the declaration"
+    assert "examples/omnix.nix" in architecture, "the architecture must point at the declaration"
     for section in ("hosts", "placement", "subsystems", "environments", "presentation", "secrets"):
         assert (
             f"{section} = " in declaration or f"{section} =" in declaration

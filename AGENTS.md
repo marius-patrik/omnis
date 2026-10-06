@@ -1,6 +1,6 @@
 # Repository Development Guidelines & Agent Rules
 
-Omnis is developed by an autonomous agent pipeline under human approval gates. These rules are
+Omnix is developed by an autonomous agent pipeline under human approval gates. These rules are
 binding on every contributor — human or agent. They are enforced by CI, by branch protection, and
 by the tests in `tests/`.
 
@@ -74,7 +74,7 @@ warnings`) are blocking.
 - **Branch Auto-Deletion**: Merging closes the bound issue and deletes the remote branch
   (`delete_branch_on_merge: true` and `--delete-branch`); the local branch must be pruned.
 - **Project Board Status Taxonomy**: All issues and pull requests are automatically added to the
-  Omnis GitHub Project with automated status movements:
+  Omnix GitHub Project with automated status movements:
   - `Backlog`: Staged items planned for future consideration.
   - `ToDo`: Approved requests or plans ready for implementation.
   - `In Progress`: Active branches, pull requests, or ongoing development.

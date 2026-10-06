@@ -19,7 +19,7 @@ Two distinct concepts, and colours keep the name.
 **A theme is colours, in the VS Code colour-theme format.** `colors` (workbench keys),
 `tokenColors` (TextMate scopes), `semanticTokenColors`, and `type: dark | light | hc`. Existing VS
 Code colour themes load directly, unmodified. The VS Code colour key namespace is the canonical
-token namespace, **extended** where Omnis needs tokens VS Code lacks — material-layer inputs, and
+token namespace, **extended** where Omnix needs tokens VS Code lacks — material-layer inputs, and
 cell-grid specifics beyond the `terminal.ansi*` keys the format already provides.
 
 **File and product icon themes** use the VS Code icon-theme format for the same reason.
@@ -39,9 +39,9 @@ provider, model, or reasoning effort behind the user's back.
 - **One concept called "theme"** (the transcript). Hides that selecting one changes behaviour.
 - **One concept called "profile", colours folded in.** Throws away compatibility with thousands of
   existing themes, and forces every user to re-author colours they already have.
-- **An Omnis-native colour format.** Marginally cleaner, and it would mean nobody's existing theme
+- **An Omnix-native colour format.** Marginally cleaner, and it would mean nobody's existing theme
   works on day one. The VS Code format is verbose and editor-shaped, and that is worth paying: it
-  also hands us the 16 ANSI terminal colours the cell-grid renderer and `omnis-tui` both need.
+  also hands us the 16 ANSI terminal colours the cell-grid renderer and `omnix-tui` both need.
 - **Binding persona to the bundle** (the transcript's `aiPersona`). Selecting a *look* would silently
   select a model provider and reasoning effort.
 
@@ -49,7 +49,7 @@ provider, model, or reasoning effort behind the user's back.
 
 - A documented mapping from VS Code colour keys onto scene-tree primitives is required, and gaps in
   that mapping are a compatibility surface with its own versioning obligation.
-- Themes authored for a DOM editor will not exercise every Omnis token; unmapped tokens need
+- Themes authored for a DOM editor will not exercise every Omnix token; unmapped tokens need
   defined fallbacks rather than undefined colour.
 - Two lints, not one: no branching on theme name, no branching on profile name.
 - Third-party trade dress becomes a data and licensing question (D3), not a code question.

@@ -2,7 +2,7 @@
 
 > **Status: SOURCE MATERIAL. Superseded as a specification.**
 >
-> This is the captured record of the scoping conversation that produced Omnis. It is kept for
+> This is the captured record of the scoping conversation that produced Omnix. It is kept for
 > provenance and for the detail it carries, not as a specification: `ARCHITECTURE.md` is now the
 > single normative document, and everything here that survived review has been absorbed into it or
 > explicitly rejected in a decision record.
@@ -18,7 +18,7 @@
 
 ## Table of contents
 
-1. [What Omnis is](#1-what-omnis-is)
+1. [What Omnix is](#1-what-omnix-is)
 2. [Brand parity and dynamic appearance](#2-brand-parity-and-dynamic-appearance)
 3. [Native window styling: the five pillars](#3-native-window-styling-the-five-pillars)
 4. [Typography, density, audio, icon state machines](#4-typography-density-audio-icon-state-machines)
@@ -32,13 +32,13 @@
 
 ---
 
-## 1. What Omnis is
+## 1. What Omnix is
 
 > Universal Developer Workspace & Local-First Personal Data Operating System.
 
 Two ideas run through the whole conversation, and they are not independent.
 
-**The substrate.** Omnis is a headless daemon that owns everything durable — version control,
+**The substrate.** Omnix is a headless daemon that owns everything durable — version control,
 packages, tasks, terminals, containers, language servers, debuggers, an embedded browser, an agent
 runtime, a secrets vault, content-addressed storage, and a sync mesh — with thin, interchangeable
 surfaces attached over IPC. The surfaces are a Tauri desktop app, a CLI, and any external harness
@@ -71,7 +71,7 @@ exist independently of any brand. If a look needs code specific to that look, th
 
 ## 2. Brand parity and dynamic appearance
 
-Namespace: `omnis.appearance`. Called the **Dynamic Brand Skinning Engine**.
+Namespace: `omnix.appearance`. Called the **Dynamic Brand Skinning Engine**.
 
 ### 2.1 Dynamic app icon and window chrome engine
 
@@ -219,7 +219,7 @@ export interface BrandProfileSpecification {
 The pivotal turn. The model's own framing:
 
 > If "still not enough" means skinning layout tokens and window frames isn't capturing the soul of
-> these applications, it is because a brand theme in Omnis must fundamentally alter how the
+> these applications, it is because a brand theme in Omnix must fundamentally alter how the
 > operating system behaves, not just how it looks.
 
 **1. Brand-specific interaction paradigms.**
@@ -245,7 +245,7 @@ math-optimized prompts; `brand-github` biases agents toward PRs, conventional co
 compliance.
 
 **4. Extension API emulation layers.** When a `vscode:full` extension runs inside `brand-claude`,
-Omnis injects compatibility shims mapping expected VS Code UI elements into native chat artifacts or
+Omnix injects compatibility shims mapping expected VS Code UI elements into native chat artifacts or
 sidebar panels without uncaught exceptions.
 
 ```ts
@@ -280,16 +280,16 @@ export interface SystemPersonalityPackage {
 
 `brand-zed` is not a skin. It is a **second renderer**.
 
-### 6.1 The cell-grid UI engine (`omnis-term-ui`)
+### 6.1 The cell-grid UI engine (`omnix-term-ui`)
 
-Omnis bypasses HTML DOM layout trees and CSS flexbox for its chrome, replacing them with a
+Omnix bypasses HTML DOM layout trees and CSS flexbox for its chrome, replacing them with a
 **GPU-accelerated Cell Matrix Buffer**. Every UI element — sidebar borders, status bars, tab headers,
 buttons, input prompts — is a styled terminal cell rendered via WebGL/WebGPU inside the Tauri window.
 
 - **Unified cell buffer** — the whole window shares one text-grid coordinate space.
 - **Zero DOM overhead** — components are data structures mapped to cells holding Unicode glyphs,
   24-bit RGB foreground/background, and SGR attribute flags (bold, dim, italic, underline, reverse).
-- **GPU blitting** — an optimized WebGPU/WebGL shader pipeline inside `omnisd`, targeting
+- **GPU blitting** — an optimized WebGPU/WebGL shader pipeline inside `omnixd`, targeting
   sub-millisecond full-screen redraws and zero layout thrashing.
 
 ### 6.2 Interaction paradigms
@@ -304,7 +304,7 @@ buttons, input prompts — is a styled terminal cell rendered via WebGL/WebGPU i
 
 ### 6.3 The native rendering switchboard
 
-| HTML / DOM engine | Cell-grid terminal engine (`omnis-term-ui`) |
+| HTML / DOM engine | Cell-grid terminal engine (`omnix-term-ui`) |
 |---|---|
 | Claude, VS Code, GitHub, Default | `brand-zed` |
 | React / DOM layout trees | GPU cell matrix buffer |
@@ -351,8 +351,8 @@ strict grid lines.
 
 ## 8. Terminal-grid web browser
 
-`omnis-term-browser` is a **dual-mode rendering bridge**. Under the terminal renderer the embedded
-Chromium engine (`omnis-browser`) does not display DOM nodes; it renders pages through two
+`omnix-term-browser` is a **dual-mode rendering bridge**. Under the terminal renderer the embedded
+Chromium engine (`omnix-browser`) does not display DOM nodes; it renders pages through two
 conversion pipelines fed by headless CDP.
 
 **Semantic text mode (AXTree → cells).** For documentation, repositories, blogs, and text-heavy
@@ -362,7 +362,7 @@ tabbing or clicking highlights the cell range and triggers CDP navigation. Near-
 instant keyboard scrolling.
 
 **Pixel blit mode (Sixel / Unicode Braille).** For rich apps, charts, embedded editors, or video:
-Chromium screencasts the viewport over CDP at 30/60 FPS, and `omnis-term-browser` downsamples pixel
+Chromium screencasts the viewport over CDP at 30/60 FPS, and `omnix-term-browser` downsamples pixel
 buffers into TrueColor ANSI Sixel graphics or high-density Braille matrices (`⣿⣾⣽⣻⢿⡿⣟⣯⣷`).
 
 ```jsonc
@@ -382,7 +382,7 @@ The compilation the user pushed for three times. This is the substrate the appea
 
 ### 9.1 Process topology and dual-socket IPC
 
-> Omnis isolates the persistent background daemon, GUI presentation layer, language servers, browser
+> Omnix isolates the persistent background daemon, GUI presentation layer, language servers, browser
 > runtimes, and extension execution hosts into strictly decoupled processes. This guarantees zero
 > process termination on UI reloads, unblocked I/O streaming, and complete harness agnosticism.
 
@@ -390,18 +390,18 @@ The compilation the user pushed for three times. This is the substrate the appea
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                              SURFACE LAYER                                   │
 │  ┌────────────────────────┐ ┌──────────────────────┐ ┌────────────────────┐  │
-│  │ Omnis GUI (Tauri)      │ │ Omnis CLI (`omnis`)  │ │ Any External       │  │
+│  │ Omnix GUI (Tauri)      │ │ Omnix CLI (`omnix`)  │ │ Any External       │  │
 │  │ DOM-Flex / Cell-Grid   │ │ Shell orchestration  │ │ Harness: Claude    │  │
 │  │ Cordis Microkernel Root│ │ Pretty & `--json`    │ │ Code, Codex, Aider │  │
 │  └───────────┬────────────┘ └──────────┬───────────┘ └─────────┬──────────┘  │
 └──────────────┼─────────────────────────┼───────────────────────┼─────────────┘
                │   DUAL IPC TRANSPORT                            │ MCP / Stdio
-               │   • Control: JSON-RPC 2.0 (omnis-control.sock)  ▼
-               │   • Data: framed binary  (omnis-data.sock)  ┌──────────────────┐
-               │                                            │ `@omnis/agent`   │
+               │   • Control: JSON-RPC 2.0 (omnix-control.sock)  ▼
+               │   • Data: framed binary  (omnix-data.sock)  ┌──────────────────┐
+               │                                            │ `@omnix/agent`   │
                ▼                                            │ SDK & MCP bridge │
 ┌────────────────────────────────────────────────────────┐  └──────────────────┘
-│ HEADLESS DAEMON (`omnisd`)                             │
+│ HEADLESS DAEMON (`omnixd`)                             │
 │           OMNIS SUBSTRATE BUS (OSB ROUTER)             │
 │ ┌──────────────────┬──────────────────┬──────────────┐ │
 │ │ Core Engine/Sync │ Background       │ Storage &    │ │
@@ -414,18 +414,18 @@ The compilation the user pushed for three times. This is the substrate the appea
 │ │                  │                  │ Inotify      │ │
 │ └──────────────────┴──────────────────┴──────────────┘ │
 │ Modular subsystems (conditionally initialized):        │
-│  LSP Hub · DAP (`omnis-dap`) · P2P WebRTC Mesh         │
-│  Browser (`omnis-browser` + `omnis-term-browser`)      │
+│  LSP Hub · DAP (`omnix-dap`) · P2P WebRTC Mesh         │
+│  Browser (`omnix-browser` + `omnix-term-browser`)      │
 │  SSH/GPG Agent · Task DAG Engine · Audit Stream        │
 │  Context Harvester · VCS & Forge · Cloud VFS · Chat    │
 └────────────────────────────────────────────────────────┘
 ```
 
-**Control socket** (`omnis-control.sock` / `\\.\pipe\omnis-control`) — strict JSON-RPC 2.0 framing
+**Control socket** (`omnix-control.sock` / `\\.\pipe\omnix-control`) — strict JSON-RPC 2.0 framing
 carrying capability checks, layout persistence, escrow ticket transitions, extension registrations,
 database queries, and context shelf modifications.
 
-**Data socket** (`omnis-data.sock` / `\\.\pipe\omnis-data`) — high-throughput binary multiplexer with
+**Data socket** (`omnix-data.sock` / `\\.\pipe\omnix-data`) — high-throughput binary multiplexer with
 a uniform 9-byte header:
 
 ```
@@ -441,24 +441,24 @@ a uniform 9-byte header:
 ### 9.2 Workspace layout
 
 ```
-omnis/
+omnix/
 ├── Cargo.toml                  # virtual workspace root
 ├── crates/
-│   ├── omnis-core/             # shared RPC models, schemas, OSB contracts
-│   ├── omnisd/                 # headless daemon binary
+│   ├── omnix-core/             # shared RPC models, schemas, OSB contracts
+│   ├── omnixd/                 # headless daemon binary
 │   │   └── src/
 │   │       ├── main.rs         # conditional subsystem bootloader
 │   │       └── subsystems/     # modular domain implementations
-│   ├── omnis-cli/              # `omnis` executable
-│   ├── omnis-gui/              # Tauri desktop host & window manager
-│   ├── omnis-agent/            # agent engine & MCP server binary
-│   ├── omnis-lsp/              # LSP multiplexer hub
-│   ├── omnis-dap/              # Debug Adapter Protocol implementation
-│   ├── omnis-browser/          # Chromium supervisor, CDP bridge, adblock
-│   └── omnis-cas/              # FastCDC chunking, convergent encryption, VFS
+│   ├── omnix-cli/              # `omnix` executable
+│   ├── omnix-gui/              # Tauri desktop host & window manager
+│   ├── omnix-agent/            # agent engine & MCP server binary
+│   ├── omnix-lsp/              # LSP multiplexer hub
+│   ├── omnix-dap/              # Debug Adapter Protocol implementation
+│   ├── omnix-browser/          # Chromium supervisor, CDP bridge, adblock
+│   └── omnix-cas/              # FastCDC chunking, convergent encryption, VFS
 └── packages/
     ├── core/                   # Cordis microkernel, context defs, dsh-compat
-    ├── agent-sdk/              # npm package `@omnis/agent`
+    ├── agent-sdk/              # npm package `@omnix/agent`
     ├── exthost-node/           # isolated Node.js runtime for VS Code extensions
     └── frontend/               # webview shell (Dockview, shadcn/ui)
 ```
@@ -467,10 +467,10 @@ omnis/
 
 Two distinct installable universes, deliberately not merged:
 
-| **Packages** (`omnis pkg` / `ctx.packages`) | **Extensions** (`omnis ext` / `ctx.extensions`) |
+| **Packages** (`omnix pkg` / `ctx.packages`) | **Extensions** (`omnix ext` / `ctx.extensions`) |
 |---|---|
 | *"What my project runs on"* | *"What my workspace and agents run on"* |
-| Target: the codebase repo or host OS | Target: Omnis client, Monaco, Cordis, agents |
+| Target: the codebase repo or host OS | Target: Omnix client, Monaco, Cordis, agents |
 | Code deps: Bun, pnpm, npm, Cargo, uv, Poetry, Go modules, Deno | Editor & tools: VS Code extensions (Open VSX/VSIX), web extensions, LSPs |
 | System deps: Homebrew, Pacman, APT | Runtime modules: native `dsh` extensions, Cordis forks, V8 worker realms, Shadow-DOM slots |
 | Task runners: `package.json` scripts, Cargo targets, task DAGs | Agent capabilities: MCP servers, Claude Code skills, Codex playbooks |
@@ -481,10 +481,10 @@ Two distinct installable universes, deliberately not merged:
 - **Zero-knowledge vault** — master key derived via Argon2id (64 MB, 3 iterations, 4 parallelism).
   The KEK is held in a `Zeroizing<[u8; 32]>` buffer with `mlock()` protection. Device secrets bridge
   to OS keychains (Apple Keychain, DPAPI, Secret Service).
-- **Secure process injection** — `omnisd` intercepts child spawns (`omnis.terminal`,
-  `omnis.pkg.exec`) and injects decrypted `.env` secrets directly into the child's memory map,
+- **Secure process injection** — `omnixd` intercepts child spawns (`omnix.terminal`,
+  `omnix.pkg.exec`) and injects decrypted `.env` secrets directly into the child's memory map,
   without writing plaintext credentials to disk *or into agent context windows*.
-- **Integrated SSH/GPG agent** (`omnis-ssh-agent`) — a native Unix socket (`~/.omnis/ssh.sock`)
+- **Integrated SSH/GPG agent** (`omnix-ssh-agent`) — a native Unix socket (`~/.omnix/ssh.sock`)
   managed by the daemon, decrypting private keys from the vault on demand to authenticate git pushes,
   forge operations, and SSH tunnels.
 
@@ -493,12 +493,12 @@ Two distinct installable universes, deliberately not merged:
 - **Agent behavioural audit stream** — immutable append-only log of every tool call, file
   modification, SQL query, and network request an autonomous agent executes, with a one-click sandbox
   execution killswitch.
-- **Unified task & build DAG engine** (`omnis task`) — parses `package.json`, `Cargo.toml`,
+- **Unified task & build DAG engine** (`omnix task`) — parses `package.json`, `Cargo.toml`,
   `Makefile`, `Taskfile.yaml` into a cross-repository dependency graph, using CAS timestamps to skip
   unchanged targets and parallelize builds.
-- **Universal context fabric** (`omnis-context`) — harvests normal-form `ContextFragment` envelopes
+- **Universal context fabric** (`omnix-context`) — harvests normal-form `ContextFragment` envelopes
   from code selections, terminal buffers, browser pages, and Docker logs; pins them to a persistent
-  sidebar shelf; exposes them as `omnis://context/<id>` URIs.
+  sidebar shelf; exposes them as `omnix://context/<id>` URIs.
 - **Universal VCS & stacked PRs** (`ovcs`) — dual Git/Sapling engine with an atomic operation log
   (`vcs_op_log`), automated `absorb`, a 3-way AST merge editor, and stacked PR management across
   GitHub, GitLab, and Forgejo.
@@ -565,7 +565,7 @@ export const approvalEscrowTickets = pgTable('approval_escrow_tickets', {
 
 ```jsonc
 {
-  "$schema": "https://omnis.dev/schemas/settings.v1.json",
+  "$schema": "https://omnix.dev/schemas/settings.v1.json",
   "daemon.autoStartOnLogin": true,
   "daemon.controlSocketPath": "default",
   "daemon.dataSocketPath": "default",
@@ -606,17 +606,17 @@ The transcript's final technical turn supplied Rust skeletons. They are illustra
 several have acknowledged defects (the task DAG sort returns the unsorted input; the cell grid writes
 characters without touching colour). Treat them as shape, not as code to copy.
 
-- `crates/omnis-core/src/bus.rs` — `Subsystem` async trait (`name`/`initialize`/`shutdown`) and a
+- `crates/omnix-core/src/bus.rs` — `Subsystem` async trait (`name`/`initialize`/`shutdown`) and a
   `SubstrateBus` over a `tokio::sync::broadcast` channel carrying `BusMessage { id, topic, payload }`.
-- `crates/omnisd/src/ipc.rs` — `UnixListener` control socket, per-connection `tokio::spawn`, JSON-RPC
+- `crates/omnixd/src/ipc.rs` — `UnixListener` control socket, per-connection `tokio::spawn`, JSON-RPC
   2.0 request/response.
-- `crates/omnisd/src/security/process.rs` — `SecureProcessSpawner::spawn_with_vault_env`, injecting
+- `crates/omnixd/src/security/process.rs` — `SecureProcessSpawner::spawn_with_vault_env`, injecting
   `Zeroizing<String>` secrets into the child environment only.
-- `crates/omnis-cas/src/chunker.rs` — `ConvergentFastCDC` with min/avg/max chunk sizes and a
+- `crates/omnix-cas/src/chunker.rs` — `ConvergentFastCDC` with min/avg/max chunk sizes and a
   BLAKE3 keyed convergent key derivation.
-- `crates/omnis-browser/src/term_ui.rs` — `Cell { character, fg_color, bg_color, flags }` and
+- `crates/omnix-browser/src/term_ui.rs` — `Cell { character, fg_color, bg_color, flags }` and
   `CellGridBuffer { cols, rows, grid: Vec<Cell> }`.
-- `crates/omnisd/src/tasks/dag.rs` — Kahn topological sort over `TaskNode { name, dependencies,
+- `crates/omnixd/src/tasks/dag.rs` — Kahn topological sort over `TaskNode { name, dependencies,
   input_hash }` with cycle detection.
 
 ---
@@ -637,8 +637,8 @@ be a mistake. Each is a decision to make deliberately, not a defect to fix silen
    than effects that would exist in one renderer and not the other.
 
    The transcript also conflates two different things under `brand-zed`: a terminal *look*, and
-   actually *running in a terminal*. Omnis separates them. `cell-grid` is a presentation mode the
-   GPU compositor draws in a desktop window; `omnis-tui` is a genuine second renderer backend that
+   actually *running in a terminal*. Omnix separates them. `cell-grid` is a presentation mode the
+   GPU compositor draws in a desktop window; `omnix-tui` is a genuine second renderer backend that
    emits ANSI to a real terminal, works over SSH, and needs no GPU. Both consume the same scene
    tree, which is what makes feature parity between them a contract rather than a hope
    (`ARCHITECTURE.md` §4.7).
