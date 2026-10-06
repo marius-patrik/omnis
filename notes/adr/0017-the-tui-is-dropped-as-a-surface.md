@@ -6,7 +6,7 @@
 
 ## Context
 
-ADR-0001 established two renderer backends over one scene tree: the GPU compositor, and `omnis-tui`
+ADR-0001 established two renderer backends over one scene tree: the GPU compositor, and `omnix-tui`
 rendering the same scene tree as ANSI escape sequences in a real terminal. The second backend brought
 a parity contract (§9.4), a degradation ladder per primitive, terminal capability detection, kitty
 and SGR input decoding, a terminal capability floor to decide (D15), and an epic to build it (E22).
@@ -20,7 +20,7 @@ That leaves the TUI carrying a large, permanent tax for a shrinking benefit.
 ## Decision
 
 **There is one renderer backend: the GPU compositor.** It targets a desktop window natively and a
-browser canvas over WebGPU. `omnis-tui` is not built.
+browser canvas over WebGPU. `omnix-tui` is not built.
 
 What this does **not** remove:
 
@@ -28,13 +28,13 @@ What this does **not** remove:
   pane-grid keyboard navigation, command-palette-first interaction — is a layout mode the GPU
   compositor draws, and was always separate from running in a terminal. The Zed-style look survives
   intact.
-- **The CLI stays a surface.** `omnis` with `--json` on every command is unaffected; it is not a
+- **The CLI stays a surface.** `omnix` with `--json` on every command is unaffected; it is not a
   renderer.
 - **The scene tree stays.** It remains the single input to the renderer and the abstraction feature
   code targets. One backend does not make it optional — it is what keeps sources from reaching into
   rendering.
 
-What this removes: the `omnis-tui` crate, the parity contract, per-primitive terminal fallbacks (P7),
+What this removes: the `omnix-tui` crate, the parity contract, per-primitive terminal fallbacks (P7),
 terminal capability detection, D15, and E22.
 
 ## Alternatives rejected
@@ -53,8 +53,8 @@ terminal capability detection, D15, and E22.
 ## Consequences
 
 - **A machine with no display and no browser gets the CLI only.** This is the real loss and it should
-  be named rather than discovered: SSH into a headless box and there is no interactive Omnis, only
-  `omnis` commands. If that becomes intolerable, this ADR is what gets superseded.
+  be named rather than discovered: SSH into a headless box and there is no interactive Omnix, only
+  `omnix` commands. If that becomes intolerable, this ADR is what gets superseded.
 - **Accessibility gets more important, not less.** The TUI was one path to text-addressable output;
   with it gone, the compositor's published accessibility tree (UIA/AX/AT-SPI) is the *only* path.
   That work moves from important to non-negotiable.

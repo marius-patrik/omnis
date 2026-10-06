@@ -19,7 +19,7 @@ provider's logs.
   never written to disk, and never to a file the child reads.
 - **Secrets are never placed in agent context.** An agent may reference a secret by name and cause it
   to be injected; it may not read its value.
-- Git, forge, and SSH authentication go through `omnis-ssh-agent` over a local socket, so private
+- Git, forge, and SSH authentication go through `omnix-ssh-agent` over a local socket, so private
   keys are decrypted on demand and never handed out.
 
 ## Alternatives rejected

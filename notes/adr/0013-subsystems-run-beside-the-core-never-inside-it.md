@@ -6,7 +6,7 @@
 
 ## Context
 
-`ARCHITECTURE.md` §2.2 has `omnisd` initialising subsystems in-process from a `features` block, and
+`ARCHITECTURE.md` §2.2 has `omnixd` initialising subsystems in-process from a `features` block, and
 states that "every subsystem must be independently omittable" as a rule contributors must honour.
 
 Rules honoured by discipline erode. With seventeen subsystems in one address space, the first
@@ -15,7 +15,7 @@ failing to signal it.
 
 ## Decision
 
-Four layers. Nothing runs inside `omnisd`.
+Four layers. Nothing runs inside `omnixd`.
 
 ```
 SURFACES      gui · tui · cli · web · external harnesses
@@ -23,7 +23,7 @@ SURFACES      gui · tui · cli · web · external harnesses
 NEXT TO       vcs · pty · lsp · dap · browser · cas · tasks · exthost · agent · environments
               supervised peers — separate processes, the bus is the only ABI
                               ▲
-CORE          omnisd — bus router, registry, capability broker, convergence and generations
+CORE          omnixd — bus router, registry, capability broker, convergence and generations
                               ▲
 BELOW         host OS · container runtime · Nix store · systemd · Tailscale · OS keychain
               bound, never owned

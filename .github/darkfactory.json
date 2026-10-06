@@ -2,11 +2,11 @@
   "$comment": "Everything about this repository that the shared pipeline needs and cannot detect. The pipeline lives in marius-patrik/DarkFactory and is pinned below; the workflows here are callers, not copies.",
   "identity": {
     "owner": "marius-patrik",
-    "repo": "omnis",
-    "display_name": "Omnis",
-    "project_title": "Omnis",
-    "agent_slug": "omnis-agent",
-    "description": "Omnis - universal developer workspace and local-first personal data OS. Multi-process Rust daemon, Tauri shell, dual renderer (DOM + terminal cell-grid), multi-agent harness orchestration.",
+    "repo": "omnix",
+    "display_name": "Omnix",
+    "project_title": "Omnix",
+    "agent_slug": "omnix-agent",
+    "description": "Omnix - universal developer workspace and local-first personal data OS. Multi-process Rust daemon, Tauri shell, dual renderer (DOM + terminal cell-grid), multi-agent harness orchestration.",
     "topics": [
       "agentic-coding",
       "agentic-development",
@@ -47,7 +47,7 @@
     }
   },
   "areas": {
-    "$comment": "Omnis's own domains. Declaration order is match order, so specific areas come before general ones.",
+    "$comment": "Omnix's own domains. Declaration order is match order, so specific areas come before general ones.",
     "$default": "core",
     "term": {
       "description": "Terminal cell-grid renderer, ANSI/TrueColor pipeline, PTY integration",
@@ -151,7 +151,7 @@
       "description": "Microkernel, process topology, IPC/substrate bus, daemon lifecycle, config",
       "keywords": [
         "daemon",
-        "omnisd",
+        "omnixd",
         "kernel",
         "microkernel",
         "ipc",
@@ -169,7 +169,7 @@
     "global_title": "Global",
     "link_boards": [
       "Global",
-      "Omnis"
+      "Omnix"
     ]
   },
   "pages": {
@@ -194,8 +194,8 @@
         "url": "https://marius-patrik.github.io/DarkFactory/"
       },
       {
-        "name": "Omnis",
-        "url": "https://marius-patrik.github.io/omnis/"
+        "name": "Omnix",
+        "url": "https://marius-patrik.github.io/omnix/"
       },
       {
         "name": "ChessWithQuests",

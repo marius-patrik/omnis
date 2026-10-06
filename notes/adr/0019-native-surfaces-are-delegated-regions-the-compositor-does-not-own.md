@@ -23,7 +23,7 @@ Capture is the wrong verb.
 Add a sixth primitive: a **native surface** — a region the scene tree **delegates** rather than
 draws.
 
-Omnis declares the geometry, the clip, and the z-order. The **platform** composites someone else's
+Omnix declares the geometry, the clip, and the z-order. The **platform** composites someone else's
 content there, through its own path. **We never receive the pixels**, which is precisely why it is
 permitted where capture is not.
 
@@ -68,7 +68,7 @@ we no longer control. If content can be a texture, it should be.
 - **Accept that DRM services cannot be presented at all.** Honest, and it removes a large part of the
   point of ADR-0018's streaming domain. Search, metadata, and queue can be unified even when playback
   cannot — but only if playback has somewhere to go.
-- **Ship a separate player window outside Omnis.** Solves DRM by leaving the product. The whole
+- **Ship a separate player window outside Omnix.** Solves DRM by leaving the product. The whole
   premise is composition.
 - **Attempt to defeat the protected path.** Not a design option.
 

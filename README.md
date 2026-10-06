@@ -1,9 +1,9 @@
-# Omnis
+# Omnix
 
 **An AI operating system. Talk to your machine, and it does the thing.**
 
 "Install Rust, give me a Windows VM with Photoshop, put the daemon on my workstation and the
-interface here, and make it look like Zed" is a sentence, not an afternoon. Omnis takes it, writes
+interface here, and make it look like Zed" is a sentence, not an afternoon. Omnix takes it, writes
 the change into one declaration, shows you exactly what it will do, and applies it. If you don't like
 the result, you roll it back — one command, every time, whatever changed.
 
@@ -11,7 +11,7 @@ It is very smart because it can see the whole machine: your repositories, termin
 containers, guest operating systems, browser, and secrets are one system with one API, and the agent
 is a first-class operator of it rather than a chat box bolted onto an editor.
 
-Underneath, Omnis is a **kernel**. It owns nothing you could get elsewhere — `git`, `sl`, Nix,
+Underneath, Omnix is a **kernel**. It owns nothing you could get elsewhere — `git`, `sl`, Nix,
 podman, libvirt, Chromium, Tailscale, and the coding-agent CLIs are all **bound, not built** — and
 everything that makes them compose: one bus, one scene tree, one declaration, one modification
 surface, one audit trail.
@@ -28,7 +28,7 @@ and an agent reconfiguring your machine leaves a reviewable change rather than a
 
 ```nix
 {
-  omnis = {
+  omnix = {
     hosts.core.backend = "docker";        # native · docker · wsl · podman · nspawn · remote
     placement = { daemon = "core"; gui = "workstation"; };
 
@@ -49,7 +49,7 @@ and an agent reconfiguring your machine leaves a reviewable change rather than a
 }
 ```
 
-The full reference is [`examples/omnis.nix`](examples/omnis.nix).
+The full reference is [`examples/omnix.nix`](examples/omnix.nix).
 
 Removing something removes it **completely** — the processes, the packages, the files, and
 everything it contributed to the rest of the system. "Disabled" and "not installed" are not
@@ -73,7 +73,7 @@ change.
 
 | Document | What it is |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **The only normative document.** What Omnis is, why, and how it is built. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | **The only normative document.** What Omnix is, why, and how it is built. |
 | [Decision records](notes/adr/) | Every decision that binds the implementation, with the alternatives it rejected. |
 | [ROADMAP.md](ROADMAP.md) | Epics, entry gates, sequencing. |
 | [AGENTS.md](AGENTS.md) | Binding rules for every contributor, human or agent. Also `CONTRIBUTING.md`. |

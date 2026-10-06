@@ -30,7 +30,7 @@ This clarifies the `inputBar` axis: `global-hud` and `per-pane` are two **placem
 bar, floating or anchored into the focused pane, not two implementations.
 
 **Everything is addressable.** Panes, files, settings pages, documentation, chats, repositories,
-tasks, context fragments, and guest environments all have an `omnis://` address. Addressability is
+tasks, context fragments, and guest environments all have an `omnix://` address. Addressability is
 what the input bar navigates to, what the CLI takes as an argument, what an agent cites in a
 proposal, and what a documentation link points at.
 
@@ -58,7 +58,7 @@ navigation control into a destructive one, and a user pressing a familiar button
 
 - Every pane type must define its input contract and its address, which is a real per-pane cost paid
   once instead of a widget built each time.
-- The `omnis://` scheme becomes a compatibility surface: addresses appear in documentation, agent
+- The `omnix://` scheme becomes a compatibility surface: addresses appear in documentation, agent
   proposals, and user bookmarks, so they cannot be casually renamed.
 - History across heterogeneous surfaces raises questions a browser does not face — what "back" means
   after a pane closes, or when a target no longer exists. Those need answers before this ships, not

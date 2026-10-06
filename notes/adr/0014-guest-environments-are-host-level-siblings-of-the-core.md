@@ -5,7 +5,7 @@
 
 ## Context
 
-A power user's tools are not all on one distribution, and some are not on Linux at all. Omnis should
+A power user's tools are not all on one distribution, and some are not on Linux at all. Omnix should
 let a user run other operating systems beside the core — another distribution's userland, a full
 guest, and ideally Windows applications.
 

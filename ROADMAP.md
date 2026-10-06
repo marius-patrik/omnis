@@ -1,4 +1,4 @@
-# Omnis — Roadmap
+# Omnix — Roadmap
 
 Authoritative list of epics and their sequencing. Every `epic`-labelled GitHub issue corresponds to
 exactly one row here. Epics are containers: never implemented directly, only their child `Request`
@@ -20,27 +20,27 @@ issues are. Update this file whenever an epic is added, split, completed, or dro
 
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
-| E1 | Substrate Bus, daemon, process topology | `area:core` | D1, D9 | `omnis-proto` wire schema; control socket (JSON-RPC 2.0) and data socket (9-byte framed binary, opcodes `0x01`–`0x05`); additive versioning; `omnisd` conditional subsystem bootloader; the `Subsystem` trait; surface attach/detach; crash isolation. |
+| E1 | Substrate Bus, daemon, process topology | `area:core` | D1, D9 | `omnix-proto` wire schema; control socket (JSON-RPC 2.0) and data socket (9-byte framed binary, opcodes `0x01`–`0x05`); additive versioning; `omnixd` conditional subsystem bootloader; the `Subsystem` trait; surface attach/detach; crash isolation. |
 | E9 | Capability matrix and settings switchboard | `area:core` | E1 | Five orthogonal axes; layered resolution (`defaults → profile → user → workspace → runtime`); JSON schema; the `features` block that decides which subsystems initialize; live IPC updates; layer introspection; the lint enforcing no branching on profile names. |
 | E10 | Scene tree — the renderer-agnostic view model | `area:core` | E9 | Panes, focus, buffers, selections, decorations, and the primitive vocabulary of `ARCHITECTURE.md` §9.2. The single input to the compositor, and what keeps sources out of rendering — a source emits primitives and knows nothing about how they are drawn. **Must land before E3.** |
-| E3 | GPU compositor (`omnis-render`) | `area:term` | D4, D7, D11, D12, E10 | **The** renderer. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer, native surface), shared glyph atlas and shaping, damage tracking, device-loss handling, the material-layer pass that 3D and particles ride on, and the delegated-region path DRM playback and guest windows depend on (§9.4). Accessibility (UIA/AX/AT-SPI) is acceptance criteria, not a follow-up. |
+| E3 | GPU compositor (`omnix-render`) | `area:term` | D4, D7, D11, D12, E10 | **The** renderer. Frame graph, batched instanced primitives (quad, glyph run, texture, path, material layer, native surface), shared glyph atlas and shaping, damage tracking, device-loss handling, the material-layer pass that 3D and particles ride on, and the delegated-region path DRM playback and guest windows depend on (§9.4). Accessibility (UIA/AX/AT-SPI) is acceptance criteria, not a follow-up. |
 | E2 | Tauri shell and window chrome engine | `area:ui` | D4 | The five pillars: frame styles, drag regions, traffic-light insets, vibrancy (`NSVisualEffectView`, Mica, Acrylic), corner radius and border metrics, menu-bar paradigms; dynamic dock/tray icon state machine. |
 | E6 | Local-first persistence | `area:data` | D2 | PGlite store, schema, migrations, the config/data boundary, the sync boundary. |
 
 ## Phase 2 — The developer substrate
 
-The subsystems that make Omnis a workspace rather than a shell. Each is independently omittable
+The subsystems that make Omnix a workspace rather than a shell. Each is independently omittable
 (`ARCHITECTURE.md` §2.2) and each must pass D9's admission criteria.
 
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
-| E11 | Vault, SSH/GPG agent, secure process spawn | `area:core` | D4, D10, E1 | Argon2id KEK in `Zeroizing` with `mlock`; OS keychain bridging (Keychain, DPAPI, Secret Service); `omnis-ssh-agent` on `~/.omnis/ssh.sock`; `.env` injection into child memory maps, never disk and never agent context. |
+| E11 | Vault, SSH/GPG agent, secure process spawn | `area:core` | D4, D10, E1 | Argon2id KEK in `Zeroizing` with `mlock`; OS keychain bridging (Keychain, DPAPI, Secret Service); `omnix-ssh-agent` on `~/.omnix/ssh.sock`; `.env` injection into child memory maps, never disk and never agent context. |
 | E12 | Terminals, PTY, containers | `area:core` | E1 | Native PTY manager, tmux control server, Bollard Docker pipes, resource supervisor; `PTY_STREAM` / `PTY_RESIZE` / `DOCKER_LOG` opcodes end to end. |
-| E13 | Content-addressed storage and VFS | `area:data` | E6 | `omnis-cas`: FastCDC chunking, BLAKE3 keys, convergent encryption, reflink deduplication, multi-provider VFS mounts, central inotify watcher. |
+| E13 | Content-addressed storage and VFS | `area:data` | E6 | `omnix-cas`: FastCDC chunking, BLAKE3 keys, convergent encryption, reflink deduplication, multi-provider VFS mounts, central inotify watcher. |
 | E14 | Universal VCS and stacked PRs (`ovcs`) | `area:core` | E1 | Dual Git/Sapling engine, atomic operation log, automated `absorb`, 3-way AST merge, stacked PRs across GitHub/GitLab/Forgejo, git alternates manager. |
 | E15 | Task and build DAG engine | `area:core` | E13 | Manifest parsing (`package.json`, `Cargo.toml`, `Makefile`, `Taskfile.yaml`), cross-repository graph, CAS-timestamp skipping, parallel execution. |
-| E16 | Packages and extensions — the binary substrate | `area:ext` | D5, E1 | The two universes kept separate: `omnis pkg` (project and system dependencies) versus `omnis ext` (client, editor, agent capabilities). Install, resolve, cache, grant. |
-| E17 | LSP hub and DAP | `area:core` | E1, E12 | `omnis-lsp` multiplexer, `omnis-dap` implementation. |
+| E16 | Packages and extensions — the binary substrate | `area:ext` | D5, E1 | The two universes kept separate: `omnix pkg` (project and system dependencies) versus `omnix ext` (client, editor, agent capabilities). Install, resolve, cache, grant. |
+| E17 | LSP hub and DAP | `area:core` | E1, E12 | `omnix-lsp` multiplexer, `omnix-dap` implementation. |
 
 ## Phase 3 — Sources, presentation, and the second backend
 
@@ -48,18 +48,18 @@ Sources emit into the scene tree; the compositor consumes it. Only E3 is a rende
 
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
-| E20 | Layout modes — cell-grid and widget | `area:term` | E3, E10 | `omnis-layout`: the cell-grid mode (fixed advance, 24-bit TrueColor with SGR attributes, 256-colour ANSI palettes, cursor shapes, pane-grid keyboard navigation, command-palette-first interaction, inline inspector strips) and the widget mode, both emitting scene-tree primitives. `hybrid` mixes them per pane. |
+| E20 | Layout modes — cell-grid and widget | `area:term` | E3, E10 | `omnix-layout`: the cell-grid mode (fixed advance, 24-bit TrueColor with SGR attributes, 256-colour ANSI palettes, cursor shapes, pane-grid keyboard navigation, command-palette-first interaction, inline inspector strips) and the widget mode, both emitting scene-tree primitives. `hybrid` mixes them per pane. |
 | E4 | Profiles as pure data | `area:ui` | D3, E9, E20 | Profile file format, token sets, asset packs, `lucide-animated` default icon set, typography and density profiles, keymap profiles, audio packs, material-layer backdrops; and the proof that adding a profile requires zero code changes. |
-| E7 | Browser as a source | `area:browser` | E3, E20, D7, D13 | `omnis-browser` Chromium/CDP worker and `omnis-web-source`: semantic mode (AXTree → layout → primitives, keyboard-navigable) and raster mode (screencast → texture), `auto`/`hybrid` selection, FPS budget, and webview compositing per D13. |
+| E7 | Browser as a source | `area:browser` | E3, E20, D7, D13 | `omnix-browser` Chromium/CDP worker and `omnix-web-source`: semantic mode (AXTree → layout → primitives, keyboard-navigable) and raster mode (screencast → texture), `auto`/`hybrid` selection, FPS budget, and webview compositing per D13. |
 | E21 | 3D, shaders, and particles | `area:ui` | E3, D11, D14 | The material-layer pass in anger: scene layer with camera and depth buffer, GPU-instanced particle systems, custom shader materials with declared inputs, and — if D14 opens it to users and extensions — sandboxing, resource limits, and GPU-hang recovery. |
 
 ## Phase 4 — Agents, extensibility, mesh
 
 | # | Epic | Area | Gate | Scope |
 |---|---|---|---|---|
-| E5 | Agent harness, audit stream, approval escrow | `area:agents` | D6, E1, E11 | Provider adapter contract; `omnis-agent` and the `@omnis/agent` MCP bridge; session supervision; immutable append-only audit stream with a one-click killswitch; escrow tickets with expiry. Decoupled from profiles by `ARCHITECTURE.md` §3. |
+| E5 | Agent harness, audit stream, approval escrow | `area:agents` | D6, E1, E11 | Provider adapter contract; `omnix-agent` and the `@omnix/agent` MCP bridge; session supervision; immutable append-only audit stream with a one-click killswitch; escrow tickets with expiry. Decoupled from profiles by `ARCHITECTURE.md` §3. |
 | E8 | Extension host | `area:ext` | D5, E16 | `exthost-node` sandboxed runtime, plugin API surface, capability grants, VS Code compatibility shims. |
-| E18 | Universal context fabric | `area:core` | E13, E1 | `ContextFragment` harvesting from code selections, terminal buffers, browser pages, and container logs; persistent sidebar shelf; `omnis://context/<id>` URIs. |
+| E18 | Universal context fabric | `area:core` | E13, E1 | `ContextFragment` harvesting from code selections, terminal buffers, browser pages, and container logs; persistent sidebar shelf; `omnix://context/<id>` URIs. |
 | E19 | Sync mesh and CRDT change log | `area:data` | E6, E13, D10 | Tailscale mesh sync, CRDT with hybrid logical clocks, P2P WebRTC mesh, cloud storage VFS, serialized PGlite mailbox. |
 
 ## Not scheduled
@@ -99,6 +99,6 @@ Sources emit into the scene tree; the compositor consumes it. Only E3 is a rende
    of the interface we no longer control — unstyleable, uncapturable, and awkward to layer. It is
    correct for DRM playback and heavy platform-composited content, and wrong for anything that
    could have been a texture.
-7. **D1 is a slice, not a thesis.** The architecture already says what Omnis does. What it does not
+7. **D1 is a slice, not a thesis.** The architecture already says what Omnix does. What it does not
    say is which path gets built first — and that choice determines which bus messages, which
    subsystem, and which surface come into existence first.

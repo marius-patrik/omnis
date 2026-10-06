@@ -1,14 +1,14 @@
-# Omnis — Architecture
+# Omnix — Architecture
 
 **Status: NORMATIVE, and the only normative document.** Vision and architecture are one file: what
-Omnis is, why, and how it is built. The scoping transcript that started it is kept as source material
+Omnix is, why, and how it is built. The scoping transcript that started it is kept as source material
 in [`notes/transcript.md`](notes/transcript.md) and specifies nothing.
 
 Changes require a decision record in [`notes/adr/`](notes/adr/).
 
 ---
 
-## 1. What Omnis is
+## 1. What Omnix is
 
 **An AI-first operating system for a power user's machine.**
 
@@ -23,10 +23,10 @@ power over a machine is defensible exactly to the degree that its actions are re
 undoable — so the accountability machinery is not a constraint on the AI-first goal, it is the thing
 that makes it achievable.
 
-Omnis is a headless daemon that owns nothing you could get elsewhere, and everything that makes those
+Omnix is a headless daemon that owns nothing you could get elsewhere, and everything that makes those
 things compose. Version control, packages, tasks, terminals, containers, language servers,
 debuggers, a browser, agents, secrets, and storage are all **bound, not built** — `git`, `sl`, Nix,
-podman, libvirt, Chromium, Tailscale, the coding-agent CLIs. What Omnis owns is the seams: one bus,
+podman, libvirt, Chromium, Tailscale, the coding-agent CLIs. What Omnix owns is the seams: one bus,
 one scene tree, one declaration, one modification surface, one audit trail.
 
 Four properties follow, and they are the whole design:
@@ -90,7 +90,7 @@ NEXT TO       vcs · terminals · lsp · dap · browser · cas · tasks · agent
               environments: containers · VMs · compat
               supervised peers — separate processes, the bus is the only ABI
                                     ▲
-CORE          omnisd — bus router · registry · capability broker · convergence & generations
+CORE          omnixd — bus router · registry · capability broker · convergence & generations
                                     ▲
 BELOW         host OS · container runtime · Nix store · systemd · Tailscale · OS keychain
               bound, never owned
@@ -104,18 +104,18 @@ registry, brokering, convergence.
 
 | Process | Owns | Never does |
 |---|---|---|
-| `omnisd` | Bus routing, subsystem registry, capability brokering, convergence, generations | Render; contain a subsystem; depend on a surface being attached |
+| `omnixd` | Bus routing, subsystem registry, capability brokering, convergence, generations | Render; contain a subsystem; depend on a surface being attached |
 | Subsystems | One domain each, behind an adapter | Talk to each other except over the bus; self-register integration |
-| `omnis-gui` | Window, renderer, input capture | Own durable state; block on I/O |
-| `omnis` (CLI) | Scriptable surface, `--json` on every command | Reimplement daemon logic |
+| `omnix-gui` | Window, renderer, input capture | Own durable state; block on I/O |
+| `omnix` (CLI) | Scriptable surface, `--json` on every command | Reimplement daemon logic |
 | Environments | A guest userland or machine | Nest inside the core |
 
 ### 3.2 The Substrate Bus
 
-**Control** (`omnis-control.sock`, `\\.\pipe\omnis-control`) — JSON-RPC 2.0. Capability checks,
+**Control** (`omnix-control.sock`, `\\.\pipe\omnix-control`) — JSON-RPC 2.0. Capability checks,
 declaration reads and writes, generation transitions, escrow tickets, registry and schema queries.
 
-**Data** (`omnis-data.sock`, `\\.\pipe\omnis-data`) — binary multiplexer, uniform 9-byte header:
+**Data** (`omnix-data.sock`, `\\.\pipe\omnix-data`) — binary multiplexer, uniform 9-byte header:
 
 ```
 [StreamID: u32][Opcode: u8][PayloadLength: u32]
@@ -143,7 +143,7 @@ Contract rules:
 ## 4. The declaration
 
 **One file defines the system.** Not settings the daemon reads — the definition it converges toward.
-See [`examples/omnis.nix`](examples/omnis.nix) for the reference declaration.
+See [`examples/omnix.nix`](examples/omnix.nix) for the reference declaration.
 
 It is a **Nix module**. Not a format of our own that compiles to Nix: that means owning a language, a
 parser, a type system, an error-reporting story, and a compiler, to arrive where the Nix module
@@ -226,7 +226,7 @@ is the only way the guarantee holds (P4).
 
 Where a subsystem fronts more than one implementation — `git` and `sl`, several task runners, several
 agent CLIs — the abstraction exists so they are **interchangeable and removable** (P2), not so either
-is reimplemented. Omnis owns the operation log, the cross-repository graph, and the harness registry.
+is reimplemented. Omnix owns the operation log, the cross-repository graph, and the harness registry.
 The tools stay the tools.
 
 ---
@@ -275,7 +275,7 @@ front of you.
 agents — through one API.**
 
 - **No privileged surface.** The GUI is a control-socket client like any other. If a setting can be
-  changed by clicking, it can be changed by `omnis` and by an agent over MCP, using the same
+  changed by clicking, it can be changed by `omnix` and by an agent over MCP, using the same
   operation (P5).
 - **Introspectable, not guessable.** Clients enumerate the option schema, the axes and their legal
   values, installed profiles, themes, keymaps, environments, and subsystems (§6.1).
@@ -339,11 +339,11 @@ checks whether the goal holds, and either stops or re-enters. Self-optimisation 
 whose action is proposing a generation. Scheduled jobs are graphs with a time trigger. The task graph
 (§11) is the execution engine underneath, not a parallel system.
 
-**The proof this abstraction is right is that it already exists.** The pipeline that builds Omnis —
+**The proof this abstraction is right is that it already exists.** The pipeline that builds Omnix —
 request, interpretation gate, plan, approval gate, implement, self-review loop, merge gate, with
 checkpoint-and-resume on quota exhaustion — *is* a goal loop with human gates and durable
 checkpoints. It is currently GitHub Actions and Python because the product does not exist yet. When
-it does, that pipeline should be an Omnis automation, and the fact that it was built by hand first
+it does, that pipeline should be an Omnix automation, and the fact that it was built by hand first
 means the abstraction is validated against a real workload rather than an imagined one.
 
 **Not built yet.** This section specifies the shape; no automation engine exists. Its position in the
@@ -401,7 +401,7 @@ on my placement" becomes the standard bug report.
 **Sources are not renderers.** Cell-grid layout, widget layout, web content, guest windows, and 3D
 all emit primitives into one scene tree. Two **backends** consume it.
 
-There is **one backend**: the GPU compositor (`omnis-render`), targeting a desktop window natively
+There is **one backend**: the GPU compositor (`omnix-render`), targeting a desktop window natively
 and a browser canvas over WebGPU (§8.1).
 
 `cell-grid` presentation remains — the terminal *look*, fixed advance, ANSI palettes, pane-grid
@@ -443,7 +443,7 @@ the other five can express *content we are not permitted to look at*.
 
 The material layer is a first-class primitive, not an effects add-on, available in every presentation
 mode — including behind and between glyph runs in the cell grid. Two uses, deliberately not
-conflated: **chrome** (backdrops, transitions, agent-activity fields) authored by Omnis and profiles,
+conflated: **chrome** (backdrops, transitions, agent-activity fields) authored by Omnix and profiles,
 and **content** (shader playgrounds, model preview, GPU-accelerated visualisation) supplied by a user
 or extension. The engine supports both; exposing authoring demands sandboxing, resource limits, and
 GPU-hang recovery, and is gated on D14.
@@ -454,7 +454,7 @@ Some content cannot be drawn by us. DRM-protected playback requires a protected 
 capturing it — in a browser canvas or from a guest window — yields black frames by design. Capture is
 the wrong verb.
 
-A **native surface** is delegated instead: Omnis declares the geometry, the clip, and the z-order, and
+A **native surface** is delegated instead: Omnix declares the geometry, the clip, and the z-order, and
 the platform composites the content there through its own path. **We never receive the pixels**, which
 is exactly why it is permitted (Wayland subsurfaces, `CALayer`/`AVSampleBufferDisplayLayer`,
 DirectComposition visuals).
@@ -536,7 +536,7 @@ they are two *placements* of the same bar — floating and centred, or anchored 
 `hybrid` mixes them.
 
 **Everything is addressable.** Panes, files, settings pages, documentation, chats, repositories,
-tasks, context fragments, and guest environments all have an `omnis://` address. Addressability is
+tasks, context fragments, and guest environments all have an `omnix://` address. Addressability is
 what makes the rest of this work: it is what the input bar navigates to, what the CLI takes as an
 argument, what an agent cites in a proposal, and what a link in the documentation points at.
 
@@ -562,11 +562,11 @@ the second.
   one user's store: an attacker with store access who can guess a plaintext can confirm its presence.
   A bounded, accepted property, not an oversight.
 - **Context fragments** — everything captured normalises to one envelope regardless of origin (code
-  selection, terminal buffer, browser page, container log), addressable as `omnis://context/<id>`,
+  selection, terminal buffer, browser page, container log), addressable as `omnix://context/<id>`,
   payload in the CAS. Per-origin formats would mean an adapter per origin per consumer.
 - **The VCS operation log** — every mutating operation appends an entry carrying enough state to
   invert it. Undo is a first-class operation over that log, not reconstruction from git internals,
-  and it holds identically for Git and Sapling because the log is Omnis's. Operations that are not
+  and it holds identically for Git and Sapling because the log is Omnix's. Operations that are not
   losslessly invertible must capture the discarded state into the CAS first, or refuse.
 - **Task identity is the hash of its inputs** — source content, dependency output hashes, the command
   line, the declared environment. Not a timestamp: `mtime` changes on checkout and fails to change on
@@ -589,7 +589,7 @@ Three concerns, only one of them new:
 | **Action** | A capability over the bus, brokered and escrow-gated (§7) |
 | **Aggregation** | A **domain schema** every backend maps onto — the new part |
 
-**The universal translator already exists.** `omnis-web-source`'s semantic mode — AXTree to layout to
+**The universal translator already exists.** `omnix-web-source`'s semantic mode — AXTree to layout to
 primitives — renders any service with a web interface *today*, as real primitives rather than a
 rectangle of pixels: keyboard-navigable, themeable, and legible to an agent.
 
@@ -636,24 +636,24 @@ The structure is fixed; the **threat model is D10** and may constrain it.
 
 ```
 crates/
-  omnis-core/          bus contracts, option schema, scene tree types, capability matrix
-  omnisd/              the core: routing, registry, brokering, convergence, generations
-  omnis-cli/           `omnis`, `--json` on every command
-  omnis-gui/           desktop host and window manager
-  omnis-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
-  omnis-layout/        cell-grid and widget layout modes
-  omnis-browser/       Chromium supervisor and CDP bridge
-  omnis-web-source/    AXTree→layout and screencast→texture bridges; the default service backend
-  omnis-cas/           chunking, convergent encryption, VFS
-  omnis-agent/         harness registry, session supervision, MCP bridge
-  omnis-docs/          option schema → documentation, search index, in-product docs surface
+  omnix-core/          bus contracts, option schema, scene tree types, capability matrix
+  omnixd/              the core: routing, registry, brokering, convergence, generations
+  omnix-cli/           `omnix`, `--json` on every command
+  omnix-gui/           desktop host and window manager
+  omnix-render/        GPU compositor: frame graph, primitives, glyph atlas, material passes
+  omnix-layout/        cell-grid and widget layout modes
+  omnix-browser/       Chromium supervisor and CDP bridge
+  omnix-web-source/    AXTree→layout and screencast→texture bridges; the default service backend
+  omnix-cas/           chunking, convergent encryption, VFS
+  omnix-agent/         harness registry, session supervision, MCP bridge
+  omnix-docs/          option schema → documentation, search index, in-product docs surface
 subsystems/            one adapter binary per bound tool — vcs, terminals, lsp, dap, tasks, …
 packages/
   frontend/            web surface shell
   profiles/            profiles and themes — data only, no code
 nix/                   modules defining the declaration's option schema
 examples/
-  omnis.nix            the reference declaration
+  omnix.nix            the reference declaration
 ```
 
 Nothing here exists yet. It is the target shape, and the reason `ci.yml` already carries guarded Rust
@@ -680,7 +680,7 @@ Resolved decisions link to their record; see [the decision log](notes/adr/).
 | D11 | **Graphics baseline** — API, minimum GPU capability, and what happens below it | E3, E21 |
 | D12 | **Text stack** — shaping, atlas strategy, subpixel policy, bidi, IME | E3 |
 | ~~D13~~ | Webview compositing — answered by [ADR-0019](notes/adr/0019-native-surfaces-are-delegated-regions-the-compositor-does-not-own.md): a native subsurface, not readback | ~~E3, E7, E8~~ |
-| D14 | **Shader and 3D exposure** — Omnis and profiles only, or users and extensions | E21 |
+| D14 | **Shader and 3D exposure** — Omnix and profiles only, or users and extensions | E21 |
 | ~~D15~~ | Terminal capability floor — moot, the TUI is dropped by [ADR-0017](notes/adr/0017-the-tui-is-dropped-as-a-surface.md) | ~~E22~~ |
 
 ---
